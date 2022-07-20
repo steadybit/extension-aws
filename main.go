@@ -14,7 +14,7 @@ import (
 func main() {
 	utils.RegisterHttpHandler("/", utils.GetterAsHandler(getExtensionList))
 
-	discovery.RegisterCommonDiscoveryHandlers()
+	utils.RegisterCommonDiscoveryHandlers()
 	discovery.RegisterRdsDiscoveryHandlers()
 
 	port := 8085

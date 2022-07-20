@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2022 Steadybit GmbH
 
-package discovery
+package utils
 
 import (
 	"context"
@@ -9,31 +9,30 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	"github.com/steadybit/extension-aws/utils"
 )
 
 var (
-	awsAccountNumber string
-	awsConfig        aws.Config
+	AwsAccountNumber string
+	AwsConfig        aws.Config
 )
 
 func init() {
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
-		utils.ErrorLogger.Fatalf("Failed to load AWS configuration: %s", err)
+		ErrorLogger.Fatalf("Failed to load AWS configuration: %s", err)
 	}
-	awsConfig = cfg
+	AwsConfig = cfg
 
 	stsService := sts.NewFromConfig(cfg)
 	identityOutput, err := stsService.GetCallerIdentity(context.Background(), nil)
 	if err != nil {
-		utils.ErrorLogger.Fatalf("Failed to identify AWS account number: %s", err)
+		ErrorLogger.Fatalf("Failed to identify AWS account number: %s", err)
 	}
-	awsAccountNumber = aws.ToString(identityOutput.Account)
+	AwsAccountNumber = aws.ToString(identityOutput.Account)
 }
 
 func RegisterCommonDiscoveryHandlers() {
-	utils.RegisterHttpHandler("/discovery/common/attribute-descriptions", utils.GetterAsHandler(getCommonAttributeDescriptions))
+	RegisterHttpHandler("/discovery/common/attribute-descriptions", GetterAsHandler(getCommonAttributeDescriptions))
 }
 
 func getCommonAttributeDescriptions() discovery_kit_api.AttributeDescriptions {

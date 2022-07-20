@@ -9,6 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.16.7
 	github.com/aws/aws-sdk-go-v2/config v1.15.14
 	github.com/aws/aws-sdk-go-v2/service/rds v1.22.0
+	github.com/aws/aws-sdk-go-v2/service/fis v1.12.8
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v0.1.0
 )
 

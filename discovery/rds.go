@@ -76,7 +76,7 @@ func getRdsAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 	}
 }
 
-func getRdsDiscoveryResults(w http.ResponseWriter, r *http.Request, body []byte) {
+func getRdsDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []byte) {
 	targets, err := getAllRdsInstances(r.Context())
 	if err != nil {
 		utils.WriteError(w, "Failed to collect RDS instance information", err)
@@ -86,7 +86,7 @@ func getRdsDiscoveryResults(w http.ResponseWriter, r *http.Request, body []byte)
 }
 
 func getAllRdsInstances(context context.Context) ([]discovery_kit_api.Target, error) {
-	client := rds.NewFromConfig(awsConfig)
+	client := rds.NewFromConfig(utils.AwsConfig)
 
 	result := make([]discovery_kit_api.Target, 0, 20)
 
@@ -119,7 +119,7 @@ func toTarget(dbInstance types.DBInstance) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["steadybit.label"] = []string{label}
-	attributes["aws.account"] = []string{awsAccountNumber}
+	attributes["aws.account"] = []string{utils.AwsAccountNumber}
 	attributes["aws.arn"] = []string{arn}
 	attributes["aws.zone"] = []string{aws.ToString(dbInstance.AvailabilityZone)}
 	attributes["aws.rds.engine"] = []string{aws.ToString(dbInstance.Engine)}
