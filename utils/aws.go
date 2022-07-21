@@ -32,7 +32,7 @@ func init() {
 }
 
 func RegisterCommonDiscoveryHandlers() {
-	RegisterHttpHandler("/discovery/common/attribute-descriptions", GetterAsHandler(getCommonAttributeDescriptions))
+	RegisterHttpHandler("/common/discovery/attribute-descriptions", GetterAsHandler(getCommonAttributeDescriptions))
 }
 
 func getCommonAttributeDescriptions() discovery_kit_api.AttributeDescriptions {

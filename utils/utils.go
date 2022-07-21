@@ -2,6 +2,8 @@ package utils
 
 import (
 	"encoding/json"
+	"github.com/mitchellh/mapstructure"
+	"github.com/steadybit/attack-kit/go/attack_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"io/ioutil"
 	"net/http"
@@ -64,4 +66,25 @@ func WriteBody(w http.ResponseWriter, response any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(response)
+}
+
+func WriteAttackState[T any](w http.ResponseWriter, state T) {
+	err, encodedState := EncodeAttackState(state)
+	if err != nil {
+		WriteError(w, "Failed to encode attack state", err)
+	} else {
+		WriteBody(w, attack_kit_api.AttackStateAndMessages{
+			State: encodedState,
+		})
+	}
+}
+
+func EncodeAttackState[T any](attackState T) (error, attack_kit_api.AttackState) {
+	var result attack_kit_api.AttackState
+	err := mapstructure.Decode(attackState, &result)
+	return err, result
+}
+
+func DecodeAttackState[T any](attackState attack_kit_api.AttackState, result *T) error {
+	return mapstructure.Decode(attackState, result)
 }

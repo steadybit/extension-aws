@@ -4,7 +4,9 @@
 package extrds
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/steadybit/attack-kit/go/attack_kit_api"
 	"github.com/steadybit/extension-aws/utils"
 	"net/http"
@@ -26,41 +28,8 @@ func getRebootInstanceAttackDescription() attack_kit_api.AttackDescription {
 		Icon:        attack_kit_api.Ptr(rdsIcon),
 		TargetType:  rdsTargetId,
 		Category:    attack_kit_api.Resource,
-		// TODO
 		TimeControl: attack_kit_api.INSTANTANEOUS,
-		Parameters: []attack_kit_api.AttackParameter{
-			// TODO
-			{
-				Label:        "Duration",
-				Name:         "duration",
-				Type:         "duration",
-				Advanced:     attack_kit_api.Ptr(false),
-				Required:     attack_kit_api.Ptr(true),
-				DefaultValue: attack_kit_api.Ptr("30s"),
-			},
-			{
-				Label:       "Consumer Username or ID",
-				Name:        "consumer",
-				Description: attack_kit_api.Ptr("You may optionally define for which Kong consumer the traffic should be impacted."),
-				Type:        "string",
-				Advanced:    attack_kit_api.Ptr(false),
-				Required:    attack_kit_api.Ptr(false),
-			},
-			{
-				Label:        "Message",
-				Name:         "message",
-				Type:         "string",
-				Advanced:     attack_kit_api.Ptr(true),
-				DefaultValue: attack_kit_api.Ptr("Error injected through the Steadybit Kong extension (through the request-termination Kong plugin)"),
-			},
-			{
-				Label:        "HTTP status code",
-				Name:         "status",
-				Type:         "integer",
-				Advanced:     attack_kit_api.Ptr(true),
-				DefaultValue: attack_kit_api.Ptr("500"),
-			},
-		},
+		Parameters:  []attack_kit_api.AttackParameter{},
 		Prepare: attack_kit_api.MutatingEndpointReference{
 			Method: "POST",
 			Path:   "/rds/instance/attack/reboot/prepare",
@@ -72,10 +41,54 @@ func getRebootInstanceAttackDescription() attack_kit_api.AttackDescription {
 	}
 }
 
-func prepareInstanceReboot(w http.ResponseWriter, r *http.Request, _ []byte) {
-	utils.WriteBody(w, "TODO")
+type InstanceRebootState struct {
+	DBInstanceIdentifier string
 }
 
-func startInstanceReboot(w http.ResponseWriter, r *http.Request, _ []byte) {
-	utils.WriteBody(w, "TODO")
+func prepareInstanceReboot(w http.ResponseWriter, r *http.Request, body []byte) {
+	var request attack_kit_api.PrepareAttackRequestBody
+	err := json.Unmarshal(body, &request)
+	if err != nil {
+		utils.WriteError(w, "Failed to parse request body", err)
+		return
+	}
+
+	instanceId := request.Target.Attributes["aws.rds.instance.id"]
+	if instanceId == nil || len(instanceId) == 0 {
+		utils.WriteError(w, "Target is missing the 'aws.rds.instance.id' tag.", err)
+		return
+	}
+
+	utils.WriteAttackState(w, InstanceRebootState{
+		DBInstanceIdentifier: instanceId[0],
+	})
+}
+
+func startInstanceReboot(w http.ResponseWriter, r *http.Request, body []byte) {
+	var request attack_kit_api.StartAttackRequestBody
+	err := json.Unmarshal(body, &request)
+	if err != nil {
+		utils.WriteError(w, "Failed to parse request body", err)
+		return
+	}
+
+	var state InstanceRebootState
+	err = utils.DecodeAttackState(request.State, &state)
+	if err != nil {
+		utils.WriteError(w, "Failed to parse attack state", err)
+		return
+	}
+
+	client := rds.NewFromConfig(utils.AwsConfig)
+
+	input := rds.RebootDBInstanceInput{
+		DBInstanceIdentifier: &state.DBInstanceIdentifier,
+	}
+	_, err = client.RebootDBInstance(r.Context(), &input)
+	if err != nil {
+		utils.WriteError(w, "Failed to execute database instance reboot", err)
+		return
+	}
+
+	utils.WriteAttackState(w, state)
 }
