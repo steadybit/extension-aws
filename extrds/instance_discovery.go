@@ -138,7 +138,7 @@ func toTarget(dbInstance types.DBInstance) discovery_kit_api.Target {
 	return discovery_kit_api.Target{
 		Id:         arn,
 		Label:      label,
-		TargetType: "com.github.steadybit.extension_aws.rds",
+		TargetType: rdsTargetId,
 		Attributes: attributes,
 	}
 }
