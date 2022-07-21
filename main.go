@@ -5,17 +5,19 @@ package main
 
 import (
 	"fmt"
+	"github.com/steadybit/attack-kit/go/attack_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	"github.com/steadybit/extension-aws/discovery"
+	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
 	"net/http"
 )
 
 func main() {
 	utils.RegisterHttpHandler("/", utils.GetterAsHandler(getExtensionList))
-
 	utils.RegisterCommonDiscoveryHandlers()
-	discovery.RegisterRdsDiscoveryHandlers()
+
+	extrds.RegisterRdsDiscoveryHandlers()
+	extrds.RegisterRdsAttackHandlers()
 
 	port := 8085
 	InfoLogger.Printf("Starting extension-aws server on port %d. Get started via /\n", port)
@@ -23,6 +25,7 @@ func main() {
 }
 
 type ExtensionListResponse struct {
+	Attacks          []attack_kit_api.DescribingEndpointReference    `json:"attacks"`
 	Discoveries      []discovery_kit_api.DescribingEndpointReference `json:"discoveries"`
 	TargetTypes      []discovery_kit_api.DescribingEndpointReference `json:"targetTypes"`
 	TargetAttributes []discovery_kit_api.DescribingEndpointReference `json:"targetAttributes"`
@@ -30,26 +33,32 @@ type ExtensionListResponse struct {
 
 func getExtensionList() ExtensionListResponse {
 	return ExtensionListResponse{
+		Attacks: []attack_kit_api.DescribingEndpointReference{
+			{
+				"GET",
+				"/rds/instance/attack/reboot",
+			},
+		},
 		Discoveries: []discovery_kit_api.DescribingEndpointReference{
 			{
 				"GET",
-				"/discovery/rds",
+				"/rds/instance/discovery",
 			},
 		},
 		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
 			{
 				"GET",
-				"/discovery/rds/target-description",
+				"/rds/instance/discovery/target-description",
 			},
 		},
 		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
 			{
 				"GET",
-				"/discovery/rds/attribute-descriptions",
+				"/rds/instance/discovery/attribute-descriptions",
 			},
 			{
 				"GET",
-				"/discovery/common/attribute-descriptions",
+				"/common/discovery/attribute-descriptions",
 			},
 		},
 	}
