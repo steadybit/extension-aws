@@ -13,6 +13,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/steadybit/attack-kit/go/attack_kit_api v0.1.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v0.1.0
+	github.com/stretchr/testify v1.8.0
 )
 
 require (
@@ -24,5 +25,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.12 // indirect
 	github.com/aws/smithy-go v1.12.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

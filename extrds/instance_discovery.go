@@ -22,7 +22,7 @@ func RegisterRdsDiscoveryHandlers() {
 
 func getRdsInstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id:         "com.github.steadybit.extension_aws.rds",
+		Id:         rdsTargetId,
 		RestrictTo: discovery_kit_api.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
@@ -83,7 +83,8 @@ func getRdsInstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 }
 
 func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []byte) {
-	targets, err := getAllRdsInstances(r.Context())
+	client := rds.NewFromConfig(utils.AwsConfig)
+	targets, err := GetAllRdsInstances(r.Context(), client)
 	if err != nil {
 		utils.WriteError(w, "Failed to collect RDS instance information", err)
 	} else {
@@ -91,14 +92,16 @@ func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []
 	}
 }
 
-func getAllRdsInstances(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	client := rds.NewFromConfig(utils.AwsConfig)
+type RdsDescribeInstancesApi interface {
+	DescribeDBInstances(ctx context.Context, params *rds.DescribeDBInstancesInput, optFns ...func(*rds.Options)) (*rds.DescribeDBInstancesOutput, error)
+}
 
+func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	var marker *string = nil
 	for {
-		output, err := client.DescribeDBInstances(ctx, &rds.DescribeDBInstancesInput{
+		output, err := rdsApi.DescribeDBInstances(ctx, &rds.DescribeDBInstancesInput{
 			Marker: marker,
 		})
 		if err != nil {
