@@ -16,7 +16,7 @@ var (
 	AwsConfig        aws.Config
 )
 
-func init() {
+func InitializeAwsAccountAccess() {
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		ErrorLogger.Fatalf("Failed to load AWS configuration: %s", err)

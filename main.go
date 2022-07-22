@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	utils.InitializeAwsAccountAccess()
+
 	utils.RegisterHttpHandler("/", utils.GetterAsHandler(getExtensionList))
 	utils.RegisterCommonDiscoveryHandlers()
 
