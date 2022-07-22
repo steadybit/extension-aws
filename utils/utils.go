@@ -25,7 +25,7 @@ func PanicRecovery(next func(w http.ResponseWriter, r *http.Request)) http.Handl
 		defer func() {
 			if err := recover(); err != nil {
 				ErrorLogger.Printf("Panic: %v\n %s", err, string(debug.Stack()))
-				WriteError(w, "Internal Server Error", nil)
+				WriteError(w, ToError("Internal Server Error", nil))
 			}
 		}()
 		next(w, r)
@@ -50,16 +50,20 @@ func LogRequest(next func(w http.ResponseWriter, r *http.Request, body []byte)) 
 	}
 }
 
-func WriteError(w http.ResponseWriter, title string, err error) {
+func WriteError(w http.ResponseWriter, err attack_kit_api.AttackKitError) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
-	var response discovery_kit_api.DiscoveryKitError
+	json.NewEncoder(w).Encode(err)
+}
+
+func ToError(title string, err error) attack_kit_api.AttackKitError {
+	var response attack_kit_api.AttackKitError
 	if err != nil {
-		response = discovery_kit_api.DiscoveryKitError{Title: title, Detail: discovery_kit_api.Ptr(err.Error())}
+		response = attack_kit_api.AttackKitError{Title: title, Detail: discovery_kit_api.Ptr(err.Error())}
 	} else {
-		response = discovery_kit_api.DiscoveryKitError{Title: title}
+		response = attack_kit_api.AttackKitError{Title: title}
 	}
-	json.NewEncoder(w).Encode(response)
+	return response
 }
 
 func WriteBody(w http.ResponseWriter, response any) {
@@ -71,7 +75,7 @@ func WriteBody(w http.ResponseWriter, response any) {
 func WriteAttackState[T any](w http.ResponseWriter, state T) {
 	err, encodedState := EncodeAttackState(state)
 	if err != nil {
-		WriteError(w, "Failed to encode attack state", err)
+		WriteError(w, ToError("Failed to encode attack state", err))
 	} else {
 		WriteBody(w, attack_kit_api.AttackStateAndMessages{
 			State: encodedState,

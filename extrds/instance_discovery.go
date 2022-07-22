@@ -86,7 +86,7 @@ func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []
 	client := rds.NewFromConfig(utils.AwsConfig)
 	targets, err := GetAllRdsInstances(r.Context(), client)
 	if err != nil {
-		utils.WriteError(w, "Failed to collect RDS instance information", err)
+		utils.WriteError(w, utils.ToError("Failed to collect RDS instance information", err))
 	} else {
 		utils.WriteBody(w, discovery_kit_api.DiscoveredTargets{Targets: targets})
 	}

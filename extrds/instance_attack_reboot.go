@@ -4,6 +4,7 @@
 package extrds
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
@@ -45,50 +46,66 @@ type InstanceRebootState struct {
 	DBInstanceIdentifier string
 }
 
-func prepareInstanceReboot(w http.ResponseWriter, r *http.Request, body []byte) {
+func prepareInstanceReboot(w http.ResponseWriter, _ *http.Request, body []byte) {
+	state, err := PrepareInstanceReboot(body)
+	if err != nil {
+		utils.WriteError(w, *err)
+	} else {
+		utils.WriteAttackState(w, *state)
+	}
+}
+
+func PrepareInstanceReboot(body []byte) (*InstanceRebootState, *attack_kit_api.AttackKitError) {
 	var request attack_kit_api.PrepareAttackRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
-		utils.WriteError(w, "Failed to parse request body", err)
-		return
+		return nil, attack_kit_api.Ptr(utils.ToError("Failed to parse request body", err))
 	}
 
 	instanceId := request.Target.Attributes["aws.rds.instance.id"]
 	if instanceId == nil || len(instanceId) == 0 {
-		utils.WriteError(w, "Target is missing the 'aws.rds.instance.id' tag.", err)
-		return
+		return nil, attack_kit_api.Ptr(utils.ToError("Target is missing the 'aws.rds.instance.id' tag.", nil))
 	}
 
-	utils.WriteAttackState(w, InstanceRebootState{
+	return attack_kit_api.Ptr(InstanceRebootState{
 		DBInstanceIdentifier: instanceId[0],
-	})
+	}), nil
 }
 
 func startInstanceReboot(w http.ResponseWriter, r *http.Request, body []byte) {
+	client := rds.NewFromConfig(utils.AwsConfig)
+	state, err := StartInstanceReboot(r.Context(), body, client)
+	if err != nil {
+		utils.WriteError(w, *err)
+	} else {
+		utils.WriteAttackState(w, *state)
+	}
+}
+
+type RdsRebootDBInstanceApi interface {
+	RebootDBInstance(ctx context.Context, params *rds.RebootDBInstanceInput, optFns ...func(*rds.Options)) (*rds.RebootDBInstanceOutput, error)
+}
+
+func StartInstanceReboot(ctx context.Context, body []byte, client RdsRebootDBInstanceApi) (*InstanceRebootState, *attack_kit_api.AttackKitError) {
 	var request attack_kit_api.StartAttackRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
-		utils.WriteError(w, "Failed to parse request body", err)
-		return
+		return nil, attack_kit_api.Ptr(utils.ToError("Failed to parse request body", err))
 	}
 
 	var state InstanceRebootState
 	err = utils.DecodeAttackState(request.State, &state)
 	if err != nil {
-		utils.WriteError(w, "Failed to parse attack state", err)
-		return
+		return nil, attack_kit_api.Ptr(utils.ToError("Failed to parse attack state", err))
 	}
-
-	client := rds.NewFromConfig(utils.AwsConfig)
 
 	input := rds.RebootDBInstanceInput{
 		DBInstanceIdentifier: &state.DBInstanceIdentifier,
 	}
-	_, err = client.RebootDBInstance(r.Context(), &input)
+	_, err = client.RebootDBInstance(ctx, &input)
 	if err != nil {
-		utils.WriteError(w, "Failed to execute database instance reboot", err)
-		return
+		return nil, attack_kit_api.Ptr(utils.ToError("Failed to execute database instance reboot", err))
 	}
 
-	utils.WriteAttackState(w, state)
+	return &state, nil
 }
