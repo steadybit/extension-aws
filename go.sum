@@ -12,6 +12,8 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.8 h1:2J+jdlBJWEmTyAwC82Y
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.8/go.mod h1:ZIV8GYoC6WLBW5KGs+o4rsc65/ozd+eQ0L31XF5VDwk=
 github.com/aws/aws-sdk-go-v2/internal/ini v1.3.15 h1:QquxR7NH3ULBsKC+NoTpilzbKKS+5AELfNREInbhvas=
 github.com/aws/aws-sdk-go-v2/internal/ini v1.3.15/go.mod h1:Tkrthp/0sNBShQQsamR7j/zY4p19tVTAs+nnqhH6R3c=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.51.0 h1:J2RdvCCH6V1UPw9yywvLjyhZqi5WCk6xMl0Y9edbeQc=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.51.0/go.mod h1:VoBcwURHnJVCWuXHdqVuG03i2lUlHJ5DTTqDSyCdEcc=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.8 h1:oKnAXxSF2FUvfgw8uzU/v9OTYorJJZ8eBmWhr9TWVVQ=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.8/go.mod h1:rDVhIMAX9N2r8nWxDUlbubvvaFMnfsm+3jAV7q+rpM4=
 github.com/aws/aws-sdk-go-v2/service/rds v1.22.0 h1:dMF/tnxgmNFs0b8Eno3bd3a/G0y/uzTalhimVzRUyyI=
@@ -35,8 +37,8 @@ github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyua
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/steadybit/attack-kit/go/attack_kit_api v0.1.0 h1:FpY7E+k5xcUYyKSKUCDOYe0BGSTaYDsL+Zsm2jTibBA=
-github.com/steadybit/attack-kit/go/attack_kit_api v0.1.0/go.mod h1:mt4cEAhluP5pRjXXDq7dJ78fZfhmgRyIrKa8fX3O3es=
+github.com/steadybit/attack-kit/go/attack_kit_api v0.3.0 h1:TUpwbbAKC6vawIvbxQfnHWzQfzHvKYxxvqx7A9s4Mhk=
+github.com/steadybit/attack-kit/go/attack_kit_api v0.3.0/go.mod h1:Om4Mnj5sTU1FgmDhJXBu7Ezfkz/UBz6zEGm6nqkIpAY=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v0.1.0 h1:CM7Ghsa+JVFZGBL4fwYLcwg3LvZzANy1gcMoLe+MDwI=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v0.1.0/go.mod h1:OnIfjrBhmMQCYxriHmr8mT1wCpvqIZxwBHWnanFhgNA=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

@@ -17,7 +17,6 @@ func RegisterRdsAttackHandlers() {
 	utils.RegisterHttpHandler("/rds/instance/attack/reboot", utils.GetterAsHandler(getRebootInstanceAttackDescription))
 	utils.RegisterHttpHandler("/rds/instance/attack/reboot/prepare", prepareInstanceReboot)
 	utils.RegisterHttpHandler("/rds/instance/attack/reboot/start", startInstanceReboot)
-
 }
 
 func getRebootInstanceAttackDescription() attack_kit_api.AttackDescription {

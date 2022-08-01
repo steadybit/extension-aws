@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/steadybit/attack-kit/go/attack_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
 	"net/http"
@@ -20,6 +21,8 @@ func main() {
 
 	extrds.RegisterRdsDiscoveryHandlers()
 	extrds.RegisterRdsAttackHandlers()
+
+	extec2.RegisterEc2AttackHandlers()
 
 	port := 8085
 	InfoLogger.Printf("Starting extension-aws server on port %d. Get started via /\n", port)
@@ -39,6 +42,10 @@ func getExtensionList() ExtensionListResponse {
 			{
 				"GET",
 				"/rds/instance/attack/reboot",
+			},
+			{
+				"GET",
+				"/ec2/instance/attack/state",
 			},
 		},
 		Discoveries: []discovery_kit_api.DescribingEndpointReference{
