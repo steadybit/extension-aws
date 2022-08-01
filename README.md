@@ -28,6 +28,18 @@ by tweaking the `Resource` clause.
         "rds:DescribeDBClusters"
       ],
       "Resource": "*"
+    },
+
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:DescribeTags",
+        "ec2:StopInstances",
+        "ec2:RebootInstances",
+        "ec2:TerminateInstances"
+      ],
+      "Resource": "*"
     }
   ]
 }
