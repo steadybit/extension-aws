@@ -1,8 +1,12 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2022 Steadybit GmbH
+
 package utils
 
 import (
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
+	"github.com/rs/zerolog/log"
 	"github.com/steadybit/attack-kit/go/attack_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"io/ioutil"
@@ -24,7 +28,7 @@ func PanicRecovery(next func(w http.ResponseWriter, r *http.Request)) http.Handl
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				ErrorLogger.Printf("Panic: %v\n %s", err, string(debug.Stack()))
+				log.Error().Msgf("Panic: %v\n %s", err, string(debug.Stack()))
 				WriteError(w, ToError("Internal Server Error", nil))
 			}
 		}()
@@ -41,9 +45,9 @@ func LogRequest(next func(w http.ResponseWriter, r *http.Request, body []byte)) 
 		}
 
 		if len(body) > 0 {
-			InfoLogger.Printf("%s %s with body %s", r.Method, r.URL, body)
+			log.Info().Msgf("%s %s with body %s", r.Method, r.URL, body)
 		} else {
-			InfoLogger.Printf("%s %s", r.Method, r.URL)
+			log.Info().Msgf("%s %s", r.Method, r.URL)
 		}
 
 		next(w, r, body)

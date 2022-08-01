@@ -5,15 +5,21 @@ package main
 
 import (
 	"fmt"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/steadybit/attack-kit/go/attack_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
 	"net/http"
+	"os"
 )
 
 func main() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
 	utils.InitializeAwsAccountAccess()
 
 	utils.RegisterHttpHandler("/", utils.GetterAsHandler(getExtensionList))
@@ -25,7 +31,7 @@ func main() {
 	extec2.RegisterEc2AttackHandlers()
 
 	port := 8085
-	InfoLogger.Printf("Starting extension-aws server on port %d. Get started via /\n", port)
+	log.Info().Msgf("Starting extension-aws server on port %d. Get started via /", port)
 	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
 

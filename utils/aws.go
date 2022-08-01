@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 )
 
@@ -19,14 +20,14 @@ var (
 func InitializeAwsAccountAccess() {
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
-		ErrorLogger.Fatalf("Failed to load AWS configuration: %s", err)
+		log.Fatal().Err(err).Msgf("Failed to load AWS configuration")
 	}
 	AwsConfig = cfg
 
 	stsService := sts.NewFromConfig(cfg)
 	identityOutput, err := stsService.GetCallerIdentity(context.Background(), nil)
 	if err != nil {
-		ErrorLogger.Fatalf("Failed to identify AWS account number: %s", err)
+		log.Fatal().Err(err).Msgf("Failed to identify AWS account number")
 	}
 	AwsAccountNumber = aws.ToString(identityOutput.Account)
 }
