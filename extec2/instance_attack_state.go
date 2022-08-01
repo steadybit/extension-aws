@@ -143,6 +143,7 @@ func StartInstanceStateChange(ctx context.Context, body []byte, client Ec2Instan
 	} else if state.Action == "stop" {
 		in := ec2.StopInstancesInput{
 			InstanceIds: instanceIds,
+			Hibernate:   attack_kit_api.Ptr(false),
 		}
 		_, err = client.StopInstances(ctx, &in)
 	} else if state.Action == "hibernate" {
