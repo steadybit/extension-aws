@@ -38,6 +38,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 				AvailabilityZone:     discovery_kit_api.Ptr("az"),
 				Engine:               discovery_kit_api.Ptr("engine"),
 				DBClusterIdentifier:  discovery_kit_api.Ptr("cluster"),
+				DBInstanceStatus:     discovery_kit_api.Ptr("status"),
 			},
 		},
 	}
@@ -54,8 +55,9 @@ func TestGetAllRdsInstances(t *testing.T) {
 	assert.Equal(t, rdsTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 7, len(target.Attributes))
+	assert.Equal(t, 8, len(target.Attributes))
 	assert.Equal(t, []string{"cluster"}, target.Attributes["aws.rds.cluster"])
+	assert.Equal(t, []string{"status"}, target.Attributes["aws.rds.instance.status"])
 }
 
 func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
@@ -68,6 +70,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier"),
 				AvailabilityZone:     discovery_kit_api.Ptr("az"),
 				Engine:               discovery_kit_api.Ptr("engine"),
+				DBInstanceStatus:     discovery_kit_api.Ptr("status"),
 				DBClusterIdentifier:  nil,
 			},
 		},
@@ -85,7 +88,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	assert.Equal(t, rdsTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 6, len(target.Attributes))
+	assert.Equal(t, 7, len(target.Attributes))
 	assert.Equal(t, []string(nil), target.Attributes["aws.rds.cluster"])
 }
 
@@ -107,6 +110,7 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier1"),
 				AvailabilityZone:     discovery_kit_api.Ptr("az1"),
 				Engine:               discovery_kit_api.Ptr("engine1"),
+				DBInstanceStatus:     discovery_kit_api.Ptr("status"),
 				DBClusterIdentifier:  nil,
 			},
 		},
@@ -118,6 +122,7 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier2"),
 				AvailabilityZone:     discovery_kit_api.Ptr("az2"),
 				Engine:               discovery_kit_api.Ptr("engine2"),
+				DBInstanceStatus:     discovery_kit_api.Ptr("status2"),
 				DBClusterIdentifier:  nil,
 			},
 		},

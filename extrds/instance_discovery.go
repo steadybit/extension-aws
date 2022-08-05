@@ -80,6 +80,13 @@ func getRdsInstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 					One:   "AWS RDS instance ID",
 					Other: "AWS RDS instance IDs",
 				},
+			}, {
+				// See https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/accessing-monitoring.html#Overview.DBInstance.Status
+				Attribute: "aws.rds.instance.status",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "AWS RDS instance status",
+					Other: "AWS RDS instance status",
+				},
 			},
 		},
 	}
@@ -136,6 +143,7 @@ func toTarget(dbInstance types.DBInstance) discovery_kit_api.Target {
 	attributes["aws.zone"] = []string{aws.ToString(dbInstance.AvailabilityZone)}
 	attributes["aws.rds.engine"] = []string{aws.ToString(dbInstance.Engine)}
 	attributes["aws.rds.instance.id"] = []string{label}
+	attributes["aws.rds.instance.status"] = []string{aws.ToString(dbInstance.DBInstanceStatus)}
 
 	if dbInstance.DBClusterIdentifier != nil {
 		attributes["aws.rds.cluster"] = []string{aws.ToString(dbInstance.DBClusterIdentifier)}
