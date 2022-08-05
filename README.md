@@ -2,6 +2,17 @@
 
 A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to inject HTTP faults into various AWS services.
 
+## Capabilities
+
+ - Amazon Elastic Cloud Compute (EC2)
+     - Attacks
+         - State change of EC2 instances, e.g., stop, hibernate, terminate and reboot. 
+ - Amazon Relational Database Service (RDS)
+   - Discoveries
+     - RDS instances
+   - Attacks
+     - Reboot of RDS instances
+
 ## Configuration
 
 The process requires valid access credentials to interact with various AWS APIs.
@@ -78,3 +89,4 @@ with the AWS APIs.
 ## Deployment
 
 We recommend that you deploy the extension with our [official Helm chart](https://github.com/steadybit/helm-charts/tree/main/charts/steadybit-extension-aws).
+Please note that the Steadybit AWS agent currently needs to be configured to interact this the AWS extension.
