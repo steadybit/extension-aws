@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-kit/exthttp"
 )
 
 var (
@@ -33,7 +34,7 @@ func InitializeAwsAccountAccess() {
 }
 
 func RegisterCommonDiscoveryHandlers() {
-	RegisterHttpHandler("/common/discovery/attribute-descriptions", GetterAsHandler(getCommonAttributeDescriptions))
+	exthttp.RegisterHttpHandler("/common/discovery/attribute-descriptions", exthttp.GetterAsHandler(getCommonAttributeDescriptions))
 }
 
 func getCommonAttributeDescriptions() discovery_kit_api.AttributeDescriptions {

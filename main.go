@@ -5,24 +5,23 @@ package main
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/attack-kit/go/attack_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-kit/exthttp"
+	"github.com/steadybit/extension-kit/extlogging"
 	"net/http"
-	"os"
 )
 
 func main() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	extlogging.InitZeroLog()
 
 	utils.InitializeAwsAccountAccess()
 
-	utils.RegisterHttpHandler("/", utils.GetterAsHandler(getExtensionList))
+	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	utils.RegisterCommonDiscoveryHandlers()
 
 	extrds.RegisterRdsDiscoveryHandlers()
@@ -32,7 +31,10 @@ func main() {
 
 	port := 8085
 	log.Info().Msgf("Starting extension-aws server on port %d. Get started via /", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to start extension-aws server on port %d", port)
+	}
 }
 
 type ExtensionListResponse struct {

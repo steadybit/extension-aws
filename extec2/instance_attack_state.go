@@ -10,13 +10,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/steadybit/attack-kit/go/attack_kit_api"
 	"github.com/steadybit/extension-aws/utils"
+	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/exthttp"
+	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
 )
 
 func RegisterEc2AttackHandlers() {
-	utils.RegisterHttpHandler("/ec2/instance/attack/state", utils.GetterAsHandler(getInstanceStateAttackDescription))
-	utils.RegisterHttpHandler("/ec2/instance/attack/state/prepare", prepareInstanceStateChange)
-	utils.RegisterHttpHandler("/ec2/instance/attack/state/start", startInstanceStateChange)
+	exthttp.RegisterHttpHandler("/ec2/instance/attack/state", exthttp.GetterAsHandler(getInstanceStateAttackDescription))
+	exthttp.RegisterHttpHandler("/ec2/instance/attack/state/prepare", prepareInstanceStateChange)
+	exthttp.RegisterHttpHandler("/ec2/instance/attack/state/start", startInstanceStateChange)
 }
 
 func getInstanceStateAttackDescription() attack_kit_api.AttackDescription {
@@ -25,7 +28,7 @@ func getInstanceStateAttackDescription() attack_kit_api.AttackDescription {
 		Label:       "change instance state",
 		Description: "Reboot, terminate, stop or hibernate EC2 instances",
 		Version:     "1.0.0",
-		Icon:        attack_kit_api.Ptr(ec2Icon),
+		Icon:        extutil.Ptr(ec2Icon),
 		TargetType:  ec2TargetId,
 		Category:    attack_kit_api.State,
 		TimeControl: attack_kit_api.INSTANTANEOUS,
@@ -33,10 +36,10 @@ func getInstanceStateAttackDescription() attack_kit_api.AttackDescription {
 			{
 				Name:        "action",
 				Label:       "Action",
-				Description: attack_kit_api.Ptr("The kind of state change operation to execute for the EC2 instances"),
-				Required:    attack_kit_api.Ptr(true),
+				Description: extutil.Ptr("The kind of state change operation to execute for the EC2 instances"),
+				Required:    extutil.Ptr(true),
 				Type:        "string",
-				Options: attack_kit_api.Ptr([]attack_kit_api.ParameterOption{
+				Options: extutil.Ptr([]attack_kit_api.ParameterOption{
 					{
 						Label: "Reboot",
 						Value: "reboot",
@@ -75,30 +78,30 @@ type InstanceStateChangeState struct {
 func prepareInstanceStateChange(w http.ResponseWriter, _ *http.Request, body []byte) {
 	state, err := PrepareInstanceStateChange(body)
 	if err != nil {
-		utils.WriteError(w, *err)
+		exthttp.WriteError(w, *err)
 	} else {
 		utils.WriteAttackState(w, *state)
 	}
 }
 
-func PrepareInstanceStateChange(body []byte) (*InstanceStateChangeState, *attack_kit_api.AttackKitError) {
+func PrepareInstanceStateChange(body []byte) (*InstanceStateChangeState, *extension_kit.ExtensionError) {
 	var request attack_kit_api.PrepareAttackRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
-		return nil, attack_kit_api.Ptr(utils.ToError("Failed to parse request body", err))
+		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
 	}
 
 	instanceId := request.Target.Attributes["aws-ec2.instance.id"]
 	if instanceId == nil || len(instanceId) == 0 {
-		return nil, attack_kit_api.Ptr(utils.ToError("Target is missing the 'aws-ec2.instance.id' tag.", nil))
+		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' tag.", nil))
 	}
 
 	action := request.Config["action"]
 	if action == nil {
-		return nil, attack_kit_api.Ptr(utils.ToError("Missing attack action parameter.", nil))
+		return nil, extutil.Ptr(extension_kit.ToError("Missing attack action parameter.", nil))
 	}
 
-	return attack_kit_api.Ptr(InstanceStateChangeState{
+	return extutil.Ptr(InstanceStateChangeState{
 		InstanceId: instanceId[0],
 		Action:     action.(string),
 	}), nil
@@ -108,7 +111,7 @@ func startInstanceStateChange(w http.ResponseWriter, r *http.Request, body []byt
 	client := ec2.NewFromConfig(utils.AwsConfig)
 	state, err := StartInstanceStateChange(r.Context(), body, client)
 	if err != nil {
-		utils.WriteError(w, *err)
+		exthttp.WriteError(w, *err)
 	} else {
 		utils.WriteAttackState(w, *state)
 	}
@@ -120,17 +123,17 @@ type Ec2InstanceStateChangeApiApi interface {
 	RebootInstances(ctx context.Context, params *ec2.RebootInstancesInput, optFns ...func(*ec2.Options)) (*ec2.RebootInstancesOutput, error)
 }
 
-func StartInstanceStateChange(ctx context.Context, body []byte, client Ec2InstanceStateChangeApiApi) (*InstanceStateChangeState, *attack_kit_api.AttackKitError) {
+func StartInstanceStateChange(ctx context.Context, body []byte, client Ec2InstanceStateChangeApiApi) (*InstanceStateChangeState, *extension_kit.ExtensionError) {
 	var request attack_kit_api.StartAttackRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
-		return nil, attack_kit_api.Ptr(utils.ToError("Failed to parse request body", err))
+		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
 	}
 
 	var state InstanceStateChangeState
 	err = utils.DecodeAttackState(request.State, &state)
 	if err != nil {
-		return nil, attack_kit_api.Ptr(utils.ToError("Failed to parse attack state", err))
+		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse attack state", err))
 	}
 
 	instanceIds := []string{state.InstanceId}
@@ -143,13 +146,13 @@ func StartInstanceStateChange(ctx context.Context, body []byte, client Ec2Instan
 	} else if state.Action == "stop" {
 		in := ec2.StopInstancesInput{
 			InstanceIds: instanceIds,
-			Hibernate:   attack_kit_api.Ptr(false),
+			Hibernate:   extutil.Ptr(false),
 		}
 		_, err = client.StopInstances(ctx, &in)
 	} else if state.Action == "hibernate" {
 		in := ec2.StopInstancesInput{
 			InstanceIds: instanceIds,
-			Hibernate:   attack_kit_api.Ptr(true),
+			Hibernate:   extutil.Ptr(true),
 		}
 		_, err = client.StopInstances(ctx, &in)
 	} else if state.Action == "terminate" {
@@ -160,7 +163,7 @@ func StartInstanceStateChange(ctx context.Context, body []byte, client Ec2Instan
 	}
 
 	if err != nil {
-		return nil, attack_kit_api.Ptr(utils.ToError(fmt.Sprintf("Failed to execute state change attack '%s' on instance '%s'", state.Action, state.InstanceId), err))
+		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to execute state change attack '%s' on instance '%s'", state.Action, state.InstanceId), err))
 	}
 
 	return &state, nil
