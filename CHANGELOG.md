@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.0
+
+ - Expose AWS RDS instance status in target table
+
 ## v1.2.0
 
  - Report AWS RDS instance status

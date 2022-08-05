@@ -40,12 +40,13 @@ func getRdsInstanceTargetDescription() discovery_kit_api.TargetDescription {
 		Id:       rdsTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "RDS instance", Other: "RDS instances"},
 		Category: extutil.Ptr("cloud"),
-		Version:  "1.0.0",
+		Version:  "1.1.0",
 		Icon:     extutil.Ptr(rdsIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
 				{Attribute: "aws.rds.cluster"},
+				{Attribute: "aws.rds.instance.status"},
 				{Attribute: "aws.zone"},
 				{Attribute: "aws.account"},
 			},
