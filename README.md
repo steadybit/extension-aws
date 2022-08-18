@@ -1,3 +1,5 @@
+<img src="./logo.jpeg" height="130" align="right" alt="Amazon Web Services (AWS) logo depicting five orange colored boxes and the text Amazon Web Services">
+
 # Steadybit extension-aws
 
 A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to inject HTTP faults into various AWS services.
