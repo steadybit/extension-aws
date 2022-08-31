@@ -26,7 +26,7 @@ func RegisterRdsDiscoveryHandlers() {
 func getRdsInstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         rdsTargetId,
-		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
+		RestrictTo: extutil.Ptr(discovery_kit_api.AWS),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
 			Path:         "/rds/instance/discovery/discovered-targets",

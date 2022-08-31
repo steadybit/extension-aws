@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+ - Restrict discovery execution to AWS agents to avoid common issues.
+
 ## v1.3.0
 
  - Expose AWS RDS instance status in target table
