@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## v1.4.0
 
  - Restrict discovery execution to AWS agents to avoid common issues.
+ - The log level can now be configured through the `STEADYBIT_LOG_LEVEL` environment variable. 
 
 ## v1.3.0
 
