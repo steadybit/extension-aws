@@ -31,6 +31,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/godbus/dbus/v5 v5.0.4/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
 github.com/google/go-cmp v0.5.8 h1:e6P7q2lk1O+qJJb4BtCQXlK8vWEO8V1ZeuEdJNOqZyg=
 github.com/google/go-cmp v0.5.8/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
@@ -51,8 +53,8 @@ github.com/steadybit/attack-kit/go/attack_kit_api v0.3.0 h1:TUpwbbAKC6vawIvbxQfn
 github.com/steadybit/attack-kit/go/attack_kit_api v0.3.0/go.mod h1:Om4Mnj5sTU1FgmDhJXBu7Ezfkz/UBz6zEGm6nqkIpAY=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.1.0 h1:Ue2pIpPmtcVTcwILZlRfAsKNbznUjrRfmeZXlta4YOw=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.1.0/go.mod h1:OnIfjrBhmMQCYxriHmr8mT1wCpvqIZxwBHWnanFhgNA=
-github.com/steadybit/extension-kit v1.2.0 h1:7Qf9mvYDqjzSSyqhzqXoKQSYVtiQ51Ky4HxrD9DlE9Y=
-github.com/steadybit/extension-kit v1.2.0/go.mod h1:RpEERODMoEqNL5GXdMRhnRJwu1vUlHBS+2cZ9WWKQKg=
+github.com/steadybit/extension-kit v1.5.0 h1:4PXUxa66PhdL4L6QexWqbYbIHfBeKq7ZKI9mKq19tBs=
+github.com/steadybit/extension-kit v1.5.0/go.mod h1:RpEERODMoEqNL5GXdMRhnRJwu1vUlHBS+2cZ9WWKQKg=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0 h1:M2gUjqZET1qApGOWNSnZ49BAIMX4F/1plDv3+l31EJ4=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=

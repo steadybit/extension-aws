@@ -15,7 +15,7 @@ require (
 	github.com/rs/zerolog v1.27.0
 	github.com/steadybit/attack-kit/go/attack_kit_api v0.3.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.1.0
-	github.com/steadybit/extension-kit v1.2.0
+	github.com/steadybit/extension-kit v1.5.0
 	github.com/stretchr/testify v1.8.0
 )
 
@@ -29,6 +29,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.12 // indirect
 	github.com/aws/smithy-go v1.12.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
