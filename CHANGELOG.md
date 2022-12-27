@@ -2,7 +2,7 @@
 
 ## v1.5.0
 
-- Support for the `STEADYBIT_LOG_FORMAT` env variable. When set to `json`, extensions will log JSON lines to stderr.
+ - Support for the `STEADYBIT_LOG_FORMAT` env variable. When set to `json`, extensions will log JSON lines to stderr.
 
 ## v1.4.0
 
