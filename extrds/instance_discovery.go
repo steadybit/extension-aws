@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2022 Steadybit GmbH
+// SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
 package extrds
 
@@ -94,8 +94,7 @@ func getRdsInstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 }
 
 func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []byte) {
-	client := rds.NewFromConfig(utils.AwsConfig)
-	targets, err := GetAllRdsInstances(r.Context(), client)
+	targets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, mergeTargets, make([]discovery_kit_api.Target, 0, 100), r.Context())
 	if err != nil {
 		exthttp.WriteError(w, extension_kit.ToError("Failed to collect RDS instance information", err))
 	} else {
@@ -103,11 +102,24 @@ func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []
 	}
 }
 
+func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+	client := rds.NewFromConfig(account.AwsConfig)
+	targets, err := GetAllRdsInstances(ctx, client, account.AccountNumber)
+	if err != nil {
+		return nil, err
+	}
+	return &targets, nil
+}
+
+func mergeTargets(merged []discovery_kit_api.Target, eachResult []discovery_kit_api.Target) ([]discovery_kit_api.Target, error) {
+	return append(merged, eachResult...), nil
+}
+
 type RdsDescribeInstancesApi interface {
 	DescribeDBInstances(ctx context.Context, params *rds.DescribeDBInstancesInput, optFns ...func(*rds.Options)) (*rds.DescribeDBInstancesOutput, error)
 }
 
-func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi) ([]discovery_kit_api.Target, error) {
+func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi, awsAccountNumber string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	var marker *string = nil
@@ -120,7 +132,7 @@ func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi) ([]
 		}
 
 		for _, dbInstance := range output.DBInstances {
-			result = append(result, toTarget(dbInstance))
+			result = append(result, toTarget(dbInstance, awsAccountNumber))
 		}
 
 		if output.Marker == nil {
@@ -133,13 +145,13 @@ func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi) ([]
 	return result, nil
 }
 
-func toTarget(dbInstance types.DBInstance) discovery_kit_api.Target {
+func toTarget(dbInstance types.DBInstance, awsAccountNumber string) discovery_kit_api.Target {
 	arn := aws.ToString(dbInstance.DBInstanceArn)
 	label := aws.ToString(dbInstance.DBInstanceIdentifier)
 
 	attributes := make(map[string][]string)
 	attributes["steadybit.label"] = []string{label}
-	attributes["aws.account"] = []string{utils.AwsAccountNumber}
+	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws.arn"] = []string{arn}
 	attributes["aws.zone"] = []string{aws.ToString(dbInstance.AvailabilityZone)}
 	attributes["aws.rds.engine"] = []string{aws.ToString(dbInstance.Engine)}

@@ -25,6 +25,7 @@ func TestPrepareInstanceStateChange(t *testing.T) {
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws-ec2.instance.id": {"my-instance"},
+				"aws.account":         {"42"},
 			},
 		}),
 	}
@@ -47,7 +48,9 @@ func TestPrepareInstanceStateChangeMustRequireAnInstanceId(t *testing.T) {
 			"action": "stop",
 		},
 		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{},
+			Attributes: map[string][]string{
+				"aws.account": {"42"},
+			},
 		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
@@ -61,6 +64,29 @@ func TestPrepareInstanceStateChangeMustRequireAnInstanceId(t *testing.T) {
 	assert.Contains(t, attackErr.Title, "aws-ec2.instance.id")
 }
 
+func TestPrepareInstanceStateChangeMustRequireAnAccountNumber(t *testing.T) {
+	// Given
+	requestBody := action_kit_api.PrepareActionRequestBody{
+		Config: map[string]interface{}{
+			"action": "stop",
+		},
+		Target: extutil.Ptr(action_kit_api.Target{
+			Attributes: map[string][]string{
+				"aws-ec2.instance.id": {"my-instance"},
+			},
+		}),
+	}
+	requestBodyJson, err := json.Marshal(requestBody)
+	require.Nil(t, err)
+
+	// When
+	state, attackErr := PrepareInstanceStateChange(requestBodyJson)
+
+	// Then
+	assert.Nil(t, state)
+	assert.Contains(t, attackErr.Title, "aws.account")
+}
+
 func TestPrepareInstanceStateChangeMustRequireAnAction(t *testing.T) {
 	// Given
 	requestBody := action_kit_api.PrepareActionRequestBody{
@@ -68,6 +94,7 @@ func TestPrepareInstanceStateChangeMustRequireAnAction(t *testing.T) {
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws-ec2.instance.id": {"my-instance"},
+				"aws.account":         {"42"},
 			},
 		}),
 	}
@@ -128,7 +155,9 @@ func TestStartInstanceStop(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
+		return mockedApi, nil
+	})
 
 	// Then
 	assert.Nil(t, attackError)
@@ -152,7 +181,9 @@ func TestStartInstanceHibernate(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
+		return mockedApi, nil
+	})
 
 	// Then
 	assert.Nil(t, attackError)
@@ -175,7 +206,9 @@ func TestStartInstanceTerminate(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
+		return mockedApi, nil
+	})
 
 	// Then
 	assert.Nil(t, attackError)
@@ -198,7 +231,9 @@ func TestStartInstanceReboot(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
+		return mockedApi, nil
+	})
 
 	// Then
 	assert.Nil(t, attackError)
@@ -221,7 +256,9 @@ func TestStartInstanceStateChangeForwardsError(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
+		return mockedApi, nil
+	})
 
 	// Then
 	assert.Contains(t, attackError.Title, "Failed to execute state change attack")

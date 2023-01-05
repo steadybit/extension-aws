@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2022 Steadybit GmbH
+// SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
 package extrds
 
@@ -45,7 +45,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
 	// When
-	targets, err := GetAllRdsInstances(context.Background(), mockedApi)
+	targets, err := GetAllRdsInstances(context.Background(), mockedApi, "42")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -58,6 +58,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 	assert.Equal(t, 8, len(target.Attributes))
 	assert.Equal(t, []string{"cluster"}, target.Attributes["aws.rds.cluster"])
 	assert.Equal(t, []string{"status"}, target.Attributes["aws.rds.instance.status"])
+	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 }
 
 func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
@@ -78,7 +79,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
 	// When
-	targets, err := GetAllRdsInstances(context.Background(), mockedApi)
+	targets, err := GetAllRdsInstances(context.Background(), mockedApi, "42")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -129,7 +130,7 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	}), nil)
 
 	// When
-	targets, err := GetAllRdsInstances(context.Background(), mockedApi)
+	targets, err := GetAllRdsInstances(context.Background(), mockedApi, "42")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -145,7 +146,7 @@ func TestGetAllRdsInstancesError(t *testing.T) {
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := GetAllRdsInstances(context.Background(), mockedApi)
+	_, err := GetAllRdsInstances(context.Background(), mockedApi, "42")
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

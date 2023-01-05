@@ -11,10 +11,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.51.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.22.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.9
-	github.com/mitchellh/mapstructure v1.5.0
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.27.0
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.2.0
-	github.com/steadybit/attack-kit/go/attack_kit_api v0.3.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.1.0
 	github.com/steadybit/extension-kit v1.5.0
 	github.com/stretchr/testify v1.8.0

@@ -47,6 +47,7 @@ func getRebootInstanceAttackDescription() action_kit_api.ActionDescription {
 
 type InstanceRebootState struct {
 	DBInstanceIdentifier string
+	Account              string
 }
 
 func prepareInstanceReboot(w http.ResponseWriter, _ *http.Request, body []byte) {
@@ -77,17 +78,28 @@ func PrepareInstanceReboot(body []byte) (*InstanceRebootState, *extension_kit.Ex
 
 	instanceId := request.Target.Attributes["aws.rds.instance.id"]
 	if instanceId == nil || len(instanceId) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.rds.instance.id' tag.", nil))
+		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.rds.instance.id' target attribute.", nil))
+	}
+
+	account := request.Target.Attributes["aws.account"]
+	if account == nil || len(account) == 0 {
+		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
 	}
 
 	return extutil.Ptr(InstanceRebootState{
+		Account:              account[0],
 		DBInstanceIdentifier: instanceId[0],
 	}), nil
 }
 
 func startInstanceReboot(w http.ResponseWriter, r *http.Request, body []byte) {
-	client := rds.NewFromConfig(utils.AwsConfig)
-	extKitErr := StartInstanceReboot(r.Context(), body, client)
+	extKitErr := StartInstanceReboot(r.Context(), body, func(account string) (RdsRebootDBInstanceClient, error) {
+		awsAccount, err := utils.Accounts.GetAccount(account)
+		if err != nil {
+			return nil, err
+		}
+		return rds.NewFromConfig(awsAccount.AwsConfig), nil
+	})
 	if extKitErr != nil {
 		exthttp.WriteError(w, *extKitErr)
 		return
@@ -96,11 +108,11 @@ func startInstanceReboot(w http.ResponseWriter, r *http.Request, body []byte) {
 	exthttp.WriteBody(w, extutil.Ptr(action_kit_api.StartResult{}))
 }
 
-type RdsRebootDBInstanceApi interface {
+type RdsRebootDBInstanceClient interface {
 	RebootDBInstance(ctx context.Context, params *rds.RebootDBInstanceInput, optFns ...func(*rds.Options)) (*rds.RebootDBInstanceOutput, error)
 }
 
-func StartInstanceReboot(ctx context.Context, body []byte, client RdsRebootDBInstanceApi) *extension_kit.ExtensionError {
+func StartInstanceReboot(ctx context.Context, body []byte, clientProvider func(account string) (RdsRebootDBInstanceClient, error)) *extension_kit.ExtensionError {
 	var request action_kit_api.StartActionRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
@@ -111,6 +123,11 @@ func StartInstanceReboot(ctx context.Context, body []byte, client RdsRebootDBIns
 	err = extconversion.Convert(request.State, &state)
 	if err != nil {
 		return extutil.Ptr(extension_kit.ToError("Failed to parse attack state", err))
+	}
+
+	client, err := clientProvider(state.Account)
+	if err != nil {
+		return extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err))
 	}
 
 	input := rds.RebootDBInstanceInput{

@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
@@ -19,7 +20,8 @@ import (
 func main() {
 	extlogging.InitZeroLog()
 
-	utils.InitializeAwsAccountAccess()
+	config.ParseConfiguration()
+	utils.InitializeAwsAccountAccess(config.Config)
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	utils.RegisterCommonDiscoveryHandlers()

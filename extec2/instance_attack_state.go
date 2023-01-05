@@ -72,6 +72,7 @@ func getInstanceStateAttackDescription() action_kit_api.ActionDescription {
 }
 
 type InstanceStateChangeState struct {
+	Account    string
 	InstanceId string
 	Action     string
 }
@@ -104,7 +105,12 @@ func PrepareInstanceStateChange(body []byte) (*InstanceStateChangeState, *extens
 
 	instanceId := request.Target.Attributes["aws-ec2.instance.id"]
 	if instanceId == nil || len(instanceId) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' tag.", nil))
+		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil))
+	}
+
+	account := request.Target.Attributes["aws.account"]
+	if account == nil || len(account) == 0 {
+		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil))
 	}
 
 	action := request.Config["action"]
@@ -113,14 +119,20 @@ func PrepareInstanceStateChange(body []byte) (*InstanceStateChangeState, *extens
 	}
 
 	return extutil.Ptr(InstanceStateChangeState{
+		Account:    account[0],
 		InstanceId: instanceId[0],
 		Action:     action.(string),
 	}), nil
 }
 
 func startInstanceStateChange(w http.ResponseWriter, r *http.Request, body []byte) {
-	client := ec2.NewFromConfig(utils.AwsConfig)
-	err := StartInstanceStateChange(r.Context(), body, client)
+	err := StartInstanceStateChange(r.Context(), body, func(account string) (Ec2InstanceStateChangeApiApi, error) {
+		awsAccount, err := utils.Accounts.GetAccount(account)
+		if err != nil {
+			return nil, err
+		}
+		return ec2.NewFromConfig(awsAccount.AwsConfig), nil
+	})
 	if err != nil {
 		exthttp.WriteError(w, *err)
 		return
@@ -135,7 +147,7 @@ type Ec2InstanceStateChangeApiApi interface {
 	RebootInstances(ctx context.Context, params *ec2.RebootInstancesInput, optFns ...func(*ec2.Options)) (*ec2.RebootInstancesOutput, error)
 }
 
-func StartInstanceStateChange(ctx context.Context, body []byte, client Ec2InstanceStateChangeApiApi) *extension_kit.ExtensionError {
+func StartInstanceStateChange(ctx context.Context, body []byte, clientProvider func(account string) (Ec2InstanceStateChangeApiApi, error)) *extension_kit.ExtensionError {
 	var request action_kit_api.StartActionRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
@@ -146,6 +158,11 @@ func StartInstanceStateChange(ctx context.Context, body []byte, client Ec2Instan
 	err = extconversion.Convert(request.State, &state)
 	if err != nil {
 		return extutil.Ptr(extension_kit.ToError("Failed to parse attack state", err))
+	}
+
+	client, err := clientProvider(state.Account)
+	if err != nil {
+		return extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.Account), err))
 	}
 
 	instanceIds := []string{state.InstanceId}
