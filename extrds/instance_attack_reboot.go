@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2022 Steadybit GmbH
+// SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
 package extrds
 
@@ -8,9 +8,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
-	"github.com/steadybit/attack-kit/go/attack_kit_api"
+	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extconversion"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
@@ -22,22 +23,22 @@ func RegisterRdsAttackHandlers() {
 	exthttp.RegisterHttpHandler("/rds/instance/attack/reboot/start", startInstanceReboot)
 }
 
-func getRebootInstanceAttackDescription() attack_kit_api.AttackDescription {
-	return attack_kit_api.AttackDescription{
+func getRebootInstanceAttackDescription() action_kit_api.ActionDescription {
+	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.reboot", rdsTargetId),
 		Label:       "reboot instance",
 		Description: "Reboot a single database instance",
 		Version:     "1.0.0",
 		Icon:        extutil.Ptr(rdsIcon),
-		TargetType:  rdsTargetId,
-		Category:    attack_kit_api.Resource,
-		TimeControl: attack_kit_api.INSTANTANEOUS,
-		Parameters:  []attack_kit_api.AttackParameter{},
-		Prepare: attack_kit_api.MutatingEndpointReference{
+		TargetType:  extutil.Ptr(rdsTargetId),
+		Category:    extutil.Ptr("resource"),
+		TimeControl: action_kit_api.Instantaneous,
+		Parameters:  []action_kit_api.ActionParameter{},
+		Prepare: action_kit_api.MutatingEndpointReference{
 			Method: "POST",
 			Path:   "/rds/instance/attack/reboot/prepare",
 		},
-		Start: attack_kit_api.MutatingEndpointReference{
+		Start: action_kit_api.MutatingEndpointReference{
 			Method: "POST",
 			Path:   "/rds/instance/attack/reboot/start",
 		},
@@ -49,16 +50,26 @@ type InstanceRebootState struct {
 }
 
 func prepareInstanceReboot(w http.ResponseWriter, _ *http.Request, body []byte) {
-	state, err := PrepareInstanceReboot(body)
-	if err != nil {
-		exthttp.WriteError(w, *err)
-	} else {
-		utils.WriteAttackState(w, *state)
+	state, extKitErr := PrepareInstanceReboot(body)
+	if extKitErr != nil {
+		exthttp.WriteError(w, *extKitErr)
+		return
 	}
+
+	var convertedState action_kit_api.ActionState
+	err := extconversion.Convert(*state, &convertedState)
+	if err != nil {
+		exthttp.WriteError(w, extension_kit.ToError("Failed to encode action state", err))
+		return
+	}
+
+	exthttp.WriteBody(w, extutil.Ptr(action_kit_api.PrepareResult{
+		State: convertedState,
+	}))
 }
 
 func PrepareInstanceReboot(body []byte) (*InstanceRebootState, *extension_kit.ExtensionError) {
-	var request attack_kit_api.PrepareAttackRequestBody
+	var request action_kit_api.PrepareActionRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
 		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
@@ -76,29 +87,30 @@ func PrepareInstanceReboot(body []byte) (*InstanceRebootState, *extension_kit.Ex
 
 func startInstanceReboot(w http.ResponseWriter, r *http.Request, body []byte) {
 	client := rds.NewFromConfig(utils.AwsConfig)
-	state, err := StartInstanceReboot(r.Context(), body, client)
-	if err != nil {
-		exthttp.WriteError(w, *err)
-	} else {
-		utils.WriteAttackState(w, *state)
+	extKitErr := StartInstanceReboot(r.Context(), body, client)
+	if extKitErr != nil {
+		exthttp.WriteError(w, *extKitErr)
+		return
 	}
+
+	exthttp.WriteBody(w, extutil.Ptr(action_kit_api.StartResult{}))
 }
 
 type RdsRebootDBInstanceApi interface {
 	RebootDBInstance(ctx context.Context, params *rds.RebootDBInstanceInput, optFns ...func(*rds.Options)) (*rds.RebootDBInstanceOutput, error)
 }
 
-func StartInstanceReboot(ctx context.Context, body []byte, client RdsRebootDBInstanceApi) (*InstanceRebootState, *extension_kit.ExtensionError) {
-	var request attack_kit_api.StartAttackRequestBody
+func StartInstanceReboot(ctx context.Context, body []byte, client RdsRebootDBInstanceApi) *extension_kit.ExtensionError {
+	var request action_kit_api.StartActionRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
+		return extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
 	}
 
 	var state InstanceRebootState
-	err = utils.DecodeAttackState(request.State, &state)
+	err = extconversion.Convert(request.State, &state)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse attack state", err))
+		return extutil.Ptr(extension_kit.ToError("Failed to parse attack state", err))
 	}
 
 	input := rds.RebootDBInstanceInput{
@@ -106,8 +118,8 @@ func StartInstanceReboot(ctx context.Context, body []byte, client RdsRebootDBIns
 	}
 	_, err = client.RebootDBInstance(ctx, &input)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to execute database instance reboot", err))
+		return extutil.Ptr(extension_kit.ToError("Failed to execute database instance reboot", err))
 	}
 
-	return &state, nil
+	return nil
 }

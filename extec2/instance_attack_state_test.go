@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2022 Steadybit GmbH
+// SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
 package extec2
 
@@ -8,7 +8,8 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/steadybit/attack-kit/go/attack_kit_api"
+	"github.com/steadybit/action-kit/go/action_kit_api/v2"
+	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -17,15 +18,15 @@ import (
 
 func TestPrepareInstanceStateChange(t *testing.T) {
 	// Given
-	requestBody := attack_kit_api.PrepareAttackRequestBody{
+	requestBody := action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
-		Target: attack_kit_api.Target{
+		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws-ec2.instance.id": {"my-instance"},
 			},
-		},
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
@@ -41,13 +42,13 @@ func TestPrepareInstanceStateChange(t *testing.T) {
 
 func TestPrepareInstanceStateChangeMustRequireAnInstanceId(t *testing.T) {
 	// Given
-	requestBody := attack_kit_api.PrepareAttackRequestBody{
+	requestBody := action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
-		Target: attack_kit_api.Target{
+		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{},
-		},
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
@@ -62,13 +63,13 @@ func TestPrepareInstanceStateChangeMustRequireAnInstanceId(t *testing.T) {
 
 func TestPrepareInstanceStateChangeMustRequireAnAction(t *testing.T) {
 	// Given
-	requestBody := attack_kit_api.PrepareAttackRequestBody{
+	requestBody := action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{},
-		Target: attack_kit_api.Target{
+		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws-ec2.instance.id": {"my-instance"},
 			},
-		},
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
@@ -94,17 +95,17 @@ type ec2ClientApiMock struct {
 	mock.Mock
 }
 
-func (m ec2ClientApiMock) StopInstances(ctx context.Context, params *ec2.StopInstancesInput, optFns ...func(*ec2.Options)) (*ec2.StopInstancesOutput, error) {
+func (m ec2ClientApiMock) StopInstances(ctx context.Context, params *ec2.StopInstancesInput, _ ...func(*ec2.Options)) (*ec2.StopInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	return nil, args.Error(1)
 }
 
-func (m ec2ClientApiMock) TerminateInstances(ctx context.Context, params *ec2.TerminateInstancesInput, optFns ...func(*ec2.Options)) (*ec2.TerminateInstancesOutput, error) {
+func (m ec2ClientApiMock) TerminateInstances(ctx context.Context, params *ec2.TerminateInstancesInput, _ ...func(*ec2.Options)) (*ec2.TerminateInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	return nil, args.Error(1)
 }
 
-func (m ec2ClientApiMock) RebootInstances(ctx context.Context, params *ec2.RebootInstancesInput, optFns ...func(*ec2.Options)) (*ec2.RebootInstancesOutput, error) {
+func (m ec2ClientApiMock) RebootInstances(ctx context.Context, params *ec2.RebootInstancesInput, _ ...func(*ec2.Options)) (*ec2.RebootInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	return nil, args.Error(1)
 }
@@ -117,7 +118,7 @@ func TestStartInstanceStop(t *testing.T) {
 		require.Equal(t, false, *params.Hibernate)
 		return true
 	})).Return(nil, nil)
-	requestBody := attack_kit_api.StartAttackRequestBody{
+	requestBody := action_kit_api.StartActionRequestBody{
 		State: map[string]interface{}{
 			"InstanceId": "dev-worker-1",
 			"Action":     "stop",
@@ -127,7 +128,7 @@ func TestStartInstanceStop(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	_, attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
 
 	// Then
 	assert.Nil(t, attackError)
@@ -141,7 +142,7 @@ func TestStartInstanceHibernate(t *testing.T) {
 		require.Equal(t, true, *params.Hibernate)
 		return true
 	})).Return(nil, nil)
-	requestBody := attack_kit_api.StartAttackRequestBody{
+	requestBody := action_kit_api.StartActionRequestBody{
 		State: map[string]interface{}{
 			"InstanceId": "dev-worker-1",
 			"Action":     "hibernate",
@@ -151,7 +152,7 @@ func TestStartInstanceHibernate(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	_, attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
 
 	// Then
 	assert.Nil(t, attackError)
@@ -164,7 +165,7 @@ func TestStartInstanceTerminate(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, nil)
-	requestBody := attack_kit_api.StartAttackRequestBody{
+	requestBody := action_kit_api.StartActionRequestBody{
 		State: map[string]interface{}{
 			"InstanceId": "dev-worker-1",
 			"Action":     "terminate",
@@ -174,7 +175,7 @@ func TestStartInstanceTerminate(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	_, attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
 
 	// Then
 	assert.Nil(t, attackError)
@@ -187,7 +188,7 @@ func TestStartInstanceReboot(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, nil)
-	requestBody := attack_kit_api.StartAttackRequestBody{
+	requestBody := action_kit_api.StartActionRequestBody{
 		State: map[string]interface{}{
 			"InstanceId": "dev-worker-1",
 			"Action":     "reboot",
@@ -197,7 +198,7 @@ func TestStartInstanceReboot(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	_, attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
 
 	// Then
 	assert.Nil(t, attackError)
@@ -210,7 +211,7 @@ func TestStartInstanceStateChangeForwardsError(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, errors.New("expected"))
-	requestBody := attack_kit_api.StartAttackRequestBody{
+	requestBody := action_kit_api.StartActionRequestBody{
 		State: map[string]interface{}{
 			"InstanceId": "dev-worker-1",
 			"Action":     "reboot",
@@ -220,7 +221,7 @@ func TestStartInstanceStateChangeForwardsError(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	_, attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
+	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, mockedApi)
 
 	// Then
 	assert.Contains(t, attackError.Title, "Failed to execute state change attack")

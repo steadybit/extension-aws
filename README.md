@@ -88,6 +88,12 @@ with the AWS APIs.
 }
 ```
 
+### Role Assumption
+
+TODO docs
+
+ - `STEADYBIT_AGENT_AWS_ASSUME_ROLE_LIST`
+
 ## Deployment
 
 We recommend that you deploy the extension with our [official Helm chart](https://github.com/steadybit/helm-charts/tree/main/charts/steadybit-extension-aws).

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2022 Steadybit GmbH
+// SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
 package main
 
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"github.com/steadybit/attack-kit/go/attack_kit_api"
+	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extrds"
@@ -38,7 +38,7 @@ func main() {
 }
 
 type ExtensionListResponse struct {
-	Attacks          []attack_kit_api.DescribingEndpointReference    `json:"attacks"`
+	Attacks          []action_kit_api.DescribingEndpointReference    `json:"attacks"`
 	Discoveries      []discovery_kit_api.DescribingEndpointReference `json:"discoveries"`
 	TargetTypes      []discovery_kit_api.DescribingEndpointReference `json:"targetTypes"`
 	TargetAttributes []discovery_kit_api.DescribingEndpointReference `json:"targetAttributes"`
@@ -46,7 +46,7 @@ type ExtensionListResponse struct {
 
 func getExtensionList() ExtensionListResponse {
 	return ExtensionListResponse{
-		Attacks: []attack_kit_api.DescribingEndpointReference{
+		Attacks: []action_kit_api.DescribingEndpointReference{
 			{
 				"GET",
 				"/rds/instance/attack/reboot",
