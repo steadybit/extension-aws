@@ -26,16 +26,16 @@ type GetAccountApi interface {
 }
 
 func (accounts *AwsAccounts) GetAccount(accountNumber string) (*AwsAccount, error) {
+	account, ok := accounts.accounts[accountNumber]
+	if ok {
+		return &account, nil
+	}
+
 	if accountNumber == accounts.rootAccount.AccountNumber {
 		return &accounts.rootAccount, nil
 	}
 
-	account, ok := accounts.accounts[accountNumber]
-	if !ok {
-		return nil, fmt.Errorf("AWS account '%s' not found", accountNumber)
-	}
-
-	return &account, nil
+	return nil, fmt.Errorf("AWS account '%s' not found", accountNumber)
 }
 
 // ForEveryAccount cannot be turned into an interface method because of generics restrictions.

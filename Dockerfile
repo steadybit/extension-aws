@@ -24,6 +24,6 @@ WORKDIR /
 
 COPY --from=build /extension-aws /extension-aws
 
-EXPOSE 8084
+EXPOSE 8085
 
 ENTRYPOINT ["/extension-aws"]

@@ -5,6 +5,7 @@ package utils
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -25,6 +26,28 @@ func TestGetAccountSupportsAssumedAccount(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, "assumed2", account.AccountNumber)
+}
+
+func TestMustPreferAssumedAccount(t *testing.T) {
+	accounts := AwsAccounts{
+		rootAccount: AwsAccount{
+			AccountNumber: "root",
+		},
+		accounts: map[string]AwsAccount{
+			"assumed1": {
+				AccountNumber: "assumed1",
+			},
+			"root": {
+				AccountNumber: "root",
+				AwsConfig:     aws.Config{},
+			},
+		},
+	}
+
+	account, err := accounts.GetAccount("root")
+
+	require.NoError(t, err)
+	require.NotNil(t, account.AwsConfig)
 }
 
 func TestGetAccountReportsErrorWhenMissing(t *testing.T) {
