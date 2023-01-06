@@ -88,11 +88,50 @@ with the AWS APIs.
 }
 ```
 
-### Role Assumption
+### Assume Role into Multiple AWS Accounts
 
-TODO docs
+By default, the extension uses the provided credentials to discover all resources within the belonging AWS account. To interact with multiple AWS accounts using a single extension, you can instruct the extension only to use the provided credentials to assume roles (using AWS STS) into given role-ARNs (and thus to possibly other AWS accounts).
 
- - `STEADYBIT_AGENT_AWS_ASSUME_ROLE_LIST`
+To achieve this, you must set the STEADYBIT_EXTENSION_ASSUME_ROLES environment variable to a comma-separated list of role-ARNs. Example:
+
+```sh
+STEADYBIT_EXTENSION_ASSUME_ROLES='arn:aws:iam::1111111111:role/steadybit-extension-aws,arn:aws:iam::22222222:role/steadybit-extension-aws'
+```
+
+#### Necessary AWS Configuration
+
+IAM policies need to be correctly configured for cross-account role assumption. In a nutshell, these are the necessary steps:
+
+ 1. The credentials provided to the extension are allowed to assume the provided role-ARNs.
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": "sts:AssumeRole",
+                "Resource": "arn:aws:iam::<TARGET_ACCOUNT>:role/<ROLE_IN_TARGET_ACCOUNT>"
+            }
+        ]
+    }
+    ```
+ 2. The roles themselves have all the [required permissions](#iam-policy).
+ 3. The roles have trust relationships that allow them to be assumed by the given credentials.
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+               "Effect": "Allow",
+               "Principal": {
+                   "AWS": "arn:aws:iam::<SOURCE_ACCOUNT>:<SOURCE_ROLE>"
+               },
+               "Action": "sts:AssumeRole",
+               "Condition": {}
+            }
+        ]
+    }
+    ```
 
 ## Deployment
 
