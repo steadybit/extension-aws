@@ -7,6 +7,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/require"
+	"sort"
 	"testing"
 )
 
@@ -74,6 +75,8 @@ func TestForEachAccountWithRoleAssumption(t *testing.T) {
 	result, err := ForEveryAccount(&accounts, getAccountNumber, reduceAccountNumbers, make([]string, 0, 2), context.Background())
 
 	require.NoError(t, err)
+	// for stable test execution
+	sort.Strings(result)
 	require.Equal(t, []string{"assumed1", "assumed2"}, result)
 }
 
