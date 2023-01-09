@@ -43,6 +43,7 @@ github.com/mattn/go-colorable v0.1.12 h1:jF+Du6AlPIjs2BiUiQlKOX0rt3SujHxPnksPKZb
 github.com/mattn/go-colorable v0.1.12/go.mod h1:u5H1YNBxpqRaxsYJYSkiCWKzEfiAb1Gb520KVy5xxl4=
 github.com/mattn/go-isatty v0.0.14 h1:yVuAays6BHfxijgZPzw+3Zlu5yQgKGP2/hcQbHb7S9Y=
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
+github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5 h1:Ii+DKncOVM8Cu1Hc+ETb5K+23HdAMvESYE3ZJ5b5cMI=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
@@ -53,8 +54,8 @@ github.com/steadybit/action-kit/go/action_kit_api/v2 v2.2.0 h1:Qu4Sl32W/e66dp9wx
 github.com/steadybit/action-kit/go/action_kit_api/v2 v2.2.0/go.mod h1:4yGr/DzsHpw6elju1XHCeUsY/qoqNTcLY3ytgnNcMt8=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.1.0 h1:Ue2pIpPmtcVTcwILZlRfAsKNbznUjrRfmeZXlta4YOw=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.1.0/go.mod h1:OnIfjrBhmMQCYxriHmr8mT1wCpvqIZxwBHWnanFhgNA=
-github.com/steadybit/extension-kit v1.5.0 h1:4PXUxa66PhdL4L6QexWqbYbIHfBeKq7ZKI9mKq19tBs=
-github.com/steadybit/extension-kit v1.5.0/go.mod h1:RpEERODMoEqNL5GXdMRhnRJwu1vUlHBS+2cZ9WWKQKg=
+github.com/steadybit/extension-kit v1.6.0 h1:TV5EQQqT9yBtzTKoHg4s56B+n2x1UAWok0t2puoo26o=
+github.com/steadybit/extension-kit v1.6.0/go.mod h1:zC5Tw+wrJTx4xvOlsIY+MfMoRYoglj83vR15Xr3aP5c=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0 h1:M2gUjqZET1qApGOWNSnZ49BAIMX4F/1plDv3+l31EJ4=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=

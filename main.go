@@ -4,8 +4,6 @@
 package main
 
 import (
-	"fmt"
-	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/config"
@@ -14,7 +12,6 @@ import (
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extlogging"
-	"net/http"
 )
 
 func main() {
@@ -31,12 +28,9 @@ func main() {
 
 	extec2.RegisterEc2AttackHandlers()
 
-	port := 8085
-	log.Info().Msgf("Starting extension-aws server on port %d. Get started via /", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to start extension-aws server on port %d", port)
-	}
+	exthttp.Listen(exthttp.ListenOpts{
+		Port: 8085,
+	})
 }
 
 type ExtensionListResponse struct {

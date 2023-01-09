@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.7.0
+
+ - Support creation of a TLS server through the environment variables `STEADYBIT_EXTENSION_TLS_SERVER_CERT` and `STEADYBIT_EXTENSION_TLS_SERVER_KEY`. Both environment variables must refer to files containing the certificate and key in PEM format.
+ - Support mutual TLS through the environment variable `STEADYBIT_EXTENSION_TLS_CLIENT_CAS`. The environment must refer to a comma-separated list of files containing allowed clients' CA certificates in PEM format. 
+
 ## v1.6.0
 
  - Support for AWS role assumption. This permits one extension instance from gathering data from multiple AWS accounts. To configure this, you must set the `STEADYBIT_EXTENSION_ASSUME_ROLES` environment variable to a comma-separated list of role ARNs. Example: `STEADYBIT_EXTENSION_ASSUME_ROLES='arn:aws:iam::1111111111:role/steadybit-extension-aws,arn:aws:iam::22222222:role/steadybit-extension-aws'`.
