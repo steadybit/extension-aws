@@ -33,6 +33,7 @@ func getInstanceStateAttackDescription() action_kit_api.ActionDescription {
 		TargetType:  extutil.Ptr(ec2TargetId),
 		Category:    extutil.Ptr("state"),
 		TimeControl: action_kit_api.Instantaneous,
+		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:        "action",

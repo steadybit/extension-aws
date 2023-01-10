@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.7.1
+
+ - Add missing `kind` field to both actions.
+
 ## v1.7.0
 
  - Support creation of a TLS server through the environment variables `STEADYBIT_EXTENSION_TLS_SERVER_CERT` and `STEADYBIT_EXTENSION_TLS_SERVER_KEY`. Both environment variables must refer to files containing the certificate and key in PEM format.

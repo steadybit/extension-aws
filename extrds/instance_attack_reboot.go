@@ -33,6 +33,7 @@ func getRebootInstanceAttackDescription() action_kit_api.ActionDescription {
 		TargetType:  extutil.Ptr(rdsTargetId),
 		Category:    extutil.Ptr("resource"),
 		TimeControl: action_kit_api.Instantaneous,
+		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},
 		Prepare: action_kit_api.MutatingEndpointReference{
 			Method: "POST",
