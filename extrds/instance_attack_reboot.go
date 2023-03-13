@@ -26,7 +26,7 @@ func RegisterRdsAttackHandlers() {
 func getRebootInstanceAttackDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.reboot", rdsTargetId),
-		Label:       "reboot instance",
+		Label:       "Reboot Instance",
 		Description: "Reboot a single database instance",
 		Version:     "1.0.0",
 		Icon:        extutil.Ptr(rdsIcon),
