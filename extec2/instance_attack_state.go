@@ -26,7 +26,7 @@ func RegisterEc2AttackHandlers() {
 func getInstanceStateAttackDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.state", ec2TargetId),
-		Label:       "change instance state",
+		Label:       "Change Instance State",
 		Description: "Reboot, terminate, stop or hibernate EC2 instances",
 		Version:     "1.0.0",
 		Icon:        extutil.Ptr(ec2Icon),
