@@ -5,6 +5,10 @@
 ##
 FROM golang:1.18-alpine AS build
 
+ARG NAME
+ARG VERSION
+ARG REVISION
+
 WORKDIR /app
 
 COPY go.mod ./
@@ -13,7 +17,12 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /extension-aws
+RUN go build \
+    -ldflags="\
+    -X 'github.com/steadybit/extension-kit/extbuild.ExtensionName=${NAME}' \
+    -X 'github.com/steadybit/extension-kit/extbuild.Version=${VERSION}' \
+    -X 'github.com/steadybit/extension-kit/extbuild.Revision=${REVISION}'" \
+     -o /extension-aws
 
 ##
 ## Runtime

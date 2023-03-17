@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.8.0
+
+- Print build information on extension startup.
+
 ## v1.7.1
 
  - Add missing `kind` field to both actions.

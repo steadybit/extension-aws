@@ -10,12 +10,14 @@ import (
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extlogging"
 )
 
 func main() {
 	extlogging.InitZeroLog()
+	extbuild.PrintBuildInformation()
 
 	config.ParseConfiguration()
 	utils.InitializeAwsAccountAccess(config.Config)

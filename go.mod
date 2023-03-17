@@ -16,7 +16,7 @@ require (
 	github.com/rs/zerolog v1.27.0
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.2.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.1.0
-	github.com/steadybit/extension-kit v1.6.0
+	github.com/steadybit/extension-kit v1.7.1
 	github.com/stretchr/testify v1.8.0
 )
 
