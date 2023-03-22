@@ -105,7 +105,7 @@ func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []
 
 func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	targets, err := GetAllRdsInstances(ctx, client, account.AccountNumber)
+	targets, err := GetAllRdsInstances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ type RdsDescribeInstancesApi interface {
 	DescribeDBInstances(ctx context.Context, params *rds.DescribeDBInstancesInput, optFns ...func(*rds.Options)) (*rds.DescribeDBInstancesOutput, error)
 }
 
-func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi, awsAccountNumber string) ([]discovery_kit_api.Target, error) {
+func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	var marker *string = nil
@@ -133,7 +133,7 @@ func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi, aws
 		}
 
 		for _, dbInstance := range output.DBInstances {
-			result = append(result, toTarget(dbInstance, awsAccountNumber))
+			result = append(result, toTarget(dbInstance, awsAccountNumber, awsRegion))
 		}
 
 		if output.Marker == nil {
@@ -146,15 +146,15 @@ func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi, aws
 	return result, nil
 }
 
-func toTarget(dbInstance types.DBInstance, awsAccountNumber string) discovery_kit_api.Target {
+func toTarget(dbInstance types.DBInstance, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
 	arn := aws.ToString(dbInstance.DBInstanceArn)
 	label := aws.ToString(dbInstance.DBInstanceIdentifier)
 
 	attributes := make(map[string][]string)
-	attributes["steadybit.label"] = []string{label}
 	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws.arn"] = []string{arn}
 	attributes["aws.zone"] = []string{aws.ToString(dbInstance.AvailabilityZone)}
+	attributes["aws.region"] = []string{awsRegion}
 	attributes["aws.rds.engine"] = []string{aws.ToString(dbInstance.Engine)}
 	attributes["aws.rds.instance.id"] = []string{label}
 	attributes["aws.rds.instance.status"] = []string{aws.ToString(dbInstance.DBInstanceStatus)}
