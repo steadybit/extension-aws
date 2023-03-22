@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.0 (not yet released)
+
+- Renamed attack `ec2-instance.state` to `com.github.steadybit.extension_aws.ec2-instance-state`
+
 ## v1.8.0
 
 - Print build information on extension startup.

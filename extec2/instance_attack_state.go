@@ -26,7 +26,7 @@ func RegisterEc2AttackHandlers() {
 
 func getInstanceStateAttackDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.state", ec2TargetId),
+		Id:          ec2InstanceStateActionId,
 		Label:       "Change Instance State",
 		Description: "Reboot, terminate, stop or hibernate EC2 instances",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
@@ -35,6 +35,18 @@ func getInstanceStateAttackDescription() action_kit_api.ActionDescription {
 		Category:    extutil.Ptr("state"),
 		TimeControl: action_kit_api.Instantaneous,
 		Kind:        action_kit_api.Attack,
+		TargetSelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			{
+				Label:       "by instance-id",
+				Description: extutil.Ptr("Find ec2-instance by instance-id"),
+				Query:       "aws-ec2.instance.id=\"\"",
+			},
+			{
+				Label:       "by instance-name",
+				Description: extutil.Ptr("Find ec2-instance by instance-name"),
+				Query:       "aws-ec2.instance.name=\"\"",
+			},
+		}),
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:        "action",
