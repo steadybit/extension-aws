@@ -31,10 +31,8 @@ FROM alpine:3.16
 
 ARG USERNAME=steadybit
 ARG USER_UID=1000
-ARG USER_GID=$USER_UID
 
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+RUN useradd -u $USER_UID -D $USERNAME
 
 USER $USERNAME
 
