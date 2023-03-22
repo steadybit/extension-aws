@@ -7,6 +7,7 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/extaz"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
@@ -27,6 +28,8 @@ func main() {
 
 	extrds.RegisterRdsDiscoveryHandlers()
 	extrds.RegisterRdsAttackHandlers()
+
+	extaz.RegisterAZDiscoveryHandlers()
 
 	extec2.RegisterEc2AttackHandlers()
 
@@ -58,18 +61,27 @@ func getExtensionList() ExtensionListResponse {
 			{
 				"GET",
 				"/rds/instance/discovery",
+			}, {
+				"GET",
+				"/az/discovery",
 			},
 		},
 		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
 			{
 				"GET",
 				"/rds/instance/discovery/target-description",
+			}, {
+				"GET",
+				"/az/discovery/target-description",
 			},
 		},
 		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
 			{
 				"GET",
 				"/rds/instance/discovery/attribute-descriptions",
+			}, {
+				"GET",
+				"/az/discovery/attribute-descriptions",
 			},
 			{
 				"GET",
