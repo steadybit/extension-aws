@@ -31,6 +31,7 @@ func main() {
 
 	extaz.RegisterAZDiscoveryHandlers()
 
+	extec2.RegisterEc2InstanceDiscoveryHandlers()
 	extec2.RegisterEc2AttackHandlers()
 
 	exthttp.Listen(exthttp.ListenOpts{
@@ -65,6 +66,10 @@ func getExtensionList() ExtensionListResponse {
 				"GET",
 				"/az/discovery",
 			},
+			{
+				"GET",
+				"/ec2/instance/discovery",
+			},
 		},
 		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
 			{
@@ -74,6 +79,10 @@ func getExtensionList() ExtensionListResponse {
 				"GET",
 				"/az/discovery/target-description",
 			},
+			{
+				"GET",
+				"/ec2/instance/discovery/target-description",
+			},
 		},
 		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
 			{
@@ -82,6 +91,10 @@ func getExtensionList() ExtensionListResponse {
 			}, {
 				"GET",
 				"/az/discovery/attribute-descriptions",
+			},
+			{
+				"GET",
+				"/ec2/instance/discovery/attribute-descriptions",
 			},
 			{
 				"GET",
