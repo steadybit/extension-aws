@@ -125,7 +125,6 @@ func toTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string)
 	id := aws.ToString(availabilityZone.ZoneName) + "@" + awsAccountNumber
 
 	attributes := make(map[string][]string)
-	attributes["steadybit.label"] = []string{label}
 	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws.region"] = []string{aws.ToString(availabilityZone.RegionName)}
 	attributes["aws.zone"] = []string{aws.ToString(availabilityZone.ZoneName)}

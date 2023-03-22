@@ -51,8 +51,7 @@ func TestGetAllAvailabilityZones(t *testing.T) {
 	target := targets[0]
 	assert.Equal(t, azTargetId, target.TargetType)
 	assert.Equal(t, "eu-central-1b", target.Label)
-	assert.Equal(t, 6, len(target.Attributes))
-	assert.Equal(t, []string{"eu-central-1b"}, target.Attributes["steadybit.label"])
+	assert.Equal(t, 5, len(target.Attributes))
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"eu-central-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"eu-central-1b"}, target.Attributes["aws.zone"])
@@ -60,7 +59,7 @@ func TestGetAllAvailabilityZones(t *testing.T) {
 	assert.Equal(t, []string{"eu-central-1b@42"}, target.Attributes["aws.zone@account"])
 }
 
-func TestGetAllRdsInstancesError(t *testing.T) {
+func TestGetAllAvailabilityZonesError(t *testing.T) {
 	// Given
 	mockedApi := new(ec2ClientMock)
 
