@@ -155,7 +155,7 @@ func toTarget(ec2Instance types.Instance, awsAccountNumber string, awsRegion str
 		}
 	}
 
-	arn := fmt.Sprintf("arn:aws:ec2:%s:%s:instance/%s", awsRegion, awsAccountNumber, ec2Instance.InstanceId)
+	arn := fmt.Sprintf("arn:aws:ec2:%s:%s:instance/%s", awsRegion, awsAccountNumber, *ec2Instance.InstanceId)
 	label := *ec2Instance.InstanceId
 	if name != nil {
 		label = label + " / " + *name
