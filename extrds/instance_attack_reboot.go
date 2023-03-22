@@ -11,6 +11,7 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extconversion"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
@@ -28,7 +29,7 @@ func getRebootInstanceAttackDescription() action_kit_api.ActionDescription {
 		Id:          fmt.Sprintf("%s.reboot", rdsTargetId),
 		Label:       "Reboot Instance",
 		Description: "Reboot a single database instance",
-		Version:     "1.0.0",
+		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(rdsIcon),
 		TargetType:  extutil.Ptr(rdsTargetId),
 		Category:    extutil.Ptr("resource"),

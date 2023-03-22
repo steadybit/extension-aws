@@ -11,6 +11,7 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
@@ -40,7 +41,7 @@ func getRdsInstanceTargetDescription() discovery_kit_api.TargetDescription {
 		Id:       rdsTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "RDS instance", Other: "RDS instances"},
 		Category: extutil.Ptr("cloud"),
-		Version:  "1.1.0",
+		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(rdsIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
