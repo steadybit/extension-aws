@@ -32,7 +32,7 @@ FROM alpine:3.16
 ARG USERNAME=steadybit
 ARG USER_UID=1000
 
-RUN useradd -u $USER_UID -D $USERNAME
+RUN adduser -u $USER_UID -D $USERNAME
 
 USER $USERNAME
 
