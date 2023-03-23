@@ -107,7 +107,7 @@ func GetAllAvailabilityZones(ctx context.Context, ec2Api AZDescribeAvailabilityZ
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	output, err := ec2Api.DescribeAvailabilityZones(ctx, &ec2.DescribeAvailabilityZonesInput{
-		AllAvailabilityZones: aws.Bool(true),
+		AllAvailabilityZones: aws.Bool(false),
 	})
 	if err != nil {
 		return result, err
