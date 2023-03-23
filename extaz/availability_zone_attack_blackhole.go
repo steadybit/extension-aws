@@ -71,6 +71,7 @@ type AZBlackholeEC2Api interface {
 	DescribeSubnets(ctx context.Context, params *ec2.DescribeSubnetsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSubnetsOutput, error)
 	DescribeNetworkAcls(ctx context.Context, params *ec2.DescribeNetworkAclsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeNetworkAclsOutput, error)
 	CreateNetworkAcl(ctx context.Context, params *ec2.CreateNetworkAclInput, optFns ...func(*ec2.Options)) (*ec2.CreateNetworkAclOutput, error)
+	CreateNetworkAclEntry(ctx context.Context, params *ec2.CreateNetworkAclEntryInput, optFns ...func(*ec2.Options)) (*ec2.CreateNetworkAclEntryOutput, error)
 }
 type AZBlackholeImdsApi interface {
 	GetInstanceIdentityDocument(
@@ -257,7 +258,7 @@ func StartBlackhole(ctx context.Context, body []byte, clientProvider func(accoun
 			return extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to create network ACL for VPC %s", vpcId), err))
 		}
 		//Replace the association IDs for the above subnets with the new network acl which will deny all traffic for those subnets in that AZ
-		err = replaceNetworkAclAssociations(ctx, state, clientEc2, desiredAclAssociations, networkAclId)
+		err = replaceNetworkAclAssociations(ctx, state, clientEc2, desiredAclAssociations, networkAclId) //ToDo implement
 	}
 
 	//input := rds.RebootDBInstanceInput{
@@ -272,6 +273,7 @@ func StartBlackhole(ctx context.Context, body []byte, clientProvider func(accoun
 }
 
 func replaceNetworkAclAssociations(ctx context.Context, state BlackholeState, clientEc2 AZBlackholeEC2Api, desiredAclAssociations []types.NetworkAclAssociation, networkAclId string) error {
+	// ToDo Implement
 	return nil
 }
 
@@ -315,7 +317,30 @@ func createNetworkAcl(ctx context.Context, state BlackholeState, clientEc2 AZBla
 	log.Debug().Msgf("Created network ACL %+v", *createNetworkAclResult.NetworkAcl)
 
 	state.NetworkAclIds = append(state.NetworkAclIds, *createNetworkAclResult.NetworkAcl.NetworkAclId)
-	return "", nil
+
+	//Create deny all egress rule
+	createNetworkAclEntry(ctx, clientEc2, *createNetworkAclResult.NetworkAcl.NetworkAclId, 100, true)
+	createNetworkAclEntry(ctx, clientEc2, *createNetworkAclResult.NetworkAcl.NetworkAclId, 101, false)
+	return *createNetworkAclResult.NetworkAcl.NetworkAclId, nil
+}
+
+func createNetworkAclEntry(ctx context.Context, clientEc2 AZBlackholeEC2Api, networkAclId string, ruleNumber int, egress bool) {
+	createdNetworkAclEntry, err := clientEc2.CreateNetworkAclEntry(ctx, &ec2.CreateNetworkAclEntryInput{
+		NetworkAclId: aws.String(networkAclId),
+		RuleNumber:   aws.Int32(int32(ruleNumber)),
+		CidrBlock:    aws.String("0.0.0.0/0"),
+		Egress:       aws.Bool(egress),
+		Protocol:     aws.String("-1"),
+		PortRange: &types.PortRange{
+			From: aws.Int32(0),
+			To:   aws.Int32(65535),
+		},
+		RuleAction: types.RuleActionDeny,
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to create network ACL entry")
+	}
+	log.Debug().Msgf("Created network ACL entry for network ACL %+v", createdNetworkAclEntry)
 }
 
 func getNetworkAclAssociations(ctx context.Context, clientEc2 AZBlackholeEC2Api, vpcId string, targetSubnetIds []string) []types.NetworkAclAssociation {
