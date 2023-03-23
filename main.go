@@ -62,7 +62,8 @@ func getExtensionList() ExtensionListResponse {
 			{
 				"GET",
 				"/rds/instance/discovery",
-			}, {
+			},
+			{
 				"GET",
 				"/az/discovery",
 			},

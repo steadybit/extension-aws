@@ -28,7 +28,7 @@ func RegisterAZDiscoveryHandlers() {
 func getAZDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         azTargetId,
-		RestrictTo: extutil.Ptr(discovery_kit_api.AWS),
+		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
 			Path:         "/az/discovery/discovered-targets",
