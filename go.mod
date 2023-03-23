@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.19
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.18
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.91.0
+	github.com/aws/aws-sdk-go-v2/service/fis v1.14.6
 	github.com/aws/aws-sdk-go-v2/service/rds v1.40.7
 	github.com/aws/aws-sdk-go-v2/service/sts v1.18.7
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -18,6 +19,7 @@ require (
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.2.0
 	github.com/steadybit/extension-kit v1.7.2
 	github.com/stretchr/testify v1.8.0
+	github.com/sosodev/duration v1.0.1
 )
 
 require (

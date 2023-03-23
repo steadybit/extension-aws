@@ -9,6 +9,7 @@ import (
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/extaz"
 	"github.com/steadybit/extension-aws/extec2"
+	"github.com/steadybit/extension-aws/extfis"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
@@ -33,6 +34,8 @@ func main() {
 
 	extec2.RegisterEc2InstanceDiscoveryHandlers()
 	extec2.RegisterEc2AttackHandlers()
+
+	extfis.RegisterFisInstanceDiscoveryHandlers()
 
 	exthttp.Listen(exthttp.ListenOpts{
 		Port: 8085,
@@ -71,6 +74,10 @@ func getExtensionList() ExtensionListResponse {
 				"GET",
 				"/ec2/instance/discovery",
 			},
+			{
+				"GET",
+				"/fis/template/discovery",
+			},
 		},
 		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
 			{
@@ -84,6 +91,10 @@ func getExtensionList() ExtensionListResponse {
 				"GET",
 				"/ec2/instance/discovery/target-description",
 			},
+			{
+				"GET",
+				"/fis/template/discovery/target-description",
+			},
 		},
 		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
 			{
@@ -96,6 +107,10 @@ func getExtensionList() ExtensionListResponse {
 			{
 				"GET",
 				"/ec2/instance/discovery/attribute-descriptions",
+			},
+			{
+				"GET",
+				"/fis/template/discovery/attribute-descriptions",
 			},
 			{
 				"GET",
