@@ -13,6 +13,7 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
+	"strings"
 )
 
 func RegisterEc2InstanceDiscoveryHandlers() {
@@ -180,6 +181,9 @@ func toTarget(ec2Instance types.Instance, awsAccountNumber string, awsRegion str
 	}
 	attributes["aws-ec2.arn"] = []string{arn}
 	attributes["aws-ec2.vpc"] = []string{aws.ToString(ec2Instance.VpcId)}
+	for _, tag := range ec2Instance.Tags {
+		attributes[fmt.Sprintf("label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{strings.ToLower(aws.ToString(tag.Value))}
+	}
 
 	return discovery_kit_api.Target{
 		Id:         *ec2Instance.InstanceId,

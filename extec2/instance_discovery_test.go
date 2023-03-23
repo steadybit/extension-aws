@@ -63,7 +63,6 @@ func TestGetAllEc2Instances(t *testing.T) {
 	target := targets[0]
 	assert.Equal(t, ec2TargetId, target.TargetType)
 	assert.Equal(t, "i-0ef9adc9fbd3b19c5 / dev-demo-ngroup2", target.Label)
-	//assert.Equal(t, 5, len(target.Attributes))
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"ami-02fc9c535f43bbc91"}, target.Attributes["aws-ec2.image"])
 	assert.Equal(t, []string{"us-east-1b"}, target.Attributes["aws.zone"])
@@ -72,6 +71,37 @@ func TestGetAllEc2Instances(t *testing.T) {
 	assert.Equal(t, []string{"ip-10-3-92-28.eu-central-1.compute.internal"}, target.Attributes["aws-ec2.hostname.internal"])
 	assert.Equal(t, []string{"arn:aws:ec2:us-east-1:42:instance/i-0ef9adc9fbd3b19c5"}, target.Attributes["aws-ec2.arn"])
 	assert.Equal(t, []string{"vpc-003cf5dda88c814c6"}, target.Attributes["aws-ec2.vpc"])
+	assert.Equal(t, []string{"dev-demo-ngroup2"}, target.Attributes["label.name"])
+}
+
+func TestNameNotSet(t *testing.T) {
+	// Given
+	mockedApi := new(ec2ClientMock)
+	mockedReturnValue := ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					{
+						InstanceId: extutil.Ptr("i-0ef9adc9fbd3b19c5"),
+						Placement: &types.Placement{
+							AvailabilityZone: extutil.Ptr("us-east-1b"),
+						},
+					},
+				},
+			},
+		},
+	}
+	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
+
+	// When
+	targets, err := GetAllEc2Instances(context.Background(), mockedApi, "42", "us-east-1")
+
+	// Then
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(targets))
+
+	target := targets[0]
+	assert.Equal(t, "i-0ef9adc9fbd3b19c5", target.Label)
 }
 
 func TestGetAllAvailabilityZonesError(t *testing.T) {
