@@ -415,7 +415,7 @@ func stopBlackhole(w http.ResponseWriter, _ *http.Request, body []byte) {
 			return nil, err
 		}
 		return ec2.NewFromConfig(awsAccount.AwsConfig), nil
-	}))
+	})
 	if err != nil {
 		exthttp.WriteError(w, *err)
 	} else {
