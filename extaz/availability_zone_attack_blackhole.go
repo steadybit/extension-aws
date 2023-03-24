@@ -25,6 +25,7 @@ import (
 	"strings"
 )
 
+const DoADryRun = true // TODO remove dry run
 func RegisterAZAttackHandlers() {
 	exthttp.RegisterHttpHandler("/az/attack/blackhole", exthttp.GetterAsHandler(getBlackholeAttackDescription))
 	exthttp.RegisterHttpHandler("/az/attack/blackhole/prepare", prepareBlackhole)
@@ -74,6 +75,7 @@ type AZBlackholeEC2Api interface {
 	CreateNetworkAcl(ctx context.Context, params *ec2.CreateNetworkAclInput, optFns ...func(*ec2.Options)) (*ec2.CreateNetworkAclOutput, error)
 	CreateNetworkAclEntry(ctx context.Context, params *ec2.CreateNetworkAclEntryInput, optFns ...func(*ec2.Options)) (*ec2.CreateNetworkAclEntryOutput, error)
 	ReplaceNetworkAclAssociation(ctx context.Context, params *ec2.ReplaceNetworkAclAssociationInput, optFns ...func(*ec2.Options)) (*ec2.ReplaceNetworkAclAssociationOutput, error)
+	DeleteNetworkAcl(ctx context.Context, params *ec2.DeleteNetworkAclInput, optFns ...func(*ec2.Options)) (*ec2.DeleteNetworkAclOutput, error)
 }
 type AZBlackholeImdsApi interface {
 	GetInstanceIdentityDocument(
@@ -230,14 +232,14 @@ func startBlackhole(w http.ResponseWriter, r *http.Request, body []byte) {
 		return ec2.NewFromConfig(awsAccount.AwsConfig), nil
 	})
 	if extKitErr != nil {
-		rollback(r.Context(), state)
+		rollbackViaLabel(r.Context(), state)
 		exthttp.WriteError(w, *extKitErr)
 		return
 	}
 	var convertedState action_kit_api.ActionState
 	err := extconversion.Convert(*state, &convertedState)
 	if err != nil {
-		rollback(r.Context(), state)
+		rollbackViaLabel(r.Context(), state)
 		exthttp.WriteError(w, extension_kit.ToError("Failed to convert attack state", err))
 		return
 	}
@@ -293,6 +295,7 @@ func replaceNetworkAclAssociations(ctx context.Context, state *BlackholeState, c
 		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
 			AssociationId: networkAclAssociation.NetworkAclAssociationId,
 			NetworkAclId:  aws.String(networkAclId),
+			DryRun:        aws.Bool(DoADryRun),
 		}
 		log.Debug().Msgf("Replacing acl entry %+v", networkAclAssociationInput)
 		replaceNetworkAclAssociationResponse, err := clientEc2.ReplaceNetworkAclAssociation(ctx, networkAclAssociationInput)
@@ -337,7 +340,7 @@ func createNetworkAcl(ctx context.Context, state *BlackholeState, clientEc2 AZBl
 				Tags:         tagList,
 			},
 		},
-		DryRun: aws.Bool(true), // TODO remove dry run
+		DryRun: aws.Bool(DoADryRun),
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to create network ACL")
@@ -406,14 +409,20 @@ func getNetworkAclAssociations(ctx context.Context, clientEc2 AZBlackholeEC2Api,
 }
 
 func stopBlackhole(w http.ResponseWriter, _ *http.Request, body []byte) {
-	result, err := StopBlackhole(body)
+	result, err := StopBlackhole(body, func(account string) (AZBlackholeEC2Api, error) {
+		awsAccount, err := utils.Accounts.GetAccount(account)
+		if err != nil {
+			return nil, err
+		}
+		return ec2.NewFromConfig(awsAccount.AwsConfig), nil
+	}))
 	if err != nil {
 		exthttp.WriteError(w, *err)
 	} else {
 		exthttp.WriteBody(w, result)
 	}
 }
-func StopBlackhole(body []byte) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
+func StopBlackhole(body []byte, clientProvider func(account string) (AZBlackholeEC2Api, error)) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
 	var request action_kit_api.ActionStatusRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
@@ -426,9 +435,50 @@ func StopBlackhole(body []byte) (*action_kit_api.StopResult, *extension_kit.Exte
 		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse state", err))
 	}
 
+	if state.NetworkAclIds == nil || state.OldNetworkAclIds == nil {
+		log.Error().Msg("NetworkAclIds or OldNetworkAclIds is nil")
+	}
+
+	clientEc2, err := clientProvider(state.AwsAccount)
+	if err != nil {
+		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.AwsAccount), err))
+	}
+
+	var errors []string
+	for oldNetworkAclIdKey, oldNetworkAclIdValue := range state.OldNetworkAclIds {
+		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
+			AssociationId: aws.String(oldNetworkAclIdKey),
+			NetworkAclId:  aws.String(oldNetworkAclIdValue),
+			DryRun:        aws.Bool(DoADryRun),
+		}
+		log.Debug().Msgf("Rolling back to old acl entry %+v", networkAclAssociationInput)
+		replaceNetworkAclAssociationResponse, err := clientEc2.ReplaceNetworkAclAssociation(context.Background(), networkAclAssociationInput)
+		if err != nil {
+			errors = append(errors, err.Error())
+		}
+		log.Debug().Msgf("Rolled back to old acl entry  %+v", replaceNetworkAclAssociationResponse)
+	}
+
+	for _, networkAclId := range state.NetworkAclIds {
+		deleteNetworkAclInput := &ec2.DeleteNetworkAclInput{
+			NetworkAclId: aws.String(networkAclId),
+			DryRun:       aws.Bool(DoADryRun),
+		}
+		log.Debug().Msgf("Deleting network acl entry %+v", deleteNetworkAclInput)
+		deleteNetworkAclResponse, err := clientEc2.DeleteNetworkAcl(context.Background(), deleteNetworkAclInput)
+		if err != nil {
+			errors = append(errors, err.Error())
+		}
+		log.Debug().Msgf("Deleted network acl entry  %+v", deleteNetworkAclResponse)
+	}
+	if errors != nil {
+		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL association: %s", strings.Join(errors, ", ")), nil))
+	}
+	rollbackViaLabel(context.Background(), &state)
 	return extutil.Ptr(action_kit_api.StopResult{}), nil
 }
 
-func rollback(context.Context, *BlackholeState) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
+func rollbackViaLabel(context.Context, *BlackholeState) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
+	// TO DO: Implement rollback via label
 	return nil, nil
 }
