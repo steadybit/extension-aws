@@ -22,6 +22,7 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
+	"strings"
 )
 
 func RegisterAZAttackHandlers() {
@@ -72,6 +73,7 @@ type AZBlackholeEC2Api interface {
 	DescribeNetworkAcls(ctx context.Context, params *ec2.DescribeNetworkAclsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeNetworkAclsOutput, error)
 	CreateNetworkAcl(ctx context.Context, params *ec2.CreateNetworkAclInput, optFns ...func(*ec2.Options)) (*ec2.CreateNetworkAclOutput, error)
 	CreateNetworkAclEntry(ctx context.Context, params *ec2.CreateNetworkAclEntryInput, optFns ...func(*ec2.Options)) (*ec2.CreateNetworkAclEntryOutput, error)
+	ReplaceNetworkAclAssociation(ctx context.Context, params *ec2.ReplaceNetworkAclAssociationInput, optFns ...func(*ec2.Options)) (*ec2.ReplaceNetworkAclAssociationOutput, error)
 }
 type AZBlackholeImdsApi interface {
 	GetInstanceIdentityDocument(
@@ -85,7 +87,8 @@ type AZBlackholeStsApi interface {
 }
 
 func prepareBlackhole(w http.ResponseWriter, r *http.Request, body []byte) {
-	state, extKitErr := PrepareBlackhole(body, r.Context(), func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error) {
+	agentAWSAccount := r.Header.Get("AgentAWSAccount")
+	state, extKitErr := PrepareBlackhole(body, r.Context(), agentAWSAccount, func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error) {
 		awsAccount, err := utils.Accounts.GetAccount(account)
 		if err != nil {
 			return nil, nil, nil, err
@@ -115,7 +118,7 @@ func prepareBlackhole(w http.ResponseWriter, r *http.Request, body []byte) {
 	}))
 }
 
-func PrepareBlackhole(body []byte, ctx context.Context, clientProvider func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error)) (*BlackholeState, *extension_kit.ExtensionError) {
+func PrepareBlackhole(body []byte, ctx context.Context, agentAWSAccount string, clientProvider func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error)) (*BlackholeState, *extension_kit.ExtensionError) {
 	var request action_kit_api.PrepareActionRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
@@ -123,9 +126,9 @@ func PrepareBlackhole(body []byte, ctx context.Context, clientProvider func(acco
 	}
 
 	// Get Target Attributes
-	account := request.Target.Attributes["aws.account"]
-	if account == nil || len(account) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
+	targetAccount := request.Target.Attributes["aws.targetAccount"]
+	if targetAccount == nil || len(targetAccount) == 0 {
+		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.targetAccount' target attribute.", nil))
 	}
 
 	targetZone := request.Target.Attributes["aws.zone"]
@@ -134,17 +137,24 @@ func PrepareBlackhole(body []byte, ctx context.Context, clientProvider func(acco
 	}
 
 	// Get AWS Clients
-	clientEc2, clientImds, clientSts, err := clientProvider(account[0])
+	clientEc2, clientImds, clientSts, err := clientProvider(targetAccount[0])
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS account %s", account[0]), err))
+		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS targetAccount %s", targetAccount[0]), err))
 	}
-	//Get Agent Account
-	agentAwsAccount := getAgentAccount(ctx, clientImds, clientSts)
-	if agentAwsAccount == "" {
-		return nil, extutil.Ptr(extension_kit.ToError("Could not get AWS Account of the Agent. Attack is disabled to prevent an agent lockout.", nil))
+	//Get Extension Account
+	extensionAwsAccount := getExtensionAWSAccount(ctx, clientImds, clientSts)
+	if extensionAwsAccount == "" {
+		return nil, extutil.Ptr(extension_kit.ToError("Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.", nil))
 	}
-	if account[0] == agentAwsAccount {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("The agent is running in the same AWS account (%s) as the target. Attack is disabled to prevent an agent lockout.", agentAwsAccount), nil))
+	if targetAccount[0] == extensionAwsAccount {
+		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("The extension is running in the same AWS account (%s) as the target. Attack is disabled to prevent an extension lockout.", extensionAwsAccount), nil))
+	}
+
+	if agentAWSAccount == "" {
+		return nil, extutil.Ptr(extension_kit.ToError("Could not get AWS Account of the agent. Attack is disabled to prevent an agent lockout.", nil))
+	}
+	if targetAccount[0] == agentAWSAccount {
+		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("The agent is running in the same AWS account (%s) as the target. Attack is disabled to prevent an agent lockout.", extensionAwsAccount), nil))
 	}
 
 	// Get Target Subnets
@@ -154,7 +164,7 @@ func PrepareBlackhole(body []byte, ctx context.Context, clientProvider func(acco
 	}
 
 	return extutil.Ptr(BlackholeState{
-		AwsAccount:        account[0],
+		AwsAccount:        targetAccount[0],
 		TargetZone:        targetZone[0],
 		TargetSubnets:     targetSubnets,
 		AttackExecutionId: uuid.New().String(),
@@ -191,7 +201,7 @@ func getTargetSubnets(clientEc2 AZBlackholeEC2Api, ctx context.Context, targetZo
 	return subnetResults, nil
 }
 
-func getAgentAccount(ctx context.Context, clientImds AZBlackholeImdsApi, clientSts AZBlackholeStsApi) string {
+func getExtensionAWSAccount(ctx context.Context, clientImds AZBlackholeImdsApi, clientSts AZBlackholeStsApi) string {
 	output, err := clientImds.GetInstanceIdentityDocument(ctx, &imds.GetInstanceIdentityDocumentInput{})
 	if err != nil {
 		log.Debug().Err(err).Msg("Unable to get AWS Account ID by EC2-Metadata-Service.")
@@ -212,7 +222,7 @@ func getAgentAccount(ctx context.Context, clientImds AZBlackholeImdsApi, clientS
 }
 
 func startBlackhole(w http.ResponseWriter, r *http.Request, body []byte) {
-	extKitErr := StartBlackhole(r.Context(), body, func(account string) (AZBlackholeEC2Api, error) {
+	state, extKitErr := StartBlackhole(r.Context(), body, func(account string) (AZBlackholeEC2Api, error) {
 		awsAccount, err := utils.Accounts.GetAccount(account)
 		if err != nil {
 			return nil, err
@@ -220,29 +230,39 @@ func startBlackhole(w http.ResponseWriter, r *http.Request, body []byte) {
 		return ec2.NewFromConfig(awsAccount.AwsConfig), nil
 	})
 	if extKitErr != nil {
+		rollback(r.Context(), state)
 		exthttp.WriteError(w, *extKitErr)
 		return
 	}
+	var convertedState action_kit_api.ActionState
+	err := extconversion.Convert(*state, &convertedState)
+	if err != nil {
+		rollback(r.Context(), state)
+		exthttp.WriteError(w, extension_kit.ToError("Failed to convert attack state", err))
+		return
+	}
 
-	exthttp.WriteBody(w, extutil.Ptr(action_kit_api.StartResult{}))
+	exthttp.WriteBody(w, extutil.Ptr(action_kit_api.StartResult{
+		State: extutil.Ptr(convertedState),
+	}))
 }
 
-func StartBlackhole(ctx context.Context, body []byte, clientProvider func(account string) (AZBlackholeEC2Api, error)) *extension_kit.ExtensionError {
+func StartBlackhole(ctx context.Context, body []byte, clientProvider func(account string) (AZBlackholeEC2Api, error)) (*BlackholeState, *extension_kit.ExtensionError) {
 	var request action_kit_api.StartActionRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
-		return extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
+		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
 	}
 
 	var state BlackholeState
 	err = extconversion.Convert(request.State, &state)
 	if err != nil {
-		return extutil.Ptr(extension_kit.ToError("Failed to parse attack state", err))
+		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse attack state", err))
 	}
 
 	clientEc2, err := clientProvider(state.AwsAccount)
 	if err != nil {
-		return extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.AwsAccount), err))
+		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.AwsAccount), err))
 	}
 	log.Info().Msgf("Starting AZ Blackhole attack against AWS account %s", state.AwsAccount)
 	log.Debug().Msgf("Attack state: %+v", state)
@@ -253,31 +273,40 @@ func StartBlackhole(ctx context.Context, body []byte, clientProvider func(accoun
 		desiredAclAssociations := getNetworkAclAssociations(ctx, clientEc2, vpcId, subnetIds)
 		log.Info().Msgf("Found %d network ACL associations to modify", len(desiredAclAssociations))
 		//Create new network acl
-		networkAclId, err := createNetworkAcl(ctx, state, clientEc2, vpcId, desiredAclAssociations)
+		networkAclId, err := createNetworkAcl(ctx, &state, clientEc2, vpcId, desiredAclAssociations)
 		if err != nil {
-			return extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to create network ACL for VPC %s", vpcId), err))
+			return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to create network ACL for VPC %s", vpcId), err))
 		}
 		//Replace the association IDs for the above subnets with the new network acl which will deny all traffic for those subnets in that AZ
-		err = replaceNetworkAclAssociations(ctx, state, clientEc2, desiredAclAssociations, networkAclId) //ToDo implement
+		err = replaceNetworkAclAssociations(ctx, &state, clientEc2, desiredAclAssociations, networkAclId)
+		if err != nil {
+			return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL associations for VPC %s", vpcId), err))
+		}
 	}
 
-	//input := rds.RebootDBInstanceInput{
-	//	DBInstanceIdentifier: &state.DBInstanceIdentifier,
-	//}
-	//_, err = client.RebootDBInstance(ctx, &input)
-	//if err != nil {
-	//	return extutil.Ptr(extension_kit.ToError("Failed to execute database instance reboot", err))
-	//}
+	return &state, nil
+}
 
+func replaceNetworkAclAssociations(ctx context.Context, state *BlackholeState, clientEc2 AZBlackholeEC2Api, desiredAclAssociations []types.NetworkAclAssociation, networkAclId string) error {
+	for _, networkAclAssociation := range desiredAclAssociations {
+		oldNetworkAclId := strings.Clone(*networkAclAssociation.NetworkAclId)
+		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
+			AssociationId: networkAclAssociation.NetworkAclAssociationId,
+			NetworkAclId:  aws.String(networkAclId),
+		}
+		log.Debug().Msgf("Replacing acl entry %+v", networkAclAssociationInput)
+		replaceNetworkAclAssociationResponse, err := clientEc2.ReplaceNetworkAclAssociation(ctx, networkAclAssociationInput)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to replace network ACL association %s with network ACL %s", *networkAclAssociation.NetworkAclAssociationId, networkAclId)
+			return err
+		}
+		state.OldNetworkAclIds[*replaceNetworkAclAssociationResponse.NewAssociationId] = oldNetworkAclId
+		log.Debug().Msgf("Replaced acl entry %+v", replaceNetworkAclAssociationResponse)
+	}
 	return nil
 }
 
-func replaceNetworkAclAssociations(ctx context.Context, state BlackholeState, clientEc2 AZBlackholeEC2Api, desiredAclAssociations []types.NetworkAclAssociation, networkAclId string) error {
-	// ToDo Implement
-	return nil
-}
-
-func createNetworkAcl(ctx context.Context, state BlackholeState, clientEc2 AZBlackholeEC2Api, vpcId string, desiredAclAssociations []types.NetworkAclAssociation) (string, error) {
+func createNetworkAcl(ctx context.Context, state *BlackholeState, clientEc2 AZBlackholeEC2Api, vpcId string, desiredAclAssociations []types.NetworkAclAssociation) (string, error) {
 	//Create new network acl for each vpc in the zone
 	tagList := []types.Tag{
 		{
@@ -398,4 +427,8 @@ func StopBlackhole(body []byte) (*action_kit_api.StopResult, *extension_kit.Exte
 	}
 
 	return extutil.Ptr(action_kit_api.StopResult{}), nil
+}
+
+func rollback(context.Context, *BlackholeState) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
+	return nil, nil
 }
