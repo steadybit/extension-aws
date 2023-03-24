@@ -328,7 +328,8 @@ func createNetworkAcl(ctx context.Context, state *BlackholeState, clientEc2 AZBl
 
 	for _, desiredAclAssociation := range desiredAclAssociations {
 		tagList = append(tagList, types.Tag{
-			Key: aws.String("steadybit-replaced" + *desiredAclAssociation.SubnetId),
+			Key:   aws.String("steadybit-replaced " + *desiredAclAssociation.SubnetId),
+			Value: aws.String(*desiredAclAssociation.NetworkAclId),
 		})
 	}
 
@@ -368,6 +369,7 @@ func createNetworkAclEntry(ctx context.Context, clientEc2 AZBlackholeEC2Api, net
 			To:   aws.Int32(65535),
 		},
 		RuleAction: types.RuleActionDeny,
+		DryRun:     aws.Bool(DoADryRun),
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to create network ACL entry")
