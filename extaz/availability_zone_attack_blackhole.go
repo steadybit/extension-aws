@@ -465,6 +465,7 @@ func stopBlackholeViaState(state *BlackholeState, clientProvider func(account st
 
 	if state.NetworkAclIds == nil || state.OldNetworkAclIds == nil {
 		log.Error().Msg("NetworkAclIds or OldNetworkAclIds is nil")
+		return nil, extutil.Ptr(extension_kit.ToError("NetworkAclIds or OldNetworkAclIds is nil", nil))
 	}
 
 	if state.ExtensionAwsAccount == "" {
