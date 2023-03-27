@@ -43,7 +43,17 @@ func getBlackholeAttackDescription() action_kit_api.ActionDescription {
 		Category:    extutil.Ptr("network"),
 		TimeControl: action_kit_api.External,
 		Kind:        action_kit_api.Attack,
-		Parameters:  []action_kit_api.ActionParameter{},
+		Parameters: []action_kit_api.ActionParameter{
+			{
+				Name:         "duration",
+				Label:        "Duration",
+				Description:  extutil.Ptr(""),
+				Type:         action_kit_api.Duration,
+				DefaultValue: extutil.Ptr("60s"),
+				Order:        extutil.Ptr(1),
+				Required:     extutil.Ptr(true),
+			},
+		},
 		Prepare: action_kit_api.MutatingEndpointReference{
 			Method: "POST",
 			Path:   "/az/attack/blackhole/prepare",
