@@ -71,6 +71,14 @@ func (m clientEC2ApiMock) DeleteNetworkAcl(ctx context.Context, params *ec2.Dele
 	return args.Get(0).(*ec2.DeleteNetworkAclOutput), args.Error(1)
 }
 
+func (m clientEC2ApiMock) DescribeTags(ctx context.Context, params *ec2.DescribeTagsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTagsOutput, error) {
+	args := m.Called(ctx, params)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*ec2.DescribeTagsOutput), args.Error(1)
+}
+
 type clientImdsApiMock struct {
 	mock.Mock
 }
@@ -448,7 +456,7 @@ func TestStopBlackhole(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	stopResult, attackErr := StopBlackhole(requestBodyJson, func(account string) (AZBlackholeEC2Api, error) {
+	stopResult, attackErr := StopBlackhole(requestBodyJson, nil, func(account string) (AZBlackholeEC2Api, error) {
 		return clientEC2, nil
 	})
 
