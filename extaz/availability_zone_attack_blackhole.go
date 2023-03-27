@@ -286,7 +286,7 @@ func StartBlackhole(ctx context.Context, body []byte, clientProvider func(accoun
 	}
 	log.Info().Msgf("Starting AZ Blackhole attack against AWS account %s", state.ExtensionAwsAccount)
 	log.Debug().Msgf("Attack state: %+v", state)
-
+	state.OldNetworkAclIds = make(map[string]string)
 	for vpcId, subnetIds := range state.TargetSubnets {
 		log.Info().Msgf("Creating temporary ACL to block traffic in VPC %s", vpcId)
 		//Find existing to be modified network acl associations matching the subnetIds in the given VPC
@@ -308,7 +308,6 @@ func StartBlackhole(ctx context.Context, body []byte, clientProvider func(accoun
 }
 
 func replaceNetworkAclAssociations(ctx context.Context, state *BlackholeState, clientEc2 AZBlackholeEC2Api, desiredAclAssociations []types.NetworkAclAssociation, networkAclId string) error {
-	state.OldNetworkAclIds = make(map[string]string, len(desiredAclAssociations))
 	for _, networkAclAssociation := range desiredAclAssociations {
 		oldNetworkAclId := strings.Clone(*networkAclAssociation.NetworkAclId)
 		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
@@ -487,6 +486,7 @@ func stopBlackholeViaState(state *BlackholeState, clientProvider func(account st
 		log.Debug().Msgf("Rolling back to old acl entry %+v", networkAclAssociationInput)
 		replaceNetworkAclAssociationResponse, err := clientEc2.ReplaceNetworkAclAssociation(context.Background(), networkAclAssociationInput)
 		if err != nil {
+			log.Error().Err(err).Msgf("Failed to rollback to old acl entry %+v", networkAclAssociationInput)
 			errors = append(errors, err.Error())
 		}
 		log.Debug().Msgf("Rolled back to old acl entry  %+v", replaceNetworkAclAssociationResponse)
@@ -499,6 +499,7 @@ func stopBlackholeViaState(state *BlackholeState, clientProvider func(account st
 		log.Debug().Msgf("Deleting network acl entry %+v", deleteNetworkAclInput)
 		deleteNetworkAclResponse, err := clientEc2.DeleteNetworkAcl(context.Background(), deleteNetworkAclInput)
 		if err != nil {
+			log.Error().Err(err).Msgf("Failed to delete network acl entry %+v", deleteNetworkAclInput)
 			errors = append(errors, err.Error())
 		}
 		log.Debug().Msgf("Deleted network acl entry  %+v", deleteNetworkAclResponse)
