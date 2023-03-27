@@ -31,6 +31,7 @@ func main() {
 	extrds.RegisterRdsAttackHandlers()
 
 	extaz.RegisterAZDiscoveryHandlers()
+	extaz.RegisterAZAttackHandlers()
 
 	extec2.RegisterEc2InstanceDiscoveryHandlers()
 	extec2.RegisterEc2AttackHandlers()
@@ -60,6 +61,10 @@ func getExtensionList() ExtensionListResponse {
 			{
 				"GET",
 				"/ec2/instance/attack/state",
+			},
+			{
+				"GET",
+				"/az/attack/blackhole",
 			},
 			{
 				"GET",
