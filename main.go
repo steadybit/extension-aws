@@ -110,9 +110,6 @@ func getExtensionList() ExtensionListResponse {
 			{
 				"GET",
 				"/rds/instance/discovery/attribute-descriptions",
-			}, {
-				"GET",
-				"/az/discovery/attribute-descriptions",
 			},
 			{
 				"GET",

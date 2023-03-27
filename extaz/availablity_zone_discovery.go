@@ -1,6 +1,5 @@
-/*
- * Copyright 2023 steadybit GmbH. All rights reserved.
- */
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
 package extaz
 
@@ -21,7 +20,6 @@ import (
 func RegisterAZDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler("/az/discovery", exthttp.GetterAsHandler(getAZDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/az/discovery/target-description", exthttp.GetterAsHandler(getAZTargetDescription))
-	exthttp.RegisterHttpHandler("/az/discovery/attribute-descriptions", exthttp.GetterAsHandler(getAZAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/az/discovery/discovered-targets", getAZDiscoveryResults)
 }
 
@@ -46,31 +44,14 @@ func getAZTargetDescription() discovery_kit_api.TargetDescription {
 		Icon:     extutil.Ptr(azIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
-				{Attribute: "steadybit.label"},
 				{Attribute: "aws.zone"},
 				{Attribute: "aws.zone.id"},
-				{Attribute: "aws.zone@account"},
 				{Attribute: "aws.account"},
-				{Attribute: "aws.region"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{
 				{
-					Attribute: "steadybit.label",
+					Attribute: "aws.zone",
 					Direction: "ASC",
-				},
-			},
-		},
-	}
-}
-
-func getAZAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
-	return discovery_kit_api.AttributeDescriptions{
-		Attributes: []discovery_kit_api.AttributeDescription{
-			{
-				Attribute: "aws.zone@account",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS zone with account",
-					Other: "AWS zones with account",
 				},
 			},
 		},
