@@ -230,22 +230,23 @@ func getExtensionAWSAccount(ctx context.Context, clientImds AZBlackholeImdsApi, 
 }
 
 func startBlackhole(w http.ResponseWriter, r *http.Request, body []byte) {
-	state, extKitErr := StartBlackhole(r.Context(), body, func(account string) (AZBlackholeEC2Api, error) {
+	clientProvider := func(account string) (AZBlackholeEC2Api, error) {
 		awsAccount, err := utils.Accounts.GetAccount(account)
 		if err != nil {
 			return nil, err
 		}
 		return ec2.NewFromConfig(awsAccount.AwsConfig), nil
-	})
+	}
+	state, extKitErr := StartBlackhole(r.Context(), body, clientProvider)
 	if extKitErr != nil {
-		rollbackViaLabel(r.Context(), state)
+		stopBlackholeViaState(state, clientProvider)
 		exthttp.WriteError(w, *extKitErr)
 		return
 	}
 	var convertedState action_kit_api.ActionState
 	err := extconversion.Convert(*state, &convertedState)
 	if err != nil {
-		rollbackViaLabel(r.Context(), state)
+		stopBlackholeViaState(state, clientProvider)
 		exthttp.WriteError(w, extension_kit.ToError("Failed to convert attack state", err))
 		return
 	}
@@ -283,12 +284,12 @@ func StartBlackhole(ctx context.Context, body []byte, clientProvider func(accoun
 		//Create new network acl
 		networkAclId, err := createNetworkAcl(ctx, &state, clientEc2, vpcId, desiredAclAssociations)
 		if err != nil {
-			return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to create network ACL for VPC %s", vpcId), err))
+			return &state, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to create network ACL for VPC %s", vpcId), err))
 		}
 		//Replace the association IDs for the above subnets with the new network acl which will deny all traffic for those subnets in that AZ
 		err = replaceNetworkAclAssociations(ctx, &state, clientEc2, desiredAclAssociations, networkAclId)
 		if err != nil {
-			return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL associations for VPC %s", vpcId), err))
+			return &state, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL associations for VPC %s", vpcId), err))
 		}
 	}
 
@@ -296,6 +297,7 @@ func StartBlackhole(ctx context.Context, body []byte, clientProvider func(accoun
 }
 
 func replaceNetworkAclAssociations(ctx context.Context, state *BlackholeState, clientEc2 AZBlackholeEC2Api, desiredAclAssociations []types.NetworkAclAssociation, networkAclId string) error {
+	state.OldNetworkAclIds = make(map[string]string, len(desiredAclAssociations))
 	for _, networkAclAssociation := range desiredAclAssociations {
 		oldNetworkAclId := strings.Clone(*networkAclAssociation.NetworkAclId)
 		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
@@ -323,7 +325,7 @@ func createNetworkAcl(ctx context.Context, state *BlackholeState, clientEc2 AZBl
 			Value: aws.String("created by steadybit"),
 		},
 	}
-	if state.AttackExecutionId != "" {
+	if state.AttackExecutionId == "" {
 		return "", fmt.Errorf("AttackExecutionId is empty")
 	}
 
@@ -430,6 +432,7 @@ func stopBlackhole(w http.ResponseWriter, _ *http.Request, body []byte) {
 		exthttp.WriteBody(w, result)
 	}
 }
+
 func StopBlackhole(body []byte, clientProvider func(account string) (AZBlackholeEC2Api, error)) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
 	var request action_kit_api.ActionStatusRequestBody
 	err := json.Unmarshal(body, &request)
@@ -443,8 +446,22 @@ func StopBlackhole(body []byte, clientProvider func(account string) (AZBlackhole
 		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse state", err))
 	}
 
+	return stopBlackholeViaState(&state, clientProvider)
+}
+func stopBlackholeViaState(state *BlackholeState, clientProvider func(account string) (AZBlackholeEC2Api, error)) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
+
+	if state == nil {
+		log.Error().Msg("State is nil")
+		return nil, extutil.Ptr(extension_kit.ToError("State is nil", nil))
+	}
+
 	if state.NetworkAclIds == nil || state.OldNetworkAclIds == nil {
 		log.Error().Msg("NetworkAclIds or OldNetworkAclIds is nil")
+	}
+
+	if state.ExtensionAwsAccount == "" {
+		log.Error().Msg("ExtensionAwsAccount is empty")
+		return nil, extutil.Ptr(extension_kit.ToError("ExtensionAwsAccount is empty", nil))
 	}
 
 	clientEc2, err := clientProvider(state.ExtensionAwsAccount)
@@ -482,11 +499,5 @@ func StopBlackhole(body []byte, clientProvider func(account string) (AZBlackhole
 	if errors != nil {
 		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL association: %s", strings.Join(errors, ", ")), nil))
 	}
-	rollbackViaLabel(context.Background(), &state)
 	return extutil.Ptr(action_kit_api.StopResult{}), nil
-}
-
-func rollbackViaLabel(context.Context, *BlackholeState) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
-	// TO DO: Implement rollback via label
-	return nil, nil
 }
