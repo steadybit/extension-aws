@@ -25,6 +25,10 @@ type GetAccountApi interface {
 	GetAccount(accountNumber string) (*AwsAccount, error)
 }
 
+func (accounts *AwsAccounts) GetRootAccount() *AwsAccount {
+	return &accounts.rootAccount
+}
+
 func (accounts *AwsAccounts) GetAccount(accountNumber string) (*AwsAccount, error) {
 	account, ok := accounts.accounts[accountNumber]
 	if ok {

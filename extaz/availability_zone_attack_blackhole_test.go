@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/google/uuid"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
@@ -87,23 +87,10 @@ func (m clientImdsApiMock) GetInstanceIdentityDocument(
 	return args.Get(0).(*imds.GetInstanceIdentityDocumentOutput), args.Error(1)
 }
 
-type clientStsApiMock struct {
-	mock.Mock
-}
-
-func (m clientStsApiMock) GetCallerIdentity(ctx context.Context, params *sts.GetCallerIdentityInput, optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error) {
-	args := m.Called(ctx, params)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*sts.GetCallerIdentityOutput), args.Error(1)
-}
-
 func TestPrepareBlackhole(t *testing.T) {
 	// Given
 	clientEC2 := new(clientEC2ApiMock)
 	clientImds := new(clientImdsApiMock)
-	clientSts := new(clientStsApiMock)
 	clientEC2.On("DescribeSubnets", mock.Anything, mock.MatchedBy(func(params *ec2.DescribeSubnetsInput) bool {
 		require.Equal(t, extutil.Ptr("availabilityZone"), params.Filters[0].Name)
 		require.Equal(t, "eu-west-1a", params.Filters[0].Values[0])
@@ -141,8 +128,8 @@ func TestPrepareBlackhole(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error) {
-		return clientEC2, clientImds, clientSts, nil
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+		return clientEC2, clientImds, nil
 	})
 
 	// Then
@@ -158,7 +145,6 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 	// Given
 	clientEC2 := new(clientEC2ApiMock)
 	clientImds := new(clientImdsApiMock)
-	clientSts := new(clientStsApiMock)
 
 	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything).Return(extutil.Ptr(imds.GetInstanceIdentityDocumentOutput{
 		InstanceIdentityDocument: imds.InstanceIdentityDocument{
@@ -181,8 +167,8 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error) {
-		return clientEC2, clientImds, clientSts, nil
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", "42", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+		return clientEC2, clientImds, nil
 	})
 
 	// Then
@@ -194,13 +180,8 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 	// Given
 	clientEC2 := new(clientEC2ApiMock)
 	clientImds := new(clientImdsApiMock)
-	clientSts := new(clientStsApiMock)
 
 	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything).Return(nil, nil)
-	clientSts.On("GetCallerIdentity", mock.Anything, mock.Anything).Return(extutil.Ptr(
-		sts.GetCallerIdentityOutput{
-			Account: extutil.Ptr("42"),
-		}), nil)
 
 	requestBody := action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
@@ -217,8 +198,8 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error) {
-		return clientEC2, clientImds, clientSts, nil
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", "42", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+		return clientEC2, clientImds, nil
 	})
 
 	// Then
@@ -230,13 +211,8 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 	// Given
 	clientEC2 := new(clientEC2ApiMock)
 	clientImds := new(clientImdsApiMock)
-	clientSts := new(clientStsApiMock)
 
 	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything).Return(nil, nil)
-	clientSts.On("GetCallerIdentity", mock.Anything, mock.Anything).Return(extutil.Ptr(
-		sts.GetCallerIdentityOutput{
-			Account: extutil.Ptr("41"),
-		}), nil)
 
 	requestBody := action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
@@ -253,23 +229,21 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error) {
-		return clientEC2, clientImds, clientSts, nil
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "", "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+		return clientEC2, clientImds, nil
 	})
 
 	// Then
 	assert.Nil(t, state)
-	assert.Equal(t, "Could not get AWS Account of the agent. Attack is disabled to prevent an agent lockout.", attackErr.Title)
+	assert.Equal(t, "Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.", attackErr.Title)
 }
 
 func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 	// Given
 	clientEC2 := new(clientEC2ApiMock)
 	clientImds := new(clientImdsApiMock)
-	clientSts := new(clientStsApiMock)
 
 	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything).Return(nil, nil)
-	clientSts.On("GetCallerIdentity", mock.Anything, mock.Anything).Return(nil, nil)
 
 	requestBody := action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
@@ -286,8 +260,8 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error) {
-		return clientEC2, clientImds, clientSts, nil
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+		return clientEC2, clientImds, nil
 	})
 
 	// Then
@@ -299,7 +273,6 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 	// Given
 	clientEC2 := new(clientEC2ApiMock)
 	clientImds := new(clientImdsApiMock)
-	clientSts := new(clientStsApiMock)
 
 	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything).Return(extutil.Ptr(imds.GetInstanceIdentityDocumentOutput{
 		InstanceIdentityDocument: imds.InstanceIdentityDocument{
@@ -322,8 +295,8 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "42", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, AZBlackholeStsApi, error) {
-		return clientEC2, clientImds, clientSts, nil
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "42", "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+		return clientEC2, clientImds, nil
 	})
 
 	// Then
@@ -333,6 +306,7 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 
 func TestStartBlackhole(t *testing.T) {
 	// Given
+	uuid := uuid.New().String()
 	clientEC2 := new(clientEC2ApiMock)
 	clientEC2.On("DescribeNetworkAcls", mock.Anything, mock.MatchedBy(func(params *ec2.DescribeNetworkAclsInput) bool {
 		require.Equal(t, extutil.Ptr("association.subnet-id"), params.Filters[0].Name)
@@ -365,7 +339,7 @@ func TestStartBlackhole(t *testing.T) {
 		require.Equal(t, extutil.Ptr("vpcId-1"), params.VpcId)
 		require.Equal(t, extutil.Ptr("created by steadybit"), params.TagSpecifications[0].Tags[0].Value)
 		require.Equal(t, extutil.Ptr("steadybit-attack-execution-id"), params.TagSpecifications[0].Tags[1].Key)
-		require.Equal(t, extutil.Ptr("AttackExecutionId1234"), params.TagSpecifications[0].Tags[1].Value)
+		require.Equal(t, extutil.Ptr(uuid), params.TagSpecifications[0].Tags[1].Value)
 		require.Equal(t, extutil.Ptr("steadybit-replaced subnet-1"), params.TagSpecifications[0].Tags[2].Key)
 		require.Equal(t, extutil.Ptr("nacl-1"), params.TagSpecifications[0].Tags[2].Value)
 		require.Equal(t, extutil.Ptr("steadybit-replaced subnet-2"), params.TagSpecifications[0].Tags[3].Key)
@@ -410,7 +384,7 @@ func TestStartBlackhole(t *testing.T) {
 			"TargetSubnets": map[string][]string{
 				"vpcId-1": {"subnet-1", "subnet-2"},
 			},
-			"AttackExecutionId": "AttackExecutionId1234",
+			"AttackExecutionId": uuid,
 		},
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
@@ -454,7 +428,7 @@ func TestStopBlackhole(t *testing.T) {
 		return true
 	})).Return(extutil.Ptr(ec2.DeleteNetworkAclOutput{}), nil)
 
-	requestBody := action_kit_api.StartActionRequestBody{
+	requestBody := action_kit_api.StopActionRequestBody{
 		State: map[string]interface{}{
 			"AgentAWSAccount":     "41",
 			"ExtensionAwsAccount": "43",
@@ -462,7 +436,7 @@ func TestStopBlackhole(t *testing.T) {
 			"TargetSubnets": map[string][]string{
 				"vpcId-1": {"subnet-1", "subnet-2"},
 			},
-			"AttackExecutionId": "AttackExecutionId1234",
+			"AttackExecutionId": uuid.New().String(),
 			"NetworkAclIds":     []string{"NEW nacl-4"},
 			"OldNetworkAclIds": map[string]string{
 				"NEW association-4": "nacl-1",
