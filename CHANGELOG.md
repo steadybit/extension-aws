@@ -2,7 +2,7 @@
 
 ## v2.0.0
 
-- Renamed attack `ec2-instance.state` to `com.github.steadybit.extension_aws.ec2-instance-state`
+- Renamed attack `ec2-instance.state` to `com.github.steadybit.extension_aws.ec2_instance.state`
 - Added EC2-Instance discovery
 - Added Zone-Discovery and Availability Zone Blackhole attack
 - Added AWS FIS-Experiment discovery and AWS FIS-Experiment action
