@@ -277,7 +277,7 @@ func actionSummary(experiment *types.Experiment) string {
 		if action.State != nil {
 			status = string(action.State.Status)
 			if action.State.Reason != nil {
-				statusReason = *action.State.Reason
+				statusReason = " (" + *action.State.Reason + ")"
 			}
 		}
 		summary = summary + fmt.Sprintf("%s: %s%s\n", actionName, status, statusReason)
