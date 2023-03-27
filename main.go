@@ -36,6 +36,7 @@ func main() {
 	extec2.RegisterEc2AttackHandlers()
 
 	extfis.RegisterFisInstanceDiscoveryHandlers()
+	extfis.RegisterFisActionHandlers()
 
 	exthttp.Listen(exthttp.ListenOpts{
 		Port: 8085,
@@ -59,6 +60,10 @@ func getExtensionList() ExtensionListResponse {
 			{
 				"GET",
 				"/ec2/instance/attack/state",
+			},
+			{
+				"GET",
+				"/fis/experiment/action",
 			},
 		},
 		Discoveries: []discovery_kit_api.DescribingEndpointReference{
