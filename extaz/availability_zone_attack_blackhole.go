@@ -478,9 +478,9 @@ func stopBlackholeViaState(state *BlackholeState, clientProvider func(account st
 	}
 
 	var errors []string
-	for oldNetworkAclIdKey, oldNetworkAclIdValue := range state.OldNetworkAclIds {
+	for associationId, oldNetworkAclIdValue := range state.OldNetworkAclIds {
 		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
-			AssociationId: aws.String(oldNetworkAclIdKey),
+			AssociationId: aws.String(associationId),
 			NetworkAclId:  aws.String(oldNetworkAclIdValue),
 		}
 		log.Debug().Msgf("Rolling back to old acl entry %+v", networkAclAssociationInput)
