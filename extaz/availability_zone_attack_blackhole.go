@@ -25,7 +25,6 @@ import (
 	"strings"
 )
 
-const DoADryRun = true // TODO remove dry run
 func RegisterAZAttackHandlers() {
 	exthttp.RegisterHttpHandler("/az/attack/blackhole", exthttp.GetterAsHandler(getBlackholeAttackDescription))
 	exthttp.RegisterHttpHandler("/az/attack/blackhole/prepare", prepareBlackhole)
@@ -303,7 +302,6 @@ func replaceNetworkAclAssociations(ctx context.Context, state *BlackholeState, c
 		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
 			AssociationId: networkAclAssociation.NetworkAclAssociationId,
 			NetworkAclId:  aws.String(networkAclId),
-			DryRun:        aws.Bool(DoADryRun),
 		}
 		log.Debug().Msgf("Replacing acl entry %+v", networkAclAssociationInput)
 		replaceNetworkAclAssociationResponse, err := clientEc2.ReplaceNetworkAclAssociation(ctx, networkAclAssociationInput)
@@ -349,7 +347,6 @@ func createNetworkAcl(ctx context.Context, state *BlackholeState, clientEc2 AZBl
 				Tags:         tagList,
 			},
 		},
-		DryRun: aws.Bool(DoADryRun),
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to create network ACL")
@@ -377,7 +374,6 @@ func createNetworkAclEntry(ctx context.Context, clientEc2 AZBlackholeEC2Api, net
 			To:   aws.Int32(65535),
 		},
 		RuleAction: types.RuleActionDeny,
-		DryRun:     aws.Bool(DoADryRun),
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to create network ACL entry")
@@ -474,7 +470,6 @@ func stopBlackholeViaState(state *BlackholeState, clientProvider func(account st
 		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
 			AssociationId: aws.String(oldNetworkAclIdKey),
 			NetworkAclId:  aws.String(oldNetworkAclIdValue),
-			DryRun:        aws.Bool(DoADryRun),
 		}
 		log.Debug().Msgf("Rolling back to old acl entry %+v", networkAclAssociationInput)
 		replaceNetworkAclAssociationResponse, err := clientEc2.ReplaceNetworkAclAssociation(context.Background(), networkAclAssociationInput)
@@ -487,7 +482,6 @@ func stopBlackholeViaState(state *BlackholeState, clientProvider func(account st
 	for _, networkAclId := range state.NetworkAclIds {
 		deleteNetworkAclInput := &ec2.DeleteNetworkAclInput{
 			NetworkAclId: aws.String(networkAclId),
-			DryRun:       aws.Bool(DoADryRun),
 		}
 		log.Debug().Msgf("Deleting network acl entry %+v", deleteNetworkAclInput)
 		deleteNetworkAclResponse, err := clientEc2.DeleteNetworkAcl(context.Background(), deleteNetworkAclInput)
