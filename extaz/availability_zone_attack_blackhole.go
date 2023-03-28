@@ -152,7 +152,6 @@ func PrepareBlackhole(ctx context.Context, body []byte, agentAWSAccount string, 
 	}
 	//Get Extension Account
 	extensionAwsAccount := getExtensionAWSAccount(ctx, clientImds, extensionRootAccountNumber)
-
 	if extensionAwsAccount == "" {
 		return nil, extutil.Ptr(extension_kit.ToError("Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.", nil))
 	}
@@ -480,13 +479,13 @@ func rollbackBlackholeViaTags(awsAccount string, executionId string, ctx context
 		return nil, extutil.Ptr(extension_kit.ToError("Failed to get network ACLs created by Steadybit", err))
 	}
 
-	networkAclIdsCreadedBySteadybit := make([]string, 0) // network ACL IDs created by Steadybit to be deleted later
-	oldNetworkAclIds := make(map[string]string)          // key: new association ID, value: old network ACL ID --> to be used to rollback the network ACL association
+	networkAclIdsCreadedBySteadybit := make(map[string]struct{}) // a Set of network ACL IDs created by Steadybit to be deleted later
+	oldNetworkAclIds := make(map[string]string)                  // key: new association ID, value: old network ACL ID --> to be used to rollback the network ACL association
 
 	var errors []string
 
-	for _, networkAclsAssociatedWithSubnet := range networkAclsAssociatedWithSubnets {
-		networkAclIdsCreadedBySteadybit = append(networkAclIdsCreadedBySteadybit, *networkAclsAssociatedWithSubnet.NetworkAclId)
+	for _, networkAclsAssociatedWithSubnet := range *networkAclsAssociatedWithSubnets {
+		networkAclIdsCreadedBySteadybit[*networkAclsAssociatedWithSubnet.NetworkAclId] = struct{}{}
 		// find tags of the network ACL
 		tags, err := getTagsOfNacl(clientEc2, ctx, *networkAclsAssociatedWithSubnet.NetworkAclId)
 		if err != nil {
@@ -494,7 +493,7 @@ func rollbackBlackholeViaTags(awsAccount string, executionId string, ctx context
 			errors = append(errors, err.Error())
 		}
 
-		for _, tag := range tags {
+		for _, tag := range *tags {
 			// find tags beginning with "steadybit-replaced "
 			if strings.HasPrefix(*tag.Key, "steadybit-replaced ") {
 				subnetId := strings.TrimPrefix(*tag.Key, "steadybit-replaced ")
@@ -521,7 +520,7 @@ func rollbackBlackholeViaTags(awsAccount string, executionId string, ctx context
 		log.Debug().Msgf("Rolled back to old acl entry  %+v", replaceNetworkAclAssociationResponse)
 	}
 
-	for _, networkAclId := range networkAclIdsCreadedBySteadybit {
+	for networkAclId := range networkAclIdsCreadedBySteadybit {
 		deleteNetworkAclInput := &ec2.DeleteNetworkAclInput{
 			NetworkAclId: aws.String(networkAclId),
 		}
@@ -539,7 +538,7 @@ func rollbackBlackholeViaTags(awsAccount string, executionId string, ctx context
 	return extutil.Ptr(action_kit_api.StopResult{}), nil
 }
 
-func getTagsOfNacl(clientEc2 AZBlackholeEC2Api, ctx context.Context, networkAclId string) ([]types.TagDescription, error) {
+func getTagsOfNacl(clientEc2 AZBlackholeEC2Api, ctx context.Context, networkAclId string) (*[]types.TagDescription, error) {
 	tagsOfNacl := make([]types.TagDescription, 0)
 	var nextToken *string
 	for {
@@ -556,7 +555,6 @@ func getTagsOfNacl(clientEc2 AZBlackholeEC2Api, ctx context.Context, networkAclI
 				},
 			},
 			NextToken: nextToken,
-			//MaxResults: aws.Int32(2),
 		})
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to get network ACLs Tags")
@@ -569,20 +567,20 @@ func getTagsOfNacl(clientEc2 AZBlackholeEC2Api, ctx context.Context, networkAclI
 			break
 		}
 	}
-	return tagsOfNacl, nil
+	return &tagsOfNacl, nil
 }
 
-func getAllNACLsCreatedBySteadybit(clientEc2 AZBlackholeEC2Api, ctx context.Context, executionId string) ([]types.NetworkAclAssociation, error) {
+func getAllNACLsCreatedBySteadybit(clientEc2 AZBlackholeEC2Api, ctx context.Context, executionId string) (*[]types.NetworkAclAssociation, error) {
 	networkAclsAssociatedWithSubnets := make([]types.NetworkAclAssociation, 0)
 	var nextToken *string
 	for {
 		describeNetworkAclsResult, err := clientEc2.DescribeNetworkAcls(ctx, &ec2.DescribeNetworkAclsInput{
 			Filters: []types.Filter{
 				{
-					Name:   aws.String("Name"),
+					Name:   aws.String("tag:Name"),
 					Values: []string{"created by steadybit"},
 				}, {
-					Name:   aws.String("steadybit-attack-execution-id"),
+					Name:   aws.String("tag:steadybit-attack-execution-id"),
 					Values: []string{executionId},
 				},
 			},
@@ -603,5 +601,5 @@ func getAllNACLsCreatedBySteadybit(clientEc2 AZBlackholeEC2Api, ctx context.Cont
 			nextToken = describeNetworkAclsResult.NextToken
 		}
 	}
-	return networkAclsAssociatedWithSubnets, nil
+	return &networkAclsAssociatedWithSubnets, nil
 }

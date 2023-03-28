@@ -422,9 +422,9 @@ func TestStopBlackhole(t *testing.T) {
 	clientEC2 := new(clientEC2ApiMock)
 
 	clientEC2.On("DescribeNetworkAcls", mock.Anything, mock.MatchedBy(func(params *ec2.DescribeNetworkAclsInput) bool {
-		require.Equal(t, aws.String("Name"), params.Filters[0].Name)
+		require.Equal(t, aws.String("tag:Name"), params.Filters[0].Name)
 		require.Equal(t, "created by steadybit", params.Filters[0].Values[0])
-		require.Equal(t, aws.String("steadybit-attack-execution-id"), params.Filters[1].Name)
+		require.Equal(t, aws.String("tag:steadybit-attack-execution-id"), params.Filters[1].Name)
 		require.Equal(t, executionId, params.Filters[1].Values[0])
 		return true
 	})).Return(extutil.Ptr(ec2.DescribeNetworkAclsOutput{
