@@ -18,7 +18,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.29.0
 	github.com/sosodev/duration v1.0.1
-	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.4.1
+	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.4.2
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.2.0
 	github.com/steadybit/extension-kit v1.7.3
 	github.com/stretchr/testify v1.8.0

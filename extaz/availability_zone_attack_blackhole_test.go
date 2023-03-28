@@ -132,7 +132,9 @@ func TestPrepareBlackhole(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
-		AgentAwsAccountId: aws.String("41"),
+		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+			AgentAwsAccountId: aws.String("41"),
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
@@ -172,7 +174,9 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
-		AgentAwsAccountId: aws.String("41"),
+		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+			AgentAwsAccountId: aws.String("41"),
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
@@ -204,7 +208,9 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 				"aws.account": {"42"},
 			},
 		}),
-		AgentAwsAccountId: aws.String("41"),
+		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+			AgentAwsAccountId: aws.String("41"),
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
@@ -236,7 +242,9 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
-		AgentAwsAccountId: nil,
+		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+			AgentAwsAccountId: nil,
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
@@ -268,7 +276,9 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
-		AgentAwsAccountId: aws.String("41"),
+		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+			AgentAwsAccountId: aws.String("41"),
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
@@ -304,7 +314,9 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
-		AgentAwsAccountId: aws.String("42"),
+		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+			AgentAwsAccountId: aws.String("42"),
+		}),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
