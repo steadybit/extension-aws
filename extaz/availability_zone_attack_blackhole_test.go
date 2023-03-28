@@ -7,6 +7,7 @@ package extaz
 import (
 	"context"
 	"encoding/json"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
@@ -417,7 +418,50 @@ func TestStartBlackhole(t *testing.T) {
 
 func TestStopBlackhole(t *testing.T) {
 	// Given
+	executionId := uuid.New().String()
 	clientEC2 := new(clientEC2ApiMock)
+
+	clientEC2.On("DescribeNetworkAcls", mock.Anything, mock.MatchedBy(func(params *ec2.DescribeNetworkAclsInput) bool {
+		require.Equal(t, aws.String("Name"), params.Filters[0].Name)
+		require.Equal(t, "created by steadybit", params.Filters[0].Values[0])
+		require.Equal(t, aws.String("steadybit-attack-execution-id"), params.Filters[1].Name)
+		require.Equal(t, executionId, params.Filters[1].Values[0])
+		return true
+	})).Return(extutil.Ptr(ec2.DescribeNetworkAclsOutput{
+		NetworkAcls: []types.NetworkAcl{
+			{
+				Associations: []types.NetworkAclAssociation{
+					{
+						NetworkAclAssociationId: extutil.Ptr("NEW association-4"),
+						NetworkAclId:            extutil.Ptr("NEW nacl-4"),
+						SubnetId:                extutil.Ptr("subnet-1"),
+					}, {
+						NetworkAclAssociationId: extutil.Ptr("NEW association-5"),
+						NetworkAclId:            extutil.Ptr("NEW nacl-4"),
+						SubnetId:                extutil.Ptr("subnet-2"),
+					},
+				},
+			},
+		},
+	}), nil)
+
+	clientEC2.On("DescribeTags", mock.Anything, mock.MatchedBy(func(params *ec2.DescribeTagsInput) bool {
+		require.Equal(t, aws.String("resource-id"), params.Filters[0].Name)
+		require.Equal(t, "NEW nacl-4", params.Filters[0].Values[0])
+		require.Equal(t, aws.String("resource-type"), params.Filters[1].Name)
+		require.Equal(t, "network-acl", params.Filters[1].Values[0])
+		return true
+	})).Return(extutil.Ptr(ec2.DescribeTagsOutput{
+		Tags: []types.TagDescription{
+			{
+				Key:   extutil.Ptr("steadybit-replaced subnet-1"),
+				Value: extutil.Ptr("nacl-1"),
+			}, {
+				Key:   extutil.Ptr("steadybit-replaced subnet-2"),
+				Value: extutil.Ptr("nacl-2"),
+			},
+		},
+	}), nil)
 
 	clientEC2.On("ReplaceNetworkAclAssociation", mock.Anything, mock.MatchedBy(func(params *ec2.ReplaceNetworkAclAssociationInput) bool {
 		if "NEW association-4" == *params.AssociationId && "nacl-1" == *params.NetworkAclId {
@@ -444,7 +488,7 @@ func TestStopBlackhole(t *testing.T) {
 			"TargetSubnets": map[string][]string{
 				"vpcId-1": {"subnet-1", "subnet-2"},
 			},
-			"AttackExecutionId": uuid.New().String(),
+			"AttackExecutionId": executionId,
 			"NetworkAclIds":     []string{"NEW nacl-4"},
 			"OldNetworkAclIds": map[string]string{
 				"NEW association-4": "nacl-1",
