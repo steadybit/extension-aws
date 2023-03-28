@@ -149,7 +149,7 @@ func TestStatusExperiment(t *testing.T) {
 
 	// Then
 	assert.Nil(t, extKitErr)
-	assert.Equal(t, (*state.Messages)[0].Message, "stepA: completed\nstepB: failed (Internal error.)\nstepC: cancelled\n")
+	assert.Equal(t, (*state.Messages)[0].Message, "FIS experiment summary:\nstepA: completed\nstepB: failed (Internal error.)\nstepC: cancelled\n")
 	assert.True(t, state.Completed)
 	assert.Equal(t, state.Error.Status, extutil.Ptr(action_kit_api.Failed))
 	assert.Equal(t, state.Error.Title, "FIS Experiment failed")

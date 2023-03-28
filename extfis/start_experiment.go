@@ -42,8 +42,8 @@ func getFisExperimentActionDescription() action_kit_api.ActionDescription {
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
-				Label:        "Duration",
-				Description:  extutil.Ptr("The total duration of your FIS experiment."),
+				Label:        "Estimated duration",
+				Description:  extutil.Ptr("The estimated total duration of your FIS experiment."),
 				Name:         "duration",
 				Type:         action_kit_api.Duration,
 				Advanced:     extutil.Ptr(false),
@@ -269,7 +269,7 @@ func actionSummary(experiment *types.Experiment) string {
 	}
 	sort.Strings(actionNames)
 
-	summary := ""
+	summary := "FIS experiment summary:\n"
 	for _, actionName := range actionNames {
 		action := experiment.Actions[actionName]
 		status := "unknown"
