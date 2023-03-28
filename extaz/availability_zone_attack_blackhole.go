@@ -96,9 +96,8 @@ type AZBlackholeImdsApi interface {
 }
 
 func prepareBlackhole(w http.ResponseWriter, r *http.Request, body []byte) {
-	agentAWSAccount := r.Header.Get("AgentAWSAccount")
 	extensionRootAccountNumber := utils.Accounts.GetRootAccount().AccountNumber
-	state, extKitErr := PrepareBlackhole(r.Context(), body, agentAWSAccount, extensionRootAccountNumber, func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+	state, extKitErr := PrepareBlackhole(r.Context(), body, extensionRootAccountNumber, func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
 		awsAccount, err := utils.Accounts.GetAccount(account)
 		if err != nil {
 			return nil, nil, err
@@ -127,7 +126,7 @@ func prepareBlackhole(w http.ResponseWriter, r *http.Request, body []byte) {
 	}))
 }
 
-func PrepareBlackhole(ctx context.Context, body []byte, agentAWSAccount string, extensionRootAccountNumber string, clientProvider func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error)) (*BlackholeState, *extension_kit.ExtensionError) {
+func PrepareBlackhole(ctx context.Context, body []byte, extensionRootAccountNumber string, clientProvider func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error)) (*BlackholeState, *extension_kit.ExtensionError) {
 	var request action_kit_api.PrepareActionRequestBody
 	err := json.Unmarshal(body, &request)
 	if err != nil {
@@ -159,10 +158,10 @@ func PrepareBlackhole(ctx context.Context, body []byte, agentAWSAccount string, 
 		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("The extension is running in the same AWS account (%s) as the target. Attack is disabled to prevent an extension lockout.", extensionAwsAccount), nil))
 	}
 
-	if agentAWSAccount == "" {
+	if request.AgentAwsAccountId == nil || *request.AgentAwsAccountId == "" {
 		return nil, extutil.Ptr(extension_kit.ToError("Could not get AWS Account of the agent. Attack is disabled to prevent an agent lockout.", nil))
 	}
-	if targetAccount[0] == agentAWSAccount {
+	if request.AgentAwsAccountId != nil && targetAccount[0] == *request.AgentAwsAccountId {
 		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("The agent is running in the same AWS account (%s) as the target. Attack is disabled to prevent an agent lockout.", extensionAwsAccount), nil))
 	}
 
@@ -173,7 +172,7 @@ func PrepareBlackhole(ctx context.Context, body []byte, agentAWSAccount string, 
 	}
 
 	return extutil.Ptr(BlackholeState{
-		AgentAWSAccount:     agentAWSAccount,
+		AgentAWSAccount:     *request.AgentAwsAccountId,
 		ExtensionAwsAccount: targetAccount[0],
 		TargetZone:          targetZone[0],
 		TargetSubnets:       targetSubnets,

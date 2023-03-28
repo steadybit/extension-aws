@@ -132,12 +132,13 @@ func TestPrepareBlackhole(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
+		AgentAwsAccountId: aws.String("41"),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
 		return clientEC2, clientImds, nil
 	})
 
@@ -171,12 +172,13 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
+		AgentAwsAccountId: aws.String("41"),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", "42", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "42", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
 		return clientEC2, clientImds, nil
 	})
 
@@ -202,12 +204,13 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 				"aws.account": {"42"},
 			},
 		}),
+		AgentAwsAccountId: aws.String("41"),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", "42", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "42", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
 		return clientEC2, clientImds, nil
 	})
 
@@ -233,12 +236,13 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
+		AgentAwsAccountId: nil,
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "", "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
 		return clientEC2, clientImds, nil
 	})
 
@@ -264,12 +268,13 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
+		AgentAwsAccountId: aws.String("41"),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "41", "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
 		return clientEC2, clientImds, nil
 	})
 
@@ -299,12 +304,13 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 				"aws.account": {"42"},
 			},
 		}),
+		AgentAwsAccountId: aws.String("42"),
 	}
 	requestBodyJson, err := json.Marshal(requestBody)
 	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "42", "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
+	state, attackErr := PrepareBlackhole(context.Background(), requestBodyJson, "", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
 		return clientEC2, clientImds, nil
 	})
 
