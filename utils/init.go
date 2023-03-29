@@ -6,9 +6,12 @@ package utils
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	middleware2 "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/smithy-go/logging"
+	"github.com/aws/smithy-go/middleware"
 	"github.com/rs/zerolog/log"
 	extConfig "github.com/steadybit/extension-aws/config"
 )
@@ -19,6 +22,11 @@ var (
 
 func InitializeAwsAccountAccess(specification extConfig.Specification) {
 	awsConfigForRootAccount, err := config.LoadDefaultConfig(context.Background())
+	awsConfigForRootAccount.Logger = logForwarder{}
+	awsConfigForRootAccount.ClientLogMode = aws.LogRequest
+	awsConfigForRootAccount.APIOptions = append(awsConfigForRootAccount.APIOptions, func(stack *middleware.Stack) error {
+		return stack.Initialize.Add(customLoggerMiddleware, middleware.After)
+	})
 
 	log.Info().Msgf("Starting in region %s", awsConfigForRootAccount.Region)
 
@@ -49,6 +57,25 @@ func InitializeAwsAccountAccess(specification extConfig.Specification) {
 		}
 	}
 }
+
+type logForwarder struct {
+}
+
+func (logger logForwarder) Logf(classification logging.Classification, format string, v ...interface{}) {
+	switch classification {
+	case logging.Debug:
+		log.Trace().Msgf(format, v...)
+	case logging.Warn:
+		log.Warn().Msgf(format, v...)
+	}
+}
+
+var customLoggerMiddleware = middleware.InitializeMiddlewareFunc("customLoggerMiddleware",
+	func(ctx context.Context, in middleware.InitializeInput, next middleware.InitializeHandler) (out middleware.InitializeOutput, metadata middleware.Metadata, err error) {
+		middleware2.GetOperationName(ctx)
+		log.Debug().Msgf("AWS-Call: %s - %s", middleware2.GetServiceID(ctx), middleware2.GetOperationName(ctx))
+		return next.HandleInitialize(ctx, in)
+	})
 
 func initializeRoleAssumption(stsServiceForRootAccount *sts.Client, roleArn string, rootAccount AwsAccount) AwsAccount {
 	awsConfig := rootAccount.AwsConfig.Copy()
