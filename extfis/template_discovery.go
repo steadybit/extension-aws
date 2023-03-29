@@ -129,11 +129,9 @@ type FisApi interface {
 func GetAllFisTemplates(ctx context.Context, fisApi FisApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
-	var nextToken *string = nil
-	for {
-		output, err := fisApi.ListExperimentTemplates(ctx, &fis.ListExperimentTemplatesInput{
-			NextToken: nextToken,
-		})
+	paginator := fis.NewListExperimentTemplatesPaginator(fisApi, &fis.ListExperimentTemplatesInput{})
+	for paginator.HasMorePages() {
+		output, err := paginator.NextPage(ctx)
 		if err != nil {
 			return result, err
 		}
@@ -144,12 +142,6 @@ func GetAllFisTemplates(ctx context.Context, fisApi FisApi, awsAccountNumber str
 				return result, err
 			}
 			result = append(result, toTarget(template, awsAccountNumber, awsRegion, totalDuration))
-		}
-
-		if output.NextToken == nil {
-			break
-		} else {
-			nextToken = output.NextToken
 		}
 	}
 

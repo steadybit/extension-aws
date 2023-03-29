@@ -131,23 +131,15 @@ type RdsDescribeInstancesApi interface {
 func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
-	var marker *string = nil
-	for {
-		output, err := rdsApi.DescribeDBInstances(ctx, &rds.DescribeDBInstancesInput{
-			Marker: marker,
-		})
+	paginator := rds.NewDescribeDBInstancesPaginator(rdsApi, &rds.DescribeDBInstancesInput{})
+	for paginator.HasMorePages() {
+		output, err := paginator.NextPage(ctx)
 		if err != nil {
 			return result, err
 		}
 
 		for _, dbInstance := range output.DBInstances {
 			result = append(result, toTarget(dbInstance, awsAccountNumber, awsRegion))
-		}
-
-		if output.Marker == nil {
-			break
-		} else {
-			marker = output.Marker
 		}
 	}
 
