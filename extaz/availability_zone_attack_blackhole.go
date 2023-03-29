@@ -190,18 +190,19 @@ func getAgentAWSAccount(request action_kit_api.PrepareActionRequestBody) string 
 
 func getTargetSubnets(clientEc2 AZBlackholeEC2Api, ctx context.Context, targetZone string) (map[string][]string, error) {
 	subnetResults := make(map[string][]string)
-	var nextToken *string
 
-	for {
-		subnets, err := clientEc2.DescribeSubnets(ctx, &ec2.DescribeSubnetsInput{
+	paginator := ec2.NewDescribeSubnetsPaginator(clientEc2,
+		&ec2.DescribeSubnetsInput{
 			Filters: []types.Filter{
 				{
 					Name:   aws.String("availabilityZone"),
 					Values: []string{targetZone},
 				},
 			},
-			NextToken: nextToken,
 		})
+
+	for paginator.HasMorePages() {
+		subnets, err := paginator.NextPage(ctx)
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to get subnets")
 			return nil, err
@@ -210,10 +211,6 @@ func getTargetSubnets(clientEc2 AZBlackholeEC2Api, ctx context.Context, targetZo
 			subnetResults[*subnet.VpcId] = append(subnetResults[*subnet.VpcId], *subnet.SubnetId)
 		}
 		log.Debug().Msgf("Found %d subnets in AZ %s for creating temporary ACL to block traffic: %+v", len(subnets.Subnets), targetZone, subnets.Subnets)
-		if subnets.NextToken == nil {
-			break
-		}
-		nextToken = subnets.NextToken
 	}
 	return subnetResults, nil
 }
@@ -297,16 +294,22 @@ func StartBlackhole(ctx context.Context, body []byte, clientProvider func(accoun
 	for vpcId, subnetIds := range state.TargetSubnets {
 		log.Info().Msgf("Creating temporary ACL to block traffic in VPC %s", vpcId)
 		//Find existing to be modified network acl associations matching the subnetIds in the given VPC
-		desiredAclAssociations := getNetworkAclAssociations(ctx, clientEc2, vpcId, subnetIds)
+		desiredAclAssociations, err := getNetworkAclAssociations(ctx, clientEc2, vpcId, subnetIds)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to get network ACL associations for VPC %s", vpcId)
+			return &state, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to get network ACL associations for VPC %s", vpcId), err))
+		}
 		log.Info().Msgf("Found %d network ACL associations to modify", len(desiredAclAssociations))
 		//Create new network acl
 		networkAclId, err := createNetworkAcl(ctx, &state, clientEc2, vpcId, desiredAclAssociations)
 		if err != nil {
+			log.Error().Err(err).Msgf("Failed to create network ACL for VPC %s", vpcId)
 			return &state, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to create network ACL for VPC %s", vpcId), err))
 		}
 		//Replace the association IDs for the above subnets with the new network acl which will deny all traffic for those subnets in that AZ
 		err = replaceNetworkAclAssociations(ctx, &state, clientEc2, desiredAclAssociations, networkAclId)
 		if err != nil {
+			log.Error().Err(err).Msgf("Failed to replace network ACL associations for VPC %s", vpcId)
 			return &state, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL associations for VPC %s", vpcId), err))
 		}
 	}
@@ -399,34 +402,28 @@ func createNetworkAclEntry(ctx context.Context, clientEc2 AZBlackholeEC2Api, net
 	log.Debug().Msgf("Created network ACL entry for network ACL %+v", createdNetworkAclEntry)
 }
 
-func getNetworkAclAssociations(ctx context.Context, clientEc2 AZBlackholeEC2Api, vpcId string, targetSubnetIds []string) []types.NetworkAclAssociation {
+func getNetworkAclAssociations(ctx context.Context, clientEc2 AZBlackholeEC2Api, vpcId string, targetSubnetIds []string) ([]types.NetworkAclAssociation, error) {
 	desiredAclAssociations := make([]types.NetworkAclAssociation, 0, len(targetSubnetIds))
 	networkAclsAssociatedWithSubnets := make([]types.NetworkAclAssociation, 0, len(targetSubnetIds))
-	var nextToken *string
-	for {
-
-		describeNetworkAclsResult, err := clientEc2.DescribeNetworkAcls(ctx, &ec2.DescribeNetworkAclsInput{
-			Filters: []types.Filter{
-				{
-					Name:   aws.String("association.subnet-id"),
-					Values: targetSubnetIds,
-				},
+	paginator := ec2.NewDescribeNetworkAclsPaginator(clientEc2, &ec2.DescribeNetworkAclsInput{
+		Filters: []types.Filter{
+			{
+				Name:   aws.String("association.subnet-id"),
+				Values: targetSubnetIds,
 			},
-			NextToken: nextToken,
-		})
+		},
+	})
+	for paginator.HasMorePages() {
+		describeNetworkAclsResult, err := paginator.NextPage(ctx)
+
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to get network ACLs")
-			return nil
+			return nil, err
 		}
 		for _, networkAcl := range describeNetworkAclsResult.NetworkAcls {
 			for _, association := range networkAcl.Associations {
 				networkAclsAssociatedWithSubnets = append(networkAclsAssociatedWithSubnets, association)
 			}
-		}
-		if describeNetworkAclsResult.NextToken == nil {
-			break
-		} else {
-			nextToken = describeNetworkAclsResult.NextToken
 		}
 	}
 
@@ -439,7 +436,7 @@ func getNetworkAclAssociations(ctx context.Context, clientEc2 AZBlackholeEC2Api,
 		}
 	}
 	log.Debug().Msgf("Found  %+v acl associations for subnets  %+v in VPC %s.", desiredAclAssociations, targetSubnetIds, vpcId)
-	return desiredAclAssociations
+	return desiredAclAssociations, nil
 }
 
 func stopBlackhole(w http.ResponseWriter, req *http.Request, body []byte) {
@@ -547,52 +544,49 @@ func rollbackBlackholeViaTags(awsAccount string, executionId string, ctx context
 
 func getTagsOfNacl(clientEc2 AZBlackholeEC2Api, ctx context.Context, networkAclId string) (*[]types.TagDescription, error) {
 	tagsOfNacl := make([]types.TagDescription, 0)
-	var nextToken *string
-	for {
 
-		describeTagsResult, err := clientEc2.DescribeTags(ctx, &ec2.DescribeTagsInput{
-			Filters: []types.Filter{
-				{
-					Name:   aws.String("resource-id"),
-					Values: []string{networkAclId},
-				},
-				{
-					Name:   aws.String("resource-type"),
-					Values: []string{"network-acl"},
-				},
+	paginator := ec2.NewDescribeTagsPaginator(clientEc2, &ec2.DescribeTagsInput{
+		Filters: []types.Filter{
+			{
+				Name:   aws.String("resource-id"),
+				Values: []string{networkAclId},
 			},
-			NextToken: nextToken,
-		})
+			{
+				Name:   aws.String("resource-type"),
+				Values: []string{"network-acl"},
+			},
+		},
+	})
+
+	for paginator.HasMorePages() {
+		describeTagsResult, err := paginator.NextPage(ctx)
+
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to get network ACLs Tags")
 			return nil, err
 		}
 		tagsOfNacl = append(tagsOfNacl, describeTagsResult.Tags...)
-		if describeTagsResult.NextToken != nil {
-			nextToken = describeTagsResult.NextToken
-		} else {
-			break
-		}
 	}
 	return &tagsOfNacl, nil
 }
 
 func getAllNACLsCreatedBySteadybit(clientEc2 AZBlackholeEC2Api, ctx context.Context, executionId string) (*[]types.NetworkAclAssociation, error) {
 	networkAclsAssociatedWithSubnets := make([]types.NetworkAclAssociation, 0)
-	var nextToken *string
-	for {
-		describeNetworkAclsResult, err := clientEc2.DescribeNetworkAcls(ctx, &ec2.DescribeNetworkAclsInput{
-			Filters: []types.Filter{
-				{
-					Name:   aws.String("tag:Name"),
-					Values: []string{"created by steadybit"},
-				}, {
-					Name:   aws.String("tag:steadybit-attack-execution-id"),
-					Values: []string{executionId},
-				},
+	paginator := ec2.NewDescribeNetworkAclsPaginator(clientEc2, &ec2.DescribeNetworkAclsInput{
+		Filters: []types.Filter{
+			{
+				Name:   aws.String("tag:Name"),
+				Values: []string{"created by steadybit"},
+			}, {
+				Name:   aws.String("tag:steadybit-attack-execution-id"),
+				Values: []string{executionId},
 			},
-			NextToken: nextToken,
-		})
+		},
+	})
+
+	for paginator.HasMorePages() {
+		describeNetworkAclsResult, err := paginator.NextPage(ctx)
+
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to get network ACLs")
 			return nil, err
@@ -601,11 +595,6 @@ func getAllNACLsCreatedBySteadybit(clientEc2 AZBlackholeEC2Api, ctx context.Cont
 			for _, association := range networkAcl.Associations {
 				networkAclsAssociatedWithSubnets = append(networkAclsAssociatedWithSubnets, association)
 			}
-		}
-		if describeNetworkAclsResult.NextToken == nil {
-			break
-		} else {
-			nextToken = describeNetworkAclsResult.NextToken
 		}
 	}
 	return &networkAclsAssociatedWithSubnets, nil
