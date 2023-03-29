@@ -73,8 +73,8 @@ type BlackholeState struct {
 	ExtensionAwsAccount string
 	TargetZone          string
 	NetworkAclIds       []string
-	OldNetworkAclIds    map[string]string
-	TargetSubnets       map[string][]string
+	OldNetworkAclIds    map[string]string   // map[NewAssociationId] = oldNetworkAclId
+	TargetSubnets       map[string][]string // map[vpcId] = [subnetIds]
 	AttackExecutionId   uuid.UUID
 }
 
