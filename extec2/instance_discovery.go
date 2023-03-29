@@ -134,25 +134,16 @@ type Ec2DescribeInstancesApi interface {
 func GetAllEc2Instances(ctx context.Context, ec2Api Ec2DescribeInstancesApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
-	var nextToken *string = nil
-	for {
-		output, err := ec2Api.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
-			NextToken: nextToken,
-		})
+	paginator := ec2.NewDescribeInstancesPaginator(ec2Api, &ec2.DescribeInstancesInput{})
+	for paginator.HasMorePages() {
+		output, err := paginator.NextPage(ctx)
 		if err != nil {
 			return result, err
 		}
-
 		for _, reservation := range output.Reservations {
 			for _, ec2Instance := range reservation.Instances {
 				result = append(result, toTarget(ec2Instance, awsAccountNumber, awsRegion))
 			}
-		}
-
-		if output.NextToken == nil {
-			break
-		} else {
-			nextToken = output.NextToken
 		}
 	}
 
