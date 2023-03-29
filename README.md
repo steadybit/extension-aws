@@ -6,26 +6,26 @@ A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to
 
 ## Capabilities
 
- - Amazon Elastic Cloud Compute (EC2)
-   - Discoveries
-     - EC2 instance discovery
-   - Actions
-     - State change of EC2 instances, e.g., stop, hibernate, terminate and reboot. 
- - Amazon Virtual Private Cloud (VPC)
-   - Discoveries
-     - Availability Zones
-   - Actions
-     - Availability Zone Blackhole
- - Amazon Relational Database Service (RDS)
-   - Discoveries
-     - RDS instances
-   - Actions
-     - Reboot of RDS instances
- - AWS Fault Injection Simulator (FIS)
-   - Discoveries
-     - Experiment Templates
-   - Actions
-     - Start Experiments
+- Amazon Elastic Cloud Compute (EC2)
+    - Discoveries
+        - EC2 instance discovery
+    - Actions
+        - State change of EC2 instances, e.g., stop, hibernate, terminate and reboot.
+- Amazon Virtual Private Cloud (VPC)
+    - Discoveries
+        - Availability Zones
+    - Actions
+        - Availability Zone Blackhole
+- Amazon Relational Database Service (RDS)
+    - Discoveries
+        - RDS instances
+    - Actions
+        - Reboot of RDS instances
+- AWS Fault Injection Simulator (FIS)
+    - Discoveries
+        - Experiment Templates
+    - Actions
+        - Start Experiments
 
 ## Configuration
 
@@ -59,6 +59,7 @@ by tweaking the `Resource` clause.
   ]
 }
 ```
+
 </details>
 <details>
     <summary>EC2-Discovery & Actions</summary>
@@ -81,6 +82,7 @@ by tweaking the `Resource` clause.
   ]
 }
 ```
+
 </details>
 <details>
     <summary>Availability Zone-Discovery & Availability Zone Blackhole</summary>
@@ -107,11 +109,14 @@ by tweaking the `Resource` clause.
   ]
 }
 ```
+
 </details>
 <details>
     <summary>FIS-Discovery & Actions</summary>
 
-FIS will create a [ServiceLinkedRole](https://docs.aws.amazon.com/fis/latest/userguide/using-service-linked-roles.html) AWSServiceRoleForFIS when you start an experiment. If you started the experiment from the ui and the role is already existing, you can omit the iam:CreateServiceLinkedRole permission. If you want to start the very first fis experiment via the steadybit agent, you will need to add the permission.
+FIS will create a [ServiceLinkedRole](https://docs.aws.amazon.com/fis/latest/userguide/using-service-linked-roles.html) AWSServiceRoleForFIS when you start an
+experiment. If you started the experiment from the ui and the role is already existing, you can omit the iam:CreateServiceLinkedRole permission. If you want to
+start the very first fis experiment via the steadybit agent, you will need to add the permission.
 
 ```yaml
 {
@@ -136,11 +141,12 @@ FIS will create a [ServiceLinkedRole](https://docs.aws.amazon.com/fis/latest/use
   ]
 }
 ```
+
 </details>
 
 #### Authentication setup
 
-The extension is using the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials). 
+The extension is using the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials).
 
 You can pass credentials using the following sequence:
 
@@ -148,8 +154,8 @@ You can pass credentials using the following sequence:
     1. Static Credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN)
     1. Web Identity Token (AWS_WEB_IDENTITY_TOKEN_FILE)
 1. Shared configuration files.
-   1. SDK defaults to credentials file under .aws folder that is placed in the home folder on your computer.
-   1. SDK defaults to config file under .aws folder that is placed in the home folder on your computer.
+    1. SDK defaults to credentials file under .aws folder that is placed in the home folder on your computer.
+    1. SDK defaults to config file under .aws folder that is placed in the home folder on your computer.
 1. If your application uses an ECS task definition or RunTask API operation, IAM role for tasks.
 1. If your application is running on an Amazon EC2 instance, IAM role for Amazon EC2.
 
@@ -158,10 +164,14 @@ You can find more information about best matching ways to provide credentials in
 <details>
     <summary>Authenticate on EC2 Instance</summary>
 
-If you installed the agent on an EC2 instance, the easiest way is to use the option 4 from the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials).
+If you installed the agent on an EC2 instance, the easiest way is to use the option 4 from
+the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials).
 
 Steps:
-- Assign your previous created IAM role to the ec2 instance. There is a slight difference between IAM Roles and Instance Profiles, if you see a message like No roles attached to instance profile, make sure to check [this page](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html)
+
+- Assign your previous created IAM role to the ec2 instance. There is a slight difference between IAM Roles and Instance Profiles, if you see a message like No
+  roles attached to instance profile, make sure to
+  check [this page](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html)
 - The IAM role needs a trust relationship so that EC2 is able to assume the role.
     ```yaml
     {
@@ -179,12 +189,14 @@ Steps:
         ]
     }
     ```
+
 </details>
 
 <details>
     <summary>Authenticate when running as ECS Task</summary>
 
-The `taskRoleArn` of your task definition needs to have the required permissions mentioned before. Make sure, that the role can be assumed by ECS and provide a trust relationship to the role.
+The `taskRoleArn` of your task definition needs to have the required permissions mentioned before. Make sure, that the role can be assumed by ECS and provide a
+trust relationship to the role.
 
 ```yaml
 {
@@ -207,11 +219,14 @@ The `taskRoleArn` of your task definition needs to have the required permissions
 <details>
     <summary>Authenticate when running in EKS</summary>
 
-If you installed the agent into an EKS cluster, the recommended way to provide credentials is to use option 1.ii from the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials). This approach will use a Web Identity Token. 
+If you installed the agent into an EKS cluster, the recommended way to provide credentials is to use option 1.ii from
+the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials). This approach will use a Web
+Identity Token.
 
 With this option you need to associate an IAM role with a Kubernetes service account.
 
 Steps:
+
 - [Create an OIDC Provider for your cluster](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
 - Create an IAM Role with the required permissions.
 - Allow the Role to be assumed by the OIDC Provider. Add the following trust relationship to the IAM Role
@@ -235,14 +250,16 @@ Steps:
         ]
     }
     ```
-- Associate the IAM Role to your Kubernetes Service Account. If you are using our helm charts to create the Service Account, you can use the parameter serviceAccount.eksRoleArn.
+- Associate the IAM Role to your Kubernetes Service Account. If you are using our helm charts to create the Service Account, you can use the parameter
+  serviceAccount.eksRoleArn.
 
 </details>
 
 <details>
     <summary>Authenticate when running outside of AWS</summary>
 
-You can install the aws extension outside your AWS infrastructure to communicate with the AWS API. In this case you need to set up an IAM User with API credentials which is allowed to access the resources already described in the section above.
+You can install the aws extension outside your AWS infrastructure to communicate with the AWS API. In this case you need to set up an IAM User with API
+credentials which is allowed to access the resources already described in the section above.
 
 The following variables needs to be added to the environment configuration:
 
@@ -251,11 +268,14 @@ AWS_REGION=<replace-with-region-to-attack>
 AWS_ACCESS_KEY_ID=<replace-with-aws-access-key>
 AWS_SECRET_ACCESS_KEY=<replace-with-aws-secret-access-key>
 ```
+
 </details>
 
 ### Assume Role into Multiple AWS Accounts
 
-By default, the extension uses the provided credentials to discover all resources within the belonging AWS account. To interact with multiple AWS accounts using a single extension, you can instruct the extension only to use the provided credentials to assume roles (using AWS STS) into given role-ARNs (and thus to possibly other AWS accounts).
+By default, the extension uses the provided credentials to discover all resources within the belonging AWS account. To interact with multiple AWS accounts using
+a single extension, you can instruct the extension only to use the provided credentials to assume roles (using AWS STS) into given role-ARNs (and thus to
+possibly other AWS accounts).
 
 To achieve this, you must set the STEADYBIT_EXTENSION_ASSUME_ROLES environment variable to a comma-separated list of role-ARNs. Example:
 
@@ -267,36 +287,36 @@ STEADYBIT_EXTENSION_ASSUME_ROLES='arn:aws:iam::1111111111:role/steadybit-extensi
 
 IAM policies need to be correctly configured for cross-account role assumption. In a nutshell, these are the necessary steps:
 
- 1. The credentials provided to the extension are allowed to assume the provided role-ARNs.
-    ```json
-    {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Effect": "Allow",
-                "Action": "sts:AssumeRole",
-                "Resource": "arn:aws:iam::<TARGET_ACCOUNT>:role/<ROLE_IN_TARGET_ACCOUNT>"
-            }
-        ]
-    }
-    ```
- 2. The roles themselves have all the [required permissions](#iam-policy).
- 3. The roles have trust relationships that allow them to be assumed by the given credentials.
-    ```json
-    {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
+1. The credentials provided to the extension are allowed to assume the provided role-ARNs.
+   ```json
+   {
+       "Version": "2012-10-17",
+       "Statement": [
+           {
                "Effect": "Allow",
-               "Principal": {
-                   "AWS": "arn:aws:iam::<SOURCE_ACCOUNT>:<SOURCE_ROLE>"
-               },
                "Action": "sts:AssumeRole",
-               "Condition": {}
-            }
-        ]
-    }
-    ```
+               "Resource": "arn:aws:iam::<TARGET_ACCOUNT>:role/<ROLE_IN_TARGET_ACCOUNT>"
+           }
+       ]
+   }
+   ```
+2. The roles themselves have all the [required permissions](#iam-policy).
+3. The roles have trust relationships that allow them to be assumed by the given credentials.
+   ```json
+   {
+       "Version": "2012-10-17",
+       "Statement": [
+           {
+              "Effect": "Allow",
+              "Principal": {
+                  "AWS": "arn:aws:iam::<SOURCE_ACCOUNT>:<SOURCE_ROLE>"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {}
+           }
+       ]
+   }
+   ```
 
 ## Deployment
 
