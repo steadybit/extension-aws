@@ -5,8 +5,10 @@ package extfis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/fis"
 	"github.com/aws/aws-sdk-go-v2/service/fis/types"
 	"github.com/rs/zerolog/log"
@@ -105,6 +107,11 @@ func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]di
 	client := fis.NewFromConfig(account.AwsConfig)
 	targets, err := GetAllFisTemplates(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
+		var re *awshttp.ResponseError
+		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
+			log.Error().Msgf("Not Authorized to discover fis experiment templates for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS=true. Details: %s", account.AccountNumber, re.Error())
+			return extutil.Ptr([]discovery_kit_api.Target{}), nil
+		}
 		return nil, err
 	}
 	return &targets, nil

@@ -5,9 +5,12 @@ package extaz
 
 import (
 	"context"
+	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	types2 "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
@@ -91,6 +94,11 @@ func GetAllAvailabilityZones(ctx context.Context, ec2Api AZDescribeAvailabilityZ
 		AllAvailabilityZones: aws.Bool(false),
 	})
 	if err != nil {
+		var re *awshttp.ResponseError
+		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
+			log.Error().Msgf("Not Authorized to discover availability zones for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE=true. Details: %s", awsAccountNumber, re.Error())
+			return result, nil
+		}
 		return result, err
 	}
 

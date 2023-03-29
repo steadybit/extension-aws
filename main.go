@@ -52,6 +52,33 @@ type ExtensionListResponse struct {
 }
 
 func getExtensionList() ExtensionListResponse {
+	config := config.Config
+	discoveries := make([]discovery_kit_api.DescribingEndpointReference, 0)
+	if !config.DiscoveryDisabledRds {
+		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
+			"GET",
+			"/rds/instance/discovery",
+		})
+	}
+	if !config.DiscoveryDisabledZone {
+		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
+			"GET",
+			"/az/discovery",
+		})
+	}
+	if !config.DiscoveryDisabledZone {
+		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
+			"GET",
+			"/az/discovery",
+		})
+	}
+	if !config.DiscoveryDisabledFis {
+		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
+			"GET",
+			"/fis/template/discovery",
+		})
+	}
+
 	return ExtensionListResponse{
 		Attacks: []action_kit_api.DescribingEndpointReference{
 			{
@@ -71,24 +98,7 @@ func getExtensionList() ExtensionListResponse {
 				"/fis/experiment/action",
 			},
 		},
-		Discoveries: []discovery_kit_api.DescribingEndpointReference{
-			{
-				"GET",
-				"/rds/instance/discovery",
-			},
-			{
-				"GET",
-				"/az/discovery",
-			},
-			{
-				"GET",
-				"/ec2/instance/discovery",
-			},
-			{
-				"GET",
-				"/fis/template/discovery",
-			},
-		},
+		Discoveries: discoveries,
 		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
 			{
 				"GET",

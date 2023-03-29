@@ -5,9 +5,12 @@ package extrds
 
 import (
 	"context"
+	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
+	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
@@ -107,6 +110,11 @@ func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]di
 	client := rds.NewFromConfig(account.AwsConfig)
 	targets, err := GetAllRdsInstances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
+		var re *awshttp.ResponseError
+		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
+			log.Error().Msgf("Not Authorized to discover rds-instances for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true. Details: %s", account.AccountNumber, re.Error())
+			return extutil.Ptr([]discovery_kit_api.Target{}), nil
+		}
 		return nil, err
 	}
 	return &targets, nil
