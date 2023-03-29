@@ -60,10 +60,10 @@ func getExtensionList() ExtensionListResponse {
 			"/rds/instance/discovery",
 		})
 	}
-	if !config.DiscoveryDisabledZone {
+	if !config.DiscoveryDisabledEc2 {
 		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
 			"GET",
-			"/az/discovery",
+			"/ec2/instance/discovery",
 		})
 	}
 	if !config.DiscoveryDisabledZone {
