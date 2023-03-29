@@ -79,7 +79,7 @@ var customLoggerMiddleware = middleware.InitializeMiddlewareFunc("customLoggerMi
 
 func initializeRoleAssumption(stsServiceForRootAccount *sts.Client, roleArn string, rootAccount AwsAccount) AwsAccount {
 	awsConfig := rootAccount.AwsConfig.Copy()
-	awsConfig.Credentials = stscreds.NewAssumeRoleProvider(stsServiceForRootAccount, roleArn, setSessionName)
+	awsConfig.Credentials = aws.NewCredentialsCache(stscreds.NewAssumeRoleProvider(stsServiceForRootAccount, roleArn, setSessionName))
 
 	stsClient := sts.NewFromConfig(awsConfig)
 	identityOutput, err := stsClient.GetCallerIdentity(context.Background(), nil)
