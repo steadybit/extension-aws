@@ -4,7 +4,7 @@ After=syslog.target
 
 [Service]
 Type=simple
-ExecStart=/opt/steadybit/extension-aws/bin/run.sh
+ExecStart=/opt/steadybit/extension-aws/steadybit-extension-aws
 EnvironmentFile=/etc/steadybit/extension-aws
 User=steadybit
 Group=steadybit

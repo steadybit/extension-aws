@@ -52,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: "Upload packages and invalidate artifacts cache"
-#        if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
         run: |
           REPO_USER="${{ secrets.STEADYBIT_ARTIFACT_SERVER_USERNAME }}:${{ secrets.STEADYBIT_ARTIFACT_SERVER_PASSWORD }}"
 

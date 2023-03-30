@@ -13,7 +13,7 @@
 # chkconfig:         2345 99 01
 ### END INIT INFO
 
-SCRIPT=/opt/steadybit/extension-aws/bin/run.sh
+SCRIPT=/opt/steadybit/extension-aws/steadybit-extension-aws
 RUNAS=steadybit
 
 PIDFILE=/var/run/steadybit-extension-aws.pid
