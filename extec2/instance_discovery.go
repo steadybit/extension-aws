@@ -65,6 +65,144 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 				},
 			},
 		},
+		EnrichmentRules: extutil.Ptr([]discovery_kit_api.TargetEnrichmentRule{
+			{
+				Src: discovery_kit_api.SourceOrDestination{
+					Type: ec2TargetId,
+					Selector: map[string]string{
+						"aws-ec2.hostname.internal": "${dest.host.hostname}",
+					},
+				},
+				Dest: discovery_kit_api.SourceOrDestination{
+					Type: "host",
+					Selector: map[string]string{
+						"host.hostname": "${src.aws-ec2.hostname.internal}",
+					},
+				},
+				Attributes: []discovery_kit_api.Attribute{
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.account",
+					}, {
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.region",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.zone",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.arn",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.image",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.instance.id",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.instance.name",
+					}, {
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.ipv4.private",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.ipv4.public",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.vpc",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.hostname.internal",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.hostname.public",
+					},
+					{
+						Matcher: discovery_kit_api.StartsWith,
+						Name:    "label.",
+					},
+				},
+			},
+			{
+				Src: discovery_kit_api.SourceOrDestination{
+					Type: ec2TargetId,
+					Selector: map[string]string{
+						"aws-ec2.hostname.internal": "${dest.container.host}",
+					},
+				},
+				Dest: discovery_kit_api.SourceOrDestination{
+					Type: "container",
+					Selector: map[string]string{
+						"container.host": "${src.aws-ec2.hostname.internal}",
+					},
+				},
+				Attributes: []discovery_kit_api.Attribute{
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.account",
+					}, {
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.region",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.zone",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.instance.id",
+					},
+					{
+						Matcher: discovery_kit_api.StartsWith,
+						Name:    "label.",
+					},
+				},
+			},
+			{
+				Src: discovery_kit_api.SourceOrDestination{
+					Type: ec2TargetId,
+					Selector: map[string]string{
+						"aws-ec2.hostname.internal": "${dest.container.host}",
+					},
+				},
+				Dest: discovery_kit_api.SourceOrDestination{
+					Type: "application",
+					Selector: map[string]string{
+						"container.host": "${src.aws-ec2.hostname.internal}",
+					},
+				},
+				Attributes: []discovery_kit_api.Attribute{
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.account",
+					}, {
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.region",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws.zone",
+					},
+					{
+						Matcher: discovery_kit_api.Equals,
+						Name:    "aws-ec2.instance.id",
+					},
+					{
+						Matcher: discovery_kit_api.StartsWith,
+						Name:    "label.",
+					},
+				},
+			},
+		}),
 	}
 }
 
