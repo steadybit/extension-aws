@@ -62,9 +62,9 @@ nfpms:
       postinstall: ./linuxpkg/scripts/postinstall.sh
       preremove: ./linuxpkg/scripts/preremove.sh
 
-#    rpm:
-#      signature:
-#        key_file: "${NFPM_KEY_FILE}"
-#    deb:
-#      signature:
-#        key_file: "${NFPM_KEY_FILE}"
+    rpm:
+      signature:
+        key_file: "${NFPM_KEY_FILE}"
+    deb:
+      signature:
+        key_file: "${NFPM_KEY_FILE}"

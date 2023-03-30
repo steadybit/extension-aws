@@ -37,8 +37,7 @@ jobs:
 
       - name: Export GPG key
         run: |
-          mkdir ./keys
-          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > keys/gpg.key
+          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > /tmp/gpg.key
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
@@ -47,7 +46,7 @@ jobs:
           version: latest
           args: release --clean
         env:
-          NFPM_KEY_FILE: keys/gpg.key
+          NFPM_KEY_FILE: /tmp/gpg.key
           NFPM_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
