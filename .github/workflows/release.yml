@@ -30,7 +30,7 @@ jobs:
 
       - name: Export GPG key
         run: |
-          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > ./gpg.key
+          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > /build/gpg.key
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
@@ -40,7 +40,7 @@ jobs:
           args: release --clean
         env:
           NFPM_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
-          NFPM_KEY_FILE: ./gpg.key
+          NFPM_KEY_FILE: /build/gpg.key
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: "Upload packages and invalidate artifacts cache"
