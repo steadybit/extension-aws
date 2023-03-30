@@ -71,3 +71,73 @@ jobs:
             NAME=${{ github.repository }}
             VERSION=${{ steps.meta.outputs.version }}
             REVISION=${{ github.sha }}
+
+  compute-version:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.git_tag_dry_run.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bump version without tagging
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: git_tag_dry_run
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: "patch"
+          DRY_RUN: true
+
+  linux-packages:
+    name: Linux Packages
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    needs: [ compute-version]
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v3
+
+#      - name: Log in to the GitHub container registry
+#        uses: docker/login-action@v2
+#        with:
+#          registry: ${{ env.REGISTRY }}
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Export GPG key
+#        run: |
+#          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > linuxpkg/gpg.key
+
+      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-buildx-action@v2
+      - name: Build packages using docker
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          file: Dockerfile.linuxpkg
+          platforms: linux/arm64
+#          platforms: linux/amd64,linux/arm64
+          outputs: type=local,dest=./target/
+          build-args: |
+            VERSION=${{ needs.compute-version.outputs.version || '1.0.0-SNAPSHOT' }}
+            NFPM_PASSPHRASE=${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
+            NFPM_KEY_FILE=/build/gpg.key
+            NAME=${{ github.repository }}
+            REVISION=${{ github.sha }}
+
+      - name: "Upload packages and invalidate artifacts cache"
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+        run: |
+          REPO_USER="${{ secrets.STEADYBIT_ARTIFACT_SERVER_USERNAME }}:${{ secrets.STEADYBIT_ARTIFACT_SERVER_PASSWORD }}"
+          
+          echo "Uploading deb packages to artifacts server"
+          find ./target -name '*.deb' -type f -exec curl -u "$REPO_USER" -X POST -H "Content-Type: multipart/form-data" --data-binary "@{}" https://artifacts.steadybit.io/repository/deb-internal/ \;
+          echo "Uploading rpm packages to artifacts server"
+          find ./target -name '*.rpm' -type f -exec curl -u "$REPO_USER" --upload-file {} https://artifacts.steadybit.io/repository/yum-internal/ \;
+          
+          echo "Invalidating artifacts server cache"
+          curl -X POST -u $REPO_USER https://artifacts.steadybit.io/service/rest/v1/repositories/yum-proxy/invalidate-cache
+          curl -X POST -u $REPO_USER https://artifacts.steadybit.io/service/rest/v1/repositories/yum-public/invalidate-cache
+          curl -X POST -u $REPO_USER https://artifacts.steadybit.io/service/rest/v1/repositories/deb-public/invalidate-cache            

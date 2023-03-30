@@ -1,0 +1,18 @@
+[Unit]
+Description="steadybit extension aws"
+After=syslog.target
+
+[Service]
+Type=simple
+ExecStart=/opt/steadybit/extension-aws/bin/run.sh
+EnvironmentFile=/etc/steadybit/extension-aws
+User=steadybit
+Group=steadybit
+SuccessExitStatus=0 143
+Restart=on-failure
+RestartSec=5s
+StandardOutput=file:/var/log/steadybit-extension-aws.log
+StandardError=file:/var/log/steadybit-extension-aws.log
+
+[Install]
+WantedBy=multi-user.target
