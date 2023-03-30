@@ -41,7 +41,7 @@ jobs:
           args: release --clean
         env:
           NFPM_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
-          NFPM_KEY_FILE: ./dist/gpg.key
+#          NFPM_KEY_FILE: ./dist/gpg.key
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: "Upload packages and invalidate artifacts cache"
