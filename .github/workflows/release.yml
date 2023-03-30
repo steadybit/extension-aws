@@ -28,10 +28,17 @@ jobs:
         with:
           go-version: '^1.19.0'
 
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
+
       - name: Export GPG key
         run: |
-          mkdir ./dist
-          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > ./dist/gpg.key
+          mkdir ./keys
+          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > keys/gpg.key
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
@@ -40,8 +47,8 @@ jobs:
           version: latest
           args: release --clean
         env:
+          NFPM_KEY_FILE: keys/gpg.key
           NFPM_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
-#          NFPM_KEY_FILE: ./dist/gpg.key
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: "Upload packages and invalidate artifacts cache"
