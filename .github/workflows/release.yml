@@ -28,6 +28,11 @@ jobs:
         with:
           go-version: '^1.19.0'
 
+      - name: Export GPG key
+        run: |
+          mkdir ./dist
+          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > ./dist/gpg.key
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
@@ -36,7 +41,7 @@ jobs:
           args: release --clean
         env:
           NFPM_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
-          NFPM_KEY_FILE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          NFPM_KEY_FILE: ./dist/gpg.key
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: "Upload packages and invalidate artifacts cache"
