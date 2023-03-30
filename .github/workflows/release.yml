@@ -3,8 +3,8 @@ name: Release
 on:
   push:
     # run only against tags
-    tags:
-      - 'v*'
+#    tags:
+#      - 'v*'
 
 permissions:
   contents: write
