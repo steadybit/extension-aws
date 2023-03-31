@@ -25,7 +25,11 @@ cleanup() {
 
 cleanInstall() {
   if [ -n "$STEADYBIT_LOG_LEVEL" ]; then
-    sed -i "s/^$STEADYBIT_LOG_LEVEL=.*/$STEADYBIT_LOG_LEVEL=$(echo "$$STEADYBIT_LOG_LEVEL" | sed 's,/,\\/,g')/" /etc/steadybit/extension-aws
+    sed -i "s/^STEADYBIT_LOG_LEVEL=.*/STEADYBIT_LOG_LEVEL=$(echo "$STEADYBIT_LOG_LEVEL" | sed 's,/,\\/,g')/" /etc/steadybit/extension-aws
+  fi
+
+  if [ -n "$AWS_REGION" ]; then
+    sed -i "s/^AWS_REGION=.*/AWS_REGION=$(echo "$AWS_REGION" | sed 's,/,\\/,g')/" /etc/steadybit/extension-aws
   fi
 
   # enable the service in the proper way for this platform
