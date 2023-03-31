@@ -28,12 +28,10 @@ jobs:
         with:
           go-version: '^1.19.0'
 
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
+      - name: Export GPG key
+        run: |
+          mkdir -p gpg
+          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > gpg.key
 
       - name: Export GPG key
         run: |
@@ -45,17 +43,15 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-#          args: release --clean
-          args: release --clean --snapshot
+          args: release --clean
+#          args: release --clean --snapshot
         env:
           NFPM_KEY_FILE: gpg.key
-#          NFPM_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
           NFPM_DEFAULT_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
-#          NFPM_DEFAULT_RPM_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: "Upload packages and invalidate artifacts cache"
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+#        if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
         run: |
           REPO_USER="${{ secrets.STEADYBIT_ARTIFACT_SERVER_USERNAME }}:${{ secrets.STEADYBIT_ARTIFACT_SERVER_PASSWORD }}"
 
