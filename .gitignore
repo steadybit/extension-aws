@@ -4,3 +4,4 @@ extension-aws.iml
 dist/
 
 gpg/gpg.key
+gpg.key
