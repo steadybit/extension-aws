@@ -11,6 +11,7 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extconversion"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
@@ -25,15 +26,27 @@ func RegisterEc2AttackHandlers() {
 
 func getInstanceStateAttackDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.state", ec2TargetId),
+		Id:          ec2InstanceStateActionId,
 		Label:       "Change Instance State",
 		Description: "Reboot, terminate, stop or hibernate EC2 instances",
-		Version:     "1.0.0",
+		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(ec2Icon),
 		TargetType:  extutil.Ptr(ec2TargetId),
 		Category:    extutil.Ptr("state"),
 		TimeControl: action_kit_api.Instantaneous,
 		Kind:        action_kit_api.Attack,
+		TargetSelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			{
+				Label:       "by instance-id",
+				Description: extutil.Ptr("Find ec2-instance by instance-id"),
+				Query:       "aws-ec2.instance.id=\"\"",
+			},
+			{
+				Label:       "by instance-name",
+				Description: extutil.Ptr("Find ec2-instance by instance-name"),
+				Query:       "aws-ec2.instance.name=\"\"",
+			},
+		}),
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:        "action",
