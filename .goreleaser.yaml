@@ -1,0 +1,70 @@
+project_name: steadybit-extension-aws
+before:
+  hooks:
+    - go mod download
+release:
+  prerelease: false
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+nfpms:
+  # note that this is an array of nfpm configs
+  - package_name: "steadybit-extension-aws"
+    file_name_template: "{{ .ConventionalFileName }}"
+    formats:
+      - deb
+      - rpm
+    maintainer: "Ansgar Schulte <ansgar.schulte@steadybit.com>"
+    description: |
+      Steadybit Extension AWS
+    vendor: "steadybit GmbH"
+    homepage: "https://steadybit.com"
+    license: "Steadybit license"
+    builds:
+      - steadybit-extension-aws
+    bindir: /opt/steadybit/extension-aws
+    contents:
+      - src: ./linuxpkg/config/systemd/steadybit-extension-aws.service
+        dst: /usr/lib/systemd/system/steadybit-extension-aws.service
+      - src: ./linuxpkg/config/init.d/steadybit-extension-aws
+        dst: /etc/init.d/steadybit-extension-aws
+        type: config
+      - src: ./linuxpkg/config/etc/steadybit/extension-aws
+        dst: /etc/steadybit/extension-aws
+        type: config|noreplace
+      - src: ./linuxpkg/config/etc/logrotate.d/steadybit-extension-aws
+        dst: /etc/logrotate.d/steadybit-extension-aws
+        type: config
+
+    scripts:
+      preinstall: ./linuxpkg/scripts/preinstall.sh
+      postinstall: ./linuxpkg/scripts/postinstall.sh
+      preremove: ./linuxpkg/scripts/preremove.sh
+
+    rpm:
+      signature:
+        key_file: ./gpg.key
+    deb:
+      signature:
+        key_file: ./gpg.key
