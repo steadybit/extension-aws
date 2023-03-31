@@ -3,8 +3,8 @@ name: Release
 on:
   push:
     # run only against tags
-#    tags:
-#      - 'v*'
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -33,25 +33,19 @@ jobs:
           mkdir -p gpg
           echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > gpg.key
 
-      - name: Export GPG key
-        run: |
-          mkdir -p gpg
-          echo -n "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > gpg.key
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
           version: latest
           args: release --clean
-#          args: release --clean --snapshot
         env:
           NFPM_KEY_FILE: gpg.key
           NFPM_DEFAULT_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: "Upload packages and invalidate artifacts cache"
-#        if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
         run: |
           REPO_USER="${{ secrets.STEADYBIT_ARTIFACT_SERVER_USERNAME }}:${{ secrets.STEADYBIT_ARTIFACT_SERVER_PASSWORD }}"
 
