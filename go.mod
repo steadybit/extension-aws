@@ -14,6 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/fis v1.14.6
 	github.com/aws/aws-sdk-go-v2/service/rds v1.40.7
 	github.com/aws/aws-sdk-go-v2/service/sts v1.18.7
+	github.com/aws/smithy-go v1.13.5
 	github.com/docker/go-connections v0.4.0
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -21,8 +22,9 @@ require (
 	github.com/rs/zerolog v1.29.0
 	github.com/sosodev/duration v1.0.1
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.4.2
+	github.com/steadybit/action-kit/go/action_kit_sdk v0.0.0-20230403124517-636f90ec4847
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.2.0
-	github.com/steadybit/extension-kit v1.7.3
+	github.com/steadybit/extension-kit v1.7.4
 	github.com/stretchr/testify v1.8.2
 	github.com/testcontainers/testcontainers-go v0.19.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.19.0
@@ -37,7 +39,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.25 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.12.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.14.6 // indirect
-	github.com/aws/smithy-go v1.13.5 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/containerd/containerd v1.6.19 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect

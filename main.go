@@ -5,6 +5,7 @@ package main
 
 import (
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
+	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/extaz"
@@ -37,7 +38,7 @@ func main() {
 	extec2.RegisterEc2AttackHandlers()
 
 	extfis.RegisterFisInstanceDiscoveryHandlers()
-	extfis.RegisterFisActionHandlers()
+	action_kit_sdk.RegisterAction(extfis.NewFisExperimentAction())
 
 	exthttp.Listen(exthttp.ListenOpts{
 		Port: 8085,
@@ -95,7 +96,7 @@ func getExtensionList() ExtensionListResponse {
 			},
 			{
 				"GET",
-				"/fis/experiment/action",
+				"/" + extfis.FisActionId,
 			},
 		},
 		Discoveries: discoveries,

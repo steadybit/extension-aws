@@ -5,34 +5,42 @@ package extfis
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/fis"
 	"github.com/aws/aws-sdk-go-v2/service/fis/types"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
+	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extconversion"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
 	"sort"
 )
 
-func RegisterFisActionHandlers() {
-	exthttp.RegisterHttpHandler("/fis/experiment/action", exthttp.GetterAsHandler(getFisExperimentActionDescription))
-	exthttp.RegisterHttpHandler("/fis/experiment/action/prepare", prepareExperiment)
-	exthttp.RegisterHttpHandler("/fis/experiment/action/start", startExperiment)
-	exthttp.RegisterHttpHandler("/fis/experiment/action/status", statusExperiment)
-	exthttp.RegisterHttpHandler("/fis/experiment/action/stop", stopExperiment)
+type FisExperimentAction struct {
 }
 
-func getFisExperimentActionDescription() action_kit_api.ActionDescription {
+type FisExperimentState struct {
+	Account      string
+	ExperimentId string
+	TemplateId   string
+	LastSummary  string
+	ExecutionId  uuid.UUID
+}
+
+func (f FisExperimentAction) NewEmptyState() FisExperimentState {
+	return FisExperimentState{}
+}
+
+func NewFisExperimentAction() action_kit_sdk.Action[FisExperimentState] {
+	return FisExperimentAction{}
+}
+
+func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fisActionId,
+		Id:          FisActionId,
 		Label:       "AWS FIS Experiment",
 		Description: "Start an AWS FIS experiment",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
@@ -50,63 +58,19 @@ func getFisExperimentActionDescription() action_kit_api.ActionDescription {
 				DefaultValue: extutil.Ptr("60s"),
 			},
 		},
-		Prepare: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   "/fis/experiment/action/prepare",
-		},
-		Start: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   "/fis/experiment/action/start",
-		},
+		Prepare: action_kit_api.MutatingEndpointReference{},
+		Start:   action_kit_api.MutatingEndpointReference{},
 		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
-			Method:       "POST",
-			Path:         "/fis/experiment/action/status",
 			CallInterval: extutil.Ptr("5s"),
 		}),
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   "/fis/experiment/action/stop",
-		}),
+		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
-type FisExperimentState struct {
-	Account      string
-	ExperimentId string
-	TemplateId   string
-	LastSummary  string
-	ExecutionId  uuid.UUID
-}
-
-func prepareExperiment(w http.ResponseWriter, _ *http.Request, body []byte) {
-	state, extKitErr := PrepareExperiment(body)
-	if extKitErr != nil {
-		exthttp.WriteError(w, *extKitErr)
-		return
-	}
-
-	var convertedState action_kit_api.ActionState
-	err := extconversion.Convert(*state, &convertedState)
-	if err != nil {
-		exthttp.WriteError(w, extension_kit.ToError("Failed to encode action state", err))
-		return
-	}
-
-	exthttp.WriteBody(w, extutil.Ptr(action_kit_api.PrepareResult{
-		State: convertedState,
-	}))
-}
-
-func PrepareExperiment(body []byte) (*FisExperimentState, *extension_kit.ExtensionError) {
-	var request action_kit_api.PrepareActionRequestBody
-	err := json.Unmarshal(body, &request)
-	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
-	}
-
+func (f FisExperimentAction) Prepare(ctx context.Context, state *FisExperimentState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	templateId := request.Target.Attributes["aws.fis.experiment.template.id"]
 	if templateId == nil || len(templateId) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.fis.experiment.template.id' target attribute.", nil))
+		return nil, extension_kit.ToError("Target is missing the 'aws.fis.experiment.template.id' target attribute.", nil)
 	}
 
 	account := request.Target.Attributes["aws.account"]
@@ -114,53 +78,27 @@ func PrepareExperiment(body []byte) (*FisExperimentState, *extension_kit.Extensi
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
 	}
 
-	return extutil.Ptr(FisExperimentState{
-		Account:     account[0],
-		TemplateId:  templateId[0],
-		ExecutionId: request.ExecutionId,
-	}), nil
+	state.TemplateId = templateId[0]
+	state.Account = account[0]
+	state.ExecutionId = request.ExecutionId
+	return nil, nil
 }
 
-func startExperiment(w http.ResponseWriter, r *http.Request, body []byte) {
-	state, err := StartExperiment(r.Context(), body, func(account string) (FisStartExperimentClient, error) {
+func (f FisExperimentAction) Start(ctx context.Context, state *FisExperimentState) (*action_kit_api.StartResult, error) {
+	return startExperiment(ctx, state, func(account string) (FisStartExperimentClient, error) {
 		awsAccount, err := utils.Accounts.GetAccount(account)
 		if err != nil {
 			return nil, err
 		}
 		return fis.NewFromConfig(awsAccount.AwsConfig), nil
 	})
-	if err != nil {
-		exthttp.WriteError(w, *err)
-	} else {
-		var convertedState action_kit_api.ActionState
-		err := extconversion.Convert(state, &convertedState)
-		if err != nil {
-			exthttp.WriteError(w, extension_kit.ToError("Failed to encode action state", err))
-		} else {
-			exthttp.WriteBody(w, action_kit_api.PrepareResult{
-				State: convertedState,
-			})
-		}
-	}
 }
 
 type FisStartExperimentClient interface {
 	StartExperiment(ctx context.Context, params *fis.StartExperimentInput, optFns ...func(*fis.Options)) (*fis.StartExperimentOutput, error)
 }
 
-func StartExperiment(ctx context.Context, body []byte, clientProvider func(account string) (FisStartExperimentClient, error)) (*FisExperimentState, *extension_kit.ExtensionError) {
-	var request action_kit_api.StartActionRequestBody
-	err := json.Unmarshal(body, &request)
-	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
-	}
-
-	var state FisExperimentState
-	err = extconversion.Convert(request.State, &state)
-	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse action state", err))
-	}
-
+func startExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string) (FisStartExperimentClient, error)) (*action_kit_api.StartResult, error) {
 	client, err := clientProvider(state.Account)
 	if err != nil {
 		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize FIS client for AWS account %s", state.Account), err))
@@ -182,41 +120,24 @@ func StartExperiment(ctx context.Context, body []byte, clientProvider func(accou
 	}
 
 	state.ExperimentId = *response.Experiment.Id
-	return &state, nil
+	return nil, nil
 }
 
-func statusExperiment(w http.ResponseWriter, r *http.Request, body []byte) {
-	result, err := StatusExperiment(r.Context(), body, func(account string) (FisStatusExperimentClient, error) {
+func (f FisExperimentAction) Status(ctx context.Context, state *FisExperimentState) (*action_kit_api.StatusResult, error) {
+	return statusExperiment(ctx, state, func(account string) (FisStatusExperimentClient, error) {
 		awsAccount, err := utils.Accounts.GetAccount(account)
 		if err != nil {
 			return nil, err
 		}
 		return fis.NewFromConfig(awsAccount.AwsConfig), nil
 	})
-	if err != nil {
-		exthttp.WriteError(w, *err)
-	} else {
-		exthttp.WriteBody(w, result)
-	}
 }
 
 type FisStatusExperimentClient interface {
 	GetExperiment(ctx context.Context, params *fis.GetExperimentInput, optFns ...func(*fis.Options)) (*fis.GetExperimentOutput, error)
 }
 
-func StatusExperiment(ctx context.Context, body []byte, clientProvider func(account string) (FisStatusExperimentClient, error)) (*action_kit_api.StatusResult, *extension_kit.ExtensionError) {
-	var request action_kit_api.ActionStatusRequestBody
-	err := json.Unmarshal(body, &request)
-	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
-	}
-
-	var state FisExperimentState
-	err = extconversion.Convert(request.State, &state)
-	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to decode action state", err))
-	}
-
+func statusExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string) (FisStatusExperimentClient, error)) (*action_kit_api.StatusResult, error) {
 	client, err := clientProvider(state.Account)
 	if err != nil {
 		return nil, extutil.Ptr(extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err))
@@ -252,13 +173,6 @@ func StatusExperiment(ctx context.Context, body []byte, clientProvider func(acco
 		}
 	}
 
-	var convertedState action_kit_api.ActionState
-	err = extconversion.Convert(state, &convertedState)
-	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to encode action state", err))
-	}
-	result.State = &convertedState
-
 	return &result, nil
 }
 
@@ -290,33 +204,17 @@ type FisStopExperimentClient interface {
 	StopExperiment(ctx context.Context, params *fis.StopExperimentInput, optFns ...func(*fis.Options)) (*fis.StopExperimentOutput, error)
 }
 
-func stopExperiment(w http.ResponseWriter, r *http.Request, body []byte) {
-	result, err := StopExperiment(r.Context(), body, func(account string) (FisStopExperimentClient, error) {
+func (f FisExperimentAction) Stop(ctx context.Context, state *FisExperimentState) (*action_kit_api.StopResult, error) {
+	return stopExperiment(ctx, state, func(account string) (FisStopExperimentClient, error) {
 		awsAccount, err := utils.Accounts.GetAccount(account)
 		if err != nil {
 			return nil, err
 		}
 		return fis.NewFromConfig(awsAccount.AwsConfig), nil
 	})
-	if err != nil {
-		exthttp.WriteError(w, *err)
-	} else {
-		exthttp.WriteBody(w, result)
-	}
 }
-func StopExperiment(ctx context.Context, body []byte, clientProvider func(account string) (FisStopExperimentClient, error)) (*action_kit_api.StopResult, *extension_kit.ExtensionError) {
-	var request action_kit_api.ActionStatusRequestBody
-	err := json.Unmarshal(body, &request)
-	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to parse request body", err))
-	}
 
-	var state FisExperimentState
-	err = extconversion.Convert(request.State, &state)
-	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to decode action state", err))
-	}
-
+func stopExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string) (FisStopExperimentClient, error)) (*action_kit_api.StopResult, error) {
 	client, err := clientProvider(state.Account)
 	if err != nil {
 		return nil, extutil.Ptr(extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err))
@@ -339,6 +237,6 @@ func StopExperiment(ctx context.Context, body []byte, clientProvider func(accoun
 	} else {
 		log.Debug().Msgf("Experiment already in state %s.", status)
 	}
-	return extutil.Ptr(action_kit_api.StopResult{}), nil
+	return nil, nil
 
 }
