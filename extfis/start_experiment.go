@@ -30,12 +30,17 @@ type FisExperimentState struct {
 	ExecutionId  uuid.UUID
 }
 
-func (f FisExperimentAction) NewEmptyState() FisExperimentState {
-	return FisExperimentState{}
-}
-
 func NewFisExperimentAction() action_kit_sdk.Action[FisExperimentState] {
 	return FisExperimentAction{}
+}
+
+// Make sure FisExperimentAction implements all required interfaces
+var _ action_kit_sdk.Action[FisExperimentState] = (*FisExperimentAction)(nil)
+var _ action_kit_sdk.ActionWithStatus[FisExperimentState] = (*FisExperimentAction)(nil)
+var _ action_kit_sdk.ActionWithStop[FisExperimentState] = (*FisExperimentAction)(nil)
+
+func (f FisExperimentAction) NewEmptyState() FisExperimentState {
+	return FisExperimentState{}
 }
 
 func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
