@@ -47,15 +47,6 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(0),
 			},
 			{
-				Name:         "exceptionMsg",
-				Label:        "Message",
-				Description:  extutil.Ptr("Message of the thrown exception."),
-				Type:         action_kit_api.String,
-				DefaultValue: extutil.Ptr("Injected exception"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(1),
-			},
-			{
 				Name:         "rate",
 				Label:        "Rate",
 				Description:  extutil.Ptr("The rate of invocations to affect."),
@@ -63,6 +54,15 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 				DefaultValue: extutil.Ptr("100"),
 				Required:     extutil.Ptr(true),
 				Order:        extutil.Ptr(1),
+			},
+			{
+				Name:         "exceptionMsg",
+				Label:        "Message",
+				Description:  extutil.Ptr("Message of the thrown exception."),
+				Type:         action_kit_api.String,
+				DefaultValue: extutil.Ptr("Injected exception"),
+				Required:     extutil.Ptr(true),
+				Order:        extutil.Ptr(2),
 			},
 		},
 		Prepare: action_kit_api.MutatingEndpointReference{

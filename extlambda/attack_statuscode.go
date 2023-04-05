@@ -47,15 +47,6 @@ func getInjectStatusCodeDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(0),
 			},
 			{
-				Name:         "statuscode",
-				Label:        "Status Code",
-				Description:  extutil.Ptr("The status code to return."),
-				Type:         action_kit_api.Integer,
-				DefaultValue: extutil.Ptr("500"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(1),
-			},
-			{
 				Name:         "rate",
 				Label:        "Rate",
 				Description:  extutil.Ptr("The rate of invocations to affect."),
@@ -63,6 +54,15 @@ func getInjectStatusCodeDescription() action_kit_api.ActionDescription {
 				DefaultValue: extutil.Ptr("100"),
 				Required:     extutil.Ptr(true),
 				Order:        extutil.Ptr(1),
+			},
+			{
+				Name:         "statuscode",
+				Label:        "Status Code",
+				Description:  extutil.Ptr("The status code to return."),
+				Type:         action_kit_api.Integer,
+				DefaultValue: extutil.Ptr("500"),
+				Required:     extutil.Ptr(true),
+				Order:        extutil.Ptr(2),
 			},
 		},
 		Prepare: action_kit_api.MutatingEndpointReference{

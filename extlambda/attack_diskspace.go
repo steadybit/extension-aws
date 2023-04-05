@@ -47,15 +47,6 @@ func getDiskspaceDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(0),
 			},
 			{
-				Name:         "diskSpace",
-				Label:        "Megabytes",
-				Description:  extutil.Ptr("Size in MB of the file created in tmp."),
-				Type:         action_kit_api.Integer,
-				DefaultValue: nil,
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(1),
-			},
-			{
 				Name:         "rate",
 				Label:        "Rate",
 				Description:  extutil.Ptr("The rate of invocations to affect."),
@@ -63,6 +54,15 @@ func getDiskspaceDescription() action_kit_api.ActionDescription {
 				DefaultValue: extutil.Ptr("100"),
 				Required:     extutil.Ptr(true),
 				Order:        extutil.Ptr(1),
+			},
+			{
+				Name:         "diskSpace",
+				Label:        "Megabytes",
+				Description:  extutil.Ptr("Size in MB of the file created in tmp."),
+				Type:         action_kit_api.Integer,
+				DefaultValue: nil,
+				Required:     extutil.Ptr(true),
+				Order:        extutil.Ptr(2),
 			},
 		},
 		Prepare: action_kit_api.MutatingEndpointReference{

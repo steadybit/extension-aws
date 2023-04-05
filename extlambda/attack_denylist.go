@@ -47,15 +47,6 @@ func getDenylistDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(0),
 			},
 			{
-				Name:         "denylist",
-				Label:        "Message",
-				Description:  extutil.Ptr("List of regular expressions to match the hosts against"),
-				Type:         action_kit_api.StringArray,
-				DefaultValue: nil,
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(1),
-			},
-			{
 				Name:         "rate",
 				Label:        "Rate",
 				Description:  extutil.Ptr("The rate of invocations to affect."),
@@ -63,6 +54,15 @@ func getDenylistDescription() action_kit_api.ActionDescription {
 				DefaultValue: extutil.Ptr("100"),
 				Required:     extutil.Ptr(true),
 				Order:        extutil.Ptr(1),
+			},
+			{
+				Name:         "denylist",
+				Label:        "Deny list",
+				Description:  extutil.Ptr("List of regular expressions to match the hosts against"),
+				Type:         action_kit_api.String1,
+				DefaultValue: nil,
+				Required:     extutil.Ptr(true),
+				Order:        extutil.Ptr(2),
 			},
 		},
 		Prepare: action_kit_api.MutatingEndpointReference{
