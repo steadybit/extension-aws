@@ -25,7 +25,6 @@ func main() {
 	config.ParseConfiguration()
 	utils.InitializeAwsAccountAccess(config.Config)
 
-	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	utils.RegisterCommonDiscoveryHandlers()
 
 	extrds.RegisterRdsDiscoveryHandlers()
@@ -40,13 +39,14 @@ func main() {
 	extfis.RegisterFisInstanceDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extfis.NewFisExperimentAction())
 
+	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	exthttp.Listen(exthttp.ListenOpts{
 		Port: 8085,
 	})
 }
 
 type ExtensionListResponse struct {
-	Attacks          []action_kit_api.DescribingEndpointReference    `json:"attacks"`
+	Actions          []action_kit_api.DescribingEndpointReference    `json:"actions"`
 	Discoveries      []discovery_kit_api.DescribingEndpointReference `json:"discoveries"`
 	TargetTypes      []discovery_kit_api.DescribingEndpointReference `json:"targetTypes"`
 	TargetAttributes []discovery_kit_api.DescribingEndpointReference `json:"targetAttributes"`
@@ -80,25 +80,24 @@ func getExtensionList() ExtensionListResponse {
 		})
 	}
 
-	return ExtensionListResponse{
-		Attacks: []action_kit_api.DescribingEndpointReference{
-			{
-				"GET",
-				"/rds/instance/attack/reboot",
-			},
-			{
-				"GET",
-				"/ec2/instance/attack/state",
-			},
-			{
-				"GET",
-				"/az/attack/blackhole",
-			},
-			{
-				"GET",
-				"/" + extfis.FisActionId,
-			},
+	actions := action_kit_sdk.RegisteredActionsEndpoints()
+	actions = append(actions,
+		action_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/rds/instance/attack/reboot",
 		},
+		action_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/ec2/instance/attack/state",
+		},
+		action_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/az/attack/blackhole",
+		},
+	)
+
+	return ExtensionListResponse{
+		Actions:     actions,
 		Discoveries: discoveries,
 		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
 			{
