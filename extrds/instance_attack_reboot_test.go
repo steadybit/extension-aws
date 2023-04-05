@@ -5,10 +5,10 @@ package extrds
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
+	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -26,14 +26,16 @@ func TestPrepareInstanceReboot(t *testing.T) {
 			},
 		}),
 	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+
+	attack := NewRdsInstanceAttack()
+	state := attack.NewEmptyState()
 
 	// When
-	state, attackErr := PrepareInstanceReboot(requestBodyJson)
+	result, err := attack.Prepare(context.Background(), &state, requestBody)
 
 	// Then
-	assert.Nil(t, attackErr)
+	assert.Nil(t, err)
+	assert.Nil(t, result)
 	assert.Equal(t, "my-instance", state.DBInstanceIdentifier)
 }
 
@@ -46,15 +48,16 @@ func TestPrepareInstanceRebootMustRequireAnInstanceId(t *testing.T) {
 			},
 		}),
 	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+
+	attack := NewRdsInstanceAttack()
+	state := attack.NewEmptyState()
 
 	// When
-	state, attackErr := PrepareInstanceReboot(requestBodyJson)
+	result, err := attack.Prepare(context.Background(), &state, requestBody)
 
 	// Then
-	assert.Nil(t, state)
-	assert.Contains(t, attackErr.Title, "aws.rds.instance.id")
+	assert.Nil(t, result)
+	assert.Contains(t, err.(*extension_kit.ExtensionError).Title, "aws.rds.instance.id")
 }
 
 func TestPrepareInstanceRebootMustRequireAnAccountId(t *testing.T) {
@@ -66,32 +69,16 @@ func TestPrepareInstanceRebootMustRequireAnAccountId(t *testing.T) {
 			},
 		}),
 	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+
+	attack := NewRdsInstanceAttack()
+	state := attack.NewEmptyState()
 
 	// When
-	state, attackErr := PrepareInstanceReboot(requestBodyJson)
+	result, err := attack.Prepare(context.Background(), &state, requestBody)
 
 	// Then
-	assert.Nil(t, state)
-	assert.Contains(t, attackErr.Title, "aws.account")
-}
-
-func TestPrepareInstanceRebootMustFailOnInvalidBody(t *testing.T) {
-	// When
-	state, attackErr := PrepareInstanceReboot([]byte{})
-
-	// Then
-	assert.Nil(t, state)
-	assert.Contains(t, attackErr.Title, "Failed to parse request body")
-}
-
-func TestStartInstanceRebootMustFailOnInvalidBody(t *testing.T) {
-	// When
-	attackErr := StartInstanceReboot(context.Background(), []byte{}, nil)
-
-	// Then
-	assert.Contains(t, attackErr.Title, "Failed to parse request body")
+	assert.Nil(t, result)
+	assert.Contains(t, err.(*extension_kit.ExtensionError).Title, "aws.account")
 }
 
 type rdsRebootDBInstanceApiMock struct {
@@ -110,42 +97,36 @@ func TestStartInstanceReboot(t *testing.T) {
 		require.Equal(t, "dev-db", *params.DBInstanceIdentifier)
 		return true
 	})).Return(nil, nil)
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"DBInstanceIdentifier": "dev-db",
-			"Account":              "42",
-		},
+	state := RdsInstanceAttackState{
+		DBInstanceIdentifier: "dev-db",
+		Account:              "42",
 	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
 
 	// When
-	attackError := StartInstanceReboot(context.Background(), requestBodyJson, func(account string) (RdsRebootDBInstanceClient, error) {
+	result, err := startAttack(context.Background(), &state, func(account string) (RdsRebootDBInstanceClient, error) {
 		assert.Equal(t, "42", account)
 		return mockedApi, nil
 	})
 
 	// Then
-	assert.Nil(t, attackError)
+	assert.Nil(t, err)
+	assert.Nil(t, result)
 }
 
 func TestStartInstanceRebootForwardRebootError(t *testing.T) {
 	// Given
 	mockedApi := new(rdsRebootDBInstanceApiMock)
 	mockedApi.On("RebootDBInstance", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"DBInstanceIdentifier": "dev-db",
-		},
+	state := RdsInstanceAttackState{
+		DBInstanceIdentifier: "dev-db",
 	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
 
 	// When
-	attackError := StartInstanceReboot(context.Background(), requestBodyJson, func(account string) (RdsRebootDBInstanceClient, error) {
+	result, err := startAttack(context.Background(), &state, func(account string) (RdsRebootDBInstanceClient, error) {
 		return mockedApi, nil
 	})
 
 	// Then
-	assert.Equal(t, "Failed to execute database instance reboot", attackError.Title)
+	assert.Nil(t, result)
+	assert.Equal(t, "Failed to execute database instance reboot", err.(*extension_kit.ExtensionError).Title)
 }

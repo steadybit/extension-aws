@@ -28,7 +28,7 @@ func main() {
 	utils.RegisterCommonDiscoveryHandlers()
 
 	extrds.RegisterRdsDiscoveryHandlers()
-	extrds.RegisterRdsAttackHandlers()
+	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceAttack())
 
 	extaz.RegisterAZDiscoveryHandlers()
 	extaz.RegisterAZAttackHandlers()
@@ -53,39 +53,35 @@ type ExtensionListResponse struct {
 }
 
 func getExtensionList() ExtensionListResponse {
-	config := config.Config
+	cfg := config.Config
 	discoveries := make([]discovery_kit_api.DescribingEndpointReference, 0)
-	if !config.DiscoveryDisabledRds {
+	if !cfg.DiscoveryDisabledRds {
 		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
-			"GET",
-			"/rds/instance/discovery",
+			Method: "GET",
+			Path:   "/rds/instance/discovery",
 		})
 	}
-	if !config.DiscoveryDisabledEc2 {
+	if !cfg.DiscoveryDisabledEc2 {
 		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
-			"GET",
-			"/ec2/instance/discovery",
+			Method: "GET",
+			Path:   "/ec2/instance/discovery",
 		})
 	}
-	if !config.DiscoveryDisabledZone {
+	if !cfg.DiscoveryDisabledZone {
 		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
-			"GET",
-			"/az/discovery",
+			Method: "GET",
+			Path:   "/az/discovery",
 		})
 	}
-	if !config.DiscoveryDisabledFis {
+	if !cfg.DiscoveryDisabledFis {
 		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
-			"GET",
-			"/fis/template/discovery",
+			Method: "GET",
+			Path:   "/fis/template/discovery",
 		})
 	}
 
 	actions := action_kit_sdk.RegisteredActionsEndpoints()
 	actions = append(actions,
-		action_kit_api.DescribingEndpointReference{
-			Method: "GET",
-			Path:   "/rds/instance/attack/reboot",
-		},
 		action_kit_api.DescribingEndpointReference{
 			Method: "GET",
 			Path:   "/ec2/instance/attack/state",
@@ -101,37 +97,37 @@ func getExtensionList() ExtensionListResponse {
 		Discoveries: discoveries,
 		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
 			{
-				"GET",
-				"/rds/instance/discovery/target-description",
+				Method: "GET",
+				Path:   "/rds/instance/discovery/target-description",
 			}, {
-				"GET",
-				"/az/discovery/target-description",
+				Method: "GET",
+				Path:   "/az/discovery/target-description",
 			},
 			{
-				"GET",
-				"/ec2/instance/discovery/target-description",
+				Method: "GET",
+				Path:   "/ec2/instance/discovery/target-description",
 			},
 			{
-				"GET",
-				"/fis/template/discovery/target-description",
+				Method: "GET",
+				Path:   "/fis/template/discovery/target-description",
 			},
 		},
 		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
 			{
-				"GET",
-				"/rds/instance/discovery/attribute-descriptions",
+				Method: "GET",
+				Path:   "/rds/instance/discovery/attribute-descriptions",
 			},
 			{
-				"GET",
-				"/ec2/instance/discovery/attribute-descriptions",
+				Method: "GET",
+				Path:   "/ec2/instance/discovery/attribute-descriptions",
 			},
 			{
-				"GET",
-				"/fis/template/discovery/attribute-descriptions",
+				Method: "GET",
+				Path:   "/fis/template/discovery/attribute-descriptions",
 			},
 			{
-				"GET",
-				"/common/discovery/attribute-descriptions",
+				Method: "GET",
+				Path:   "/common/discovery/attribute-descriptions",
 			},
 		},
 	}
