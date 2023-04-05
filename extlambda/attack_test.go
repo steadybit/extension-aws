@@ -227,10 +227,13 @@ func Test_injectException(t *testing.T) {
 	assert.EqualValues(t, true, config.IsEnabled)
 }
 
+func toGenericArray(arr ...interface{}) []interface{} {
+	return arr
+}
 func Test_denyConnection(t *testing.T) {
 	request := action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
-			"denylist": []string{".*.google.com", ".*"},
+			"denylist": toGenericArray(".*.google.com", ".*"),
 			"rate":     25.0,
 		},
 	}

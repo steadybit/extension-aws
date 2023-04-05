@@ -81,10 +81,15 @@ func getDenylistDescription() action_kit_api.ActionDescription {
 }
 
 func denyConnection(request action_kit_api.PrepareActionRequestBody) (*FailureInjectionConfig, error) {
+	denylist := make([]string, len(request.Config["denylist"].([]interface{})))
+	for i, v := range request.Config["denylist"].([]interface{}) {
+		denylist[i] = v.(string)
+	}
+
 	return &FailureInjectionConfig{
 		FailureMode: "denylist",
 		Rate:        request.Config["rate"].(float64) / 100.0,
-		Denylist:    extutil.Ptr(request.Config["denylist"].([]string)),
+		Denylist:    &denylist,
 		IsEnabled:   true,
 	}, nil
 }
