@@ -155,6 +155,28 @@ start the very first fis experiment via the steadybit agent, you will need to ad
 ```
 
 </details>
+<details>
+    <summary>Lambda Functions-Discovery & Attacks</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ssm:AddTagsToResource",
+        "ssm:PutParameter",
+        "ssm:DeleteParameter",
+        "lambda:ListFunctions",
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
 
 #### Authentication setup
 
@@ -312,7 +334,7 @@ IAM policies need to be correctly configured for cross-account role assumption. 
        ]
    }
    ```
-2. The roles themselves have all the [required permissions](#iam-policy).
+2. The roles themselves have all the [required permissions](#required-permissions-policies).
 3. The roles have trust relationships that allow them to be assumed by the given credentials.
    ```json
    {

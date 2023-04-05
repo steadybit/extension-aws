@@ -11,6 +11,7 @@ import (
 	"github.com/steadybit/extension-aws/extaz"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extfis"
+	"github.com/steadybit/extension-aws/extlambda"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
@@ -38,6 +39,13 @@ func main() {
 
 	extfis.RegisterFisInstanceDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extfis.NewFisExperimentAction())
+
+	extlambda.RegisterDiscoveryHandlers()
+	action_kit_sdk.RegisterAction(extlambda.NewInjectStatusCodeAction())
+	action_kit_sdk.RegisterAction(extlambda.NewInjectExceptionAction())
+	action_kit_sdk.RegisterAction(extlambda.NewInjectLatencyAction())
+	action_kit_sdk.RegisterAction(extlambda.NewFillDiskspaceAction())
+	action_kit_sdk.RegisterAction(extlambda.NewDenylistAction())
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	exthttp.Listen(exthttp.ListenOpts{
@@ -79,7 +87,12 @@ func getExtensionList() ExtensionListResponse {
 			Path:   "/fis/template/discovery",
 		})
 	}
-
+	if !cfg.DiscoveryDisabledLambda {
+		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/lambda/discovery",
+		})
+	}
 	actions := action_kit_sdk.RegisteredActionsEndpoints()
 	actions = append(actions,
 		action_kit_api.DescribingEndpointReference{
@@ -111,6 +124,10 @@ func getExtensionList() ExtensionListResponse {
 				Method: "GET",
 				Path:   "/fis/template/discovery/target-description",
 			},
+			{
+				Method: "GET",
+				Path:   "/lambda/discovery/target-description",
+			},
 		},
 		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
 			{
@@ -124,6 +141,10 @@ func getExtensionList() ExtensionListResponse {
 			{
 				Method: "GET",
 				Path:   "/fis/template/discovery/attribute-descriptions",
+			},
+			{
+				Method: "GET",
+				Path:   "/lambda/discovery/attribute-descriptions",
 			},
 			{
 				Method: "GET",
