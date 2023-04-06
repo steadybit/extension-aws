@@ -22,8 +22,8 @@ func getDenylistDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.denylist", lambdaTargetID),
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Label:       "Deny Connections",
-		Description: "Denies connection to host(s)",
+		Label:       "Block TCP Connections",
+		Description: "Blocks TCP connection made to listed host(s)",
 		Icon:        extutil.Ptr(lambdaTargetIcon),
 		TargetType:  extutil.Ptr(lambdaTargetID),
 		TargetSelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
