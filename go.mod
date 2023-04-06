@@ -26,7 +26,7 @@ require (
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.4.3
 	github.com/steadybit/action-kit/go/action_kit_sdk v0.0.0-20230404134046-62332985c503
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.2.0
-	github.com/steadybit/extension-kit v1.7.4
+	github.com/steadybit/extension-kit v1.7.6
 	github.com/stretchr/testify v1.8.2
 	github.com/testcontainers/testcontainers-go v0.19.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.19.0

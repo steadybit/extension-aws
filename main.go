@@ -15,6 +15,7 @@ import (
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
+	"github.com/steadybit/extension-kit/exthealth"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extlogging"
 )
@@ -46,6 +47,8 @@ func main() {
 	action_kit_sdk.RegisterAction(extlambda.NewInjectLatencyAction())
 	action_kit_sdk.RegisterAction(extlambda.NewFillDiskspaceAction())
 	action_kit_sdk.RegisterAction(extlambda.NewDenylistAction())
+
+	exthealth.AddProbes()
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	exthttp.Listen(exthttp.ListenOpts{
