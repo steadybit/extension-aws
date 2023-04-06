@@ -48,7 +48,7 @@ func main() {
 	action_kit_sdk.RegisterAction(extlambda.NewFillDiskspaceAction())
 	action_kit_sdk.RegisterAction(extlambda.NewDenylistAction())
 
-	exthealth.AddProbes()
+	exthealth.StartProbes(8086)
 
 	stop := action_kit_sdk.Start()
 	defer stop()
