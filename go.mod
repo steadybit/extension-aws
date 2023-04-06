@@ -10,10 +10,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.19
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.18
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.1
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.91.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.93.0
 	github.com/aws/aws-sdk-go-v2/service/fis v1.14.6
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.30.2
-	github.com/aws/aws-sdk-go-v2/service/rds v1.40.7
+	github.com/aws/aws-sdk-go-v2/service/rds v1.42.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.36.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.18.7
 	github.com/aws/smithy-go v1.13.5
@@ -22,10 +22,10 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.29.0
-	github.com/sosodev/duration v1.0.1
-	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.4.3
-	github.com/steadybit/action-kit/go/action_kit_sdk v0.0.0-20230404134046-62332985c503
-	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.2.0
+	github.com/sosodev/duration v1.1.0
+	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.4.4
+	github.com/steadybit/action-kit/go/action_kit_sdk v1.0.0
+	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.3.0
 	github.com/steadybit/extension-kit v1.7.6
 	github.com/stretchr/testify v1.8.2
 	github.com/testcontainers/testcontainers-go v0.19.0
@@ -69,7 +69,7 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
 	google.golang.org/genproto v0.0.0-20220617124728-180714bec0ad // indirect
 	google.golang.org/grpc v1.47.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
