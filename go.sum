@@ -187,8 +187,8 @@ github.com/sosodev/duration v1.1.0 h1:kQcaiGbJaIsRqgQy7VGlZrVw1giWO+lDoX3MCPnpVO
 github.com/sosodev/duration v1.1.0/go.mod h1:RQIBBX0+fMLc/D9+Jb/fwvVmo0eZvDDEERAikUR6SDg=
 github.com/steadybit/action-kit/go/action_kit_api/v2 v2.4.4 h1:qkiG5QONpLDnEB3cbEwgc75rLL4eEdTA6M4/28WgFuw=
 github.com/steadybit/action-kit/go/action_kit_api/v2 v2.4.4/go.mod h1:4yGr/DzsHpw6elju1XHCeUsY/qoqNTcLY3ytgnNcMt8=
-github.com/steadybit/action-kit/go/action_kit_sdk v1.0.0 h1:LjXUbXXz2Xr0FCwlYMyS8tZ3pK3Q3rOYnJv0fATpNQ8=
-github.com/steadybit/action-kit/go/action_kit_sdk v1.0.0/go.mod h1:tVb3/dByFqyfvxQREWCNBQbKUoM3BDfTCBhP9kg1Fus=
+github.com/steadybit/action-kit/go/action_kit_sdk v1.0.1 h1:6adMQ+a488LtTi+v6EQJt9DaHC+srlBNWM6p8ILmnkU=
+github.com/steadybit/action-kit/go/action_kit_sdk v1.0.1/go.mod h1:u14TA+7Xu8RPshUSjGJ2h2KS0cWzjb6QNKW+UHcuSqo=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.3.0 h1:HwvovoYbAYpJ5PnMeiJUgrjwVkV5EpveAjeHH9pPDMQ=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.3.0/go.mod h1:OnIfjrBhmMQCYxriHmr8mT1wCpvqIZxwBHWnanFhgNA=
 github.com/steadybit/extension-kit v1.7.8 h1:Wzfaes9i/7rs+ERwQWfhlOVNAJYjCYzXfVB13+mL6nw=
