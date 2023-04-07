@@ -33,7 +33,7 @@ func (tcs *TestContainers) Terminate(t *testing.T, ctx context.Context) {
 
 type WithTestContainersCase struct {
 	Name string
-	Test func(t *testing.T, clientEc2 ec2.Client, clientImds imds.Client)
+	Test func(t *testing.T, clientEc2 *ec2.Client, clientImds *imds.Client)
 }
 
 func WithTestContainers(t *testing.T, testCases []WithTestContainersCase) {
@@ -45,7 +45,7 @@ func WithTestContainers(t *testing.T, testCases []WithTestContainersCase) {
 	clientImds, err := setupImdsClient(context.Background(), tcs.LocalStackContainer)
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			tc.Test(t, *clientEc2, *clientImds)
+			tc.Test(t, clientEc2, clientImds)
 		})
 	}
 }

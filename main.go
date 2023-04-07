@@ -32,8 +32,8 @@ func main() {
 	extrds.RegisterRdsDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceAttack())
 
-	extaz.RegisterAZDiscoveryHandlers()
-	extaz.RegisterAZAttackHandlers()
+	extaz.RegisterDiscoveryHandlers()
+	action_kit_sdk.RegisterAction(extaz.NewAzBlackholeAction())
 
 	extec2.RegisterDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extec2.NewEc2InstanceStateAction())

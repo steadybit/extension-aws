@@ -6,13 +6,11 @@ package extaz
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/google/uuid"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
-	"github.com/steadybit/extension-kit/extconversion"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,9 +18,17 @@ import (
 	"testing"
 )
 
-func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 ec2.Client, clientImds imds.Client) {
+func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 *ec2.Client, clientImds *imds.Client) {
 	// Prepare
 	// Given
+	ctx := context.Background()
+	action := azBlackholeAction{
+		extensionRootAccountNumber: "41",
+		clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+			return clientEc2, clientImds, nil
+		}}
+	state := action.NewEmptyState()
+
 	requestBodyPrepare := action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
@@ -38,16 +44,12 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 ec2.C
 		}),
 		ExecutionId: uuid.New(),
 	}
-	requestBodyPrepareJson, err := json.Marshal(requestBodyPrepare)
-	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareBlackhole(context.Background(), requestBodyPrepareJson, "41", func(account string) (AZBlackholeEC2Api, AZBlackholeImdsApi, error) {
-		return &clientEc2, &clientImds, nil
-	})
+	_, err := action.Prepare(ctx, &state, requestBodyPrepare)
 
 	// Then
-	assert.Nil(t, attackErr)
+	assert.NoError(t, err)
 	assert.Equal(t, "41", state.AgentAWSAccount)
 	assert.Equal(t, "42", state.ExtensionAwsAccount)
 	assert.Equal(t, "eu-west-1a", state.TargetZone)
@@ -56,27 +58,13 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 ec2.C
 	assert.Len(t, state.TargetSubnets[vpcIds[0].String()], 1)
 	assert.NotNil(t, state.AttackExecutionId)
 
-	acls, err := clientEc2.DescribeNetworkAcls(context.Background(), &ec2.DescribeNetworkAclsInput{})
+	acls, err := clientEc2.DescribeNetworkAcls(ctx, &ec2.DescribeNetworkAclsInput{})
 	require.Nil(t, err)
 	assert.Len(t, acls.NetworkAcls, 1)
 
 	// Start
-	// Given
-	var convertedState action_kit_api.ActionState
-	err = extconversion.Convert(*state, &convertedState)
-	require.Nil(t, err)
-
-	requestBodyStart := action_kit_api.StartActionRequestBody{
-		State: convertedState,
-	}
-	requestBodyStartJson, err := json.Marshal(requestBodyStart)
-	require.Nil(t, err)
-
 	// When
-	state, attackStartErr := StartBlackhole(context.Background(), requestBodyStartJson, func(account string) (AZBlackholeEC2Api, error) {
-		return &clientEc2, nil
-	})
-
+	_, attackStartErr := action.Start(ctx, &state)
 	// Then
 	assert.Nil(t, attackStartErr)
 	assert.Equal(t, "41", state.AgentAWSAccount)
@@ -87,30 +75,17 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 ec2.C
 	assert.NotEqual(t, "", state.OldNetworkAclIds[newAssociationIds[0].String()])
 	assert.NotNil(t, state.AttackExecutionId)
 
-	acls, err = clientEc2.DescribeNetworkAcls(context.Background(), &ec2.DescribeNetworkAclsInput{})
+	acls, err = clientEc2.DescribeNetworkAcls(ctx, &ec2.DescribeNetworkAclsInput{})
 	require.Nil(t, err)
 	assert.Len(t, acls.NetworkAcls, 2)
 
 	// Stop
-	// Given
-	var convertedStateStop action_kit_api.ActionState
-	err = extconversion.Convert(*state, &convertedStateStop)
-	require.Nil(t, err)
-
-	requestBodyStop := action_kit_api.StopActionRequestBody{
-		State: convertedStateStop,
-	}
-	requestBodyStopJson, err := json.Marshal(requestBodyStop)
-	require.Nil(t, err)
 	// When
-	stopResult, attackErr := StopBlackhole(requestBodyStopJson, context.Background(), func(account string) (AZBlackholeEC2Api, error) {
-		return &clientEc2, nil
-	})
+	_, err = action.Stop(ctx, &state)
 
-	assert.Nil(t, attackErr)
-	assert.NotNil(t, stopResult)
+	assert.NoError(t, err)
 
-	acls, err = clientEc2.DescribeNetworkAcls(context.Background(), &ec2.DescribeNetworkAclsInput{})
+	acls, err = clientEc2.DescribeNetworkAcls(ctx, &ec2.DescribeNetworkAclsInput{})
 	require.Nil(t, err)
 	assert.Len(t, acls.NetworkAcls, 1)
 }
