@@ -20,7 +20,7 @@ import (
 	"net/http"
 )
 
-func RegisterRdsDiscoveryHandlers() {
+func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler("/rds/instance/discovery", exthttp.GetterAsHandler(getRdsInstanceDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/rds/instance/discovery/target-description", exthttp.GetterAsHandler(getRdsInstanceTargetDescription))
 	exthttp.RegisterHttpHandler("/rds/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getRdsInstanceAttributeDescriptions))

@@ -29,7 +29,7 @@ func main() {
 
 	utils.RegisterCommonDiscoveryHandlers()
 
-	extrds.RegisterRdsDiscoveryHandlers()
+	extrds.RegisterDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceAttack())
 
 	extaz.RegisterDiscoveryHandlers()

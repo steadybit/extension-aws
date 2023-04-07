@@ -15,26 +15,31 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-type RdsInstanceAttack struct {
+type rdsInstanceAttack struct {
+	clientProvider func(account string) (rdsRebootDBInstanceApi, error)
 }
+
+// Make sure FisExperimentAction implements all required interfaces
+var _ action_kit_sdk.Action[RdsInstanceAttackState] = (*rdsInstanceAttack)(nil)
 
 type RdsInstanceAttackState struct {
 	DBInstanceIdentifier string
 	Account              string
 }
 
-func NewRdsInstanceAttack() action_kit_sdk.Action[RdsInstanceAttackState] {
-	return RdsInstanceAttack{}
+type rdsRebootDBInstanceApi interface {
+	RebootDBInstance(ctx context.Context, params *rds.RebootDBInstanceInput, optFns ...func(*rds.Options)) (*rds.RebootDBInstanceOutput, error)
 }
 
-// Make sure FisExperimentAction implements all required interfaces
-var _ action_kit_sdk.Action[RdsInstanceAttackState] = (*RdsInstanceAttack)(nil)
+func NewRdsInstanceAttack() action_kit_sdk.Action[RdsInstanceAttackState] {
+	return rdsInstanceAttack{defaultClientProvider}
+}
 
-func (f RdsInstanceAttack) NewEmptyState() RdsInstanceAttackState {
+func (f rdsInstanceAttack) NewEmptyState() RdsInstanceAttackState {
 	return RdsInstanceAttackState{}
 }
 
-func (f RdsInstanceAttack) Describe() action_kit_api.ActionDescription {
+func (f rdsInstanceAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.reboot", rdsTargetId),
 		Label:       "Reboot Instance",
@@ -46,12 +51,10 @@ func (f RdsInstanceAttack) Describe() action_kit_api.ActionDescription {
 		TimeControl: action_kit_api.Instantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},
-		Prepare:     action_kit_api.MutatingEndpointReference{},
-		Start:       action_kit_api.MutatingEndpointReference{},
 	}
 }
 
-func (f RdsInstanceAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (f rdsInstanceAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	instanceId := request.Target.Attributes["aws.rds.instance.id"]
 	if instanceId == nil || len(instanceId) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.rds.instance.id' target attribute.", nil))
@@ -68,22 +71,8 @@ func (f RdsInstanceAttack) Prepare(_ context.Context, state *RdsInstanceAttackSt
 	return nil, nil
 }
 
-func (f RdsInstanceAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {
-	return startAttack(ctx, state, func(account string) (RdsRebootDBInstanceClient, error) {
-		awsAccount, err := utils.Accounts.GetAccount(account)
-		if err != nil {
-			return nil, err
-		}
-		return rds.NewFromConfig(awsAccount.AwsConfig), nil
-	})
-}
-
-type RdsRebootDBInstanceClient interface {
-	RebootDBInstance(ctx context.Context, params *rds.RebootDBInstanceInput, optFns ...func(*rds.Options)) (*rds.RebootDBInstanceOutput, error)
-}
-
-func startAttack(ctx context.Context, state *RdsInstanceAttackState, clientProvider func(account string) (RdsRebootDBInstanceClient, error)) (*action_kit_api.StartResult, error) {
-	client, err := clientProvider(state.Account)
+func (f rdsInstanceAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {
+	client, err := f.clientProvider(state.Account)
 	if err != nil {
 		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err))
 	}
@@ -97,4 +86,12 @@ func startAttack(ctx context.Context, state *RdsInstanceAttackState, clientProvi
 	}
 
 	return nil, nil
+}
+
+func defaultClientProvider(account string) (rdsRebootDBInstanceApi, error) {
+	awsAccount, err := utils.Accounts.GetAccount(account)
+	if err != nil {
+		return nil, err
+	}
+	return rds.NewFromConfig(awsAccount.AwsConfig), nil
 }
