@@ -5,10 +5,10 @@ package extec2
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
+	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -16,250 +16,243 @@ import (
 	"testing"
 )
 
-func TestPrepareInstanceStateChange(t *testing.T) {
-	// Given
-	requestBody := action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
-			"action": "stop",
+func TestEc2InstanceStateAction_Prepare(t *testing.T) {
+	action := ec2InstanceStateAction{}
+
+	tests := []struct {
+		name        string
+		requestBody action_kit_api.PrepareActionRequestBody
+		wantedError error
+		wantedState *InstanceStateChangeState
+	}{
+		{
+			name: "Should return config",
+			requestBody: action_kit_api.PrepareActionRequestBody{
+				Config: map[string]interface{}{
+					"action": "stop",
+				},
+				Target: extutil.Ptr(action_kit_api.Target{
+					Attributes: map[string][]string{
+						"aws-ec2.instance.id": {"my-instance"},
+						"aws.account":         {"42"},
+					},
+				}),
+			},
+
+			wantedState: &InstanceStateChangeState{
+				Account:    "42",
+				Action:     "stop",
+				InstanceId: "my-instance",
+			},
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{
-				"aws-ec2.instance.id": {"my-instance"},
-				"aws.account":         {"42"},
+		{
+			name: "Should return error if account is missing",
+			requestBody: action_kit_api.PrepareActionRequestBody{
+				Config: map[string]interface{}{
+					"action": "stop",
+				},
+				Target: extutil.Ptr(action_kit_api.Target{
+					Attributes: map[string][]string{
+						"aws-ec2.instance.id": {"my-instance"},
+					},
+				}),
 			},
-		}),
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
-
-	// When
-	state, attackErr := PrepareInstanceStateChange(requestBodyJson)
-
-	// Then
-	assert.Nil(t, attackErr)
-	assert.Equal(t, "my-instance", state.InstanceId)
-	assert.Equal(t, "stop", state.Action)
-}
-
-func TestPrepareInstanceStateChangeMustRequireAnInstanceId(t *testing.T) {
-	// Given
-	requestBody := action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
-			"action": "stop",
+			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)),
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{
-				"aws.account": {"42"},
+		{
+			name: "Should return error if instanceId is missing",
+			requestBody: action_kit_api.PrepareActionRequestBody{
+				Config: map[string]interface{}{
+					"action": "stop",
+				},
+				Target: extutil.Ptr(action_kit_api.Target{
+					Attributes: map[string][]string{
+						"aws.account": {"42"},
+					},
+				}),
 			},
-		}),
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
-
-	// When
-	state, attackErr := PrepareInstanceStateChange(requestBodyJson)
-
-	// Then
-	assert.Nil(t, state)
-	assert.Contains(t, attackErr.Title, "aws-ec2.instance.id")
-}
-
-func TestPrepareInstanceStateChangeMustRequireAnAccountNumber(t *testing.T) {
-	// Given
-	requestBody := action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
-			"action": "stop",
+			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil)),
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{
-				"aws-ec2.instance.id": {"my-instance"},
+		{
+			name: "Should return error if action is missing",
+			requestBody: action_kit_api.PrepareActionRequestBody{
+				Config: map[string]interface{}{},
+				Target: extutil.Ptr(action_kit_api.Target{
+					Attributes: map[string][]string{
+						"aws-ec2.instance.id": {"my-instance"},
+						"aws.account":         {"42"},
+					},
+				}),
 			},
-		}),
+			wantedError: extutil.Ptr(extension_kit.ToError("Missing attack action parameter.", nil)),
+		},
 	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
 
-	// When
-	state, attackErr := PrepareInstanceStateChange(requestBodyJson)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			//Given
+			state := action.NewEmptyState()
+			request := tt.requestBody
+			//When
+			_, err := action.Prepare(context.Background(), &state, request)
 
-	// Then
-	assert.Nil(t, state)
-	assert.Contains(t, attackErr.Title, "aws.account")
-}
-
-func TestPrepareInstanceStateChangeMustRequireAnAction(t *testing.T) {
-	// Given
-	requestBody := action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{},
-		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{
-				"aws-ec2.instance.id": {"my-instance"},
-				"aws.account":         {"42"},
-			},
-		}),
+			//Then
+			if tt.wantedError != nil {
+				assert.EqualError(t, err, tt.wantedError.Error())
+			}
+			if tt.wantedState != nil {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.wantedState.Account, state.Account)
+				assert.Equal(t, tt.wantedState.InstanceId, state.InstanceId)
+				assert.EqualValues(t, tt.wantedState.Action, state.Action)
+			}
+		})
 	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
-
-	// When
-	state, attackErr := PrepareInstanceStateChange(requestBodyJson)
-
-	// Then
-	assert.Nil(t, state)
-	assert.Contains(t, attackErr.Title, "action")
-}
-
-func TestPrepareInstanceStateChangeMustFailOnInvalidBody(t *testing.T) {
-	// When
-	state, attackErr := PrepareInstanceStateChange([]byte{})
-
-	// Then
-	assert.Nil(t, state)
-	assert.Contains(t, attackErr.Title, "Failed to parse request body")
 }
 
 type ec2ClientApiMock struct {
 	mock.Mock
 }
 
-func (m ec2ClientApiMock) StopInstances(ctx context.Context, params *ec2.StopInstancesInput, _ ...func(*ec2.Options)) (*ec2.StopInstancesOutput, error) {
+func (m *ec2ClientApiMock) StopInstances(ctx context.Context, params *ec2.StopInstancesInput, _ ...func(*ec2.Options)) (*ec2.StopInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	return nil, args.Error(1)
 }
 
-func (m ec2ClientApiMock) TerminateInstances(ctx context.Context, params *ec2.TerminateInstancesInput, _ ...func(*ec2.Options)) (*ec2.TerminateInstancesOutput, error) {
+func (m *ec2ClientApiMock) TerminateInstances(ctx context.Context, params *ec2.TerminateInstancesInput, _ ...func(*ec2.Options)) (*ec2.TerminateInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	return nil, args.Error(1)
 }
 
-func (m ec2ClientApiMock) RebootInstances(ctx context.Context, params *ec2.RebootInstancesInput, _ ...func(*ec2.Options)) (*ec2.RebootInstancesOutput, error) {
+func (m *ec2ClientApiMock) RebootInstances(ctx context.Context, params *ec2.RebootInstancesInput, _ ...func(*ec2.Options)) (*ec2.RebootInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	return nil, args.Error(1)
 }
 
-func TestStartInstanceStop(t *testing.T) {
+func TestEc2InstanceStateAction_Start(t *testing.T) {
 	// Given
-	mockedApi := new(ec2ClientApiMock)
-	mockedApi.On("StopInstances", mock.Anything, mock.MatchedBy(func(params *ec2.StopInstancesInput) bool {
+	api := new(ec2ClientApiMock)
+	api.On("StopInstances", mock.Anything, mock.MatchedBy(func(params *ec2.StopInstancesInput) bool {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		require.Equal(t, false, *params.Hibernate)
 		return true
 	})).Return(nil, nil)
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"InstanceId": "dev-worker-1",
-			"Action":     "stop",
-		},
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+
+	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+		return api, nil
+	}}
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
-		return mockedApi, nil
+	result, err := action.Start(context.Background(), &InstanceStateChangeState{
+		Account:    "42",
+		InstanceId: "dev-worker-1",
+		Action:     "stop",
 	})
 
 	// Then
-	assert.Nil(t, attackError)
+	assert.NoError(t, err)
+	assert.Nil(t, result)
+
+	api.AssertExpectations(t)
 }
 
-func TestStartInstanceHibernate(t *testing.T) {
+func TestEc2InstanceStateAction_Hibernate(t *testing.T) {
 	// Given
-	mockedApi := new(ec2ClientApiMock)
-	mockedApi.On("StopInstances", mock.Anything, mock.MatchedBy(func(params *ec2.StopInstancesInput) bool {
+	api := new(ec2ClientApiMock)
+	api.On("StopInstances", mock.Anything, mock.MatchedBy(func(params *ec2.StopInstancesInput) bool {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		require.Equal(t, true, *params.Hibernate)
 		return true
 	})).Return(nil, nil)
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"InstanceId": "dev-worker-1",
-			"Action":     "hibernate",
-		},
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+		return api, nil
+	}}
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
-		return mockedApi, nil
+	result, err := action.Start(context.Background(), &InstanceStateChangeState{
+		Account:    "42",
+		InstanceId: "dev-worker-1",
+		Action:     "hibernate",
 	})
 
 	// Then
-	assert.Nil(t, attackError)
+	assert.NoError(t, err)
+	assert.Nil(t, result)
+
+	api.AssertExpectations(t)
 }
 
-func TestStartInstanceTerminate(t *testing.T) {
+func TestEc2InstanceStateAction_Terminate(t *testing.T) {
 	// Given
-	mockedApi := new(ec2ClientApiMock)
-	mockedApi.On("TerminateInstances", mock.Anything, mock.MatchedBy(func(params *ec2.TerminateInstancesInput) bool {
+	api := new(ec2ClientApiMock)
+	api.On("TerminateInstances", mock.Anything, mock.MatchedBy(func(params *ec2.TerminateInstancesInput) bool {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, nil)
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"InstanceId": "dev-worker-1",
-			"Action":     "terminate",
-		},
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+		return api, nil
+	}}
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
-		return mockedApi, nil
+	result, err := action.Start(context.Background(), &InstanceStateChangeState{
+		Account:    "42",
+		InstanceId: "dev-worker-1",
+		Action:     "terminate",
 	})
 
 	// Then
-	assert.Nil(t, attackError)
+	assert.NoError(t, err)
+	assert.Nil(t, result)
+
+	api.AssertExpectations(t)
 }
 
-func TestStartInstanceReboot(t *testing.T) {
+func TestEc2InstanceStateAction_Reboot(t *testing.T) {
 	// Given
-	mockedApi := new(ec2ClientApiMock)
-	mockedApi.On("RebootInstances", mock.Anything, mock.MatchedBy(func(params *ec2.RebootInstancesInput) bool {
+	api := new(ec2ClientApiMock)
+	api.On("RebootInstances", mock.Anything, mock.MatchedBy(func(params *ec2.RebootInstancesInput) bool {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, nil)
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"InstanceId": "dev-worker-1",
-			"Action":     "reboot",
-		},
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+		return api, nil
+	}}
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
-		return mockedApi, nil
+	result, err := action.Start(context.Background(), &InstanceStateChangeState{
+		Account:    "42",
+		InstanceId: "dev-worker-1",
+		Action:     "reboot",
 	})
 
 	// Then
-	assert.Nil(t, attackError)
+	assert.NoError(t, err)
+	assert.Nil(t, result)
+
+	api.AssertExpectations(t)
 }
 
 func TestStartInstanceStateChangeForwardsError(t *testing.T) {
 	// Given
-	mockedApi := new(ec2ClientApiMock)
-	mockedApi.On("RebootInstances", mock.Anything, mock.MatchedBy(func(params *ec2.RebootInstancesInput) bool {
+	api := new(ec2ClientApiMock)
+	api.On("RebootInstances", mock.Anything, mock.MatchedBy(func(params *ec2.RebootInstancesInput) bool {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, errors.New("expected"))
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"InstanceId": "dev-worker-1",
-			"Action":     "reboot",
-		},
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+		return api, nil
+	}}
 
 	// When
-	attackError := StartInstanceStateChange(context.Background(), requestBodyJson, func(account string) (Ec2InstanceStateChangeApiApi, error) {
-		return mockedApi, nil
+	result, err := action.Start(context.Background(), &InstanceStateChangeState{
+		Account:    "42",
+		InstanceId: "dev-worker-1",
+		Action:     "reboot",
 	})
 
 	// Then
-	assert.Contains(t, attackError.Title, "Failed to execute state change attack")
+	assert.Error(t, err, "Failed to execute state change attack")
+	assert.Nil(t, result)
+
+	api.AssertExpectations(t)
 }

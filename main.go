@@ -35,8 +35,8 @@ func main() {
 	extaz.RegisterAZDiscoveryHandlers()
 	extaz.RegisterAZAttackHandlers()
 
-	extec2.RegisterEc2InstanceDiscoveryHandlers()
-	extec2.RegisterEc2AttackHandlers()
+	extec2.RegisterDiscoveryHandlers()
+	action_kit_sdk.RegisterAction(extec2.NewEc2InstanceStateAction())
 
 	extfis.RegisterFisInstanceDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extfis.NewFisExperimentAction())
