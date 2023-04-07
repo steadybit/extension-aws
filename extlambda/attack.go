@@ -18,7 +18,7 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-type LambdaAction struct {
+type lambdaAction struct {
 	description    action_kit_api.ActionDescription
 	configProvider func(request action_kit_api.PrepareActionRequestBody) (*FailureInjectionConfig, error)
 	clientProvider func(account string) (ssmApi, error)
@@ -30,9 +30,9 @@ type ssmApi interface {
 	AddTagsToResource(ctx context.Context, s *ssm.AddTagsToResourceInput, optFns ...func(*ssm.Options)) (*ssm.AddTagsToResourceOutput, error)
 }
 
-// Make sure LambdaAction implements all required interfaces
-var _ action_kit_sdk.Action[LambdaActionState] = (*LambdaAction)(nil)
-var _ action_kit_sdk.ActionWithStop[LambdaActionState] = (*LambdaAction)(nil)
+// Make sure lambdaAction implements all required interfaces
+var _ action_kit_sdk.Action[LambdaActionState] = (*lambdaAction)(nil)
+var _ action_kit_sdk.ActionWithStop[LambdaActionState] = (*lambdaAction)(nil)
 
 type FailureInjectionConfig struct {
 	FailureMode  string    `json:"failureMode"`
@@ -52,18 +52,18 @@ type LambdaActionState struct {
 	Config  *FailureInjectionConfig `json:"config"`
 }
 
-func (a *LambdaAction) Describe() action_kit_api.ActionDescription {
+func (a *lambdaAction) Describe() action_kit_api.ActionDescription {
 	return a.description
 }
 
-func (a *LambdaAction) NewEmptyState() LambdaActionState {
+func (a *lambdaAction) NewEmptyState() LambdaActionState {
 	return LambdaActionState{}
 }
 
-func (a *LambdaAction) Prepare(_ context.Context, state *LambdaActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (a *lambdaAction) Prepare(_ context.Context, state *LambdaActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	account := request.Target.Attributes["aws.account"]
 	if account == nil || len(account) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil)
+		return nil, extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)
 	}
 
 	failureInjectionParam := request.Target.Attributes["aws.lambda.failure-injection-param"]
@@ -82,7 +82,7 @@ func (a *LambdaAction) Prepare(_ context.Context, state *LambdaActionState, requ
 	return nil, nil
 }
 
-func (a *LambdaAction) Start(ctx context.Context, state *LambdaActionState) (*action_kit_api.StartResult, error) {
+func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*action_kit_api.StartResult, error) {
 	value, err := json.Marshal(state.Config)
 	if err != nil {
 		return nil, extension_kit.ToError("Failed to convert ssm parameter", err)
@@ -116,7 +116,7 @@ func (a *LambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 	return nil, nil
 }
 
-func (a *LambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*action_kit_api.StopResult, error) {
+func (a *lambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*action_kit_api.StopResult, error) {
 	client, err := a.clientProvider(state.Account)
 	if err != nil {
 		return nil, extutil.Ptr(extension_kit.ToError("Failed to create ssm client", err))

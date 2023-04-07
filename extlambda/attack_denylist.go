@@ -9,7 +9,7 @@ import (
 )
 
 func NewDenylistAction() action_kit_sdk.Action[LambdaActionState] {
-	return &LambdaAction{
+	return &lambdaAction{
 		description:    getDenylistDescription(),
 		configProvider: denyConnection,
 		clientProvider: defaultClientProvider,

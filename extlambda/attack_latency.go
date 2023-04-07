@@ -9,7 +9,7 @@ import (
 )
 
 func NewInjectLatencyAction() action_kit_sdk.Action[LambdaActionState] {
-	return &LambdaAction{
+	return &lambdaAction{
 		description:    getInjectLatencyDescription(),
 		configProvider: injectLatency,
 		clientProvider: defaultClientProvider,

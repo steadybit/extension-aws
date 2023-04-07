@@ -9,7 +9,7 @@ import (
 )
 
 func NewInjectStatusCodeAction() action_kit_sdk.Action[LambdaActionState] {
-	return &LambdaAction{
+	return &lambdaAction{
 		description:    getInjectStatusCodeDescription(),
 		configProvider: injectStatusCode,
 		clientProvider: defaultClientProvider,

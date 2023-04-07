@@ -9,7 +9,7 @@ import (
 )
 
 func NewFillDiskspaceAction() action_kit_sdk.Action[LambdaActionState] {
-	return &LambdaAction{
+	return &lambdaAction{
 		description:    getDiskspaceDescription(),
 		configProvider: fillDiskspace,
 		clientProvider: defaultClientProvider,

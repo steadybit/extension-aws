@@ -18,7 +18,7 @@ import (
 
 func TestLambdaAction_Prepare(t *testing.T) {
 	config := FailureInjectionConfig{}
-	action := LambdaAction{configProvider: func(request action_kit_api.PrepareActionRequestBody) (*FailureInjectionConfig, error) {
+	action := lambdaAction{configProvider: func(request action_kit_api.PrepareActionRequestBody) (*FailureInjectionConfig, error) {
 		return &config, nil
 	}}
 
@@ -45,7 +45,7 @@ func TestLambdaAction_Prepare(t *testing.T) {
 			attributes: map[string][]string{
 				"aws.lambda.failure-injection-param": {"PARAM"},
 			},
-			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil)),
+			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)),
 		},
 		{
 			name: "Should return error if failure-injection-param is missing",
@@ -99,7 +99,7 @@ func TestLambdaAction_Start(t *testing.T) {
 		Tags:         []types.Tag{{Key: extutil.Ptr("created-by"), Value: extutil.Ptr("steadybit")}},
 	}, mock.Anything).Return(&ssm.AddTagsToResourceOutput{}, nil)
 
-	action := LambdaAction{
+	action := lambdaAction{
 		clientProvider: func(account string) (ssmApi, error) {
 			return api, nil
 		},
@@ -126,7 +126,7 @@ func TestLambdaAction_Stop(t *testing.T) {
 		Name: extutil.Ptr("PARAM"),
 	}, mock.Anything).Return(&ssm.DeleteParameterOutput{}, nil)
 
-	action := LambdaAction{
+	action := lambdaAction{
 		clientProvider: func(account string) (ssmApi, error) {
 			return api, nil
 		},

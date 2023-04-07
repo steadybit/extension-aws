@@ -9,7 +9,7 @@ import (
 )
 
 func NewInjectExceptionAction() action_kit_sdk.Action[LambdaActionState] {
-	return &LambdaAction{
+	return &lambdaAction{
 		description:    getInjectExceptionDescription(),
 		configProvider: injectException,
 		clientProvider: defaultClientProvider,
