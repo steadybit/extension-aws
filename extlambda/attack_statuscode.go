@@ -8,8 +8,6 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-const statusCodeBasePath = "/lambda/actions/inject-status-code"
-
 func NewInjectStatusCodeAction() action_kit_sdk.Action[LambdaActionState] {
 	return &LambdaAction{
 		description:    getInjectStatusCodeDescription(),
@@ -65,18 +63,7 @@ func getInjectStatusCodeDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(2),
 			},
 		},
-		Prepare: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   statusCodeBasePath + "/prepare",
-		},
-		Start: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   statusCodeBasePath + "/start",
-		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   statusCodeBasePath + "/stop",
-		}),
+		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 func injectStatusCode(request action_kit_api.PrepareActionRequestBody) (*FailureInjectionConfig, error) {

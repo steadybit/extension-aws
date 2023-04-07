@@ -8,8 +8,6 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-const denylistBasePath = "/lambda/actions/inject-denylist"
-
 func NewDenylistAction() action_kit_sdk.Action[LambdaActionState] {
 	return &LambdaAction{
 		description:    getDenylistDescription(),
@@ -65,18 +63,7 @@ func getDenylistDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(2),
 			},
 		},
-		Prepare: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   denylistBasePath + "/prepare",
-		},
-		Start: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   denylistBasePath + "/start",
-		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   denylistBasePath + "/stop",
-		}),
+		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 

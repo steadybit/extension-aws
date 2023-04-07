@@ -8,8 +8,6 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-const diskspaceBasePath = "/lambda/actions/fill-diskspace"
-
 func NewFillDiskspaceAction() action_kit_sdk.Action[LambdaActionState] {
 	return &LambdaAction{
 		description:    getDiskspaceDescription(),
@@ -65,18 +63,7 @@ func getDiskspaceDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(2),
 			},
 		},
-		Prepare: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   diskspaceBasePath + "/prepare",
-		},
-		Start: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   diskspaceBasePath + "/start",
-		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   diskspaceBasePath + "/stop",
-		}),
+		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 

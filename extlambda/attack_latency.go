@@ -8,8 +8,6 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-const latencyBasePath = "/lambda/actions/inject-latency"
-
 func NewInjectLatencyAction() action_kit_sdk.Action[LambdaActionState] {
 	return &LambdaAction{
 		description:    getInjectLatencyDescription(),
@@ -74,18 +72,7 @@ func getInjectLatencyDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(3),
 			},
 		},
-		Prepare: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   latencyBasePath + "/prepare",
-		},
-		Start: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   latencyBasePath + "/start",
-		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   latencyBasePath + "/stop",
-		}),
+		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 

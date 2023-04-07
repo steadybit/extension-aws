@@ -31,29 +31,6 @@ func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredTargets)
 }
 
-func GetDiscoveryEndpoints() discovery_kit_api.DiscoveryList {
-	return discovery_kit_api.DiscoveryList{
-		Discoveries: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath,
-			},
-		},
-		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/target-description",
-			},
-		},
-		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/attribute-descriptions",
-			},
-		},
-	}
-}
-
 func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         lambdaTargetID,
@@ -106,24 +83,10 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 				},
 			},
 			{
-				Attribute: "aws.arn",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "ARN",
-					Other: "ARNs",
-				},
-			},
-			{
 				Attribute: "aws.lambda.runtime",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Runtime",
 					Other: "Runtimes",
-				},
-			},
-			{
-				Attribute: "aws.role",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Role",
-					Other: "Roles",
 				},
 			},
 			{
@@ -152,13 +115,13 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 					Other: "Timeouts",
 				},
 			}, {
-				Attribute: "aws.lambda.memorySize",
+				Attribute: "aws.lambda.memory-size",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Memory Size",
 					Other: "Memory Sizes",
 				},
 			}, {
-				Attribute: "aws.lambda.lastModified",
+				Attribute: "aws.lambda.last-modified",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Last Modified",
 					Other: "Last Modified",
@@ -171,14 +134,14 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 				},
 			},
 			{
-				Attribute: "aws.lambda.revisionId",
+				Attribute: "aws.lambda.revision-id",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Revision ID",
 					Other: "Revision IDs",
 				},
 			},
 			{
-				Attribute: "aws.lambda.packageType",
+				Attribute: "aws.lambda.package-type",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Package Type",
 					Other: "Package Types",

@@ -45,6 +45,12 @@ func getCommonAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 					One:   "AWS ARN",
 					Other: "AWS ARNs",
 				},
+			}, {
+				Attribute: "aws.role",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "AWS Role",
+					Other: "AWS Roles",
+				},
 			},
 		},
 	}

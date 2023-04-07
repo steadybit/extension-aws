@@ -8,8 +8,6 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-const exceptionBasePath = "/lambda/actions/inject-exception"
-
 func NewInjectExceptionAction() action_kit_sdk.Action[LambdaActionState] {
 	return &LambdaAction{
 		description:    getInjectExceptionDescription(),
@@ -65,18 +63,7 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(2),
 			},
 		},
-		Prepare: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   exceptionBasePath + "/prepare",
-		},
-		Start: action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   exceptionBasePath + "/start",
-		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{
-			Method: "POST",
-			Path:   exceptionBasePath + "/stop",
-		}),
+		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
