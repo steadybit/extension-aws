@@ -50,8 +50,7 @@ func main() {
 
 	exthealth.StartProbes(8086)
 
-	stop := action_kit_sdk.Start()
-	defer stop()
+	action_kit_sdk.InstallSignalHandler()
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	exthttp.Listen(exthttp.ListenOpts{
@@ -97,20 +96,9 @@ func getExtensionList() ExtensionListResponse {
 			Path:   "/lambda/discovery",
 		})
 	}
-	actionList := action_kit_sdk.GetActionList()
-	actionList.Actions = append(actionList.Actions,
-		action_kit_api.DescribingEndpointReference{
-			Method: "GET",
-			Path:   "/ec2/instance/attack/state",
-		},
-		action_kit_api.DescribingEndpointReference{
-			Method: "GET",
-			Path:   "/az/attack/blackhole",
-		},
-	)
 
 	return ExtensionListResponse{
-		ActionList: actionList,
+		ActionList: action_kit_sdk.GetActionList(),
 		DiscoveryList: discovery_kit_api.DiscoveryList{
 			Discoveries: discoveries,
 			TargetTypes: []discovery_kit_api.DescribingEndpointReference{
