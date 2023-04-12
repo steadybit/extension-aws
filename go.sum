@@ -193,8 +193,8 @@ github.com/steadybit/action-kit/go/action_kit_sdk v1.0.2 h1:pYpKm1BaRY296OH56oMX
 github.com/steadybit/action-kit/go/action_kit_sdk v1.0.2/go.mod h1:mTMPHv8eCORj2cVHL3BMDEcUlU86A0mRyaCNsVi25AQ=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.3.0 h1:HwvovoYbAYpJ5PnMeiJUgrjwVkV5EpveAjeHH9pPDMQ=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.3.0/go.mod h1:OnIfjrBhmMQCYxriHmr8mT1wCpvqIZxwBHWnanFhgNA=
-github.com/steadybit/extension-kit v1.7.8 h1:Wzfaes9i/7rs+ERwQWfhlOVNAJYjCYzXfVB13+mL6nw=
-github.com/steadybit/extension-kit v1.7.8/go.mod h1:zC5Tw+wrJTx4xvOlsIY+MfMoRYoglj83vR15Xr3aP5c=
+github.com/steadybit/extension-kit v1.7.9 h1:qL8s8iq/UE7pQbLSdiK4hYZNGDqj/SRsZ8tb3KpJjFY=
+github.com/steadybit/extension-kit v1.7.9/go.mod h1:zC5Tw+wrJTx4xvOlsIY+MfMoRYoglj83vR15Xr3aP5c=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0 h1:1zr/of2m5FGMsad5YfcqgdqdWrIhu+EBEJRhR1U7z/c=
