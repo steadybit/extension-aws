@@ -23,6 +23,8 @@ import (
 func main() {
 	extlogging.InitZeroLog()
 	extbuild.PrintBuildInformation()
+	exthealth.StartProbes(8086)
+	exthealth.SetReady(false)
 
 	config.ParseConfiguration()
 	utils.InitializeAwsAccountAccess(config.Config)
@@ -48,9 +50,8 @@ func main() {
 	action_kit_sdk.RegisterAction(extlambda.NewFillDiskspaceAction())
 	action_kit_sdk.RegisterAction(extlambda.NewDenylistAction())
 
-	exthealth.StartProbes(8086)
-
 	action_kit_sdk.InstallSignalHandler()
+	exthealth.SetReady(true)
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	exthttp.Listen(exthttp.ListenOpts{
