@@ -1,6 +1,7 @@
 # Changelog
 
 ## v2.0.1
+
 - Support Readiness & Liveness probes (requires new helm chart version)
 - Refactored to use `action_kit_sdk` and thus use the extended rollback safety while having connection issues
 - Added Lambda discovery & actions
