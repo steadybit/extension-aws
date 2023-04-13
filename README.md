@@ -26,6 +26,15 @@ A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to
         - Experiment Templates
     - Actions
         - Start Experiments
+- AWS Lambda
+    - Discoveries
+        - Lambda Functions
+    - Actions
+        - Block TCP Connections (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+        - Inject Latency (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+        - Inject Exceptions (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+        - Inject Status Code (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+        - Fill Diskspace (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
 
 ## Configuration
 
@@ -36,12 +45,13 @@ The process requires valid access credentials to interact with various AWS APIs.
 If you don't want to use certain parts of the extension and therefore don't want to provide the required permissions, you can disable these parts by providing
 the following environment variables. Actions using these targets will not be shown in the ui, as there are no targets reported.
 
-| Env Var                                          | 
-|--------------------------------------------------|
-| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2=true  |
-| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true  |
-| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE=true |
-| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS=true  |
+| Env Var                                            | 
+|----------------------------------------------------|
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2=true    |
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true    |
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE=true   |
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS=true    |
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA=true |
 
 ### Authentication
 
