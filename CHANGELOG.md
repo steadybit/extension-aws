@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.1
+- Support Readiness & Liveness probes (requires new helm chart version)
+- Refactored to use `action_kit_sdk` and thus use the extended rollback safety while having connection issues
+- Added Lambda discovery & actions
+
 ## v2.0.0
 
 - Renamed attack `ec2-instance.state` to `com.github.steadybit.extension_aws.ec2_instance.state`
