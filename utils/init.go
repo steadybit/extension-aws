@@ -14,6 +14,7 @@ import (
 	"github.com/aws/smithy-go/middleware"
 	"github.com/rs/zerolog/log"
 	extConfig "github.com/steadybit/extension-aws/config"
+	"strings"
 )
 
 var (
@@ -72,8 +73,15 @@ func (logger logForwarder) Logf(classification logging.Classification, format st
 
 var customLoggerMiddleware = middleware.InitializeMiddlewareFunc("customLoggerMiddleware",
 	func(ctx context.Context, in middleware.InitializeInput, next middleware.InitializeHandler) (out middleware.InitializeOutput, metadata middleware.Metadata, err error) {
-		middleware2.GetOperationName(ctx)
-		log.Debug().Msgf("AWS-Call: %s - %s", middleware2.GetServiceID(ctx), middleware2.GetOperationName(ctx))
+		operationName := middleware2.GetOperationName(ctx)
+		if strings.HasPrefix(operationName, "List") ||
+			strings.HasPrefix(operationName, "Describe") ||
+			strings.HasPrefix(operationName, "Get") ||
+			strings.HasPrefix(operationName, "Assume") {
+			log.Debug().Msgf("AWS-Call: %s - %s", middleware2.GetServiceID(ctx), operationName)
+		} else {
+			log.Info().Msgf("AWS-Call: %s - %s", middleware2.GetServiceID(ctx), operationName)
+		}
 		return next.HandleInitialize(ctx, in)
 	})
 
