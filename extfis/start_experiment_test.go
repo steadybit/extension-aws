@@ -5,7 +5,6 @@ package extfis
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/aws/aws-sdk-go-v2/service/fis"
 	"github.com/aws/aws-sdk-go-v2/service/fis/types"
 	"github.com/google/uuid"
@@ -29,14 +28,15 @@ func TestPrepareInstanceReboot(t *testing.T) {
 		}),
 		ExecutionId: executionId,
 	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
 
 	// When
-	state, attackErr := PrepareExperiment(requestBodyJson)
+	action := NewFisExperimentAction()
+	state := action.NewEmptyState()
+	result, err := action.Prepare(context.Background(), &state, requestBody)
 
 	// Then
-	assert.Nil(t, attackErr)
+	assert.Nil(t, err)
+	assert.Nil(t, result)
 	assert.Equal(t, "42", state.Account)
 	assert.Equal(t, "template-123", state.TemplateId)
 	assert.Equal(t, executionId, state.ExecutionId)
@@ -74,24 +74,21 @@ func TestStartExperiment(t *testing.T) {
 	}, nil)
 
 	executionId, _ := uuid.NewRandom()
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"TemplateId":  "template-123",
-			"Account":     "42",
-			"ExecutionId": executionId.String(),
-		},
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+	action := NewFisExperimentAction()
+	state := action.NewEmptyState()
+	state.TemplateId = "template-123"
+	state.Account = "42"
+	state.ExecutionId = executionId
 
 	// When
-	state, extKitErr := StartExperiment(context.Background(), requestBodyJson, func(account string) (FisStartExperimentClient, error) {
+	result, err := startExperiment(context.Background(), &state, func(account string) (FisStartExperimentClient, error) {
 		assert.Equal(t, "42", account)
 		return mockedApi, nil
 	})
 
 	// Then
-	assert.Nil(t, extKitErr)
+	assert.Nil(t, err)
+	assert.Nil(t, result)
 	assert.Equal(t, "EXP-123", state.ExperimentId)
 }
 
@@ -130,30 +127,26 @@ func TestStatusExperiment(t *testing.T) {
 	}, nil)
 
 	executionId, _ := uuid.NewRandom()
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"TemplateId":   "template-123",
-			"Account":      "42",
-			"ExecutionId":  executionId.String(),
-			"ExperimentId": "EXP-123",
-		},
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+	action := NewFisExperimentAction()
+	state := action.NewEmptyState()
+	state.TemplateId = "template-123"
+	state.Account = "42"
+	state.ExecutionId = executionId
+	state.ExperimentId = "EXP-123"
 
 	// When
-	state, extKitErr := StatusExperiment(context.Background(), requestBodyJson, func(account string) (FisStatusExperimentClient, error) {
+	result, err := statusExperiment(context.Background(), &state, func(account string) (FisStatusExperimentClient, error) {
 		assert.Equal(t, "42", account)
 		return mockedApi, nil
 	})
 
 	// Then
-	assert.Nil(t, extKitErr)
-	assert.Equal(t, (*state.Messages)[0].Message, "FIS experiment summary:\nstepA: completed\nstepB: failed (Internal error.)\nstepC: cancelled\n")
-	assert.True(t, state.Completed)
-	assert.Equal(t, state.Error.Status, extutil.Ptr(action_kit_api.Failed))
-	assert.Equal(t, state.Error.Title, "FIS Experiment failed")
-	assert.Equal(t, state.Error.Detail, extutil.Ptr("stepB failed"))
+	assert.Nil(t, err)
+	assert.Equal(t, (*result.Messages)[0].Message, "FIS experiment summary:\nstepA: completed\nstepB: failed (Internal error.)\nstepC: cancelled\n")
+	assert.True(t, result.Completed)
+	assert.Equal(t, result.Error.Status, extutil.Ptr(action_kit_api.Failed))
+	assert.Equal(t, result.Error.Title, "FIS Experiment failed")
+	assert.Equal(t, result.Error.Detail, extutil.Ptr("stepB failed"))
 }
 
 func TestStopExperiment(t *testing.T) {
@@ -179,19 +172,15 @@ func TestStopExperiment(t *testing.T) {
 	})).Return(&fis.StopExperimentOutput{}, nil)
 
 	executionId, _ := uuid.NewRandom()
-	requestBody := action_kit_api.StartActionRequestBody{
-		State: map[string]interface{}{
-			"TemplateId":   "template-123",
-			"Account":      "42",
-			"ExecutionId":  executionId.String(),
-			"ExperimentId": "EXP-123",
-		},
-	}
-	requestBodyJson, err := json.Marshal(requestBody)
-	require.Nil(t, err)
+	action := NewFisExperimentAction()
+	state := action.NewEmptyState()
+	state.TemplateId = "template-123"
+	state.Account = "42"
+	state.ExecutionId = executionId
+	state.ExperimentId = "EXP-123"
 
 	// When
-	_, extKitErr := StopExperiment(context.Background(), requestBodyJson, func(account string) (FisStopExperimentClient, error) {
+	_, extKitErr := stopExperiment(context.Background(), &state, func(account string) (FisStopExperimentClient, error) {
 		assert.Equal(t, "42", account)
 		return mockedApi, nil
 	})

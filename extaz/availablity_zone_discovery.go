@@ -20,7 +20,7 @@ import (
 	"net/http"
 )
 
-func RegisterAZDiscoveryHandlers() {
+func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler("/az/discovery", exthttp.GetterAsHandler(getAZDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/az/discovery/target-description", exthttp.GetterAsHandler(getAZTargetDescription))
 	exthttp.RegisterHttpHandler("/az/discovery/discovered-targets", getAZDiscoveryResults)

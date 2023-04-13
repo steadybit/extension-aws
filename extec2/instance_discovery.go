@@ -22,7 +22,7 @@ import (
 	"strings"
 )
 
-func RegisterEc2InstanceDiscoveryHandlers() {
+func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery", exthttp.GetterAsHandler(getEc2InstanceDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/target-description", exthttp.GetterAsHandler(getEc2InstanceTargetDescription))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getEc2InstanceAttributeDescriptions))

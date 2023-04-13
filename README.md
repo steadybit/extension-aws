@@ -26,6 +26,15 @@ A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to
         - Experiment Templates
     - Actions
         - Start Experiments
+- AWS Lambda
+    - Discoveries
+        - Lambda Functions
+    - Actions
+        - Block TCP Connections (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+        - Inject Latency (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+        - Inject Exceptions (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+        - Inject Status Code (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+        - Fill Diskspace (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
 
 ## Configuration
 
@@ -36,12 +45,13 @@ The process requires valid access credentials to interact with various AWS APIs.
 If you don't want to use certain parts of the extension and therefore don't want to provide the required permissions, you can disable these parts by providing
 the following environment variables. Actions using these targets will not be shown in the ui, as there are no targets reported.
 
-| Env Var                                          | 
-|--------------------------------------------------|
-| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2=true  |
-| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true  |
-| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE=true |
-| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS=true  |
+| Env Var                                            | 
+|----------------------------------------------------|
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2=true    |
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true    |
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE=true   |
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS=true    |
+| STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA=true |
 
 ### Authentication
 
@@ -138,6 +148,7 @@ start the very first fis experiment via the steadybit agent, you will need to ad
       "Action": [
         "fis:ListExperimentTemplates",
         "fis:GetExperiment",
+        "fis:GetExperimentTemplate",
         "fis:StartExperiment",
         "fis:StopExperiment",
         "fis:TagResource"
@@ -149,6 +160,28 @@ start the very first fis experiment via the steadybit agent, you will need to ad
       "Effect": "Allow",
       "Action": "iam:CreateServiceLinkedRole",
       "Resource": "arn:aws:iam::<YOUR-ACCOUNT>:role/aws-service-role/fis.amazonaws.com/AWSServiceRoleForFIS"
+    }
+  ]
+}
+```
+
+</details>
+<details>
+    <summary>Lambda Functions-Discovery & Attacks</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ssm:AddTagsToResource",
+        "ssm:PutParameter",
+        "ssm:DeleteParameter",
+        "lambda:ListFunctions"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
     }
   ]
 }
@@ -312,7 +345,7 @@ IAM policies need to be correctly configured for cross-account role assumption. 
        ]
    }
    ```
-2. The roles themselves have all the [required permissions](#iam-policy).
+2. The roles themselves have all the [required permissions](#required-permissions-policies).
 3. The roles have trust relationships that allow them to be assumed by the given credentials.
    ```json
    {
