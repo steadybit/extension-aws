@@ -138,6 +138,7 @@ start the very first fis experiment via the steadybit agent, you will need to ad
       "Action": [
         "fis:ListExperimentTemplates",
         "fis:GetExperiment",
+        "fis:GetExperimentTemplate",
         "fis:StartExperiment",
         "fis:StopExperiment",
         "fis:TagResource"
