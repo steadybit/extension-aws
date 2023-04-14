@@ -72,7 +72,20 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 		Description: "Simulates an outage of an entire availability zone.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(azIcon),
-		TargetType:  extutil.Ptr("zone"),
+		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+			TargetType: "zone",
+			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+				{
+					Label:       "by zone",
+					Description: extutil.Ptr("Find zone by name"),
+					Query:       "aws.zone=\"\"",
+				},
+				{
+					Label:       "by zone-id",
+					Description: extutil.Ptr("Find zone by zone id"),
+					Query:       "aws.zone.id=\"\"",
+				},
+			})}),
 		Category:    extutil.Ptr("network"),
 		TimeControl: action_kit_api.External,
 		Kind:        action_kit_api.Attack,

@@ -50,7 +50,22 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 		Description: "Start an AWS FIS experiment",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(fisIcon),
-		TargetType:  extutil.Ptr(fisTargetId),
+		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+			TargetType:          fisTargetId,
+			QuantityRestriction: extutil.Ptr(action_kit_api.ExactlyOne),
+			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+				{
+					Label:       "by template-id",
+					Description: extutil.Ptr("Find fis-template by template-id"),
+					Query:       "aws.fis.experiment.template.id=\"\"",
+				},
+				{
+					Label:       "by template-name",
+					Description: extutil.Ptr("Find fis-template by template-name"),
+					Query:       "aws.fis.experiment.template.name=\"\"",
+				},
+			}),
+		}),
 		TimeControl: action_kit_api.Internal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
@@ -63,18 +78,6 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 				DefaultValue: extutil.Ptr("60s"),
 			},
 		},
-		TargetSelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
-			{
-				Label:       "by template-id",
-				Description: extutil.Ptr("Find fis-template by template-id"),
-				Query:       "aws.fis.experiment.template.id=\"\"",
-			},
-			{
-				Label:       "by template-name",
-				Description: extutil.Ptr("Find fis-template by template-name"),
-				Query:       "aws.fis.experiment.template.name=\"\"",
-			},
-		}),
 		Prepare: action_kit_api.MutatingEndpointReference{},
 		Start:   action_kit_api.MutatingEndpointReference{},
 		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{

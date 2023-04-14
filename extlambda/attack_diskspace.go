@@ -23,12 +23,14 @@ func getDiskspaceDescription() action_kit_api.ActionDescription {
 		Label:       "Fill Diskspace",
 		Description: "Fills tmp diskspace of the function.",
 		Icon:        extutil.Ptr(lambdaTargetIcon),
-		TargetType:  extutil.Ptr(lambdaTargetID),
-		TargetSelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
-			{
-				Label: "by function name",
-				Query: "aws.lambda.function-name=\"\"",
-			},
+		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+			TargetType: lambdaTargetID,
+			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+				{
+					Label: "by function name",
+					Query: "aws.lambda.function-name=\"\"",
+				},
+			}),
 		}),
 		Category:    extutil.Ptr("application"),
 		Kind:        action_kit_api.Attack,

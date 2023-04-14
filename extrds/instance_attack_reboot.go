@@ -46,7 +46,15 @@ func (f rdsInstanceAttack) Describe() action_kit_api.ActionDescription {
 		Description: "Reboot a single database instance",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(rdsIcon),
-		TargetType:  extutil.Ptr(rdsTargetId),
+		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+			TargetType: rdsTargetId,
+			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+				{
+					Label: "by rds instance id",
+					Query: "aws.rds.instance.id=\"\"",
+				},
+			}),
+		}),
 		Category:    extutil.Ptr("resource"),
 		TimeControl: action_kit_api.Instantaneous,
 		Kind:        action_kit_api.Attack,
