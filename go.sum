@@ -187,8 +187,8 @@ github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/sosodev/duration v1.1.0 h1:kQcaiGbJaIsRqgQy7VGlZrVw1giWO+lDoX3MCPnpVO4=
 github.com/sosodev/duration v1.1.0/go.mod h1:RQIBBX0+fMLc/D9+Jb/fwvVmo0eZvDDEERAikUR6SDg=
-github.com/steadybit/action-kit/go/action_kit_api/v2 v2.5.0 h1:r2hBze1w0Agl1MerRNCTicxM6tbcZbJLVRzKq3P1CwI=
-github.com/steadybit/action-kit/go/action_kit_api/v2 v2.5.0/go.mod h1:4yGr/DzsHpw6elju1XHCeUsY/qoqNTcLY3ytgnNcMt8=
+github.com/steadybit/action-kit/go/action_kit_api/v2 v2.5.1 h1:gW6IttJ33Tu/ynn2cV5WdrpD5l+ODH+DFTc9r7slJCM=
+github.com/steadybit/action-kit/go/action_kit_api/v2 v2.5.1/go.mod h1:4yGr/DzsHpw6elju1XHCeUsY/qoqNTcLY3ytgnNcMt8=
 github.com/steadybit/action-kit/go/action_kit_sdk v1.0.2 h1:pYpKm1BaRY296OH56oMXTfUQjEJLwE2e6ESxRoBuyME=
 github.com/steadybit/action-kit/go/action_kit_sdk v1.0.2/go.mod h1:mTMPHv8eCORj2cVHL3BMDEcUlU86A0mRyaCNsVi25AQ=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.3.0 h1:HwvovoYbAYpJ5PnMeiJUgrjwVkV5EpveAjeHH9pPDMQ=
