@@ -33,7 +33,7 @@ func getAZDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
 			Path:         "/az/discovery/discovered-targets",
-			CallInterval: extutil.Ptr("30s"),
+			CallInterval: extutil.Ptr("300s"),
 		},
 	}
 }
