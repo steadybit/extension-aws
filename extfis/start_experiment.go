@@ -87,7 +87,7 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 	}
 }
 
-func (f FisExperimentAction) Prepare(ctx context.Context, state *FisExperimentState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (f FisExperimentAction) Prepare(_ context.Context, state *FisExperimentState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	templateId := request.Target.Attributes["aws.fis.experiment.template.id"]
 	if templateId == nil || len(templateId) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'aws.fis.experiment.template.id' target attribute.", nil)
