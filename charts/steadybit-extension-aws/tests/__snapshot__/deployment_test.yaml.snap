@@ -4,17 +4,17 @@ manifest should match snapshot with TLS:
     kind: Deployment
     metadata:
       labels: null
-      name: RELEASE-NAME-steadybit-extension-aws
+      name: RELEASE-NAME
       namespace: NAMESPACE
     spec:
       replicas: 1
       selector:
         matchLabels:
-          app.kubernetes.io/name: steadybit-extension-aws
+          app.kubernetes.io/name: RELEASE-NAME
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: steadybit-extension-aws
+            app.kubernetes.io/name: RELEASE-NAME
         spec:
           containers:
             - env:
@@ -34,7 +34,7 @@ manifest should match snapshot with TLS:
                 httpGet:
                   path: /health/liveness
                   port: 8086
-              name: extension-aws
+              name: RELEASE-NAME
               ports:
                 - containerPort: 8085
               readinessProbe:
@@ -64,17 +64,17 @@ manifest should match snapshot with mutual TLS:
     kind: Deployment
     metadata:
       labels: null
-      name: RELEASE-NAME-steadybit-extension-aws
+      name: RELEASE-NAME
       namespace: NAMESPACE
     spec:
       replicas: 1
       selector:
         matchLabels:
-          app.kubernetes.io/name: steadybit-extension-aws
+          app.kubernetes.io/name: RELEASE-NAME
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: steadybit-extension-aws
+            app.kubernetes.io/name: RELEASE-NAME
         spec:
           containers:
             - env:
@@ -96,7 +96,7 @@ manifest should match snapshot with mutual TLS:
                 httpGet:
                   path: /health/liveness
                   port: 8086
-              name: extension-aws
+              name: RELEASE-NAME
               ports:
                 - containerPort: 8085
               readinessProbe:
@@ -133,17 +133,17 @@ manifest should match snapshot without TLS:
     kind: Deployment
     metadata:
       labels: null
-      name: RELEASE-NAME-steadybit-extension-aws
+      name: RELEASE-NAME
       namespace: NAMESPACE
     spec:
       replicas: 1
       selector:
         matchLabels:
-          app.kubernetes.io/name: steadybit-extension-aws
+          app.kubernetes.io/name: RELEASE-NAME
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: steadybit-extension-aws
+            app.kubernetes.io/name: RELEASE-NAME
         spec:
           containers:
             - env:
@@ -159,7 +159,7 @@ manifest should match snapshot without TLS:
                 httpGet:
                   path: /health/liveness
                   port: 8086
-              name: extension-aws
+              name: RELEASE-NAME
               ports:
                 - containerPort: 8085
               readinessProbe:
