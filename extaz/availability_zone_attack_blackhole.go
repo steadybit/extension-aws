@@ -107,12 +107,12 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	// Get Target Attributes
 	targetAccount := request.Target.Attributes["aws.account"]
-	if targetAccount == nil || len(targetAccount) == 0 {
+	if len(targetAccount) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.targetAccount' target attribute.", nil))
 	}
 
 	targetZone := request.Target.Attributes["aws.zone"]
-	if targetZone == nil || len(targetZone) == 0 {
+	if len(targetZone) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.zone' target attribute.", nil))
 	}
 
@@ -359,9 +359,7 @@ func getNetworkAclAssociations(ctx context.Context, clientEc2 azBlackholeEC2Api,
 			return nil, err
 		}
 		for _, networkAcl := range describeNetworkAclsResult.NetworkAcls {
-			for _, association := range networkAcl.Associations {
-				networkAclsAssociatedWithSubnets = append(networkAclsAssociatedWithSubnets, association)
-			}
+			networkAclsAssociatedWithSubnets = append(networkAclsAssociatedWithSubnets, networkAcl.Associations...)
 		}
 	}
 
@@ -502,9 +500,7 @@ func getAllNACLsCreatedBySteadybit(clientEc2 azBlackholeEC2Api, ctx context.Cont
 			return nil, err
 		}
 		for _, networkAcl := range describeNetworkAclsResult.NetworkAcls {
-			for _, association := range networkAcl.Associations {
-				networkAclsAssociatedWithSubnets = append(networkAclsAssociatedWithSubnets, association)
-			}
+			networkAclsAssociatedWithSubnets = append(networkAclsAssociatedWithSubnets, networkAcl.Associations...)
 		}
 	}
 	return &networkAclsAssociatedWithSubnets, nil

@@ -62,12 +62,12 @@ func (a *lambdaAction) NewEmptyState() LambdaActionState {
 
 func (a *lambdaAction) Prepare(_ context.Context, state *LambdaActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	account := request.Target.Attributes["aws.account"]
-	if account == nil || len(account) == 0 {
+	if len(account) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)
 	}
 
 	failureInjectionParam := request.Target.Attributes["aws.lambda.failure-injection-param"]
-	if failureInjectionParam == nil || len(failureInjectionParam) == 0 {
+	if len(failureInjectionParam) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'aws.lambda.failure-injection-param' attribute. Did you wrap the lambda with https://github.com/gunnargrosch/failure-lambda ?", nil)
 	}
 
@@ -105,14 +105,11 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 		return nil, extension_kit.ToError("Failed to put ssm parameter", err)
 	}
 
-	_, err = client.AddTagsToResource(ctx, &ssm.AddTagsToResourceInput{
+	_, _ = client.AddTagsToResource(ctx, &ssm.AddTagsToResourceInput{
 		ResourceId:   extutil.Ptr(state.Param),
 		ResourceType: types.ResourceTypeForTaggingParameter,
 		Tags:         []types.Tag{{Key: extutil.Ptr("created-by"), Value: extutil.Ptr("steadybit")}},
 	})
-	if err != nil {
-		//ignore error
-	}
 	return nil, nil
 }
 

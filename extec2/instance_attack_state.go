@@ -99,12 +99,12 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 
 func (e *ec2InstanceStateAction) Prepare(_ context.Context, state *InstanceStateChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	instanceId := request.Target.Attributes["aws-ec2.instance.id"]
-	if instanceId == nil || len(instanceId) == 0 {
+	if len(instanceId) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil))
 	}
 
 	account := request.Target.Attributes["aws.account"]
-	if account == nil || len(account) == 0 {
+	if len(account) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil))
 	}
 

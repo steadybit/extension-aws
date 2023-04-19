@@ -64,12 +64,12 @@ func (f rdsInstanceAttack) Describe() action_kit_api.ActionDescription {
 
 func (f rdsInstanceAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	instanceId := request.Target.Attributes["aws.rds.instance.id"]
-	if instanceId == nil || len(instanceId) == 0 {
+	if len(instanceId) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.rds.instance.id' target attribute.", nil))
 	}
 
 	account := request.Target.Attributes["aws.account"]
-	if account == nil || len(account) == 0 {
+	if len(account) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
 	}
 

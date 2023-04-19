@@ -42,7 +42,9 @@ func WithTestContainers(t *testing.T, testCases []WithTestContainersCase) {
 	defer tcs.Terminate(t, context.Background())
 
 	clientEc2, err := setupEc2Client(context.Background(), tcs.LocalStackContainer)
+	require.NoError(t, err)
 	clientImds, err := setupImdsClient(context.Background(), tcs.LocalStackContainer)
+	require.NoError(t, err)
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			tc.Test(t, clientEc2, clientImds)

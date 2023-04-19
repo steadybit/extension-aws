@@ -46,17 +46,17 @@ type fisApiMock struct {
 	mock.Mock
 }
 
-func (m fisApiMock) StartExperiment(ctx context.Context, params *fis.StartExperimentInput, optFns ...func(*fis.Options)) (*fis.StartExperimentOutput, error) {
+func (m *fisApiMock) StartExperiment(ctx context.Context, params *fis.StartExperimentInput, _ ...func(*fis.Options)) (*fis.StartExperimentOutput, error) {
 	args := m.Called(ctx, params)
 	return args.Get(0).(*fis.StartExperimentOutput), args.Error(1)
 }
 
-func (m fisApiMock) GetExperiment(ctx context.Context, params *fis.GetExperimentInput, optFns ...func(*fis.Options)) (*fis.GetExperimentOutput, error) {
+func (m *fisApiMock) GetExperiment(ctx context.Context, params *fis.GetExperimentInput, _ ...func(*fis.Options)) (*fis.GetExperimentOutput, error) {
 	args := m.Called(ctx, params)
 	return args.Get(0).(*fis.GetExperimentOutput), args.Error(1)
 }
 
-func (m fisApiMock) StopExperiment(ctx context.Context, params *fis.StopExperimentInput, optFns ...func(*fis.Options)) (*fis.StopExperimentOutput, error) {
+func (m *fisApiMock) StopExperiment(ctx context.Context, params *fis.StopExperimentInput, _ ...func(*fis.Options)) (*fis.StopExperimentOutput, error) {
 	args := m.Called(ctx, params)
 	return args.Get(0).(*fis.StopExperimentOutput), args.Error(1)
 }

@@ -89,12 +89,12 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 
 func (f FisExperimentAction) Prepare(_ context.Context, state *FisExperimentState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	templateId := request.Target.Attributes["aws.fis.experiment.template.id"]
-	if templateId == nil || len(templateId) == 0 {
+	if len(templateId) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'aws.fis.experiment.template.id' target attribute.", nil)
 	}
 
 	account := request.Target.Attributes["aws.account"]
-	if account == nil || len(account) == 0 {
+	if len(account) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
 	}
 
