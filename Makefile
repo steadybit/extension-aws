@@ -35,6 +35,11 @@ charttesting:
     helm unittest $$dir; \
   done
 
+## chartlint: Lint charts
+.PHONY: chartlint
+chartlint:
+	ct lint --config chartTesting.yaml
+
 # ==================================================================================== #
 # BUILD
 # ==================================================================================== #
