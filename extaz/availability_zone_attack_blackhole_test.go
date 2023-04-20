@@ -390,20 +390,14 @@ func TestStartBlackhole(t *testing.T) {
 
 	clientEc2.On("ReplaceNetworkAclAssociation", mock.Anything, mock.MatchedBy(func(params *ec2.ReplaceNetworkAclAssociationInput) bool {
 		require.Equal(t, extutil.Ptr("NEW nacl-4"), params.NetworkAclId)
-		if "association-1" == *params.AssociationId {
-			return true
-		}
-		return false
+		return *params.AssociationId == "association-1"
 	}), mock.Anything).Return(extutil.Ptr(ec2.ReplaceNetworkAclAssociationOutput{
 		NewAssociationId: extutil.Ptr("NEW association-4"),
 	}), nil)
 
 	clientEc2.On("ReplaceNetworkAclAssociation", mock.Anything, mock.MatchedBy(func(params *ec2.ReplaceNetworkAclAssociationInput) bool {
 		require.Equal(t, extutil.Ptr("NEW nacl-4"), params.NetworkAclId)
-		if "association-2" == *params.AssociationId {
-			return true
-		}
-		return false
+		return *params.AssociationId == "association-2"
 	}), mock.Anything).Return(extutil.Ptr(ec2.ReplaceNetworkAclAssociationOutput{
 		NewAssociationId: extutil.Ptr("NEW association-5"),
 	}), nil)
@@ -487,10 +481,10 @@ func TestStopBlackhole(t *testing.T) {
 	}), nil)
 
 	clientEc2.On("ReplaceNetworkAclAssociation", mock.Anything, mock.MatchedBy(func(params *ec2.ReplaceNetworkAclAssociationInput) bool {
-		if "NEW association-4" == *params.AssociationId && "nacl-1" == *params.NetworkAclId {
+		if *params.AssociationId == "NEW association-4" && *params.NetworkAclId == "nacl-1" {
 			return true
 		}
-		if "NEW association-5" == *params.AssociationId && "nacl-2" == *params.NetworkAclId {
+		if *params.AssociationId == "NEW association-5" && *params.NetworkAclId == "nacl-2" {
 			return true
 		}
 		return false

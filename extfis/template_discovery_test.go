@@ -19,14 +19,14 @@ type fisClientMock struct {
 	mock.Mock
 }
 
-func (m fisClientMock) ListExperimentTemplates(ctx context.Context, params *fis.ListExperimentTemplatesInput, optFns ...func(*fis.Options)) (*fis.ListExperimentTemplatesOutput, error) {
+func (m *fisClientMock) ListExperimentTemplates(ctx context.Context, params *fis.ListExperimentTemplatesInput, _ ...func(*fis.Options)) (*fis.ListExperimentTemplatesOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*fis.ListExperimentTemplatesOutput), args.Error(1)
 }
-func (m fisClientMock) GetExperimentTemplate(ctx context.Context, params *fis.GetExperimentTemplateInput, optFns ...func(*fis.Options)) (*fis.GetExperimentTemplateOutput, error) {
+func (m *fisClientMock) GetExperimentTemplate(ctx context.Context, params *fis.GetExperimentTemplateInput, _ ...func(*fis.Options)) (*fis.GetExperimentTemplateOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)

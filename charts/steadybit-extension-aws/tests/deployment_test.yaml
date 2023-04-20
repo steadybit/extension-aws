@@ -1,0 +1,27 @@
+templates:
+  - deployment.yaml
+tests:
+  - it: manifest should match snapshot without TLS
+    asserts:
+      - matchSnapshot: { }
+  - it: manifest should match snapshot with TLS
+    set:
+      tls:
+        server:
+          certificate:
+            fromSecret: server-cert
+    asserts:
+      - matchSnapshot: { }
+  - it: manifest should match snapshot with mutual TLS
+    set:
+      tls:
+        server:
+          certificate:
+            fromSecret: server-cert
+        client:
+          certificates:
+            fromSecrets:
+              - client-cert-a
+              - client-cert-a
+    asserts:
+      - matchSnapshot: {}

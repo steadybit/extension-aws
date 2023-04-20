@@ -50,7 +50,22 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 		Description: "Start an AWS FIS experiment",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(fisIcon),
-		TargetType:  extutil.Ptr(fisTargetId),
+		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+			TargetType:          fisTargetId,
+			QuantityRestriction: extutil.Ptr(action_kit_api.ExactlyOne),
+			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+				{
+					Label:       "by template-id",
+					Description: extutil.Ptr("Find fis-template by template-id"),
+					Query:       "aws.fis.experiment.template.id=\"\"",
+				},
+				{
+					Label:       "by template-name",
+					Description: extutil.Ptr("Find fis-template by template-name"),
+					Query:       "aws.fis.experiment.template.name=\"\"",
+				},
+			}),
+		}),
 		TimeControl: action_kit_api.Internal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
@@ -72,14 +87,14 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 	}
 }
 
-func (f FisExperimentAction) Prepare(ctx context.Context, state *FisExperimentState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (f FisExperimentAction) Prepare(_ context.Context, state *FisExperimentState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	templateId := request.Target.Attributes["aws.fis.experiment.template.id"]
-	if templateId == nil || len(templateId) == 0 {
+	if len(templateId) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'aws.fis.experiment.template.id' target attribute.", nil)
 	}
 
 	account := request.Target.Attributes["aws.account"]
-	if account == nil || len(account) == 0 {
+	if len(account) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
 	}
 

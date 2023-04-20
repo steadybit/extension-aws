@@ -49,22 +49,24 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 		Description: "Reboot, terminate, stop or hibernate EC2 instances",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(ec2Icon),
-		TargetType:  extutil.Ptr(ec2TargetId),
+		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+			TargetType: ec2TargetId,
+			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+				{
+					Label:       "by instance-id",
+					Description: extutil.Ptr("Find ec2-instance by instance-id"),
+					Query:       "aws-ec2.instance.id=\"\"",
+				},
+				{
+					Label:       "by instance-name",
+					Description: extutil.Ptr("Find ec2-instance by instance-name"),
+					Query:       "aws-ec2.instance.name=\"\"",
+				},
+			}),
+		}),
 		Category:    extutil.Ptr("state"),
 		TimeControl: action_kit_api.Instantaneous,
 		Kind:        action_kit_api.Attack,
-		TargetSelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
-			{
-				Label:       "by instance-id",
-				Description: extutil.Ptr("Find ec2-instance by instance-id"),
-				Query:       "aws-ec2.instance.id=\"\"",
-			},
-			{
-				Label:       "by instance-name",
-				Description: extutil.Ptr("Find ec2-instance by instance-name"),
-				Query:       "aws-ec2.instance.name=\"\"",
-			},
-		}),
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:        "action",
@@ -97,12 +99,12 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 
 func (e *ec2InstanceStateAction) Prepare(_ context.Context, state *InstanceStateChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	instanceId := request.Target.Attributes["aws-ec2.instance.id"]
-	if instanceId == nil || len(instanceId) == 0 {
+	if len(instanceId) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil))
 	}
 
 	account := request.Target.Attributes["aws.account"]
-	if account == nil || len(account) == 0 {
+	if len(account) == 0 {
 		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil))
 	}
 

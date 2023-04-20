@@ -3,7 +3,7 @@
 ##
 ## Build
 ##
-FROM golang:1.19-alpine AS build
+FROM golang:1.20-alpine AS build
 
 ARG NAME
 ARG VERSION
@@ -11,6 +11,7 @@ ARG REVISION
 
 WORKDIR /app
 
+RUN apk add build-base
 COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
@@ -22,7 +23,7 @@ RUN go build \
     -X 'github.com/steadybit/extension-kit/extbuild.ExtensionName=${NAME}' \
     -X 'github.com/steadybit/extension-kit/extbuild.Version=${VERSION}' \
     -X 'github.com/steadybit/extension-kit/extbuild.Revision=${REVISION}'" \
-     -o /extension-aws
+    -o ./extension
 
 ##
 ## Runtime
@@ -38,8 +39,9 @@ USER $USERNAME
 
 WORKDIR /
 
-COPY --from=build /extension-aws /extension-aws
+COPY --from=build /app/extension /extension
 
 EXPOSE 8085
+EXPOSE 8086
 
-ENTRYPOINT ["/extension-aws"]
+ENTRYPOINT ["/extension"]

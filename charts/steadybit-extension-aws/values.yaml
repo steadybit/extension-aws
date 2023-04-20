@@ -1,0 +1,70 @@
+# Default values for steadybit-extension-aws.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+aws:
+  # aws.assumeRoles -- List of AWS IAM roles the extension should assume. You can use `--set aws.assumeRoles="{ARN1,ARN2}"` to set this value via the Helm CLI.
+  assumeRoles: []
+
+image:
+  # image.name -- The container image to use for the steadybit AWS extension.
+  name: steadybit/extension-aws
+  # image.tag -- tag name of the extension-aws container image to use.
+  # See https://hub.docker.com/r/steadybit/extension-aws for all tags.
+  tag: latest
+  # image.pullPolicy -- Specifies when to pull the image.
+  pullPolicy: Always
+
+tls:
+  server:
+    certificate:
+      # tls.server.certificate.fromSecret -- The name of the secret containing the TLS certificate for the extension. The extension will then create
+      # an HTTPS server instead of an HTTP server.
+      fromSecret: null
+  client:
+    certificates:
+      # tls.client.certificates.fromSecrets -- List of secret names containing TLS certificates for the extension to trust. The extension will require
+      # clients to authenticate using one of these certificates. In essence, this will enable mutual TLS.
+      fromSecrets: []
+
+logging:
+  # logging.level -- The active log level. Valid values are: TRACE, DEBUG, INFO, WARN, ERROR
+  level: INFO
+  # logging.format -- The format of the log entries. One of text, json
+  format: text
+
+resources:
+  requests:
+    # resources.requests.memory -- The minimal amount of memory needed
+    memory: "64Mi"
+    # resources.requests.cpu -- The minimal amount of cpu shares needed
+    cpu: "50m"
+  limits:
+    # resources.limits.memory -- The limit of memory to be used
+    memory: "128Mi"
+    # resources.limits.cpu -- The limit of cpu share to be used during its interval
+    cpu: "200m"
+
+serviceAccount:
+  # serviceAccount.create -- Specifies whether a ServiceAccount should be created.
+  create: true
+  # serviceAccount.name -- The name of the ServiceAccount to use. If not set and `create` is true, a name is generated using the fullname template.
+  name: steadybit-extension-aws
+  # serviceAccount.eksRoleArn -- The arn of the IAM role - [see AWS docs](https://docs.aws.amazon.com/eks/latest/userguide/specify-service-account-role.html)
+  eksRoleArn: null
+
+# extra labels to apply to the Kubernetes resources
+extraLabels: {}
+
+# nodeSelector -- Node labels for pod assignment
+nodeSelector: {}
+
+# tolerations -- Tolerations to influence pod assignment
+tolerations: []
+
+# topologySpreadConstraints -- Spread constraints to influence pod assignment.
+# https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+topologySpreadConstraints: []
+
+# affinity -- Affinities to influence pod assignment.
+affinity: {}

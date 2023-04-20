@@ -146,17 +146,17 @@ type ssmClientMock struct {
 	mock.Mock
 }
 
-func (m ssmClientMock) PutParameter(ctx context.Context, s *ssm.PutParameterInput, optFns ...func(*ssm.Options)) (*ssm.PutParameterOutput, error) {
+func (m *ssmClientMock) PutParameter(ctx context.Context, s *ssm.PutParameterInput, optFns ...func(*ssm.Options)) (*ssm.PutParameterOutput, error) {
 	args := m.Called(ctx, s, optFns)
 	return args.Get(0).(*ssm.PutParameterOutput), args.Error(1)
 }
 
-func (m ssmClientMock) DeleteParameter(ctx context.Context, s *ssm.DeleteParameterInput, optFns ...func(*ssm.Options)) (*ssm.DeleteParameterOutput, error) {
+func (m *ssmClientMock) DeleteParameter(ctx context.Context, s *ssm.DeleteParameterInput, optFns ...func(*ssm.Options)) (*ssm.DeleteParameterOutput, error) {
 	args := m.Called(ctx, s, optFns)
 	return args.Get(0).(*ssm.DeleteParameterOutput), args.Error(1)
 }
 
-func (m ssmClientMock) AddTagsToResource(ctx context.Context, s *ssm.AddTagsToResourceInput, optFns ...func(*ssm.Options)) (*ssm.AddTagsToResourceOutput, error) {
+func (m *ssmClientMock) AddTagsToResource(ctx context.Context, s *ssm.AddTagsToResourceInput, optFns ...func(*ssm.Options)) (*ssm.AddTagsToResourceOutput, error) {
 	args := m.Called(ctx, s, optFns)
 	return args.Get(0).(*ssm.AddTagsToResourceOutput), args.Error(1)
 }
