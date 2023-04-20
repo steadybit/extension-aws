@@ -124,9 +124,9 @@ jobs:
 
       - name: Run chart-testing (list-changed)
         id: list-changed
-        if: github.event_name == 'pull_request'
+        if: (github.event_name == 'pull_request' || github.ref != 'refs/heads/main')
         run: |
-          changed=$(ct list-changed --config ct.yaml)
+          changed=$(ct list-changed --config chartTesting.yaml)
           if [[ -n "$changed" ]]; then
             echo "::set-output name=changed::true"
           fi
