@@ -34,18 +34,7 @@ jobs:
           go mod download
           make audit
 
-      - name: Check Sonar Token
-        id: check-sonar
-        shell: bash
-        run: |
-          if [ "${{ secrets.SONAR_TOKEN }}" != '' ]; then
-            echo "available=true" >> $GITHUB_OUTPUT;
-          else
-            echo "available=false" >> $GITHUB_OUTPUT;
-          fi
-
-      - name: SonarCloud Scan
-        if: ${{ steps.check-sonar.outputs.available == 'true' }}
+      - name: SonarCloud Scan # only added because we also want to scan the `develop` branch, otherwise we could use the `Automatic Analysis`
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
