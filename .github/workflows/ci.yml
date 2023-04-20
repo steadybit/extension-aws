@@ -34,6 +34,23 @@ jobs:
           go mod download
           make audit
 
+      - name: Check Sonar Token
+        id: check-sonar
+        shell: bash
+        run: |
+          if [ "${{ secrets.SONAR_TOKEN }}" != '' ]; then
+            echo "available=true" >> $GITHUB_OUTPUT;
+          else
+            echo "available=false" >> $GITHUB_OUTPUT;
+          fi
+
+      - name: SonarCloud Scan
+        if: ${{ steps.check-sonar.outputs.available == 'true' }}
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   build-images:
     name: Build Docker Images
     needs:
@@ -54,12 +71,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Log in to the container registry
         if: github.event_name != 'pull_request'
@@ -120,7 +131,7 @@ jobs:
         run: make charttesting
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.3.0
+        uses: helm/chart-testing-action@v2.4.0
 
       - name: Run chart-testing (lint)
         run: ct lint --config chartTesting.yaml

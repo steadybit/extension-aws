@@ -5,3 +5,4 @@ dist/
 
 gpg/gpg.key
 gpg.key
+/coverage.out
