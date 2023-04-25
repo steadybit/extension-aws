@@ -8,7 +8,7 @@ aws:
 
 image:
   # image.name -- The container image to use for the steadybit AWS extension.
-  name: steadybit/extension-aws
+  name: ghcr.io/steadybit/extension-aws
   # image.tag -- tag name of the extension-aws container image to use.
   # See https://hub.docker.com/r/steadybit/extension-aws for all tags.
   tag: latest
