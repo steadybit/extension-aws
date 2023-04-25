@@ -59,19 +59,3 @@ run: tidy build
 .PHONY: container
 container:
 	docker build -t extension-aws:latest .
-
-# ==================================================================================== #
-# EJECT
-# ==================================================================================== #
-
-## eject: remove / clear up files associated with the scaffold repository
-.PHONY: eject
-eject:
-	rm CHANGELOG.md
-	mv CHANGELOG.SCAFFOLD.md CHANGELOG.md
-	rm CONTRIBUTING.md
-	mv CONTRIBUTING.SCAFFOLD.md CONTRIBUTING.md
-	rm README.md
-	mv README.SCAFFOLD.md README.md
-	rm LICENSE
-	mv LICENSE.SCAFFOLD LICENSE
