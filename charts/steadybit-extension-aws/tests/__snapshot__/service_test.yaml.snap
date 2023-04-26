@@ -4,7 +4,7 @@ manifest should match snapshot with TLS:
     kind: Service
     metadata:
       annotations:
-        steadybit.com/extension-auto-discovery: "{\n  \"extensions\": [\n    {\n      \"port\": 8085,\n      \"types\": [\"ACTION\",\"DISCOVERY\"],\n      \"tls\": {\n        \"server\": {\n          \"extraCertsFile\": \"/opt/steadybit/agent/etc/extension-mtls/server-cert/tls.crt\"\n        }\n        \n      }\n    }\n  ]\n}\n"
+        steadybit.com/extension-auto-discovery: "{\n  \"extensions\": [\n    {\n      \"port\": 8085,\n      \"types\": [\"ACTION\",\"DISCOVERY\"],\n      \"tls\": {\n        \"server\": {\n          \"extraCertsFile\": \"server-cert/tls.crt\"\n        }\n        \n      }\n    }\n  ]\n}\n"
       labels: null
       name: RELEASE-NAME-steadybit-extension-aws
       namespace: NAMESPACE
@@ -29,11 +29,11 @@ manifest should match snapshot with mutual TLS:
                 "types": ["ACTION","DISCOVERY"],
                 "tls": {
                   "server": {
-                    "extraCertsFile": "/opt/steadybit/agent/etc/extension-mtls/server-cert/tls.crt"
+                    "extraCertsFile": "server-cert/tls.crt"
                   },
                   "client": {
-                    "certChainFile": "/opt/steadybit/agent/etc/extension-mtls/client-cert-a/tls.crt",
-                    "certKeyFile": "/opt/steadybit/agent/etc/extension-mtls/client-cert-a/tls.key"
+                    "certChainFile": "client-cert-a/tls.crt",
+                    "certKeyFile": "client-cert-a/tls.key"
                   }
                 }
               }
