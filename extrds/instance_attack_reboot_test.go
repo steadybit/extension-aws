@@ -17,14 +17,14 @@ import (
 
 func TestPrepareInstanceReboot(t *testing.T) {
 	// Given
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.rds.instance.id": {"my-instance"},
 				"aws.account":         {"42"},
 			},
 		}),
-	}
+	})
 
 	attack := rdsInstanceAttack{}
 	state := attack.NewEmptyState()
@@ -39,13 +39,13 @@ func TestPrepareInstanceReboot(t *testing.T) {
 
 func TestPrepareInstanceRebootMustRequireAnInstanceId(t *testing.T) {
 	// Given
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.account": {"42"},
 			},
 		}),
-	}
+	})
 
 	attack := rdsInstanceAttack{}
 	state := attack.NewEmptyState()
@@ -59,13 +59,13 @@ func TestPrepareInstanceRebootMustRequireAnInstanceId(t *testing.T) {
 
 func TestPrepareInstanceRebootMustRequireAnAccountId(t *testing.T) {
 	// Given
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.rds.instance.id": {"my-instance"},
 			},
 		}),
-	}
+	})
 
 	attack := rdsInstanceAttack{}
 	state := attack.NewEmptyState()

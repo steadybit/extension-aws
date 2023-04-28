@@ -27,7 +27,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 	}{
 		{
 			name: "Should return config",
-			requestBody: action_kit_api.PrepareActionRequestBody{
+			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 				Config: map[string]interface{}{
 					"action": "stop",
 				},
@@ -37,7 +37,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 						"aws.account":         {"42"},
 					},
 				}),
-			},
+			}),
 
 			wantedState: &InstanceStateChangeState{
 				Account:    "42",
@@ -47,7 +47,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 		},
 		{
 			name: "Should return error if account is missing",
-			requestBody: action_kit_api.PrepareActionRequestBody{
+			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 				Config: map[string]interface{}{
 					"action": "stop",
 				},
@@ -56,12 +56,12 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 						"aws-ec2.instance.id": {"my-instance"},
 					},
 				}),
-			},
+			}),
 			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)),
 		},
 		{
 			name: "Should return error if instanceId is missing",
-			requestBody: action_kit_api.PrepareActionRequestBody{
+			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 				Config: map[string]interface{}{
 					"action": "stop",
 				},
@@ -70,12 +70,12 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 						"aws.account": {"42"},
 					},
 				}),
-			},
+			}),
 			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil)),
 		},
 		{
 			name: "Should return error if action is missing",
-			requestBody: action_kit_api.PrepareActionRequestBody{
+			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 				Config: map[string]interface{}{},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
@@ -83,7 +83,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 						"aws.account":         {"42"},
 					},
 				}),
-			},
+			}),
 			wantedError: extutil.Ptr(extension_kit.ToError("Missing attack action parameter.", nil)),
 		},
 	}

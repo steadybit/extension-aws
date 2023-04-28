@@ -123,7 +123,7 @@ func TestPrepareBlackhole(t *testing.T) {
 		}}
 	state := action.NewEmptyState()
 
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
@@ -136,7 +136,7 @@ func TestPrepareBlackhole(t *testing.T) {
 		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
-	}
+	})
 
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
@@ -169,7 +169,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 		}}
 	state := action.NewEmptyState()
 
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
@@ -182,7 +182,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
-	}
+	})
 
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
@@ -204,7 +204,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 		}}
 	state := action.NewEmptyState()
 
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
@@ -217,7 +217,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
-	}
+	})
 
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
@@ -239,7 +239,7 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 		}}
 	state := action.NewEmptyState()
 
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
@@ -252,7 +252,7 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: nil,
 		}),
-	}
+	})
 
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
@@ -274,7 +274,7 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 		}}
 	state := action.NewEmptyState()
 
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
@@ -287,7 +287,7 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
-	}
+	})
 
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
@@ -313,7 +313,7 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 		}}
 	state := action.NewEmptyState()
 
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
@@ -326,7 +326,7 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("42"),
 		}),
-	}
+	})
 
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)

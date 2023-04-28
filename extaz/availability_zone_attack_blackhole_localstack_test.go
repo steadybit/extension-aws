@@ -29,7 +29,7 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 *ec2.
 		}}
 	state := action.NewEmptyState()
 
-	requestBodyPrepare := action_kit_api.PrepareActionRequestBody{
+	requestBodyPrepare := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"action": "stop",
 		},
@@ -43,7 +43,7 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 *ec2.
 			AgentAwsAccountId: aws.String("41"),
 		}),
 		ExecutionId: uuid.New(),
-	}
+	})
 
 	// When
 	_, err := action.Prepare(ctx, &state, requestBodyPrepare)

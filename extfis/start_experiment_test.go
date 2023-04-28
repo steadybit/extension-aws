@@ -19,7 +19,7 @@ import (
 func TestPrepareInstanceReboot(t *testing.T) {
 	// Given
 	executionId, _ := uuid.NewRandom()
-	requestBody := action_kit_api.PrepareActionRequestBody{
+	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.fis.experiment.template.id": {"template-123"},
@@ -27,7 +27,7 @@ func TestPrepareInstanceReboot(t *testing.T) {
 			},
 		}),
 		ExecutionId: executionId,
-	}
+	})
 
 	// When
 	action := NewFisExperimentAction()

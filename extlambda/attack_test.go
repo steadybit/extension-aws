@@ -60,11 +60,11 @@ func TestLambdaAction_Prepare(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			//Given
 			state := action.NewEmptyState()
-			request := action_kit_api.PrepareActionRequestBody{
+			request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 				Target: &action_kit_api.Target{
 					Attributes: tt.attributes,
 				},
-			}
+			})
 
 			//When
 			_, err := action.Prepare(context.Background(), &state, request)
@@ -162,12 +162,12 @@ func (m *ssmClientMock) AddTagsToResource(ctx context.Context, s *ssm.AddTagsToR
 }
 
 func Test_injectStatusCode(t *testing.T) {
-	request := action_kit_api.PrepareActionRequestBody{
+	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"statuscode": 500.0,
 			"rate":       50.0,
 		},
-	}
+	})
 
 	config, err := injectStatusCode(request)
 	assert.NoError(t, err)
@@ -178,13 +178,13 @@ func Test_injectStatusCode(t *testing.T) {
 }
 
 func Test_injectLatency(t *testing.T) {
-	request := action_kit_api.PrepareActionRequestBody{
+	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"minLatency": 200.0,
 			"maxLatency": 300.0,
 			"rate":       50.0,
 		},
-	}
+	})
 
 	config, err := injectLatency(request)
 	assert.NoError(t, err)
@@ -196,12 +196,12 @@ func Test_injectLatency(t *testing.T) {
 }
 
 func Test_fillDiskspace(t *testing.T) {
-	request := action_kit_api.PrepareActionRequestBody{
+	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"diskSpace": 128.0,
 			"rate":      100.0,
 		},
-	}
+	})
 
 	config, err := fillDiskspace(request)
 	assert.NoError(t, err)
@@ -212,12 +212,12 @@ func Test_fillDiskspace(t *testing.T) {
 }
 
 func Test_injectException(t *testing.T) {
-	request := action_kit_api.PrepareActionRequestBody{
+	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"exceptionMsg": "Error",
 			"rate":         25.0,
 		},
-	}
+	})
 
 	config, err := injectException(request)
 	assert.NoError(t, err)
@@ -231,12 +231,12 @@ func toGenericArray(arr ...interface{}) []interface{} {
 	return arr
 }
 func Test_denyConnection(t *testing.T) {
-	request := action_kit_api.PrepareActionRequestBody{
+	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"denylist": toGenericArray(".*.google.com", ".*"),
 			"rate":     25.0,
 		},
-	}
+	})
 
 	config, err := denyConnection(request)
 	assert.NoError(t, err)
