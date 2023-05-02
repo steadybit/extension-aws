@@ -369,7 +369,7 @@ IAM policies need to be correctly configured for cross-account role assumption. 
 
 ## Deployment
 
-We recommend that you deploy the extension with our [official Helm chart](https://github.com/steadybit/helm-charts/tree/main/charts/steadybit-extension-aws).
+We recommend that you deploy the extension with our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
 
 ## Agent Configuration
 
