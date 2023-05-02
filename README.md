@@ -371,6 +371,26 @@ IAM policies need to be correctly configured for cross-account role assumption. 
 
 We recommend that you deploy the extension with our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
 
+### Add repository
+
+```
+helm repo add steadybit https://steadybit.github.io/extension-aws
+helm repo update
+```
+
+### Installing the Chart
+
+```bash
+$ helm upgrade steadybit-extension-aws \
+    --install \
+    --wait \
+    --timeout 5m0s \
+    --create-namespace \
+    --namespace steadybit-extension \
+    --set serviceAccount.eksRoleArn="TODO EKS ROLE ARN" \
+    steadybit/steadybit-extension-aws
+```
+
 ## Agent Configuration
 
 **Note:** When deployed in Kubernetes using our helm-chart, this is not necessary because the extension can be auto-discovered.
