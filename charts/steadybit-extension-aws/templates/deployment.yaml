@@ -38,6 +38,11 @@ spec:
             httpGet:
               port: 8086
               path: /health/readiness
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 10000
+            runAsGroup: 10000
           env:
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             - name: STEADYBIT_EXTENSION_ASSUME_ROLES

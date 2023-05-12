@@ -48,6 +48,11 @@ manifest should match snapshot with TLS:
                 requests:
                   cpu: 50m
                   memory: 64Mi
+              securityContext:
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
               volumeMounts:
                 - mountPath: /etc/extension/certificates/server-cert
                   name: certificate-server-cert
@@ -111,6 +116,11 @@ manifest should match snapshot with extra env vars:
                 requests:
                   cpu: 50m
                   memory: 64Mi
+              securityContext:
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
               volumeMounts: null
           serviceAccountName: steadybit-extension-aws
           volumes: null
@@ -160,6 +170,11 @@ manifest should match snapshot without TLS:
                 requests:
                   cpu: 50m
                   memory: 64Mi
+              securityContext:
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
               volumeMounts: null
           serviceAccountName: steadybit-extension-aws
           volumes: null
