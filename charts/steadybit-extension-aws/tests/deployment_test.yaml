@@ -23,5 +23,15 @@ tests:
             fromSecrets:
               - client-cert-a
               - client-cert-a
+  - it: manifest should match snapshot with extra env vars
+    set:
+      extraEnv:
+        - name: FOO
+          value: "bar"
+      extraEnvFrom:
+       - configMapRef:
+         name: env-configmap
+       - secretRef:
+         name: env-secrets
     asserts:
       - matchSnapshot: {}

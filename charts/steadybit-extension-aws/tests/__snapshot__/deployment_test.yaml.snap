@@ -58,7 +58,7 @@ manifest should match snapshot with TLS:
               secret:
                 optional: false
                 secretName: server-cert
-manifest should match snapshot with mutual TLS:
+manifest should match snapshot with extra env vars:
   1: |
     apiVersion: apps/v1
     kind: Deployment
@@ -82,14 +82,15 @@ manifest should match snapshot with mutual TLS:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_TLS_SERVER_CERT
-                  value: /etc/extension/certificates/server-cert/tls.crt
-                - name: STEADYBIT_EXTENSION_TLS_SERVER_KEY
-                  value: /etc/extension/certificates/server-cert/tls.key
-                - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
-                  value: /etc/extension/certificates/client-cert-a/tls.crt,/etc/extension/certificates/client-cert-a/tls.crt
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: FOO
+                  value: bar
+              envFrom:
+                - configMapRef: null
+                  name: env-configmap
+                - name: env-secrets
+                  secretRef: null
               image: ghcr.io/steadybit/extension-aws:latest
               imagePullPolicy: Always
               livenessProbe:
@@ -110,23 +111,9 @@ manifest should match snapshot with mutual TLS:
                 requests:
                   cpu: 50m
                   memory: 64Mi
-              volumeMounts:
-                - mountPath: /etc/extension/certificates/client-cert-a
-                  name: certificate-client-cert-a
-                  readOnly: true
-                - mountPath: /etc/extension/certificates/server-cert
-                  name: certificate-server-cert
-                  readOnly: true
+              volumeMounts: null
           serviceAccountName: steadybit-extension-aws
-          volumes:
-            - name: certificate-client-cert-a
-              secret:
-                optional: false
-                secretName: client-cert-a
-            - name: certificate-server-cert
-              secret:
-                optional: false
-                secretName: server-cert
+          volumes: null
 manifest should match snapshot without TLS:
   1: |
     apiVersion: apps/v1

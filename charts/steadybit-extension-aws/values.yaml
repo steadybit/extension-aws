@@ -68,3 +68,19 @@ topologySpreadConstraints: []
 
 # affinity -- Affinities to influence pod assignment.
 affinity: {}
+
+# extraEnv -- Array with extra environment variables to add to the container
+# e.g:
+# extraEnv:
+#   - name: FOO
+#     value: "bar"
+extraEnv: []
+
+# extraEnvFrom -- Array with extra environment variables sources to add to the container
+# e.g:
+# extraEnvFrom:
+#  - configMapRef:
+#    name: env-configmap
+#  - secretRef:
+#    name: env-secrets
+extraEnvFrom: []
