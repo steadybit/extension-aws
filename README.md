@@ -2,7 +2,7 @@
 
 # Steadybit extension-aws
 
-A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to inject HTTP faults into various AWS services.
+A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to inject faults into various AWS services.
 
 ## Capabilities
 
