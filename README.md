@@ -4,37 +4,7 @@
 
 A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to inject faults into various AWS services.
 
-## Capabilities
-
-- Amazon Elastic Cloud Compute (EC2)
-    - Discoveries
-        - EC2 instance discovery
-    - Actions
-        - State change of EC2 instances, e.g., stop, hibernate, terminate and reboot.
-- Amazon Virtual Private Cloud (VPC)
-    - Discoveries
-        - Availability Zones
-    - Actions
-        - Availability Zone Blackhole
-- Amazon Relational Database Service (RDS)
-    - Discoveries
-        - RDS instances
-    - Actions
-        - Reboot of RDS instances
-- AWS Fault Injection Simulator (FIS)
-    - Discoveries
-        - Experiment Templates
-    - Actions
-        - Start Experiments
-- AWS Lambda
-    - Discoveries
-        - Lambda Functions
-    - Actions
-        - Block TCP Connections (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
-        - Inject Latency (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
-        - Inject Exceptions (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
-        - Inject Status Code (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
-        - Fill Diskspace (using [lambda-failure](https://github.com/gunnargrosch/failure-lambda))
+Learn about the capabilities of this extension in our [Reliability Hub](https://hub.steadybit.com/extension/com.github.steadybit.extension_aws).
 
 ## Configuration
 
@@ -47,13 +17,13 @@ The extension supports all environment variables provided by [steadybit/extensio
 If you don't want to use certain parts of the extension and therefore don't want to provide the required permissions, you can disable these parts by providing
 the following environment variables. Actions using these targets will not be shown in the ui, as there are no targets reported.
 
-| Environment Variable                            | Meaning                 | Default |
-|-------------------------------------------------|-------------------------|---------|
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2`    | Disable EC2-Discovery   | false   |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS`    | Disable RDS-Discovery   | false   |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE`   | Disable Zone-Discovery  | false   |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS`    | Disable FIS-Discovery   | false   |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA` | Disable Lamba-Discovery | false   |
+| Environment Variable                            | Meaning                 | Required | Default |
+|-------------------------------------------------|-------------------------|----------|---------|
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2`    | Disable EC2-Discovery   | no       | false   |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS`    | Disable RDS-Discovery   | no       | false   |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE`   | Disable Zone-Discovery  | no       | false   |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS`    | Disable FIS-Discovery   | no       | false   |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA` | Disable Lamba-Discovery | no       | false   |
 
 ### Authentication
 
@@ -300,7 +270,7 @@ Steps:
     }
     ```
 - Associate the IAM Role to your Kubernetes Service Account. If you are using our helm charts to create the Service Account, you can use the parameter
-  serviceAccount.eksRoleArn.
+  `serviceAccount.eksRoleArn`.
 
 </details>
 
@@ -331,6 +301,8 @@ To achieve this, you must set the STEADYBIT_EXTENSION_ASSUME_ROLES environment v
 ```sh
 STEADYBIT_EXTENSION_ASSUME_ROLES='arn:aws:iam::1111111111:role/steadybit-extension-aws,arn:aws:iam::22222222:role/steadybit-extension-aws'
 ```
+
+If you are using our helm-chart, you can use the parameter `aws.assumeRoles`.
 
 #### Necessary AWS Configuration
 
@@ -367,9 +339,9 @@ IAM policies need to be correctly configured for cross-account role assumption. 
    }
    ```
 
-## Deployment
+## Installation
 
-We recommend that you deploy the extension with our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
+We recommend that you install the extension with our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
 
 ### Add repository
 
@@ -387,28 +359,11 @@ $ helm upgrade steadybit-extension-aws \
     --timeout 5m0s \
     --create-namespace \
     --namespace steadybit-extension \
-    --set serviceAccount.eksRoleArn="TODO EKS ROLE ARN" \
     steadybit/steadybit-extension-aws
 ```
 
-## Agent Configuration
+## Register the extension
 
-**Note:** When deployed in Kubernetes using our helm-chart, this is not necessary because the extension can be auto-discovered.
+Make sure to register the extension at the steadybit platform. Please refer to
+the [documentation](https://docs.steadybit.com/integrate-with-steadybit/extensions/extension-installation) for more information.
 
-The Steadybit AWS agent needs to be configured to interact with the AWS extension by adding the following environment variables:
-
-```shell
-# Make sure to adapt the URLs and indices in the environment variables names as necessary for your setup
-
-STEADYBIT_AGENT_ACTIONS_EXTENSIONS_0_URL=http://steadybit-extension-aws.steadybit-extension.svc.cluster.local:8085
-STEADYBIT_AGENT_DISCOVERIES_EXTENSIONS_0_URL=http://steadybit-extension-aws.steadybit-extension.svc.cluster.local:8085
-```
-
-When leveraging our official Helm charts, you can set the configuration through additional environment variables on the agent:
-
-```
---set agent.env[0].name=STEADYBIT_AGENT_ACTIONS_EXTENSIONS_0_URL \
---set agent.env[0].value="http://steadybit-extension-aws.steadybit-extension.svc.cluster.local:8085" \
---set agent.env[1].name=STEADYBIT_AGENT_DISCOVERIES_EXTENSIONS_0_URL \
---set agent.env[1].value="http://steadybit-extension-aws.steadybit-extension.svc.cluster.local:8085"
-```
