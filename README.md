@@ -343,17 +343,15 @@ IAM policies need to be correctly configured for cross-account role assumption. 
 
 We recommend that you install the extension with our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
 
-### Add repository
+### Helm
 
-```
+```bash
 helm repo add steadybit https://steadybit.github.io/extension-aws
 helm repo update
 ```
 
-### Installing the Chart
-
 ```bash
-$ helm upgrade steadybit-extension-aws \
+helm upgrade steadybit-extension-aws \
     --install \
     --wait \
     --timeout 5m0s \
