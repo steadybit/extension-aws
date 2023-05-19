@@ -138,7 +138,7 @@ func TestEc2InstanceStateAction_Start(t *testing.T) {
 		return true
 	})).Return(nil, nil)
 
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
@@ -164,7 +164,7 @@ func TestEc2InstanceStateAction_Hibernate(t *testing.T) {
 		require.Equal(t, true, *params.Hibernate)
 		return true
 	})).Return(nil, nil)
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
@@ -189,7 +189,7 @@ func TestEc2InstanceStateAction_Terminate(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, nil)
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
@@ -214,7 +214,7 @@ func TestEc2InstanceStateAction_Reboot(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, nil)
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
@@ -239,7 +239,7 @@ func TestStartInstanceStateChangeForwardsError(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, errors.New("expected"))
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
