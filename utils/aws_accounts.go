@@ -50,21 +50,31 @@ func ForEveryAccount[EachResult any, MergedResult any](
 	startValue MergedResult,
 	ctx context.Context,
 ) (MergedResult, error) {
+	forAllRegions := true
 	var err error
 	result := startValue
 
 	execute := func(account AwsAccount) error {
-		eachResult, eachErr := mapper(&account, ctx)
-		if eachErr != nil {
-			return eachErr
+
+		regions := []string{account.AwsConfig.Region}
+		if forAllRegions {
+			regions = []string{"us-east-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-west-3"}
 		}
 
-		if eachResult != nil {
-			reduceResult, reduceErr := reducer(result, *eachResult)
-			if reduceErr != nil {
-				return reduceErr
-			} else {
-				result = reduceResult
+		for _, region := range regions {
+			account.AwsConfig.Region = region
+			eachResult, eachErr := mapper(&account, ctx)
+			if eachErr != nil {
+				return eachErr
+			}
+
+			if eachResult != nil {
+				reduceResult, reduceErr := reducer(result, *eachResult)
+				if reduceErr != nil {
+					return reduceErr
+				} else {
+					result = reduceResult
+				}
 			}
 		}
 
