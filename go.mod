@@ -12,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.3
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.97.0
 	github.com/aws/aws-sdk-go-v2/service/fis v1.14.10
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.34.1
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.35.1
 	github.com/aws/aws-sdk-go-v2/service/rds v1.44.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.36.5
 	github.com/aws/aws-sdk-go-v2/service/sts v1.19.0
