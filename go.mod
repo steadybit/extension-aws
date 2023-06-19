@@ -14,7 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/fis v1.14.10
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.35.1
 	github.com/aws/aws-sdk-go-v2/service/rds v1.44.0
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.36.5
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/sts v1.19.0
 	github.com/aws/smithy-go v1.13.5
 	github.com/docker/go-connections v0.4.0
