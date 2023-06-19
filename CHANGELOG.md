@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.1.1
+
+- Support read only file system
+- Update dependencies
+
 ## v2.1.0
 
 - Support Readiness & Liveness probes (requires helm chart version >= 2.0.0)
