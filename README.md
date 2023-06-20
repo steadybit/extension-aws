@@ -348,15 +348,13 @@ We recommend that you install the extension with our [official Helm chart](https
 ```bash
 helm repo add steadybit https://steadybit.github.io/extension-aws
 helm repo update
-```
-
-```bash
 helm upgrade steadybit-extension-aws \
     --install \
     --wait \
     --timeout 5m0s \
     --create-namespace \
     --namespace steadybit-extension \
+    --serviceAccount.eksRoleArn={{YOUR_SERVICE_ACCOUNT_ARN_IF_RUNNING_IN_EKS}} \
     steadybit/steadybit-extension-aws
 ```
 
