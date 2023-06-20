@@ -50,7 +50,7 @@ serviceAccount:
   create: true
   # serviceAccount.name -- The name of the ServiceAccount to use. If not set and `create` is true, a name is generated using the fullname template.
   name: steadybit-extension-aws
-  # serviceAccount.eksRoleArn -- The arn of the IAM role - [see AWS docs](https://docs.aws.amazon.com/eks/latest/userguide/specify-service-account-role.html)
+  # serviceAccount.eksRoleArn -- The arn of the IAM role - [see AWS docs](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
   eksRoleArn: null
 
 # extra labels to apply to the Kubernetes resources
