@@ -63,6 +63,7 @@ nfpms:
       preinstall: ./linuxpkg/scripts/preinstall.sh
       postinstall: ./linuxpkg/scripts/postinstall.sh
       preremove: ./linuxpkg/scripts/preremove.sh
+      postremove: ./linuxpkg/scripts/postremove.sh
 
     rpm:
       signature:

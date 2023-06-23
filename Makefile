@@ -58,3 +58,7 @@ run: tidy build
 .PHONY: container
 container:
 	docker build --build-arg BUILD_WITH_COVERAGE="true" -t extension-aws:latest .
+
+.PHONY: linuxpkg
+linuxpkg:
+	goreleaser release --clean --snapshot

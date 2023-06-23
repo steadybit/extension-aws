@@ -3,7 +3,7 @@
 ##
 ## Build
 ##
-FROM goreleaser/goreleaser:v1.19.1 AS build
+FROM goreleaser/goreleaser:v1.19.2 AS build
 
 ARG BUILD_WITH_COVERAGE
 

@@ -3,9 +3,10 @@
 #
 # Copyright 2023 steadybit GmbH. All rights reserved.
 #
+service_name="steadybit-extension-aws"
+env_file="/etc/steadybit/extension-aws"
 
 # decide if we should use SystemD or init/upstart
-service_name="steadybit-extension-aws"
 use_systemctl="True"
 if ! command -V systemctl >/dev/null 2>&1; then
   use_systemctl="False"
@@ -23,11 +24,7 @@ cleanup() {
 
 cleanInstall() {
   if [ -n "$STEADYBIT_LOG_LEVEL" ]; then
-    sed -i "s/^STEADYBIT_LOG_LEVEL=.*/STEADYBIT_LOG_LEVEL=$(echo "$STEADYBIT_LOG_LEVEL" | sed 's,/,\\/,g')/" /etc/steadybit/extension-aws
-  fi
-
-  if [ -n "$AWS_REGION" ]; then
-    sed -i "s/^AWS_REGION=.*/AWS_REGION=$(echo "$AWS_REGION" | sed 's,/,\\/,g')/" /etc/steadybit/extension-aws
+    sed -i "s/^STEADYBIT_LOG_LEVEL=.*/STEADYBIT_LOG_LEVEL=$(echo "$STEADYBIT_LOG_LEVEL" | sed 's,/,\\/,g')/" "$env_file"
   fi
 
   # enable the service in the proper way for this platform
@@ -48,15 +45,16 @@ cleanInstall() {
 }
 
 upgrade() {
-  # enable the service in the proper way for this platform
   if [ "${use_systemctl}" = "False" ]; then
     if service "$service_name" status 2>/dev/null; then
-      service "$service_name" restart
+      service "$service_name" restart || :
     fi
   else
+    systemctl daemon-reload
     if systemctl is-active --quiet "$service_name"; then
-      systemctl daemon-reload
-      systemctl restart "$service_name"
+      systemctl restart "$service_name" || :
+    else
+      systemctl start "$service_name" || :
     fi
   fi
 }
