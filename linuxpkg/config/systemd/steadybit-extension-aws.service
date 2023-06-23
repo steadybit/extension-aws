@@ -4,15 +4,16 @@ After=syslog.target
 
 [Service]
 Type=simple
-ExecStart=/opt/steadybit/extension-aws/steadybit-extension-aws
+ExecStart=/opt/steadybit/extension-aws/extension-aws
+ExecStart=/opt/steadybit/extension-aws/extension-aws
 EnvironmentFile=/etc/steadybit/extension-aws
 User=steadybit
 Group=steadybit
 SuccessExitStatus=0 143
 Restart=on-failure
 RestartSec=5s
-StandardOutput=file:/var/log/steadybit-extension-aws.log
-StandardError=file:/var/log/steadybit-extension-aws.log
+StandardOutput=append:/var/log/steadybit-extension-aws.log
+StandardError=append:/var/log/steadybit-extension-aws.log
 
 [Install]
 WantedBy=multi-user.target

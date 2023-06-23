@@ -1,2 +1,3 @@
 STEADYBIT_LOG_LEVEL=info
+STEADYBIT_EXTENSION_UNIX_SOCKET=/run/steadybit/extension-aws.sock
 AWS_REGION=

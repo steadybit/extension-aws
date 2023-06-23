@@ -3,16 +3,23 @@ before:
   hooks:
     - go mod download
 release:
-  prerelease: false
+  prerelease: "false"
 builds:
-  - env:
+  - binary: extension-aws
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
     goarch:
       - amd64
       - arm64
-
+    flags:
+      - -cover={{ if index .Env "BUILD_WITH_COVERAGE"  }}{{ .Env.BUILD_WITH_COVERAGE }}{{ else }}false{{ end }}
+    ldflags:
+      - -s -w
+      - -X github.com/steadybit/extension-kit/extbuild.ExtensionName={{.ProjectName}}
+      - -X github.com/steadybit/extension-kit/extbuild.Version={{.Version}}
+      - -X github.com/steadybit/extension-kit/extbuild.Revision={{.Commit}}
 
 archives:
   - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
@@ -29,7 +36,6 @@ changelog:
       - '^test:'
 
 nfpms:
-  # note that this is an array of nfpm configs
   - package_name: "steadybit-extension-aws"
     file_name_template: "{{ .ConventionalFileName }}"
     formats:
