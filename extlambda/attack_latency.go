@@ -18,23 +18,15 @@ func NewInjectLatencyAction() action_kit_sdk.Action[LambdaActionState] {
 
 func getInjectLatencyDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.latency", lambdaTargetID),
-		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Label:       "Inject Latency",
-		Description: "Injects latency into the function.",
-		Icon:        extutil.Ptr(lambdaTargetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
-			TargetType: lambdaTargetID,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
-				{
-					Label: "by function name",
-					Query: "aws.lambda.function-name=\"\"",
-				},
-			}),
-		}),
-		Category:    extutil.Ptr("application"),
-		Kind:        action_kit_api.Attack,
-		TimeControl: action_kit_api.External,
+		Id:              fmt.Sprintf("%s.latency", lambdaTargetID),
+		Version:         extbuild.GetSemverVersionStringOrUnknown(),
+		Label:           "Inject Latency",
+		Description:     "Injects latency into the function.",
+		Icon:            extutil.Ptr(lambdaTargetIcon),
+		TargetSelection: &lambdaTargetSelection,
+		Category:        extutil.Ptr("application"),
+		Kind:            action_kit_api.Attack,
+		TimeControl:     action_kit_api.External,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Label:        "Duration",

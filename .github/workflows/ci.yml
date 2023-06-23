@@ -142,18 +142,18 @@ jobs:
         run: |
           REPO_USER="${{ secrets.STEADYBIT_ARTIFACT_SERVER_USERNAME }}:${{ secrets.STEADYBIT_ARTIFACT_SERVER_PASSWORD }}"
           echo "Uploading deb packages to artifacts server"
-          find ./dist -name '*.deb' -type f -exec curl -u "$REPO_USER" -X POST -H "Content-Type: multipart/form-data" --data-binary "@{}" https://artifacts.steadybit.io/repository/deb-internal/ \;
+          find ./dist -name '*.deb' -type f | xargs -i curl -u "$REPO_USER" -X POST -H "Content-Type: multipart/form-data" --data-binary "@{}" https://artifacts.steadybit.io/repository/deb-internal/
           echo "Uploading rpm packages to artifacts server"
-          find ./dist -name '*.rpm' -type f -exec curl -u "$REPO_USER" --upload-file {} https://artifacts.steadybit.io/repository/yum-internal/ \;
+          find ./dist -name '*.rpm' -type f | xargs -i curl -u "$REPO_USER" --upload-file {} https://artifacts.steadybit.io/repository/yum-internal/
 
       - name: "[release] Upload packages to public repositories"
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: |
           REPO_USER="${{ secrets.STEADYBIT_ARTIFACT_SERVER_USERNAME }}:${{ secrets.STEADYBIT_ARTIFACT_SERVER_PASSWORD }}"
           echo "Uploading deb packages to artifacts server"
-          find ./dist -name '*.deb' -type f -exec curl -u "$REPO_USER" -X POST -H "Content-Type: multipart/form-data" --data-binary "@{}" https://artifacts.steadybit.io/repository/deb/ \;
+          find ./dist -name '*.deb' -type f | xargs -i curl -u "$REPO_USER" -X POST -H "Content-Type: multipart/form-data" --data-binary "@{}" https://artifacts.steadybit.io/repository/deb/
           echo "Uploading rpm packages to artifacts server"
-          find ./dist -name '*.rpm' -type f -exec curl -u "$REPO_USER" --upload-file {} https://artifacts.steadybit.io/repository/yum/ \;
+          find ./dist -name '*.rpm' -type f | xargs -i curl -u "$REPO_USER" --upload-file {} https://artifacts.steadybit.io/repository/yum/
 
           echo "Invalidating artifacts server cache"
           curl -X POST -u $REPO_USER https://artifacts.steadybit.io/service/rest/v1/repositories/yum-proxy/invalidate-cache

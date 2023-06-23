@@ -51,16 +51,12 @@ nfpms:
       - steadybit-extension-aws
     bindir: /opt/steadybit/extension-aws
     contents:
-      - src: ./linuxpkg/config/systemd/steadybit-extension-aws.service
-        dst: /usr/lib/systemd/system/steadybit-extension-aws.service
-      - src: ./linuxpkg/config/init.d/steadybit-extension-aws
-        dst: /etc/init.d/steadybit-extension-aws
-        type: config
-      - src: ./linuxpkg/config/etc/steadybit/extension-aws
-        dst: /etc/steadybit/extension-aws
-        type: config|noreplace
-      - src: ./linuxpkg/config/etc/logrotate.d/steadybit-extension-aws
-        dst: /etc/logrotate.d/steadybit-extension-aws
+      - src: ./linuxpkg/systemd
+        dst: /usr/lib/systemd/system
+      - src: ./linuxpkg/init.d
+        dst: /etc/init.d
+      - src: ./linuxpkg/config
+        dst: /etc
         type: config
 
     scripts:
