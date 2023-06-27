@@ -34,8 +34,8 @@ github.com/aws/aws-sdk-go-v2/service/fis v1.14.10/go.mod h1:UFu/qHPW17t5CcwChAc7
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.27/go.mod h1:EOwBD4J4S5qYszS5/3DpkejfuK+Z5/1uzICfPaZLtqw=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.28 h1:bkRyG4a929RCnpVSTvLM2j/T4ls015ZhhYApbmYs15s=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.28/go.mod h1:jj7znCIg05jXlaGBlFMGP8+7UN3VtCkRBG2spnmRQkU=
-github.com/aws/aws-sdk-go-v2/service/lambda v1.35.2 h1:MeukRLx5lbfObw2gH2FePNJPCsYrsC7vuXPNf+Oa5oo=
-github.com/aws/aws-sdk-go-v2/service/lambda v1.35.2/go.mod h1:Q8zQi5nZpjUF/H55dKEpKfEvFWJkgZzjjqvDb2AR5b4=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.36.0 h1:pE6cEkDangeOnhhaBOKQAYHTyFlKbUX7qF32sApToNE=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.36.0/go.mod h1:Q8zQi5nZpjUF/H55dKEpKfEvFWJkgZzjjqvDb2AR5b4=
 github.com/aws/aws-sdk-go-v2/service/rds v1.44.0 h1:50lSF6RpPN5stt+nUbidwGzm9E1sKxBZJedU6nxu8RA=
 github.com/aws/aws-sdk-go-v2/service/rds v1.44.0/go.mod h1:rS6T0DrjdZ5LDr8ZC/J9iZdD1oSbie5reWWzqv5zLOw=
 github.com/aws/aws-sdk-go-v2/service/ssm v1.36.6 h1:/DEPQUCqR6UoJjW4a21gW9AqjFlRSTwyOmciNef19qI=
