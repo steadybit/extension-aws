@@ -73,7 +73,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 	assert.Equal(t, []string{"ip-10-3-92-28.eu-central-1.compute.internal"}, target.Attributes["aws-ec2.hostname.internal"])
 	assert.Equal(t, []string{"arn:aws:ec2:us-east-1:42:instance/i-0ef9adc9fbd3b19c5"}, target.Attributes["aws-ec2.arn"])
 	assert.Equal(t, []string{"vpc-003cf5dda88c814c6"}, target.Attributes["aws-ec2.vpc"])
-	assert.Equal(t, []string{"Great Thing"}, target.Attributes["label.specialtag"])
+	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws-ec2.label.specialtag"])
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
 }

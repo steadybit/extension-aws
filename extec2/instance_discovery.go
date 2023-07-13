@@ -128,7 +128,7 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 					},
 					{
 						Matcher: discovery_kit_api.StartsWith,
-						Name:    "label.",
+						Name:    "aws-ec2.label.",
 					},
 				},
 			},
@@ -163,7 +163,7 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 					},
 					{
 						Matcher: discovery_kit_api.StartsWith,
-						Name:    "label.",
+						Name:    "aws-ec2.label.",
 					},
 				},
 			},
@@ -198,7 +198,7 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 					},
 					{
 						Matcher: discovery_kit_api.StartsWith,
-						Name:    "label.",
+						Name:    "aws-ec2.label.",
 					},
 				},
 			},
@@ -325,7 +325,7 @@ func toTarget(ec2Instance types.Instance, awsAccountNumber string, awsRegion str
 		if aws.ToString(tag.Key) == "Name" {
 			continue
 		}
-		attributes[fmt.Sprintf("label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+		attributes[fmt.Sprintf("aws-ec2.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
 	}
 
 	return discovery_kit_api.Target{

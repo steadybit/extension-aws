@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.0
+
+- Prefix label attributes at ec2 target discovery with `aws-ec2.`.
+
 ## v2.1.1
 
 - Support read only file system
