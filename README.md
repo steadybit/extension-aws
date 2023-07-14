@@ -358,6 +358,13 @@ helm upgrade steadybit-extension-aws \
     steadybit/steadybit-extension-aws
 ```
 
+### Linux Package
+
+Please use our [outpost-linux.sh script](https://docs.steadybit.com/install-and-configure/install-outpost-agent-preview/install-on-linux-hosts) to install the extension on your Linux machine. 
+The script will download the latest version of the extension and install it using the package manager.
+
+After installing configure the extension by editing `/etc/steadybit/extension-aws` and then restart the service.
+
 ## Register the extension
 
 Make sure to register the extension at the steadybit platform. Please refer to
