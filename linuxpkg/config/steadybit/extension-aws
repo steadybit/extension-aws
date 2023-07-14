@@ -1,0 +1,12 @@
+STEADYBIT_LOG_LEVEL=info
+STEADYBIT_LOG_FORMAT=text
+STEADYBIT_EXTENSION_UNIX_SOCKET=/run/steadybit/extension-aws.sock
+#
+# TODO:
+# Please configure access for the extension to your AWS account.
+# You may use the following environment variables or other means to do so.
+# For more information visit https://github.com/steadybit/extension-aws
+#
+AWS_REGION=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=

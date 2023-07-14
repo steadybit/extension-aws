@@ -12,14 +12,17 @@ if ! command -V systemctl >/dev/null 2>&1; then
 fi
 
 remove() {
-  if [ "${use_systemctl}" = "False" ]; then
-    if service "$service_name" status 2>/dev/null; then
-      service "$service_name" stop || :
+  if [ "${use_systemctl}" = "True" ]; then
+    systemctl mask "$service_name" || :
+  fi
+}
+
+purge() {
+  if [ "${use_systemctl}" = "True" ]; then
+    if systemctl is-enabled --quiet "$service_name"; then
+      systemctl disable "$service_name" || :
     fi
-  else
-    if systemctl is-active --quiet "$service_name"; then
-      systemctl stop "$service_name" || :
-    fi
+    systemctl unmask "$service_name" || :
   fi
 }
 
@@ -30,7 +33,10 @@ upgrade() {
 action="$1"
 
 case "$action" in
-"0" | "remove")
+"0" | "purge")
+  purge
+  ;;
+"remove")
   remove
   ;;
 "1" | "upgrade")

@@ -1,0 +1,4 @@
+unixSocket: /run/steadybit/extension-aws.sock
+types:
+  - ACTION
+  - DISCOVERY

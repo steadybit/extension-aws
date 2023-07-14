@@ -1,0 +1,6 @@
+/dist
+/coverageout
+/.github
+/.idea
+*.iml
+/.vscode

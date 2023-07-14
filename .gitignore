@@ -1,8 +1,6 @@
-/extension-aws
-extension-aws.iml
-
-dist/
-
-gpg/gpg.key
-gpg.key
+/extension
 /coverage.out
+/go.docker.mod
+/e2e/e2e-coverage-docker.out
+/gpg.key
+/dist

@@ -3,16 +3,23 @@ before:
   hooks:
     - go mod download
 release:
-  prerelease: false
+  prerelease: "false"
 builds:
-  - env:
+  - binary: extension-aws
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
     goarch:
       - amd64
       - arm64
-
+    flags:
+      - -cover={{ if index .Env "BUILD_WITH_COVERAGE"  }}{{ .Env.BUILD_WITH_COVERAGE }}{{ else }}false{{ end }}
+    ldflags:
+      - -s -w
+      - -X github.com/steadybit/extension-kit/extbuild.ExtensionName={{.ProjectName}}
+      - -X github.com/steadybit/extension-kit/extbuild.Version={{.Version}}
+      - -X github.com/steadybit/extension-kit/extbuild.Revision={{.Commit}}
 
 archives:
   - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
@@ -29,7 +36,6 @@ changelog:
       - '^test:'
 
 nfpms:
-  # note that this is an array of nfpm configs
   - package_name: "steadybit-extension-aws"
     file_name_template: "{{ .ConventionalFileName }}"
     formats:
@@ -45,22 +51,19 @@ nfpms:
       - steadybit-extension-aws
     bindir: /opt/steadybit/extension-aws
     contents:
-      - src: ./linuxpkg/config/systemd/steadybit-extension-aws.service
-        dst: /usr/lib/systemd/system/steadybit-extension-aws.service
-      - src: ./linuxpkg/config/init.d/steadybit-extension-aws
-        dst: /etc/init.d/steadybit-extension-aws
-        type: config
-      - src: ./linuxpkg/config/etc/steadybit/extension-aws
-        dst: /etc/steadybit/extension-aws
-        type: config|noreplace
-      - src: ./linuxpkg/config/etc/logrotate.d/steadybit-extension-aws
-        dst: /etc/logrotate.d/steadybit-extension-aws
+      - src: ./linuxpkg/systemd
+        dst: /usr/lib/systemd/system
+      - src: ./linuxpkg/init.d
+        dst: /etc/init.d
+      - src: ./linuxpkg/config
+        dst: /etc
         type: config
 
     scripts:
       preinstall: ./linuxpkg/scripts/preinstall.sh
       postinstall: ./linuxpkg/scripts/postinstall.sh
       preremove: ./linuxpkg/scripts/preremove.sh
+      postremove: ./linuxpkg/scripts/postremove.sh
 
     rpm:
       signature:

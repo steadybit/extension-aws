@@ -18,23 +18,15 @@ func NewInjectExceptionAction() action_kit_sdk.Action[LambdaActionState] {
 
 func getInjectExceptionDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.exception", lambdaTargetID),
-		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Label:       "Inject Exception",
-		Description: "Injects exception into the function.",
-		Icon:        extutil.Ptr(lambdaTargetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
-			TargetType: lambdaTargetID,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
-				{
-					Label: "by function name",
-					Query: "aws.lambda.function-name=\"\"",
-				},
-			}),
-		}),
-		Category:    extutil.Ptr("application"),
-		Kind:        action_kit_api.Attack,
-		TimeControl: action_kit_api.External,
+		Id:              fmt.Sprintf("%s.exception", lambdaTargetID),
+		Version:         extbuild.GetSemverVersionStringOrUnknown(),
+		Label:           "Inject Exception",
+		Description:     "Injects exception into the function.",
+		Icon:            extutil.Ptr(lambdaTargetIcon),
+		TargetSelection: &lambdaTargetSelection,
+		Category:        extutil.Ptr("application"),
+		Kind:            action_kit_api.Attack,
+		TimeControl:     action_kit_api.External,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Label:        "Duration",

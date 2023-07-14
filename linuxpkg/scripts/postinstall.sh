@@ -3,62 +3,58 @@
 #
 # Copyright 2023 steadybit GmbH. All rights reserved.
 #
+service_name="steadybit-extension-aws"
+env_file="/etc/steadybit/extension-aws"
 
 # decide if we should use SystemD or init/upstart
 use_systemctl="True"
-systemd_version=0
 if ! command -V systemctl >/dev/null 2>&1; then
   use_systemctl="False"
-else
-  systemd_version=$(systemctl --version | head -1 | sed 's/systemd //g')
 fi
 
 cleanup() {
   # remove files that were not needed on this platform / system
   if [ "${use_systemctl}" = "False" ]; then
-    rm -f /usr/lib/systemd/system/steaybit-extension-aws.service
+    rm -f "/usr/lib/systemd/system/$service_name.service"
   else
-    rm -f /etc/chkconfig/steaybit-extension-aws
-    rm -f /etc/init.d/steaybit-extension-aws
+    rm -f "/etc/chkconfig/$service_name"
+    rm -f "/etc/init.d/$service_name"
   fi
 }
 
 cleanInstall() {
   if [ -n "$STEADYBIT_LOG_LEVEL" ]; then
-    sed -i "s/^STEADYBIT_LOG_LEVEL=.*/STEADYBIT_LOG_LEVEL=$(echo "$STEADYBIT_LOG_LEVEL" | sed 's,/,\\/,g')/" /etc/steadybit/extension-aws
-  fi
-
-  if [ -n "$AWS_REGION" ]; then
-    sed -i "s/^AWS_REGION=.*/AWS_REGION=$(echo "$AWS_REGION" | sed 's,/,\\/,g')/" /etc/steadybit/extension-aws
+    sed -i "s/^STEADYBIT_LOG_LEVEL=.*/STEADYBIT_LOG_LEVEL=$(echo "$STEADYBIT_LOG_LEVEL" | sed 's,/,\\/,g')/" "$env_file"
   fi
 
   # enable the service in the proper way for this platform
   if [ "${use_systemctl}" = "False" ]; then
     if command -V chkconfig >/dev/null 2>&1; then
-      chkconfig --add steadybit-extension-aws
+      chkconfig --add "$service_name"
     fi
 
-    service steadybit-extension-aws restart || :
+    service "$service_name" restart || :
   else
     systemctl daemon-reload || :
-    systemctl unmask steadybit-extension-aws || :
-    systemctl preset steadybit-extension-aws || :
-    systemctl enable steadybit-extension-aws || :
-    systemctl restart steadybit-extension-aws || :
+    systemctl unmask "$service_name" || :
+    systemctl preset "$service_name" || :
+    systemctl enable "$service_name" || :
+    systemctl restart "$service_name" || :
   fi
 
 }
 
 upgrade() {
-  # enable the service in the proper way for this platform
   if [ "${use_systemctl}" = "False" ]; then
-    if service steadybit-extension-aws status 2>/dev/null; then
-      service steadybit-extension-aws restart
+    if service "$service_name" status 2>/dev/null; then
+      service "$service_name" restart || :
     fi
   else
-    if systemctl is-active --quiet steadybit-extension-aws; then
-      systemctl daemon-reload
-      systemctl restart steadybit-extension-aws
+    systemctl daemon-reload
+    if systemctl is-active --quiet "$service_name"; then
+      systemctl restart "$service_name" || :
+    else
+      systemctl start "$service_name" || :
     fi
   fi
 }
