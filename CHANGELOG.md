@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.1
+
+- Add linux package build
+
 ## v2.2.0
 
 - Prefix label attributes at ec2 target discovery with `aws-ec2.`.
