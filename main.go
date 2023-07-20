@@ -32,7 +32,7 @@ func main() {
 	utils.RegisterCommonDiscoveryHandlers()
 
 	extrds.RegisterDiscoveryHandlers()
-	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceAttack())
+	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceRebootAttack())
 
 	extaz.RegisterDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extaz.NewAzBlackholeAction())

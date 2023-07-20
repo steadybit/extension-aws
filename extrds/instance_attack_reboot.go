@@ -9,37 +9,26 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
-	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-type rdsInstanceAttack struct {
-	clientProvider func(account string) (rdsRebootDBInstanceApi, error)
+type rdsInstanceRebootAttack struct {
+	clientProvider func(account string) (rdsDBInstanceApi, error)
 }
 
-// Make sure FisExperimentAction implements all required interfaces
-var _ action_kit_sdk.Action[RdsInstanceAttackState] = (*rdsInstanceAttack)(nil)
+var _ action_kit_sdk.Action[RdsInstanceAttackState] = (*rdsInstanceRebootAttack)(nil)
 
-type RdsInstanceAttackState struct {
-	DBInstanceIdentifier string
-	Account              string
+func NewRdsInstanceRebootAttack() action_kit_sdk.Action[RdsInstanceAttackState] {
+	return rdsInstanceRebootAttack{defaultClientProvider}
 }
 
-type rdsRebootDBInstanceApi interface {
-	RebootDBInstance(ctx context.Context, params *rds.RebootDBInstanceInput, optFns ...func(*rds.Options)) (*rds.RebootDBInstanceOutput, error)
-}
-
-func NewRdsInstanceAttack() action_kit_sdk.Action[RdsInstanceAttackState] {
-	return rdsInstanceAttack{defaultClientProvider}
-}
-
-func (f rdsInstanceAttack) NewEmptyState() RdsInstanceAttackState {
+func (f rdsInstanceRebootAttack) NewEmptyState() RdsInstanceAttackState {
 	return RdsInstanceAttackState{}
 }
 
-func (f rdsInstanceAttack) Describe() action_kit_api.ActionDescription {
+func (f rdsInstanceRebootAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.reboot", rdsTargetId),
 		Label:       "Reboot Instance",
@@ -62,24 +51,11 @@ func (f rdsInstanceAttack) Describe() action_kit_api.ActionDescription {
 	}
 }
 
-func (f rdsInstanceAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	instanceId := request.Target.Attributes["aws.rds.instance.id"]
-	if len(instanceId) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.rds.instance.id' target attribute.", nil))
-	}
-
-	account := request.Target.Attributes["aws.account"]
-	if len(account) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
-	}
-
-	state.Account = account[0]
-	state.DBInstanceIdentifier = instanceId[0]
-
-	return nil, nil
+func (f rdsInstanceRebootAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+	return nil, convertAttackState(request, state)
 }
 
-func (f rdsInstanceAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {
+func (f rdsInstanceRebootAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {
 	client, err := f.clientProvider(state.Account)
 	if err != nil {
 		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err))
@@ -90,16 +66,13 @@ func (f rdsInstanceAttack) Start(ctx context.Context, state *RdsInstanceAttackSt
 	}
 	_, err = client.RebootDBInstance(ctx, &input)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to execute database instance reboot", err))
+		return nil, extutil.Ptr(extension_kit.ToError("Failed to reboot database instance", err))
 	}
+	return &action_kit_api.StartResult{
+		Messages: &[]action_kit_api.Message{{
+			Level:   extutil.Ptr(action_kit_api.Info),
+			Message: fmt.Sprintf("Database instance %s rebooted", state.DBInstanceIdentifier),
+		}},
+	}, nil
 
-	return nil, nil
-}
-
-func defaultClientProvider(account string) (rdsRebootDBInstanceApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
-	if err != nil {
-		return nil, err
-	}
-	return rds.NewFromConfig(awsAccount.AwsConfig), nil
 }
