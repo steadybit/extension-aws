@@ -34,7 +34,7 @@ func (f rdsInstanceDowntimeAttack) NewEmptyState() RdsInstanceAttackState {
 func (f rdsInstanceDowntimeAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.downtime", rdsInstanceTargetId),
-		Label:       "Apply Instance Downtime",
+		Label:       "Perform Instance Downtime",
 		Description: "Stops a DB instance and restarts it after a given time",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(rdsIcon),

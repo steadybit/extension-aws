@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.2
+
+ - add RDS instance downtime attack
+ - add RDS cluster failover attack
+ - add RDS cluster discovery
+
 ## v2.2.1
 
 - Add linux package build
