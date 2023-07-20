@@ -15,21 +15,9 @@ import (
 	"testing"
 )
 
-type rdsClientMock struct {
-	mock.Mock
-}
-
-func (m *rdsClientMock) DescribeDBInstances(ctx context.Context, params *rds.DescribeDBInstancesInput, optFns ...func(*rds.Options)) (*rds.DescribeDBInstancesOutput, error) {
-	args := m.Called(ctx, params)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*rds.DescribeDBInstancesOutput), args.Error(1)
-}
-
 func TestGetAllRdsInstances(t *testing.T) {
 	// Given
-	mockedApi := new(rdsClientMock)
+	mockedApi := new(rdsDBInstanceApiMock)
 	mockedReturnValue := rds.DescribeDBInstancesOutput{
 		DBInstances: []types.DBInstance{
 			{
@@ -52,7 +40,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 	assert.Equal(t, 1, len(targets))
 
 	target := targets[0]
-	assert.Equal(t, rdsTargetId, target.TargetType)
+	assert.Equal(t, rdsInstanceTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
 	assert.Equal(t, 8, len(target.Attributes))
@@ -64,7 +52,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 
 func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	// Given
-	mockedApi := new(rdsClientMock)
+	mockedApi := new(rdsDBInstanceApiMock)
 	mockedReturnValue := rds.DescribeDBInstancesOutput{
 		DBInstances: []types.DBInstance{
 			{
@@ -87,7 +75,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	assert.Equal(t, 1, len(targets))
 
 	target := targets[0]
-	assert.Equal(t, rdsTargetId, target.TargetType)
+	assert.Equal(t, rdsInstanceTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
 	assert.Equal(t, 7, len(target.Attributes))
@@ -96,7 +84,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 
 func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	// Given
-	mockedApi := new(rdsClientMock)
+	mockedApi := new(rdsDBInstanceApiMock)
 
 	withMarker := mock.MatchedBy(func(arg *rds.DescribeDBInstancesInput) bool {
 		return arg.Marker != nil
@@ -142,7 +130,7 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 
 func TestGetAllRdsInstancesError(t *testing.T) {
 	// Given
-	mockedApi := new(rdsClientMock)
+	mockedApi := new(rdsDBInstanceApiMock)
 
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 

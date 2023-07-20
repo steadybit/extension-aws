@@ -77,16 +77,6 @@ func TestPrepareInstanceDowntimeMustRequireAnAccountId(t *testing.T) {
 	assert.ErrorContains(t, err, "aws.account")
 }
 
-func (m *rdsDBInstanceApiMock) StartDBInstance(ctx context.Context, params *rds.StartDBInstanceInput, optFns ...func(*rds.Options)) (*rds.StartDBInstanceOutput, error) {
-	args := m.Called(ctx, params, optFns)
-	return nil, args.Error(1)
-}
-
-func (m *rdsDBInstanceApiMock) StopDBInstance(ctx context.Context, params *rds.StopDBInstanceInput, optFns ...func(*rds.Options)) (*rds.StopDBInstanceOutput, error) {
-	args := m.Called(ctx, params, optFns)
-	return nil, args.Error(1)
-}
-
 func TestStartInstanceDowntime(t *testing.T) {
 	// Given
 	api := new(rdsDBInstanceApiMock)

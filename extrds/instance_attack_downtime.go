@@ -24,7 +24,7 @@ var (
 )
 
 func NewRdsInstanceDowntime() action_kit_sdk.Action[RdsInstanceAttackState] {
-	return rdsInstanceDowntimeAttack{defaultClientProvider}
+	return rdsInstanceDowntimeAttack{defaultInstanceClientProvider}
 }
 
 func (f rdsInstanceDowntimeAttack) NewEmptyState() RdsInstanceAttackState {
@@ -33,13 +33,13 @@ func (f rdsInstanceDowntimeAttack) NewEmptyState() RdsInstanceAttackState {
 
 func (f rdsInstanceDowntimeAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.downtime", rdsTargetId),
+		Id:          fmt.Sprintf("%s.downtime", rdsInstanceTargetId),
 		Label:       "Apply Instance Downtime",
 		Description: "Stops a DB instance and restarts it after a given time",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(rdsIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
-			TargetType: rdsTargetId,
+			TargetType: rdsInstanceTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label: "by rds instance id",
@@ -62,7 +62,7 @@ func (f rdsInstanceDowntimeAttack) Describe() action_kit_api.ActionDescription {
 }
 
 func (f rdsInstanceDowntimeAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	return nil, convertAttackState(request, state)
+	return nil, convertInstanceAttackState(request, state)
 }
 
 func (f rdsInstanceDowntimeAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {

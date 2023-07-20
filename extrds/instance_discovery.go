@@ -20,7 +20,7 @@ import (
 	"net/http"
 )
 
-func RegisterDiscoveryHandlers() {
+func RegisterInstanceDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler("/rds/instance/discovery", exthttp.GetterAsHandler(getRdsInstanceDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/rds/instance/discovery/target-description", exthttp.GetterAsHandler(getRdsInstanceTargetDescription))
 	exthttp.RegisterHttpHandler("/rds/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getRdsInstanceAttributeDescriptions))
@@ -29,7 +29,7 @@ func RegisterDiscoveryHandlers() {
 
 func getRdsInstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id:         rdsTargetId,
+		Id:         rdsInstanceTargetId,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
@@ -41,7 +41,7 @@ func getRdsInstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription
 
 func getRdsInstanceTargetDescription() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
-		Id:       rdsTargetId,
+		Id:       rdsInstanceTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "RDS instance", Other: "RDS instances"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
@@ -98,7 +98,7 @@ func getRdsInstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 }
 
 func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []byte) {
-	targets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, mergeTargets, make([]discovery_kit_api.Target, 0, 100), r.Context())
+	targets, err := utils.ForEveryAccount(utils.Accounts, getInstanceTargetsForAccount, mergeTargets, make([]discovery_kit_api.Target, 0, 100), r.Context())
 	if err != nil {
 		exthttp.WriteError(w, extension_kit.ToError("Failed to collect RDS instance information", err))
 	} else {
@@ -106,7 +106,7 @@ func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []
 	}
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
 	targets, err := GetAllRdsInstances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
@@ -120,15 +120,7 @@ func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]di
 	return &targets, nil
 }
 
-func mergeTargets(merged []discovery_kit_api.Target, eachResult []discovery_kit_api.Target) ([]discovery_kit_api.Target, error) {
-	return append(merged, eachResult...), nil
-}
-
-type RdsDescribeInstancesApi interface {
-	DescribeDBInstances(ctx context.Context, params *rds.DescribeDBInstancesInput, optFns ...func(*rds.Options)) (*rds.DescribeDBInstancesOutput, error)
-}
-
-func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func GetAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := rds.NewDescribeDBInstancesPaginator(rdsApi, &rds.DescribeDBInstancesInput{})
@@ -139,14 +131,14 @@ func GetAllRdsInstances(ctx context.Context, rdsApi RdsDescribeInstancesApi, aws
 		}
 
 		for _, dbInstance := range output.DBInstances {
-			result = append(result, toTarget(dbInstance, awsAccountNumber, awsRegion))
+			result = append(result, toInstanceTarget(dbInstance, awsAccountNumber, awsRegion))
 		}
 	}
 
 	return result, nil
 }
 
-func toTarget(dbInstance types.DBInstance, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toInstanceTarget(dbInstance types.DBInstance, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
 	arn := aws.ToString(dbInstance.DBInstanceArn)
 	label := aws.ToString(dbInstance.DBInstanceIdentifier)
 
@@ -166,7 +158,7 @@ func toTarget(dbInstance types.DBInstance, awsAccountNumber string, awsRegion st
 	return discovery_kit_api.Target{
 		Id:         arn,
 		Label:      label,
-		TargetType: rdsTargetId,
+		TargetType: rdsInstanceTargetId,
 		Attributes: attributes,
 	}
 }

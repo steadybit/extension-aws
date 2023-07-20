@@ -31,9 +31,12 @@ func main() {
 
 	utils.RegisterCommonDiscoveryHandlers()
 
-	extrds.RegisterDiscoveryHandlers()
+	extrds.RegisterInstanceDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceRebootAttack())
 	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceDowntime())
+
+	extrds.RegisterClusterDiscoveryHandlers()
+	action_kit_sdk.RegisterAction(extrds.NewRdsClusterFailoverAttack())
 
 	extaz.RegisterDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extaz.NewAzBlackholeAction())
@@ -73,6 +76,10 @@ func getExtensionList() ExtensionListResponse {
 			Method: "GET",
 			Path:   "/rds/instance/discovery",
 		})
+		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/rds/cluster/discovery",
+		})
 	}
 	if !cfg.DiscoveryDisabledEc2 {
 		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
@@ -107,7 +114,12 @@ func getExtensionList() ExtensionListResponse {
 				{
 					Method: "GET",
 					Path:   "/rds/instance/discovery/target-description",
-				}, {
+				},
+				{
+					Method: "GET",
+					Path:   "/rds/cluster/discovery/target-description",
+				},
+				{
 					Method: "GET",
 					Path:   "/az/discovery/target-description",
 				},
@@ -128,6 +140,10 @@ func getExtensionList() ExtensionListResponse {
 				{
 					Method: "GET",
 					Path:   "/rds/instance/discovery/attribute-descriptions",
+				},
+				{
+					Method: "GET",
+					Path:   "/rds/cluster/discovery/attribute-descriptions",
 				},
 				{
 					Method: "GET",

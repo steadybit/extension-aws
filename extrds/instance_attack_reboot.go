@@ -21,7 +21,7 @@ type rdsInstanceRebootAttack struct {
 var _ action_kit_sdk.Action[RdsInstanceAttackState] = (*rdsInstanceRebootAttack)(nil)
 
 func NewRdsInstanceRebootAttack() action_kit_sdk.Action[RdsInstanceAttackState] {
-	return rdsInstanceRebootAttack{defaultClientProvider}
+	return rdsInstanceRebootAttack{defaultInstanceClientProvider}
 }
 
 func (f rdsInstanceRebootAttack) NewEmptyState() RdsInstanceAttackState {
@@ -30,13 +30,13 @@ func (f rdsInstanceRebootAttack) NewEmptyState() RdsInstanceAttackState {
 
 func (f rdsInstanceRebootAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.reboot", rdsTargetId),
-		Label:       "Reboot Instance",
-		Description: "Reboot a single database instance",
+		Id:          fmt.Sprintf("%s.reboot", rdsInstanceTargetId),
+		Label:       "Trigger Instance Reboot",
+		Description: "Triggers rebooting a database instance",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(rdsIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
-			TargetType: rdsTargetId,
+			TargetType: rdsInstanceTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label: "by rds instance id",
@@ -52,7 +52,7 @@ func (f rdsInstanceRebootAttack) Describe() action_kit_api.ActionDescription {
 }
 
 func (f rdsInstanceRebootAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	return nil, convertAttackState(request, state)
+	return nil, convertInstanceAttackState(request, state)
 }
 
 func (f rdsInstanceRebootAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {

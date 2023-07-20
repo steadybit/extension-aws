@@ -15,18 +15,18 @@ import (
 	"testing"
 )
 
-func TestPrepareInstanceReboot(t *testing.T) {
+func TestPrepareClusterFailover(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
-				"aws.rds.instance.id": {"my-instance"},
-				"aws.account":         {"42"},
+				"aws.rds.cluster.id": {"my-cluster"},
+				"aws.account":        {"42"},
 			},
 		}),
 	})
 
-	attack := rdsInstanceRebootAttack{}
+	attack := rdsClusterFailoverAttack{}
 	state := attack.NewEmptyState()
 
 	// When
@@ -34,10 +34,10 @@ func TestPrepareInstanceReboot(t *testing.T) {
 
 	// Then
 	assert.NoError(t, err)
-	assert.Equal(t, "my-instance", state.DBInstanceIdentifier)
+	assert.Equal(t, "my-cluster", state.DBClusterIdentifier)
 }
 
-func TestPrepareInstanceRebootMustRequireAnInstanceId(t *testing.T) {
+func TestPrepareClusterFailoverMustRequireAnClusterId(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
@@ -47,27 +47,27 @@ func TestPrepareInstanceRebootMustRequireAnInstanceId(t *testing.T) {
 		}),
 	})
 
-	attack := rdsInstanceRebootAttack{}
+	attack := rdsClusterFailoverAttack{}
 	state := attack.NewEmptyState()
 
 	// When
 	_, err := attack.Prepare(context.Background(), &state, requestBody)
 
 	// Then
-	assert.ErrorContains(t, err, "aws.rds.instance.id")
+	assert.ErrorContains(t, err, "aws.rds.cluster.id")
 }
 
-func TestPrepareInstanceRebootMustRequireAnAccountId(t *testing.T) {
+func TestPrepareClusterFailoverMustRequireAnAccountId(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
-				"aws.rds.instance.id": {"my-instance"},
+				"aws.rds.cluster.id": {"my-cluster"},
 			},
 		}),
 	})
 
-	attack := rdsInstanceRebootAttack{}
+	attack := rdsClusterFailoverAttack{}
 	state := attack.NewEmptyState()
 
 	// When
@@ -77,18 +77,18 @@ func TestPrepareInstanceRebootMustRequireAnAccountId(t *testing.T) {
 	assert.ErrorContains(t, err, "aws.account")
 }
 
-func TestStartInstanceReboot(t *testing.T) {
+func TestStartClusterFailover(t *testing.T) {
 	// Given
-	api := new(rdsDBInstanceApiMock)
-	api.On("RebootDBInstance", mock.Anything, mock.MatchedBy(func(params *rds.RebootDBInstanceInput) bool {
-		require.Equal(t, "dev-db", *params.DBInstanceIdentifier)
+	api := new(rdsDBClusterApiMock)
+	api.On("FailoverDBCluster", mock.Anything, mock.MatchedBy(func(params *rds.FailoverDBClusterInput) bool {
+		require.Equal(t, "dev-db", *params.DBClusterIdentifier)
 		return true
 	}), mock.Anything).Return(nil, nil)
-	state := RdsInstanceAttackState{
-		DBInstanceIdentifier: "dev-db",
-		Account:              "42",
+	state := RdsClusterAttackState{
+		DBClusterIdentifier: "dev-db",
+		Account:             "42",
 	}
-	action := rdsInstanceRebootAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
+	action := rdsClusterFailoverAttack{clientProvider: func(account string) (rdsDBClusterApi, error) {
 		return api, nil
 	}}
 
@@ -100,14 +100,14 @@ func TestStartInstanceReboot(t *testing.T) {
 	api.AssertExpectations(t)
 }
 
-func TestStartInstanceRebootForwardRebootError(t *testing.T) {
+func TestStartClusterFailoverForwardFailoverError(t *testing.T) {
 	// Given
-	api := new(rdsDBInstanceApiMock)
-	api.On("RebootDBInstance", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
-	state := RdsInstanceAttackState{
-		DBInstanceIdentifier: "dev-db",
+	api := new(rdsDBClusterApiMock)
+	api.On("FailoverDBCluster", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
+	state := RdsClusterAttackState{
+		DBClusterIdentifier: "dev-db",
 	}
-	action := rdsInstanceRebootAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
+	action := rdsClusterFailoverAttack{clientProvider: func(account string) (rdsDBClusterApi, error) {
 		return api, nil
 	}}
 
@@ -115,6 +115,6 @@ func TestStartInstanceRebootForwardRebootError(t *testing.T) {
 	_, err := action.Start(context.Background(), &state)
 
 	// Then
-	assert.Error(t, err, "Failed to reboot database instance")
+	assert.Error(t, err, "Failed to failover database cluster")
 	api.AssertExpectations(t)
 }
