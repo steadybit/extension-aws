@@ -37,8 +37,7 @@ type WithTestContainersCase struct {
 }
 
 func WithTestContainers(t *testing.T, testCases []WithTestContainersCase) {
-	tcs, err := setupTestContainers(t, context.Background())
-	require.NoError(t, err)
+	tcs := setupTestContainers(t, context.Background())
 	defer tcs.Terminate(t, context.Background())
 
 	clientEc2, err := setupEc2Client(context.Background(), tcs.LocalStackContainer)
@@ -52,27 +51,26 @@ func WithTestContainers(t *testing.T, testCases []WithTestContainersCase) {
 	}
 }
 
-func setupTestContainers(t *testing.T, ctx context.Context) (*TestContainers, error) {
+func setupTestContainers(t *testing.T, ctx context.Context) *TestContainers {
 	networkName := "localstack-network"
 	localstackImage := "localstack/localstack:1.4"
 
-	networkRequest := testcontainers.GenericNetworkRequest{
+	_, err := testcontainers.GenericNetwork(ctx, testcontainers.GenericNetworkRequest{
 		NetworkRequest: testcontainers.NetworkRequest{
 			Name: networkName,
 		},
-	}
-	_, err := testcontainers.GenericNetwork(ctx, networkRequest)
-	if err != nil {
-		return nil, err
-	}
+	})
+	require.Nil(t, err)
 
-	container, err := localstack.StartContainer(
+	container, err := localstack.RunContainer(
 		ctx,
-		localstack.OverrideContainerRequest(testcontainers.ContainerRequest{
-			Image:          localstackImage,
-			Env:            map[string]string{"SERVICES": "ec2,imds"},
-			Networks:       []string{networkName},
-			NetworkAliases: map[string][]string{networkName: {"localstack"}},
+		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+			ContainerRequest: testcontainers.ContainerRequest{
+				Image:          localstackImage,
+				Env:            map[string]string{"SERVICES": "ec2,imds"},
+				Networks:       []string{networkName},
+				NetworkAliases: map[string][]string{networkName: {"localstack"}},
+			},
 		}),
 	)
 	require.Nil(t, err)
@@ -80,7 +78,7 @@ func setupTestContainers(t *testing.T, ctx context.Context) (*TestContainers, er
 
 	return &TestContainers{
 		LocalStackContainer: container,
-	}, nil
+	}
 }
 
 func setupEc2Client(ctx context.Context, l *localstack.LocalStackContainer) (*ec2.Client, error) {
