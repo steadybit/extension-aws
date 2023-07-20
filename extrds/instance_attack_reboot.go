@@ -58,7 +58,7 @@ func (f rdsInstanceRebootAttack) Prepare(_ context.Context, state *RdsInstanceAt
 func (f rdsInstanceRebootAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {
 	client, err := f.clientProvider(state.Account)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err))
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err)
 	}
 
 	input := rds.RebootDBInstanceInput{
@@ -66,7 +66,7 @@ func (f rdsInstanceRebootAttack) Start(ctx context.Context, state *RdsInstanceAt
 	}
 	_, err = client.RebootDBInstance(ctx, &input)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to reboot database instance", err))
+		return nil, extension_kit.ToError("Failed to reboot database instance", err)
 	}
 	return &action_kit_api.StartResult{
 		Messages: &[]action_kit_api.Message{{

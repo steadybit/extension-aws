@@ -45,14 +45,14 @@ func TestLambdaAction_Prepare(t *testing.T) {
 			attributes: map[string][]string{
 				"aws.lambda.failure-injection-param": {"PARAM"},
 			},
-			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)),
+			wantedError: extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil),
 		},
 		{
 			name: "Should return error if failure-injection-param is missing",
 			attributes: map[string][]string{
 				"aws.account": {"123456789012"},
 			},
-			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.lambda.failure-injection-param' attribute. Did you wrap the lambda with https://github.com/gunnargrosch/failure-lambda ?", nil)),
+			wantedError: extension_kit.ToError("Target is missing the 'aws.lambda.failure-injection-param' attribute. Did you wrap the lambda with https://github.com/gunnargrosch/failure-lambda ?", nil),
 		},
 	}
 

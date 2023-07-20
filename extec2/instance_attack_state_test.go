@@ -57,7 +57,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 					},
 				}),
 			}),
-			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)),
+			wantedError: extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil),
 		},
 		{
 			name: "Should return error if instanceId is missing",
@@ -71,7 +71,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 					},
 				}),
 			}),
-			wantedError: extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil)),
+			wantedError: extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil),
 		},
 		{
 			name: "Should return error if action is missing",
@@ -84,7 +84,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 					},
 				}),
 			}),
-			wantedError: extutil.Ptr(extension_kit.ToError("Missing attack action parameter.", nil)),
+			wantedError: extension_kit.ToError("Missing attack action parameter.", nil),
 		},
 	}
 

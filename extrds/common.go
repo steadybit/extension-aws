@@ -9,7 +9,6 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 const (
@@ -31,12 +30,12 @@ type rdsDBInstanceApi interface {
 func convertAttackState(request action_kit_api.PrepareActionRequestBody, state *RdsInstanceAttackState) error {
 	instanceId := request.Target.Attributes["aws.rds.instance.id"]
 	if len(instanceId) == 0 {
-		return extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.rds.instance.id' target attribute.", nil))
+		return extension_kit.ToError("Target is missing the 'aws.rds.instance.id' target attribute.", nil)
 	}
 
 	account := request.Target.Attributes["aws.account"]
 	if len(account) == 0 {
-		return extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
+		return extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil)
 	}
 
 	state.Account = account[0]

@@ -95,7 +95,7 @@ func (f FisExperimentAction) Prepare(_ context.Context, state *FisExperimentStat
 
 	account := request.Target.Attributes["aws.account"]
 	if len(account) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil))
+		return nil, extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil)
 	}
 
 	state.TemplateId = templateId[0]
@@ -121,12 +121,12 @@ type FisStartExperimentClient interface {
 func startExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string) (FisStartExperimentClient, error)) (*action_kit_api.StartResult, error) {
 	client, err := clientProvider(state.Account)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize FIS client for AWS account %s", state.Account), err))
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize FIS client for AWS account %s", state.Account), err)
 	}
 
 	clientToken, err := uuid.NewRandom()
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to generate a random client-token.", err))
+		return nil, extension_kit.ToError("Failed to generate a random client-token.", err)
 	}
 
 	input := fis.StartExperimentInput{
@@ -136,7 +136,7 @@ func startExperiment(ctx context.Context, state *FisExperimentState, clientProvi
 	}
 	response, err := client.StartExperiment(ctx, &input)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to start fis experiment", err))
+		return nil, extension_kit.ToError("Failed to start fis experiment", err)
 	}
 
 	state.ExperimentId = *response.Experiment.Id
@@ -160,14 +160,14 @@ type FisStatusExperimentClient interface {
 func statusExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string) (FisStatusExperimentClient, error)) (*action_kit_api.StatusResult, error) {
 	client, err := clientProvider(state.Account)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err))
+		return nil, extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err)
 	}
 
 	experiment, err := client.GetExperiment(ctx, extutil.Ptr(fis.GetExperimentInput{
 		Id: &state.ExperimentId,
 	}))
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to fetch experiment", err))
+		return nil, extension_kit.ToError("Failed to fetch experiment", err)
 	}
 
 	result := action_kit_api.StatusResult{}
@@ -237,21 +237,21 @@ func (f FisExperimentAction) Stop(ctx context.Context, state *FisExperimentState
 func stopExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string) (FisStopExperimentClient, error)) (*action_kit_api.StopResult, error) {
 	client, err := clientProvider(state.Account)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err))
+		return nil, extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err)
 	}
 
 	experiment, err := client.GetExperiment(ctx, extutil.Ptr(fis.GetExperimentInput{
 		Id: &state.ExperimentId,
 	}))
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to fetch experiment", err))
+		return nil, extension_kit.ToError("Failed to fetch experiment", err)
 	}
 
 	status := experiment.Experiment.State.Status
 	if status == types.ExperimentStatusPending || status == types.ExperimentStatusInitiating || status == types.ExperimentStatusRunning {
 		_, err := client.StopExperiment(ctx, extutil.Ptr(fis.StopExperimentInput{Id: &state.ExperimentId}))
 		if err != nil {
-			return nil, extutil.Ptr(extension_kit.ToError("Failed to stop experiment", err))
+			return nil, extension_kit.ToError("Failed to stop experiment", err)
 		}
 		log.Debug().Msgf("Stopped Experiment.")
 	} else {

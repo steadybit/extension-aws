@@ -108,26 +108,26 @@ func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, 
 	// Get Target Attributes
 	targetAccount := request.Target.Attributes["aws.account"]
 	if len(targetAccount) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.targetAccount' target attribute.", nil))
+		return nil, extension_kit.ToError("Target is missing the 'aws.targetAccount' target attribute.", nil)
 	}
 
 	targetZone := request.Target.Attributes["aws.zone"]
 	if len(targetZone) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.zone' target attribute.", nil))
+		return nil, extension_kit.ToError("Target is missing the 'aws.zone' target attribute.", nil)
 	}
 
 	// Get AWS Clients
 	clientEc2, clientImds, err := e.clientProvider(targetAccount[0])
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS targetAccount %s", targetAccount[0]), err))
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS targetAccount %s", targetAccount[0]), err)
 	}
 	//Get Extension Account
 	extensionAwsAccount := e.getExtensionAWSAccount(ctx, clientImds)
 	if extensionAwsAccount == "" {
-		return nil, extutil.Ptr(extension_kit.ToError("Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.", nil))
+		return nil, extension_kit.ToError("Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.", nil)
 	}
 	if targetAccount[0] == extensionAwsAccount {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("The extension is running in the same AWS account (%s) as the target. Attack is disabled to prevent an extension lockout.", extensionAwsAccount), nil))
+		return nil, extension_kit.ToError(fmt.Sprintf("The extension is running in the same AWS account (%s) as the target. Attack is disabled to prevent an extension lockout.", extensionAwsAccount), nil)
 	}
 
 	agentAwsAccountId := ""
@@ -136,17 +136,17 @@ func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, 
 	}
 
 	if agentAwsAccountId == "" {
-		return nil, extutil.Ptr(extension_kit.ToError("Could not get AWS Account of the agent. Attack is disabled to prevent an agent lockout.", nil))
+		return nil, extension_kit.ToError("Could not get AWS Account of the agent. Attack is disabled to prevent an agent lockout.", nil)
 	}
 
 	if targetAccount[0] == agentAwsAccountId {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("The agent is running in the same AWS account (%s) as the target. Attack is disabled to prevent an agent lockout.", extensionAwsAccount), nil))
+		return nil, extension_kit.ToError(fmt.Sprintf("The agent is running in the same AWS account (%s) as the target. Attack is disabled to prevent an agent lockout.", extensionAwsAccount), nil)
 	}
 
 	// Get Target Subnets
 	targetSubnets, err := getTargetSubnets(clientEc2, ctx, targetZone[0])
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to get subnets for zone %s", targetZone[0]), err))
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to get subnets for zone %s", targetZone[0]), err)
 	}
 
 	state.AgentAWSAccount = agentAwsAccountId
@@ -389,7 +389,7 @@ func rollbackBlackholeViaTags(ctx context.Context, state *BlackholeState, client
 	networkAclsAssociatedWithSubnets, err := getAllNACLsCreatedBySteadybit(clientEc2, ctx, state.AttackExecutionId)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get network ACLs created by Steadybit")
-		return extutil.Ptr(extension_kit.ToError("Failed to get network ACLs created by Steadybit", err))
+		return extension_kit.ToError("Failed to get network ACLs created by Steadybit", err)
 	}
 
 	networkAclIdsCreadedBySteadybit := make(map[string]struct{}) // a Set of network ACL IDs created by Steadybit to be deleted later
@@ -445,7 +445,7 @@ func rollbackBlackholeViaTags(ctx context.Context, state *BlackholeState, client
 		log.Debug().Msgf("Deleted network acl entry  %+v", deleteNetworkAclResponse)
 	}
 	if errors != nil {
-		return extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL association: %s", strings.Join(errors, ", ")), nil))
+		return extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL association: %s", strings.Join(errors, ", ")), nil)
 	}
 	return nil
 }

@@ -68,16 +68,18 @@ func (f rdsInstanceDowntimeAttack) Prepare(_ context.Context, state *RdsInstance
 func (f rdsInstanceDowntimeAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {
 	client, err := f.clientProvider(state.Account)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err))
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err)
 	}
 
 	input := rds.StopDBInstanceInput{
 		DBInstanceIdentifier: &state.DBInstanceIdentifier,
 	}
+
 	_, err = client.StopDBInstance(ctx, &input)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to stop database instance", err))
+		return nil, extension_kit.ToError("Failed to stop database instance", err)
 	}
+
 	return &action_kit_api.StartResult{
 		Messages: &[]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
@@ -89,7 +91,7 @@ func (f rdsInstanceDowntimeAttack) Start(ctx context.Context, state *RdsInstance
 func (f rdsInstanceDowntimeAttack) Stop(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StopResult, error) {
 	client, err := f.clientProvider(state.Account)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err))
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err)
 	}
 
 	input := rds.StartDBInstanceInput{
@@ -97,7 +99,7 @@ func (f rdsInstanceDowntimeAttack) Stop(ctx context.Context, state *RdsInstanceA
 	}
 	_, err = client.StartDBInstance(ctx, &input)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to start database instance", err))
+		return nil, extension_kit.ToError("Failed to start database instance", err)
 	}
 	return &action_kit_api.StopResult{
 		Messages: &[]action_kit_api.Message{{

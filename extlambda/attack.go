@@ -116,7 +116,7 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 func (a *lambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*action_kit_api.StopResult, error) {
 	client, err := a.clientProvider(state.Account)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Failed to create ssm client", err))
+		return nil, extension_kit.ToError("Failed to create ssm client", err)
 	}
 
 	_, err = client.DeleteParameter(ctx, &ssm.DeleteParameterInput{

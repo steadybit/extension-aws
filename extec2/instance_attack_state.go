@@ -100,17 +100,17 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 func (e *ec2InstanceStateAction) Prepare(_ context.Context, state *InstanceStateChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	instanceId := request.Target.Attributes["aws-ec2.instance.id"]
 	if len(instanceId) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil))
+		return nil, extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil)
 	}
 
 	account := request.Target.Attributes["aws.account"]
 	if len(account) == 0 {
-		return nil, extutil.Ptr(extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil))
+		return nil, extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)
 	}
 
 	action := request.Config["action"]
 	if action == nil {
-		return nil, extutil.Ptr(extension_kit.ToError("Missing attack action parameter.", nil))
+		return nil, extension_kit.ToError("Missing attack action parameter.", nil)
 	}
 
 	state.Account = account[0]
@@ -122,7 +122,7 @@ func (e *ec2InstanceStateAction) Prepare(_ context.Context, state *InstanceState
 func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceStateChangeState) (*action_kit_api.StartResult, error) {
 	client, err := e.clientProvider(state.Account)
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.Account), err))
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.Account), err)
 	}
 
 	instanceIds := []string{state.InstanceId}
@@ -152,7 +152,7 @@ func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceState
 	}
 
 	if err != nil {
-		return nil, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to execute state change attack '%s' on instance '%s'", state.Action, state.InstanceId), err))
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to execute state change attack '%s' on instance '%s'", state.Action, state.InstanceId), err)
 	}
 
 	return nil, nil
