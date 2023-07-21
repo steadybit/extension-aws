@@ -33,7 +33,7 @@ func main() {
 
 	extrds.RegisterInstanceDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceRebootAttack())
-	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceDowntime())
+	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceStopAttack())
 
 	extrds.RegisterClusterDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extrds.NewRdsClusterFailoverAttack())

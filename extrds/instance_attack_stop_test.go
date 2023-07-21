@@ -15,7 +15,7 @@ import (
 	"testing"
 )
 
-func TestPrepareInstanceDowntime(t *testing.T) {
+func TestPrepareInstanceStop(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
@@ -26,7 +26,7 @@ func TestPrepareInstanceDowntime(t *testing.T) {
 		}),
 	})
 
-	attack := rdsInstanceDowntimeAttack{}
+	attack := rdsInstanceStopAttack{}
 	state := attack.NewEmptyState()
 
 	// When
@@ -37,7 +37,7 @@ func TestPrepareInstanceDowntime(t *testing.T) {
 	assert.Equal(t, "my-instance", state.DBInstanceIdentifier)
 }
 
-func TestPrepareInstanceDowntimeMustRequireAnInstanceId(t *testing.T) {
+func TestPrepareInstanceStopMustRequireAnInstanceId(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
@@ -47,7 +47,7 @@ func TestPrepareInstanceDowntimeMustRequireAnInstanceId(t *testing.T) {
 		}),
 	})
 
-	attack := rdsInstanceDowntimeAttack{}
+	attack := rdsInstanceStopAttack{}
 	state := attack.NewEmptyState()
 
 	// When
@@ -57,7 +57,7 @@ func TestPrepareInstanceDowntimeMustRequireAnInstanceId(t *testing.T) {
 	assert.ErrorContains(t, err, "aws.rds.instance.id")
 }
 
-func TestPrepareInstanceDowntimeMustRequireAnAccountId(t *testing.T) {
+func TestPrepareInstanceStopMustRequireAnAccountId(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Target: extutil.Ptr(action_kit_api.Target{
@@ -67,7 +67,7 @@ func TestPrepareInstanceDowntimeMustRequireAnAccountId(t *testing.T) {
 		}),
 	})
 
-	attack := rdsInstanceDowntimeAttack{}
+	attack := rdsInstanceStopAttack{}
 	state := attack.NewEmptyState()
 
 	// When
@@ -77,7 +77,7 @@ func TestPrepareInstanceDowntimeMustRequireAnAccountId(t *testing.T) {
 	assert.ErrorContains(t, err, "aws.account")
 }
 
-func TestStartInstanceDowntime(t *testing.T) {
+func TestStartInstanceStop(t *testing.T) {
 	// Given
 	api := new(rdsDBInstanceApiMock)
 	api.On("StopDBInstance", mock.Anything, mock.MatchedBy(func(params *rds.StopDBInstanceInput) bool {
@@ -88,7 +88,7 @@ func TestStartInstanceDowntime(t *testing.T) {
 		DBInstanceIdentifier: "dev-db",
 		Account:              "42",
 	}
-	action := rdsInstanceDowntimeAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
+	action := rdsInstanceStopAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
 		return api, nil
 	}}
 
@@ -100,37 +100,14 @@ func TestStartInstanceDowntime(t *testing.T) {
 	api.AssertExpectations(t)
 }
 
-func TestStopInstanceDowntime(t *testing.T) {
-	// Given
-	api := new(rdsDBInstanceApiMock)
-	api.On("StartDBInstance", mock.Anything, mock.MatchedBy(func(params *rds.StartDBInstanceInput) bool {
-		require.Equal(t, "dev-db", *params.DBInstanceIdentifier)
-		return true
-	}), mock.Anything).Return(nil, nil)
-	state := RdsInstanceAttackState{
-		DBInstanceIdentifier: "dev-db",
-		Account:              "42",
-	}
-	action := rdsInstanceDowntimeAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
-		return api, nil
-	}}
-
-	// When
-	_, err := action.Stop(context.Background(), &state)
-
-	// Then
-	assert.NoError(t, err)
-	api.AssertExpectations(t)
-}
-
-func TestStartInstanceRebootForwardStopError(t *testing.T) {
+func TestStartInstanceStopForwardStopError(t *testing.T) {
 	// Given
 	api := new(rdsDBInstanceApiMock)
 	api.On("StopDBInstance", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 	state := RdsInstanceAttackState{
 		DBInstanceIdentifier: "dev-db",
 	}
-	action := rdsInstanceDowntimeAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
+	action := rdsInstanceStopAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
 		return api, nil
 	}}
 

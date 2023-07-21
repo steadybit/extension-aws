@@ -32,7 +32,7 @@ func (f rdsClusterFailoverAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.failover", rdsClusterTargetId),
 		Label:       "Trigger Failover DB Cluster",
-		Description: "Triggers DB cluster failover by promoting  a standby instance to primary",
+		Description: "Triggers DB cluster failover by promoting a standby instance to primary",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(rdsIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{

@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.3
+
+- replace RDS instance downtime attack with RDS instance stop attack
+
 ## v2.2.2
 
  - add RDS instance downtime attack

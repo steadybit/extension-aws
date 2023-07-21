@@ -46,7 +46,6 @@ by tweaking the `Resource` clause.
       "Action": [
         "rds:RebootDBCluster",
         "rds:ListTagsForResource",
-        "rds:StartDBInstance",
         "rds:StopDBInstance",
         "rds:RebootDBInstance",
         "rds:DescribeDBInstances",

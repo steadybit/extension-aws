@@ -97,6 +97,18 @@ func getRdsClusterAttributeDescriptions() discovery_kit_api.AttributeDescription
 					One:   "AWS RDS cluster Multi-AZ",
 					Other: "AWS RDS cluster Multi-AZ",
 				},
+			}, {
+				Attribute: "aws.rds.cluster.reader",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "AWS RDS cluster reader instance",
+					Other: "AWS RDS cluster reader instances",
+				},
+			}, {
+				Attribute: "aws.rds.cluster.writer",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "AWS RDS cluster writer instance",
+					Other: "AWS RDS cluster writer instances",
+				},
 			},
 		},
 	}
@@ -157,6 +169,15 @@ func toClusterTarget(dbCluster types.DBCluster, awsAccountNumber string, awsRegi
 	attributes["aws.rds.cluster.status"] = []string{aws.ToString(dbCluster.Status)}
 	if dbCluster.MultiAZ != nil {
 		attributes["aws.rds.cluster.multi-az"] = []string{fmt.Sprintf("%t", *dbCluster.MultiAZ)}
+	}
+	for _, member := range dbCluster.DBClusterMembers {
+		var key string
+		if member.IsClusterWriter {
+			key = "aws.rds.cluster.writer"
+		} else {
+			key = "aws.rds.cluster.reader"
+		}
+		attributes[key] = append(attributes[key], aws.ToString(member.DBInstanceIdentifier))
 	}
 
 	return discovery_kit_api.Target{

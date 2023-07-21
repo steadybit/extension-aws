@@ -14,25 +14,27 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-type rdsInstanceRebootAttack struct {
+type rdsInstanceStopAttack struct {
 	clientProvider func(account string) (rdsDBInstanceApi, error)
 }
 
-var _ action_kit_sdk.Action[RdsInstanceAttackState] = (*rdsInstanceRebootAttack)(nil)
+var (
+	_ action_kit_sdk.Action[RdsInstanceAttackState] = (*rdsInstanceStopAttack)(nil)
+)
 
-func NewRdsInstanceRebootAttack() action_kit_sdk.Action[RdsInstanceAttackState] {
-	return rdsInstanceRebootAttack{defaultInstanceClientProvider}
+func NewRdsInstanceStopAttack() action_kit_sdk.Action[RdsInstanceAttackState] {
+	return rdsInstanceStopAttack{defaultInstanceClientProvider}
 }
 
-func (f rdsInstanceRebootAttack) NewEmptyState() RdsInstanceAttackState {
+func (f rdsInstanceStopAttack) NewEmptyState() RdsInstanceAttackState {
 	return RdsInstanceAttackState{}
 }
 
-func (f rdsInstanceRebootAttack) Describe() action_kit_api.ActionDescription {
+func (f rdsInstanceStopAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.reboot", rdsInstanceTargetId),
-		Label:       "Trigger DB Instance Reboot",
-		Description: "Triggers rebooting a database instance",
+		Id:          fmt.Sprintf("%s.stop", rdsInstanceTargetId),
+		Label:       "Trigger DB Instance Stop",
+		Description: "Triggers stopping a DB instance",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(rdsIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
@@ -48,31 +50,36 @@ func (f rdsInstanceRebootAttack) Describe() action_kit_api.ActionDescription {
 		TimeControl: action_kit_api.Instantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},
+		Hint: &action_kit_api.ActionHint{
+			Content: "This action will not perform a rollback. You need to take care about restarting.\n\nStopping a DB instance may take several minutes or hours in case of issues.",
+			Type:    action_kit_api.HintWarning,
+		},
 	}
 }
 
-func (f rdsInstanceRebootAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (f rdsInstanceStopAttack) Prepare(_ context.Context, state *RdsInstanceAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	return nil, convertInstanceAttackState(request, state)
 }
 
-func (f rdsInstanceRebootAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {
+func (f rdsInstanceStopAttack) Start(ctx context.Context, state *RdsInstanceAttackState) (*action_kit_api.StartResult, error) {
 	client, err := f.clientProvider(state.Account)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err)
 	}
 
-	input := rds.RebootDBInstanceInput{
+	input := rds.StopDBInstanceInput{
 		DBInstanceIdentifier: &state.DBInstanceIdentifier,
 	}
-	_, err = client.RebootDBInstance(ctx, &input)
+
+	_, err = client.StopDBInstance(ctx, &input)
 	if err != nil {
-		return nil, extension_kit.ToError("Failed to reboot database instance", err)
+		return nil, extension_kit.ToError("Failed to stop database instance", err)
 	}
+
 	return &action_kit_api.StartResult{
 		Messages: &[]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
-			Message: fmt.Sprintf("Database instance %s rebooted", state.DBInstanceIdentifier),
+			Message: fmt.Sprintf("Database instance %s stopped", state.DBInstanceIdentifier),
 		}},
 	}, nil
-
 }
