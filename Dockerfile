@@ -6,6 +6,7 @@
 FROM goreleaser/goreleaser:v1.19.2 AS build
 
 ARG BUILD_WITH_COVERAGE
+ARG BUILD_SNAPSHOT=true
 
 WORKDIR /app
 
@@ -15,7 +16,7 @@ RUN go mod download
 
 COPY . .
 
-RUN goreleaser build --snapshot --single-target -o extension
+RUN goreleaser build --snapshot="${BUILD_SNAPSHOT}" --single-target -o extension
 ##
 ## Runtime
 ##
