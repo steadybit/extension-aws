@@ -71,7 +71,7 @@ func (f rdsClusterFailoverAttack) Start(ctx context.Context, state *RdsClusterAt
 	return &action_kit_api.StartResult{
 		Messages: &[]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
-			Message: fmt.Sprintf("Database cluster %s failovered", state.DBClusterIdentifier),
+			Message: fmt.Sprintf("Database cluster %s failover triggered", state.DBClusterIdentifier),
 		}},
 	}, nil
 

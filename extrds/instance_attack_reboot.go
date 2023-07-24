@@ -71,7 +71,7 @@ func (f rdsInstanceRebootAttack) Start(ctx context.Context, state *RdsInstanceAt
 	return &action_kit_api.StartResult{
 		Messages: &[]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
-			Message: fmt.Sprintf("Database instance %s rebooted", state.DBInstanceIdentifier),
+			Message: fmt.Sprintf("Database instance %s reboot triggered", state.DBInstanceIdentifier),
 		}},
 	}, nil
 
