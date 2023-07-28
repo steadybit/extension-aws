@@ -23,6 +23,21 @@ tests:
             fromSecrets:
               - client-cert-a
               - client-cert-a
+  - it: manifest should match snapshot with mutual TLS using containerPaths
+    set:
+      tls:
+        server:
+          certificate:
+            path: /etc/tls/server.crt
+            key:
+              path: /etc/tls/server.key
+        client:
+          certificates:
+            paths:
+              - /etc/tls/ca.crt
+              - /etc/tls/ca2.crt
+    asserts:
+      - matchSnapshot: {}
   - it: manifest should match snapshot with extra env vars
     set:
       extraEnv:

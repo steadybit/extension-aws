@@ -18,14 +18,22 @@ image:
 tls:
   server:
     certificate:
-      # tls.server.certificate.fromSecret -- The name of the secret containing the TLS certificate for the extension. The extension will then create
-      # an HTTPS server instead of an HTTP server.
+      # tls.server.certificate.fromSecret -- The name of the secret containing the TLS certificate for the extension.
+      #  The extension will then create an HTTPS server instead of an HTTP server.
       fromSecret: null
+      # tls.server.certificate.path --Path to the TLS certificate for the extension.
+      path: null
+      key:
+        # tls.server.certificate.key-path --Path to the key for the TLS certificate for the extension.
+        path: null
   client:
     certificates:
-      # tls.client.certificates.fromSecrets -- List of secret names containing TLS certificates for the extension to trust. The extension will require
-      # clients to authenticate using one of these certificates. In essence, this will enable mutual TLS.
+      # tls.client.certificates.fromSecrets -- List of secret names containing TLS certificates for the extension to trust.
+      #  The extension will require clients to authenticate using one of these certificates. In essence, this will enable mutual TLS.
       fromSecrets: []
+      # tls.client.certificates.paths -- List paths containing TLS certificates for the extension to trust.
+      #  The extension will require clients to authenticate using one of these certificates. In essence, this will enable mutual TLS.
+      paths: []
 
 logging:
   # logging.level -- The active log level. Valid values are: TRACE, DEBUG, INFO, WARN, ERROR

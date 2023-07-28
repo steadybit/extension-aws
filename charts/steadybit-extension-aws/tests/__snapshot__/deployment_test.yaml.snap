@@ -124,6 +124,66 @@ manifest should match snapshot with extra env vars:
               volumeMounts: null
           serviceAccountName: steadybit-extension-aws
           volumes: null
+manifest should match snapshot with mutual TLS using containerPaths:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels: null
+      name: RELEASE-NAME-steadybit-extension-aws
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: steadybit-extension-aws
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: steadybit-extension-aws
+        spec:
+          containers:
+            - env:
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+                - name: STEADYBIT_EXTENSION_TLS_SERVER_CERT
+                  value: /etc/tls/server.crt
+                - name: STEADYBIT_EXTENSION_TLS_SERVER_KEY
+                  value: /etc/tls/server.key
+                - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
+                  value: /etc/tls/ca.crt,/etc/tls/ca2.crt
+                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
+                  value: ""
+              image: ghcr.io/steadybit/extension-aws:latest
+              imagePullPolicy: Always
+              livenessProbe:
+                httpGet:
+                  path: /health/liveness
+                  port: 8086
+              name: extension
+              ports:
+                - containerPort: 8085
+              readinessProbe:
+                httpGet:
+                  path: /health/readiness
+                  port: 8086
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+              securityContext:
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
+              volumeMounts: null
+          serviceAccountName: steadybit-extension-aws
+          volumes: null
 manifest should match snapshot without TLS:
   1: |
     apiVersion: apps/v1

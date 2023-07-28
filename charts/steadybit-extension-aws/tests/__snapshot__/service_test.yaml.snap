@@ -4,7 +4,8 @@ manifest should match snapshot with TLS:
     kind: Service
     metadata:
       annotations:
-        steadybit.com/extension-auto-discovery: "{\n  \"extensions\": [\n    {\n      \"port\": 8085,\n      \"types\": [\"ACTION\",\"DISCOVERY\"],\n      \"tls\": {\n        \"server\": {\n          \"extraCertsFile\": \"server-cert/tls.crt\"\n        }\n        \n      }\n    }\n  ]\n}\n"
+        steadybit.com/extension-auto-discovery: |
+          {"extensions":[{"port":8085,"protocol":"https","types":["ACTION","DISCOVERY"]}]}
       labels: null
       name: RELEASE-NAME-steadybit-extension-aws
       namespace: NAMESPACE
@@ -22,23 +23,25 @@ manifest should match snapshot with mutual TLS:
     metadata:
       annotations:
         steadybit.com/extension-auto-discovery: |
-          {
-            "extensions": [
-              {
-                "port": 8085,
-                "types": ["ACTION","DISCOVERY"],
-                "tls": {
-                  "server": {
-                    "extraCertsFile": "server-cert/tls.crt"
-                  },
-                  "client": {
-                    "certChainFile": "client-cert-a/tls.crt",
-                    "certKeyFile": "client-cert-a/tls.key"
-                  }
-                }
-              }
-            ]
-          }
+          {"extensions":[{"port":8085,"protocol":"https","types":["ACTION","DISCOVERY"]}]}
+      labels: null
+      name: RELEASE-NAME-steadybit-extension-aws
+      namespace: NAMESPACE
+    spec:
+      ports:
+        - port: 8085
+          protocol: TCP
+          targetPort: 8085
+      selector:
+        app.kubernetes.io/name: steadybit-extension-aws
+manifest should match snapshot with mutual TLS using containerPaths:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        steadybit.com/extension-auto-discovery: |
+          {"extensions":[{"port":8085,"protocol":"https","types":["ACTION","DISCOVERY"]}]}
       labels: null
       name: RELEASE-NAME-steadybit-extension-aws
       namespace: NAMESPACE
@@ -55,7 +58,8 @@ manifest should match snapshot without TLS:
     kind: Service
     metadata:
       annotations:
-        steadybit.com/extension-auto-discovery: "{\n  \"extensions\": [\n    {\n      \"port\": 8085,\n      \"types\": [\"ACTION\",\"DISCOVERY\"],\n      \"tls\": {\n        \n      }\n    }\n  ]\n}\n"
+        steadybit.com/extension-auto-discovery: |
+          {"extensions":[{"port":8085,"protocol":"http","types":["ACTION","DISCOVERY"]}]}
       labels: null
       name: RELEASE-NAME-steadybit-extension-aws
       namespace: NAMESPACE

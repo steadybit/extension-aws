@@ -3,7 +3,7 @@ templates:
 tests:
   - it: manifest should match snapshot without TLS
     asserts:
-      - matchSnapshot: { }
+      - matchSnapshot: {}
   - it: manifest should match snapshot with TLS
     set:
       tls:
@@ -11,7 +11,7 @@ tests:
           certificate:
             fromSecret: server-cert
     asserts:
-      - matchSnapshot: { }
+      - matchSnapshot: {}
   - it: manifest should match snapshot with mutual TLS
     set:
       tls:
@@ -23,5 +23,20 @@ tests:
             fromSecrets:
               - client-cert-a
               - client-cert-a
+    asserts:
+      - matchSnapshot: {}
+  - it: manifest should match snapshot with mutual TLS using containerPaths
+    set:
+      tls:
+        server:
+          certificate:
+            path: /etc/tls/server.crt
+            key:
+              path: /etc/tls/server.key
+        client:
+          certificates:
+            paths:
+              - /etc/tls/ca.crt
+              - /etc/tls/ca2.crt
     asserts:
       - matchSnapshot: {}
