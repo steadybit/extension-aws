@@ -21,7 +21,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.29.1
+	github.com/rs/zerolog v1.30.0
 	github.com/sosodev/duration v1.1.0
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.6.3
 	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.4
@@ -31,6 +31,9 @@ require (
 	github.com/testcontainers/testcontainers-go v0.21.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.21.0
 )
+
+// Workaround for https://github.com/testcontainers/testcontainers-go/issues/1359
+replace github.com/docker/docker v23.0.5+incompatible => github.com/docker/docker v23.0.7-0.20230730020554-801e90549aac+incompatible
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
