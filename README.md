@@ -348,7 +348,7 @@ We recommend that you install the extension with our [official Helm chart](https
 ### Helm
 
 ```bash
-helm repo add steadybit https://steadybit.github.io/extension-aws
+helm repo add steadybit-extension-aws https://steadybit.github.io/extension-aws
 helm repo update
 helm upgrade steadybit-extension-aws \
     --install \
@@ -357,7 +357,7 @@ helm upgrade steadybit-extension-aws \
     --create-namespace \
     --namespace steadybit-extension \
     --serviceAccount.eksRoleArn={{YOUR_SERVICE_ACCOUNT_ARN_IF_RUNNING_IN_EKS}} \
-    steadybit/steadybit-extension-aws
+    steadybit-extension-aws/steadybit-extension-aws
 ```
 
 ### Linux Package
