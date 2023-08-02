@@ -341,6 +341,25 @@ IAM policies need to be correctly configured for cross-account role assumption. 
    }
    ```
 
+### Agent Lockout - Outpost Requirements
+
+In order to prevent the agent or the extension of beeing locked out by their own attacks, we implemented some security checks.
+
+For example, the blackhole az attack won't start, if
+
+- the extension is running in the attacked account
+- the outpost is running in the attacked account
+
+The extension can verify the own account based on the authentication desribed above. For the outpost you need make sure, that the outpost can determine the
+aws account where it is running on. The outpost will first try to use the EC2-Metadata-Service. If this is not possible, the outpost will try to call sts:
+GetCallerIdentity. You don't need any special permissions for that call, but the outpost agents needs to provide credentials for the api. Same authentication
+setup mechanism as for the extensions apply for the outpost setup. Make sure to check [Authentication Setup](####Authentication-Setup) for more details. For
+example, if running in kubernetes and using a ServiceAccount, you can use `serviceAccount.eksRoleArn` of the outpost helm chart to link your serviceAccount to
+a given role.
+
+We might implement a shortcut in the future, where you can simply provide the aws account id of the outpost agent without having the need of providing
+credentials.
+
 ## Installation
 
 We recommend that you install the extension with our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
@@ -362,7 +381,8 @@ helm upgrade steadybit-extension-aws \
 
 ### Linux Package
 
-Please use our [outpost-linux.sh script](https://docs.steadybit.com/install-and-configure/install-outpost-agent-preview/install-on-linux-hosts) to install the extension on your Linux machine. 
+Please use our [outpost-linux.sh script](https://docs.steadybit.com/install-and-configure/install-outpost-agent-preview/install-on-linux-hosts) to install the
+extension on your Linux machine.
 The script will download the latest version of the extension and install it using the package manager.
 
 After installing configure the extension by editing `/etc/steadybit/extension-aws` and then restart the service.
