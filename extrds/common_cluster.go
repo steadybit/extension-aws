@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	rdsClusterTargetId = "com.github.steadybit.extension_aws.rds.cluster"
+	rdsClusterTargetId = "com.steadybit.extension_aws.rds.cluster"
 )
 
 type RdsClusterAttackState struct {

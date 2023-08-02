@@ -4,7 +4,7 @@
 
 A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to inject faults into various AWS services.
 
-Learn about the capabilities of this extension in our [Reliability Hub](https://hub.steadybit.com/extension/com.github.steadybit.extension_aws).
+Learn about the capabilities of this extension in our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extension_aws).
 
 ## Configuration
 

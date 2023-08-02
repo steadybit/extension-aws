@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	rdsInstanceTargetId = "com.github.steadybit.extension_aws.rds.instance"
+	rdsInstanceTargetId = "com.steadybit.extension_aws.rds.instance"
 )
 
 type RdsInstanceAttackState struct {
