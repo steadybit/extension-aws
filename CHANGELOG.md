@@ -1,5 +1,9 @@
 # Changelog
 
+## next release
+
+- added hint to aws account lookup of the agent in case of an error
+
 ## v2.2.4
 
 - update dependencies
