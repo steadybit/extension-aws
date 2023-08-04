@@ -74,7 +74,7 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 					},
 				},
 				Dest: discovery_kit_api.SourceOrDestination{
-					Type: "host",
+					Type: "com.steadybit.extension_host.host",
 					Selector: map[string]string{
 						"host.hostname": "${src.aws-ec2.hostname.internal}",
 					},
@@ -140,7 +140,7 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 					},
 				},
 				Dest: discovery_kit_api.SourceOrDestination{
-					Type: "container",
+					Type: "com.steadybit.extension_container.container",
 					Selector: map[string]string{
 						"container.host": "${src.aws-ec2.hostname.internal}",
 					},
@@ -175,7 +175,7 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 					},
 				},
 				Dest: discovery_kit_api.SourceOrDestination{
-					Type: "application",
+					Type: "com.steadybit.extension_jvm.application",
 					Selector: map[string]string{
 						"container.host": "${src.aws-ec2.hostname.internal}",
 					},
