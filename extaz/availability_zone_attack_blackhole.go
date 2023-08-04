@@ -73,7 +73,7 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(azIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
-			TargetType: "zone",
+			TargetType: azTargetType,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "by zone",

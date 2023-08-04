@@ -28,7 +28,7 @@ func RegisterDiscoveryHandlers() {
 
 func getAZDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id:         azTargetId,
+		Id:         azTargetType,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
@@ -40,7 +40,7 @@ func getAZDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 
 func getAZTargetDescription() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
-		Id:       azTargetId,
+		Id:       azTargetType,
 		Label:    discovery_kit_api.PluralLabel{One: "Availability Zone", Other: "Availability Zones"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
@@ -123,7 +123,7 @@ func toTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string)
 	return discovery_kit_api.Target{
 		Id:         id,
 		Label:      label,
-		TargetType: azTargetId,
+		TargetType: azTargetType,
 		Attributes: attributes,
 	}
 }

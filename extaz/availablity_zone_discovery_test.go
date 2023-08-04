@@ -49,7 +49,7 @@ func TestGetAllAvailabilityZones(t *testing.T) {
 	assert.Equal(t, 1, len(targets))
 
 	target := targets[0]
-	assert.Equal(t, azTargetId, target.TargetType)
+	assert.Equal(t, azTargetType, target.TargetType)
 	assert.Equal(t, "eu-central-1b", target.Label)
 	assert.Equal(t, 5, len(target.Attributes))
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
