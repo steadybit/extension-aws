@@ -1,7 +1,8 @@
 # Changelog
 
-## next release
+## v2.2.5
 
+- migration to new unified steadybit actionIds and targetTypes
 - added hint to aws account lookup of the agent in case of an error
 
 ## v2.2.4
