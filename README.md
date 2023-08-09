@@ -350,15 +350,16 @@ For example, the blackhole az attack won't start, if
 - the extension is running in the attacked account
 - the outpost is running in the attacked account
 
-The extension can verify the own account based on the authentication desribed above. For the outpost you need make sure, that the outpost can determine the
-aws account where it is running on. The outpost will first try to use the EC2-Metadata-Service. If this is not possible, the outpost will try to call sts:
-GetCallerIdentity. You don't need any special permissions for that call, but the outpost agents needs to provide credentials for the api. Same authentication
-setup mechanism as for the extensions apply for the outpost setup. Make sure to check [Authentication Setup](####Authentication-Setup) for more details. For
-example, if running in kubernetes and using a ServiceAccount, you can use `serviceAccount.eksRoleArn` of the outpost helm chart to link your serviceAccount to
-a given role.
+The extension can verify the own account based on the authentication described above.
 
-We might implement a shortcut in the future, where you can simply provide the aws account id of the outpost agent without having the need of providing
-credentials.
+For the outpost you need make sure, that the outpost can determine the aws account where it is running on. The outpost tries to get the account id from:
+
+1. A static configuration property `steadybit.agent.aws.accountId` or env `STEADYBIT_AGENT_AWS_ACCOUNT_ID`
+2. The EC2-Metadata-Service if reachable
+3. sts:GetCallerIdentity. You don't need any special permissions for that call, but the outpost agents needs to provide credentials for the api. Same
+   authentication setup mechanism as for the extensions apply for the outpost setup. Make sure to check [Authentication Setup](####Authentication-Setup) for
+   more details. For example, if running in kubernetes and using a ServiceAccount, you can use `serviceAccount.eksRoleArn` of the outpost helm chart to link
+   your serviceAccount to a given role.
 
 ## Installation
 
