@@ -64,6 +64,12 @@ serviceAccount:
 # extra labels to apply to the Kubernetes resources
 extraLabels: {}
 
+# podAnnotations -- Additional annotations to be added to the pods.
+podAnnotations: {}
+
+# podLabels -- Additional labels to be added to the pods.
+podLabels: {}
+
 # nodeSelector -- Node labels for pod assignment
 nodeSelector: {}
 
