@@ -60,3 +60,9 @@ tests:
          name: env-secrets
     asserts:
       - matchSnapshot: {}
+  - it: manifest should match snapshot with extra labels
+    set:
+      extraLabels:
+        tags.datadoghq.com/service: steadybit-extension
+    asserts:
+      - matchSnapshot: {}

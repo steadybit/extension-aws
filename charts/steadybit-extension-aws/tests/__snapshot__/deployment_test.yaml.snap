@@ -189,6 +189,64 @@ manifest should match snapshot with extra env vars:
               volumeMounts: null
           serviceAccountName: steadybit-extension-aws
           volumes: null
+manifest should match snapshot with extra labels:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        steadybit.com/discovery-disabled: "true"
+        tags.datadoghq.com/service: steadybit-extension
+      name: RELEASE-NAME-steadybit-extension-aws
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: steadybit-extension-aws
+      template:
+        metadata:
+          annotations: null
+          labels:
+            app.kubernetes.io/name: steadybit-extension-aws
+            steadybit.com/discovery-disabled: "true"
+        spec:
+          containers:
+            - env:
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
+                  value: ""
+              image: ghcr.io/steadybit/extension-aws:latest
+              imagePullPolicy: Always
+              livenessProbe:
+                httpGet:
+                  path: /health/liveness
+                  port: 8086
+              name: extension
+              ports:
+                - containerPort: 8085
+              readinessProbe:
+                httpGet:
+                  path: /health/readiness
+                  port: 8086
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+              securityContext:
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
+              volumeMounts: null
+          serviceAccountName: steadybit-extension-aws
+          volumes: null
 manifest should match snapshot with mutual TLS:
   1: |
     apiVersion: apps/v1
