@@ -18,11 +18,16 @@ jobs:
   audit:
     name: Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Remove non-semver tags (from helmchart) for goreleaser to work properly
+        run: |
+          git tag -d $(git tag -l | grep -v "^v[0-9]*.[0-9]*.[0-9]*")
 
       - uses: actions/setup-go@v4
         with:
@@ -55,6 +60,7 @@ jobs:
     needs:
       - audit
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
       packages: write
