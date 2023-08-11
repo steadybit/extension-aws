@@ -44,7 +44,7 @@ logging:
 resources:
   requests:
     # resources.requests.memory -- The minimal amount of memory needed
-    memory: "64Mi"
+    memory: "32Mi"
     # resources.requests.cpu -- The minimal amount of cpu shares needed
     cpu: "50m"
   limits:
