@@ -18,6 +18,9 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "extensionlib.names.name" . }}
         {{- include "extensionlib.labels" (list .) | nindent 8 }}
+        {{- range $key, $value := .Values.extraLabels }}
+        {{ $key }}: {{ $value }}
+        {{- end }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
