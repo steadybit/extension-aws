@@ -26,7 +26,7 @@ func getDiskspaceDescription() action_kit_api.ActionDescription {
 		TargetSelection: &lambdaTargetSelection,
 		Category:        extutil.Ptr("application"),
 		Kind:            action_kit_api.Attack,
-		TimeControl:     action_kit_api.External,
+		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Label:        "Duration",

@@ -47,7 +47,7 @@ func (f rdsInstanceStopAttack) Describe() action_kit_api.ActionDescription {
 			}),
 		}),
 		Category:    extutil.Ptr("resource"),
-		TimeControl: action_kit_api.Instantaneous,
+		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},
 		Hint: &action_kit_api.ActionHint{

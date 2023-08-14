@@ -87,7 +87,7 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 				},
 			})}),
 		Category:    extutil.Ptr("network"),
-		TimeControl: action_kit_api.External,
+		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{

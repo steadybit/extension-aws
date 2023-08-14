@@ -66,7 +66,7 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 				},
 			}),
 		}),
-		TimeControl: action_kit_api.Internal,
+		TimeControl: action_kit_api.TimeControlInternal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
