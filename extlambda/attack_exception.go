@@ -31,7 +31,7 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 			{
 				Label:        "Duration",
 				Name:         "duration",
-				Type:         "duration",
+				Type:         action_kit_api.Duration,
 				Description:  extutil.Ptr("The duration of the attack."),
 				Advanced:     extutil.Ptr(false),
 				Required:     extutil.Ptr(true),
