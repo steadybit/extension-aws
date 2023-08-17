@@ -203,7 +203,7 @@ jobs:
 
       - name: Add unit testing plugin
         run: |
-          helm plugin install https://github.com/quintush/helm-unittest
+          helm plugin install https://github.com/helm-unittest/helm-unittest.git
 
       - name: Run unit tests
         run: make charttesting
