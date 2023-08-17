@@ -31,7 +31,7 @@ audit:
 .PHONY: charttesting
 charttesting:
 	@set -e; \
-	@for dir in charts/steadybit-extension-*; do \
+	for dir in charts/steadybit-extension-*; do \
 		echo "Unit Testing $$dir"; \
 		helm unittest $$dir; \
 	done
