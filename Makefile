@@ -30,10 +30,11 @@ audit:
 ## charttesting: Run Helm chart unit tests
 .PHONY: charttesting
 charttesting:
-	for dir in charts/steadybit-extension-*; do \
-    echo "Unit Testing $$dir"; \
-    helm unittest $$dir; \
-  done
+	@set -e; \
+	@for dir in charts/steadybit-extension-*; do \
+		echo "Unit Testing $$dir"; \
+		helm unittest $$dir; \
+	done
 
 ## chartlint: Lint charts
 .PHONY: chartlint
