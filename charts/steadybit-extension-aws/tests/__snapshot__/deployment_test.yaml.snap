@@ -50,6 +50,10 @@ manifest should match snapshot using podAnnotations and Labels:
                   cpu: 50m
                   memory: 32Mi
               securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
                 readOnlyRootFilesystem: true
                 runAsGroup: 10000
                 runAsNonRoot: true
@@ -111,6 +115,10 @@ manifest should match snapshot with TLS:
                   cpu: 50m
                   memory: 32Mi
               securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
                 readOnlyRootFilesystem: true
                 runAsGroup: 10000
                 runAsNonRoot: true
@@ -182,6 +190,10 @@ manifest should match snapshot with extra env vars:
                   cpu: 50m
                   memory: 32Mi
               securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
                 readOnlyRootFilesystem: true
                 runAsGroup: 10000
                 runAsNonRoot: true
@@ -241,6 +253,10 @@ manifest should match snapshot with extra labels:
                   cpu: 50m
                   memory: 32Mi
               securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
                 readOnlyRootFilesystem: true
                 runAsGroup: 10000
                 runAsNonRoot: true
@@ -304,6 +320,10 @@ manifest should match snapshot with mutual TLS:
                   cpu: 50m
                   memory: 32Mi
               securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
                 readOnlyRootFilesystem: true
                 runAsGroup: 10000
                 runAsNonRoot: true
@@ -381,6 +401,10 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   cpu: 50m
                   memory: 32Mi
               securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
                 readOnlyRootFilesystem: true
                 runAsGroup: 10000
                 runAsNonRoot: true
@@ -438,6 +462,10 @@ manifest should match snapshot without TLS:
                   cpu: 50m
                   memory: 32Mi
               securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
                 readOnlyRootFilesystem: true
                 runAsGroup: 10000
                 runAsNonRoot: true

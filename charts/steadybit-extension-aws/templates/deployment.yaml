@@ -55,6 +55,10 @@ spec:
             runAsNonRoot: true
             runAsUser: 10000
             runAsGroup: 10000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           env:
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             - name: STEADYBIT_EXTENSION_ASSUME_ROLES
