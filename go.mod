@@ -6,17 +6,17 @@ module github.com/steadybit/extension-aws
 go 1.20
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.20.1
-	github.com/aws/aws-sdk-go-v2/config v1.18.33
-	github.com/aws/aws-sdk-go-v2/credentials v1.13.32
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.8
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.111.0
-	github.com/aws/aws-sdk-go-v2/service/fis v1.15.2
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.39.2
-	github.com/aws/aws-sdk-go-v2/service/rds v1.50.1
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.37.2
-	github.com/aws/aws-sdk-go-v2/service/sts v1.21.2
-	github.com/aws/smithy-go v1.14.1
+	github.com/aws/aws-sdk-go-v2 v1.20.3
+	github.com/aws/aws-sdk-go-v2/config v1.18.35
+	github.com/aws/aws-sdk-go-v2/credentials v1.13.34
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.10
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.113.1
+	github.com/aws/aws-sdk-go-v2/service/fis v1.15.4
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.39.4
+	github.com/aws/aws-sdk-go-v2/service/rds v1.50.3
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.37.4
+	github.com/aws/aws-sdk-go-v2/service/sts v1.21.4
+	github.com/aws/smithy-go v1.14.2
 	github.com/docker/go-connections v0.4.0
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -26,7 +26,7 @@ require (
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.7.1
 	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.5
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.3.0
-	github.com/steadybit/extension-kit v1.8.5
+	github.com/steadybit/extension-kit v1.8.7
 	github.com/stretchr/testify v1.8.4
 	github.com/testcontainers/testcontainers-go v0.22.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.22.0
@@ -40,13 +40,13 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.12 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.38 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.32 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.39 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.32 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.13.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.15.2 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.13 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.40 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.41 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.34 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.13.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.15.4 // indirect
 	github.com/bytedance/sonic v1.10.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
@@ -63,7 +63,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.0 // indirect
+	github.com/go-playground/validator/v10 v10.15.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
