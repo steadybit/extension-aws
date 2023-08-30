@@ -57,6 +57,7 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 				{Attribute: "aws.zone"},
 				{Attribute: "aws-ec2.hostname.public"},
 				{Attribute: "aws-ec2.hostname.internal"},
+				{Attribute: "aws-ec2.state"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{
 				{
@@ -233,6 +234,12 @@ func getEc2InstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 					One:   "Instance Name",
 					Other: "Instance Names",
 				},
+			},{
+				Attribute: "aws-ec2.state",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "Instance State",
+					Other: "Instance States",
+				},
 			},
 		},
 	}
@@ -321,6 +328,9 @@ func toTarget(ec2Instance types.Instance, awsAccountNumber string, awsRegion str
 	}
 	attributes["aws-ec2.arn"] = []string{arn}
 	attributes["aws-ec2.vpc"] = []string{aws.ToString(ec2Instance.VpcId)}
+	if ec2Instance.State != nil {
+		attributes["aws-ec2.state"] = []string{string(ec2Instance.State.Name)}
+	}
 	for _, tag := range ec2Instance.Tags {
 		if aws.ToString(tag.Key) == "Name" {
 			continue

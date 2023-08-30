@@ -43,6 +43,10 @@ func TestGetAllEc2Instances(t *testing.T) {
 						PrivateIpAddress: extutil.Ptr("10.3.92.28"),
 						PrivateDnsName:   extutil.Ptr("ip-10-3-92-28.eu-central-1.compute.internal"),
 						VpcId:            extutil.Ptr("vpc-003cf5dda88c814c6"),
+						State: &types.InstanceState{
+							Name: "running",
+							Code: extutil.Ptr(int32(16)),
+						},
 						Tags: []types.Tag{
 							{Key: extutil.Ptr("Name"), Value: extutil.Ptr("dev-demo-ngroup2")},
 							{Key: extutil.Ptr("SpecialTag"), Value: extutil.Ptr("Great Thing")},
@@ -74,6 +78,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 	assert.Equal(t, []string{"arn:aws:ec2:us-east-1:42:instance/i-0ef9adc9fbd3b19c5"}, target.Attributes["aws-ec2.arn"])
 	assert.Equal(t, []string{"vpc-003cf5dda88c814c6"}, target.Attributes["aws-ec2.vpc"])
 	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws-ec2.label.specialtag"])
+	assert.Equal(t, []string{"running"}, target.Attributes["aws-ec2.state"])
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
 }
