@@ -1,6 +1,6 @@
 # Changelog
 
-## Next release
+## v2.2.8
 
 - collect EC2 instance state in discovery
 
