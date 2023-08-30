@@ -27,6 +27,9 @@ func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/target-description", exthttp.GetterAsHandler(getEc2InstanceTargetDescription))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getEc2InstanceAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/discovered-targets", getEc2InstanceTargets)
+	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-host", exthttp.GetterAsHandler(getEc2InstanceToHostEnrichmentRule))
+	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-container", exthttp.GetterAsHandler(getEc2InstanceToContainerEnrichmentRule))
+	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-jvm", exthttp.GetterAsHandler(getEc2InstanceToJvmEnrichmentRule))
 }
 
 func getEc2InstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
@@ -66,144 +69,151 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 				},
 			},
 		},
-		EnrichmentRules: extutil.Ptr([]discovery_kit_api.TargetEnrichmentRule{
+	}
+}
+
+func getEc2InstanceToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: ec2TargetId,
+			Selector: map[string]string{
+				"aws-ec2.hostname.internal": "${dest.host.hostname}",
+			},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: "com.steadybit.extension_host.host",
+			Selector: map[string]string{
+				"host.hostname": "${src.aws-ec2.hostname.internal}",
+			},
+		},
+		Attributes: []discovery_kit_api.Attribute{
 			{
-				Src: discovery_kit_api.SourceOrDestination{
-					Type: ec2TargetId,
-					Selector: map[string]string{
-						"aws-ec2.hostname.internal": "${dest.host.hostname}",
-					},
-				},
-				Dest: discovery_kit_api.SourceOrDestination{
-					Type: "com.steadybit.extension_host.host",
-					Selector: map[string]string{
-						"host.hostname": "${src.aws-ec2.hostname.internal}",
-					},
-				},
-				Attributes: []discovery_kit_api.Attribute{
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.account",
-					}, {
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.region",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.zone",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.arn",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.image",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.instance.id",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.instance.name",
-					}, {
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.ipv4.private",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.ipv4.public",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.vpc",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.hostname.internal",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.hostname.public",
-					},
-					{
-						Matcher: discovery_kit_api.StartsWith,
-						Name:    "aws-ec2.label.",
-					},
-				},
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.account",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.region",
 			},
 			{
-				Src: discovery_kit_api.SourceOrDestination{
-					Type: ec2TargetId,
-					Selector: map[string]string{
-						"aws-ec2.hostname.internal": "${dest.container.host}",
-					},
-				},
-				Dest: discovery_kit_api.SourceOrDestination{
-					Type: "com.steadybit.extension_container.container",
-					Selector: map[string]string{
-						"container.host": "${src.aws-ec2.hostname.internal}",
-					},
-				},
-				Attributes: []discovery_kit_api.Attribute{
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.account",
-					}, {
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.region",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.zone",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.instance.id",
-					},
-					{
-						Matcher: discovery_kit_api.StartsWith,
-						Name:    "aws-ec2.label.",
-					},
-				},
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.zone",
 			},
 			{
-				Src: discovery_kit_api.SourceOrDestination{
-					Type: ec2TargetId,
-					Selector: map[string]string{
-						"aws-ec2.hostname.internal": "${dest.container.host}",
-					},
-				},
-				Dest: discovery_kit_api.SourceOrDestination{
-					Type: "com.steadybit.extension_jvm.application",
-					Selector: map[string]string{
-						"container.host": "${src.aws-ec2.hostname.internal}",
-					},
-				},
-				Attributes: []discovery_kit_api.Attribute{
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.account",
-					}, {
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.region",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws.zone",
-					},
-					{
-						Matcher: discovery_kit_api.Equals,
-						Name:    "aws-ec2.instance.id",
-					},
-					{
-						Matcher: discovery_kit_api.StartsWith,
-						Name:    "aws-ec2.label.",
-					},
-				},
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.arn",
 			},
-		}),
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.image",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.instance.id",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.instance.name",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.ipv4.private",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.ipv4.public",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.vpc",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.hostname.internal",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.hostname.public",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "aws-ec2.label.",
+			},
+		},
+	}
+}
+
+func getEc2InstanceToJvmEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: ec2TargetId,
+			Selector: map[string]string{
+				"aws-ec2.hostname.internal": "${dest.container.host}",
+			},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: "com.steadybit.extension_jvm.application",
+			Selector: map[string]string{
+				"container.host": "${src.aws-ec2.hostname.internal}",
+			},
+		},
+		Attributes: []discovery_kit_api.Attribute{
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.account",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.region",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.zone",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.instance.id",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "aws-ec2.label.",
+			},
+		},
+	}
+}
+
+func getEc2InstanceToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: ec2TargetId,
+			Selector: map[string]string{
+				"aws-ec2.hostname.internal": "${dest.container.host}",
+			},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: "com.steadybit.extension_container.container",
+			Selector: map[string]string{
+				"container.host": "${src.aws-ec2.hostname.internal}",
+			},
+		},
+		Attributes: []discovery_kit_api.Attribute{
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.account",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.region",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.zone",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.instance.id",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "aws-ec2.label.",
+			},
+		},
 	}
 }
 
@@ -234,7 +244,7 @@ func getEc2InstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 					One:   "Instance Name",
 					Other: "Instance Names",
 				},
-			},{
+			}, {
 				Attribute: "aws-ec2.state",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Instance State",
@@ -250,7 +260,7 @@ func getEc2InstanceTargets(w http.ResponseWriter, r *http.Request, _ []byte) {
 	if err != nil {
 		exthttp.WriteError(w, extension_kit.ToError("Failed to collect EC2 instance information", err))
 	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveredTargets{Targets: targets})
+		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 	}
 }
 

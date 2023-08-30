@@ -119,7 +119,7 @@ func getRdsClusterDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []b
 	if err != nil {
 		exthttp.WriteError(w, extension_kit.ToError("Failed to collect RDS cluster information", err))
 	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveredTargets{Targets: targets})
+		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 	}
 }
 
