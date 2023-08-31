@@ -65,6 +65,6 @@ func helmInstallLocalStack(minikube *e2e.Minikube) error {
 	return nil
 }
 
-func validateDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
+func validateDiscovery(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
 	assert.NoError(t, validate.ValidateEndpointReferences("/", e.Client))
 }

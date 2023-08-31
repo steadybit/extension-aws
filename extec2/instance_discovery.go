@@ -74,6 +74,8 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 
 func getEc2InstanceToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      "com.steadybit.extension_aws.ec2-instance-to-host",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: ec2TargetId,
 			Selector: map[string]string{
@@ -143,6 +145,8 @@ func getEc2InstanceToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule
 
 func getEc2InstanceToJvmEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      "com.steadybit.extension_aws.ec2-instance-to-jvm",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: ec2TargetId,
 			Selector: map[string]string{
@@ -181,6 +185,8 @@ func getEc2InstanceToJvmEnrichmentRule() discovery_kit_api.TargetEnrichmentRule 
 
 func getEc2InstanceToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      "com.steadybit.extension_aws.ec2-instance-to-container",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: ec2TargetId,
 			Selector: map[string]string{
