@@ -58,6 +58,7 @@ func main() {
 	action_kit_sdk.RegisterAction(extlambda.NewDenylistAction())
 
 	action_kit_sdk.InstallSignalHandler()
+	action_kit_sdk.RegisterCoverageEndpoints()
 	exthealth.SetReady(true)
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
@@ -163,6 +164,20 @@ func getExtensionList() ExtensionListResponse {
 				{
 					Method: "GET",
 					Path:   "/common/discovery/attribute-descriptions",
+				},
+			},
+			TargetEnrichmentRules: []discovery_kit_api.DescribingEndpointReference{
+				{
+					Method: "GET",
+					Path:   "/ec2/instance/discovery/rules/ec2-to-host",
+				},
+				{
+					Method: "GET",
+					Path:   "/ec2/instance/discovery/rules/ec2-to-container",
+				},
+				{
+					Method: "GET",
+					Path:   "/ec2/instance/discovery/rules/ec2-to-jvm",
 				},
 			},
 		},

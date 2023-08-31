@@ -102,7 +102,7 @@ func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []
 	if err != nil {
 		exthttp.WriteError(w, extension_kit.ToError("Failed to collect RDS instance information", err))
 	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveredTargets{Targets: targets})
+		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 	}
 }
 

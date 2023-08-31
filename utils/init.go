@@ -22,21 +22,21 @@ var (
 )
 
 func InitializeAwsAccountAccess(specification extConfig.Specification) {
-	awsConfigForRootAccount, err := config.LoadDefaultConfig(context.Background())
+	ctx := context.Background()
+	awsConfigForRootAccount, err := config.LoadDefaultConfig(ctx, config.WithEndpointResolverWithOptions(overridingEndpointResolver(specification)))
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to load AWS configuration")
+	}
+
+	log.Info().Msgf("Starting in region %s", awsConfigForRootAccount.Region)
 	awsConfigForRootAccount.Logger = logForwarder{}
 	awsConfigForRootAccount.ClientLogMode = aws.LogRequest
 	awsConfigForRootAccount.APIOptions = append(awsConfigForRootAccount.APIOptions, func(stack *middleware.Stack) error {
 		return stack.Initialize.Add(customLoggerMiddleware, middleware.After)
 	})
 
-	log.Info().Msgf("Starting in region %s", awsConfigForRootAccount.Region)
-
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to load AWS configuration")
-	}
-
 	stsClientForRootAccount := sts.NewFromConfig(awsConfigForRootAccount)
-	identityOutput, err := stsClientForRootAccount.GetCallerIdentity(context.Background(), nil)
+	identityOutput, err := stsClientForRootAccount.GetCallerIdentity(ctx, nil)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to identify AWS account number")
 	}
@@ -57,6 +57,19 @@ func InitializeAwsAccountAccess(specification extConfig.Specification) {
 			Accounts.accounts[assumedAccount.AccountNumber] = assumedAccount
 		}
 	}
+}
+
+func overridingEndpointResolver(specification extConfig.Specification) aws.EndpointResolverWithOptions {
+	return aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		if specification.AwsEndpointOverride != "" {
+			log.Warn().Msgf("Overriding AWS endpoint for service '%s' in region '%s' with '%s'", service, region, specification.AwsEndpointOverride)
+			return aws.Endpoint{
+				URL: specification.AwsEndpointOverride,
+			}, nil
+		}
+
+		return aws.Endpoint{}, &aws.EndpointNotFoundError{}
+	})
 }
 
 type logForwarder struct {
