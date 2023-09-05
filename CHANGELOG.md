@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.9
+
+- user service icons for actions
+
 ## v2.2.8
 
 - collect EC2 instance state in discovery
