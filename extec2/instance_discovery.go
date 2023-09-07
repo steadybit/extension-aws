@@ -155,7 +155,7 @@ func getEc2InstanceToXEnrichmentRule(destTargetType string) func() discovery_kit
 			Src: discovery_kit_api.SourceOrDestination{
 				Type: ec2TargetId,
 				Selector: map[string]string{
-					"aws-ec2.hostname.internal": "${dest.container.host}",
+					"aws-ec2.hostname.internal": "${dest.host.hostname}",
 				},
 			},
 			Dest: discovery_kit_api.SourceOrDestination{
