@@ -2,28 +2,34 @@
 
 # Steadybit extension-aws
 
-A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to inject faults into various AWS services.
+A [Steadybit](https://www.steadybit.com/) discovery and attack implementation to inject faults into various AWS
+services.
 
-Learn about the capabilities of this extension in our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extension_aws).
+Learn about the capabilities of this extension in
+our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extension_aws).
 
 ## Configuration
 
 ### Environment Variables
 
-The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
+The extension supports all environment variables provided
+by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
 
 ### Disable parts of the extension
 
-If you don't want to use certain parts of the extension and therefore don't want to provide the required permissions, you can disable these parts by providing
-the following environment variables. Actions using these targets will not be shown in the ui, as there are no targets reported.
+If you don't want to use certain parts of the extension and therefore don't want to provide the required permissions,
+you can disable these parts by providing
+the following environment variables. Actions using these targets will not be shown in the ui, as there are no targets
+reported.
 
-| Environment Variable                            | Meaning                 | Required | Default |
-|-------------------------------------------------|-------------------------|----------|---------|
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2`    | Disable EC2-Discovery   | no       | false   |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS`    | Disable RDS-Discovery   | no       | false   |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE`   | Disable Zone-Discovery  | no       | false   |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS`    | Disable FIS-Discovery   | no       | false   |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA` | Disable Lamba-Discovery | no       | false   |
+| Environment Variable                                   | Meaning                                                                                                  | Required | Default                                                                                                                                      |
+|--------------------------------------------------------|----------------------------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2`           | Disable EC2-Discovery                                                                                    | no       | false                                                                                                                                        |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS`           | Disable RDS-Discovery                                                                                    | no       | false                                                                                                                                        |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE`          | Disable Zone-Discovery                                                                                   | no       | false                                                                                                                                        |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS`           | Disable FIS-Discovery                                                                                    | no       | false                                                                                                                                        |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA`        | Disable Lamba-Discovery                                                                                  | no       | false                                                                                                                                        |
+| `STEADYBIT_EXTENSION_ENRICH_EC2_DATA_FOR_TARGET_TYPES` | These target types will be enriched with EC2 data. They must have the `host.hostname` attribute for this | no       | com.steadybit.extension_jvm.application,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.kubernetes-deployment |
 
 ### Authentication
 
@@ -31,7 +37,8 @@ The process requires valid access credentials to interact with various AWS APIs.
 
 #### Required permissions (policies)
 
-You will need an IAM Role with the given permissions. You can optionally restrict for which resources the extension may become active
+You will need an IAM Role with the given permissions. You can optionally restrict for which resources the extension may
+become active
 by tweaking the `Resource` clause.
 
 <details>
@@ -112,8 +119,10 @@ by tweaking the `Resource` clause.
 <details>
     <summary>FIS-Discovery & Actions</summary>
 
-FIS will create a [ServiceLinkedRole](https://docs.aws.amazon.com/fis/latest/userguide/using-service-linked-roles.html) AWSServiceRoleForFIS when you start an
-experiment. If you started the experiment from the ui and the role is already existing, you can omit the iam:CreateServiceLinkedRole permission. If you want to
+FIS will create a [ServiceLinkedRole](https://docs.aws.amazon.com/fis/latest/userguide/using-service-linked-roles.html)
+AWSServiceRoleForFIS when you start an
+experiment. If you started the experiment from the ui and the role is already existing, you can omit the iam:
+CreateServiceLinkedRole permission. If you want to
 start the very first fis experiment via the steadybit agent, you will need to add the permission.
 
 ```yaml
@@ -167,7 +176,8 @@ start the very first fis experiment via the steadybit agent, you will need to ad
 
 #### Authentication setup
 
-The extension is using the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials).
+The extension is using
+the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials).
 
 You can pass credentials using the following sequence:
 
@@ -190,7 +200,8 @@ the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/doc
 
 Steps:
 
-- Assign your previous created IAM role to the ec2 instance. There is a slight difference between IAM Roles and Instance Profiles, if you see a message like No
+- Assign your previous created IAM role to the ec2 instance. There is a slight difference between IAM Roles and Instance
+  Profiles, if you see a message like No
   roles attached to instance profile, make sure to
   check [this page](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html)
 - The IAM role needs a trust relationship so that EC2 is able to assume the role.
@@ -216,7 +227,8 @@ Steps:
 <details>
     <summary>Authenticate when running as ECS Task</summary>
 
-The `taskRoleArn` of your task definition needs to have the required permissions mentioned before. Make sure, that the role can be assumed by ECS and provide a
+The `taskRoleArn` of your task definition needs to have the required permissions mentioned before. Make sure, that the
+role can be assumed by ECS and provide a
 trust relationship to the role.
 
 ```yaml
@@ -241,7 +253,8 @@ trust relationship to the role.
     <summary>Authenticate when running in EKS</summary>
 
 If you installed the agent into an EKS cluster, the recommended way to provide credentials is to use option 1.ii from
-the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials). This approach will use a Web
+the [default credentials provider chain](https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/#specifying-credentials).
+This approach will use a Web
 Identity Token.
 
 With this option you need to associate an IAM role with a Kubernetes service account.
@@ -271,7 +284,8 @@ Steps:
         ]
     }
     ```
-- Associate the IAM Role to your Kubernetes Service Account. If you are using our helm charts to create the Service Account, you can use the parameter
+- Associate the IAM Role to your Kubernetes Service Account. If you are using our helm charts to create the Service
+  Account, you can use the parameter
   `serviceAccount.eksRoleArn`.
 
 </details>
@@ -279,7 +293,8 @@ Steps:
 <details>
     <summary>Authenticate when running outside of AWS</summary>
 
-You can install the aws extension outside your AWS infrastructure to communicate with the AWS API. In this case you need to set up an IAM User with API
+You can install the aws extension outside your AWS infrastructure to communicate with the AWS API. In this case you need
+to set up an IAM User with API
 credentials which is allowed to access the resources already described in the section above.
 
 The following variables needs to be added to the environment configuration:
@@ -294,11 +309,14 @@ AWS_SECRET_ACCESS_KEY=<replace-with-aws-secret-access-key>
 
 ### Assume Role into Multiple AWS Accounts
 
-By default, the extension uses the provided credentials to discover all resources within the belonging AWS account. To interact with multiple AWS accounts using
-a single extension, you can instruct the extension only to use the provided credentials to assume roles (using AWS STS) into given role-ARNs (and thus to
+By default, the extension uses the provided credentials to discover all resources within the belonging AWS account. To
+interact with multiple AWS accounts using
+a single extension, you can instruct the extension only to use the provided credentials to assume roles (using AWS STS)
+into given role-ARNs (and thus to
 possibly other AWS accounts).
 
-To achieve this, you must set the STEADYBIT_EXTENSION_ASSUME_ROLES environment variable to a comma-separated list of role-ARNs. Example:
+To achieve this, you must set the STEADYBIT_EXTENSION_ASSUME_ROLES environment variable to a comma-separated list of
+role-ARNs. Example:
 
 ```sh
 STEADYBIT_EXTENSION_ASSUME_ROLES='arn:aws:iam::1111111111:role/steadybit-extension-aws,arn:aws:iam::22222222:role/steadybit-extension-aws'
@@ -308,7 +326,8 @@ If you are using our helm-chart, you can use the parameter `aws.assumeRoles`.
 
 #### Necessary AWS Configuration
 
-IAM policies need to be correctly configured for cross-account role assumption. In a nutshell, these are the necessary steps:
+IAM policies need to be correctly configured for cross-account role assumption. In a nutshell, these are the necessary
+steps:
 
 1. The credentials provided to the extension are allowed to assume the provided role-ARNs.
    ```json
@@ -343,7 +362,8 @@ IAM policies need to be correctly configured for cross-account role assumption. 
 
 ### Agent Lockout - Outpost Requirements
 
-In order to prevent the agent or the extension of beeing locked out by their own attacks, we implemented some security checks.
+In order to prevent the agent or the extension of beeing locked out by their own attacks, we implemented some security
+checks.
 
 For example, the blackhole az attack won't start, if
 
@@ -352,18 +372,23 @@ For example, the blackhole az attack won't start, if
 
 The extension can verify the own account based on the authentication described above.
 
-For the outpost you need make sure, that the outpost can determine the aws account where it is running on. The outpost tries to get the account id from:
+For the outpost you need make sure, that the outpost can determine the aws account where it is running on. The outpost
+tries to get the account id from:
 
 1. A static configuration property `steadybit.agent.aws.accountId` or env `STEADYBIT_AGENT_AWS_ACCOUNT_ID`
 2. The EC2-Metadata-Service if reachable
-3. sts:GetCallerIdentity. You don't need any special permissions for that call, but the outpost agents needs to provide credentials for the api. Same
-   authentication setup mechanism as for the extensions apply for the outpost setup. Make sure to check [Authentication Setup](####Authentication-Setup) for
-   more details. For example, if running in kubernetes and using a ServiceAccount, you can use `serviceAccount.eksRoleArn` of the outpost helm chart to link
+3. sts:GetCallerIdentity. You don't need any special permissions for that call, but the outpost agents needs to provide
+   credentials for the api. Same
+   authentication setup mechanism as for the extensions apply for the outpost setup. Make sure to
+   check [Authentication Setup](#Authentication-Setup) for
+   more details. For example, if running in kubernetes and using a ServiceAccount, you can
+   use `serviceAccount.eksRoleArn` of the outpost helm chart to link
    your serviceAccount to a given role.
 
 ## Installation
 
-We recommend that you install the extension with our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
+We recommend that you install the extension with
+our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
 
 ### Helm
 
@@ -382,7 +407,9 @@ helm upgrade steadybit-extension-aws \
 
 ### Linux Package
 
-Please use our [outpost-linux.sh script](https://docs.steadybit.com/install-and-configure/install-outpost-agent-preview/install-on-linux-hosts) to install the
+Please use
+our [outpost-linux.sh script](https://docs.steadybit.com/install-and-configure/install-outpost-agent-preview/install-on-linux-hosts)
+to install the
 extension on your Linux machine.
 The script will download the latest version of the extension and install it using the package manager.
 
@@ -391,5 +418,6 @@ After installing configure the extension by editing `/etc/steadybit/extension-aw
 ## Register the extension
 
 Make sure to register the extension at the steadybit platform. Please refer to
-the [documentation](https://docs.steadybit.com/integrate-with-steadybit/extensions/extension-installation) for more information.
+the [documentation](https://docs.steadybit.com/integrate-with-steadybit/extensions/extension-installation) for more
+information.
 

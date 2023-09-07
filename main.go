@@ -4,7 +4,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
@@ -61,6 +63,7 @@ func main() {
 	action_kit_sdk.RegisterCoverageEndpoints()
 	exthealth.SetReady(true)
 
+	log.Info().Msgf("Enriching EC2 data for target types: %v", config.Config.EnrichEc2DataForTargetTypes)
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	exthttp.Listen(exthttp.ListenOpts{
 		Port: 8085,
@@ -107,6 +110,20 @@ func getExtensionList() ExtensionListResponse {
 		discoveries = append(discoveries, discovery_kit_api.DescribingEndpointReference{
 			Method: "GET",
 			Path:   "/lambda/discovery",
+		})
+	}
+
+	targetEnrichmentRules := []discovery_kit_api.DescribingEndpointReference{
+		{
+			Method: "GET",
+			Path:   "/ec2/instance/discovery/rules/ec2-to-host",
+		},
+	}
+
+	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
+		targetEnrichmentRules = append(targetEnrichmentRules, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   fmt.Sprintf("/ec2/instance/discovery/rules/ec2-to-%s", targetType),
 		})
 	}
 
@@ -166,20 +183,7 @@ func getExtensionList() ExtensionListResponse {
 					Path:   "/common/discovery/attribute-descriptions",
 				},
 			},
-			TargetEnrichmentRules: []discovery_kit_api.DescribingEndpointReference{
-				{
-					Method: "GET",
-					Path:   "/ec2/instance/discovery/rules/ec2-to-host",
-				},
-				{
-					Method: "GET",
-					Path:   "/ec2/instance/discovery/rules/ec2-to-container",
-				},
-				{
-					Method: "GET",
-					Path:   "/ec2/instance/discovery/rules/ec2-to-jvm",
-				},
-			},
+			TargetEnrichmentRules: targetEnrichmentRules,
 		},
 	}
 }
