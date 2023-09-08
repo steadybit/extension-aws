@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.10
+
+- Add enrichment rules for kubernetes deployments
+- Make targets to recieve EC2 data configurable via `STEADYBIT_EXTENSION_ENRICH_EC2_DATA_FOR_TARGET_TYPES`
+
 ## v2.2.9
 
 - user service icons for actions
