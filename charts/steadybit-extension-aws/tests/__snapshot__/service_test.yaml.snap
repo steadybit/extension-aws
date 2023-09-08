@@ -15,6 +15,7 @@ manifest should match snapshot with TLS:
           protocol: TCP
           targetPort: 8085
       selector:
+        app.kubernetes.io/instance: RELEASE-NAME
         app.kubernetes.io/name: steadybit-extension-aws
 manifest should match snapshot with mutual TLS:
   1: |
@@ -33,6 +34,7 @@ manifest should match snapshot with mutual TLS:
           protocol: TCP
           targetPort: 8085
       selector:
+        app.kubernetes.io/instance: RELEASE-NAME
         app.kubernetes.io/name: steadybit-extension-aws
 manifest should match snapshot with mutual TLS using containerPaths:
   1: |
@@ -51,6 +53,7 @@ manifest should match snapshot with mutual TLS using containerPaths:
           protocol: TCP
           targetPort: 8085
       selector:
+        app.kubernetes.io/instance: RELEASE-NAME
         app.kubernetes.io/name: steadybit-extension-aws
 manifest should match snapshot without TLS:
   1: |
@@ -69,4 +72,5 @@ manifest should match snapshot without TLS:
           protocol: TCP
           targetPort: 8085
       selector:
+        app.kubernetes.io/instance: RELEASE-NAME
         app.kubernetes.io/name: steadybit-extension-aws
