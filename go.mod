@@ -25,7 +25,7 @@ require (
 	github.com/sosodev/duration v1.1.0
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.7.2
 	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.6
-	github.com/steadybit/action-kit/go/action_kit_test v1.1.0
+	github.com/steadybit/action-kit/go/action_kit_test v1.2.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.4.2
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.0.2
 	github.com/steadybit/extension-kit v1.8.8
@@ -64,7 +64,7 @@ require (
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v24.0.5+incompatible // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/emicklei/go-restful/v3 v3.10.2 // indirect
+	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
@@ -147,13 +147,13 @@ require (
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/oauth2 v0.11.0 // indirect
+	golang.org/x/oauth2 v0.12.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/term v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.12.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
 	google.golang.org/grpc v1.57.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
@@ -165,7 +165,7 @@ require (
 	k8s.io/apimachinery v0.29.0-alpha.0 // indirect
 	k8s.io/client-go v0.29.0-alpha.0 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20230811205723-7ac0aad8c58d // indirect
+	k8s.io/kube-openapi v0.0.0-20230905202853-d090da108d2f // indirect
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.3.0 // indirect
