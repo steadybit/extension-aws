@@ -113,7 +113,7 @@ func TestNameNotSet(t *testing.T) {
 	assert.Equal(t, "i-0ef9adc9fbd3b19c5", target.Label)
 }
 
-func TestGetAllAvailabilityZonesError(t *testing.T) {
+func TestGetAllEc2InstancesError(t *testing.T) {
 	// Given
 	mockedApi := new(ec2ClientMock)
 

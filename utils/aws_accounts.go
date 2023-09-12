@@ -7,6 +7,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/rs/zerolog/log"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/config"
 )
 
 type AwsAccount struct {
@@ -42,48 +45,41 @@ func (accounts *AwsAccounts) GetAccount(accountNumber string) (*AwsAccount, erro
 	return nil, fmt.Errorf("AWS account '%s' not found", accountNumber)
 }
 
-// ForEveryAccount cannot be turned into an interface method because of generics restrictions.
-func ForEveryAccount[EachResult any, MergedResult any](
+func ForEveryAccount(
 	accounts *AwsAccounts,
-	mapper func(account *AwsAccount, ctx context.Context) (*EachResult, error),
-	reducer func(merged MergedResult, eachResult EachResult) (MergedResult, error),
-	startValue MergedResult,
+	supplier func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error),
 	ctx context.Context,
-) (MergedResult, error) {
-	var err error
-	result := startValue
-
-	execute := func(account AwsAccount) error {
-		eachResult, eachErr := mapper(&account, ctx)
-		if eachErr != nil {
-			return eachErr
+	discovery string,
+) (*[]discovery_kit_api.Target, error) {
+	numAccounts := len(accounts.accounts)
+	if numAccounts > 0 {
+		accountsChannel := make(chan AwsAccount, numAccounts)
+		resultsChannel := make(chan *[]discovery_kit_api.Target, numAccounts)
+		for w := 1; w <= config.Config.WorkerThreads; w++ {
+			go func(w int, accounts <-chan AwsAccount, result <-chan *[]discovery_kit_api.Target) {
+				for account := range accounts {
+					log.Trace().Int("worker", w).Msgf("Collecting %s for account %s", discovery, account.AccountNumber)
+					eachResult, eachErr := supplier(&account, ctx)
+					if eachErr != nil {
+						log.Err(eachErr).Msgf("Failed to collect %s for account %s", discovery, account.AccountNumber)
+					}
+					resultsChannel <- eachResult
+				}
+			}(w, accountsChannel, resultsChannel)
 		}
-
-		if eachResult != nil {
-			reduceResult, reduceErr := reducer(result, *eachResult)
-			if reduceErr != nil {
-				return reduceErr
-			} else {
-				result = reduceResult
-			}
-		}
-
-		return nil
-	}
-
-	if len(accounts.accounts) > 0 {
 		for _, account := range accounts.accounts {
-			eachErr := execute(account)
-			if eachErr != nil {
-				err = eachErr
+			accountsChannel <- account
+		}
+		close(accountsChannel)
+		var resultTargets []discovery_kit_api.Target
+		for a := 1; a <= numAccounts; a++ {
+			targets := <-resultsChannel
+			if targets != nil {
+				resultTargets = append(resultTargets, *targets...)
 			}
 		}
+		return &resultTargets, nil
 	} else {
-		eachErr := execute(accounts.rootAccount)
-		if eachErr != nil {
-			err = eachErr
-		}
+		return supplier(&accounts.rootAccount, ctx)
 	}
-
-	return result, err
 }

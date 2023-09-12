@@ -14,6 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/sosodev/duration"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
@@ -24,11 +25,33 @@ import (
 	"time"
 )
 
+var (
+	targets        []discovery_kit_api.Target
+	discoveryError *extension_kit.ExtensionError
+)
+
 func RegisterFisInstanceDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler("/fis/template/discovery", exthttp.GetterAsHandler(getFisTemplateDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/fis/template/discovery/target-description", exthttp.GetterAsHandler(getFisTemplateTargetDescription))
 	exthttp.RegisterHttpHandler("/fis/template/discovery/attribute-descriptions", exthttp.GetterAsHandler(getFisTemplateAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/fis/template/discovery/discovered-targets", getFisTemplateTargets)
+	targets = []discovery_kit_api.Target{}
+	go func() {
+		for {
+			start := time.Now()
+			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, context.Background(), "FIS Template")
+			if err != nil {
+				discoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect FIS Template information", err))
+				targets = []discovery_kit_api.Target{}
+			} else {
+				discoveryError = nil
+				targets = *updatedTargets
+			}
+			elapsed := time.Since(start)
+			log.Debug().Msgf("Updated %d FIS Template targets in %s", len(targets), elapsed)
+			time.Sleep(time.Duration(config.Config.DiscoveryIntervalFis) * time.Second)
+		}
+	}()
 }
 
 func getFisTemplateDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
@@ -38,7 +61,7 @@ func getFisTemplateDiscoveryDescription() discovery_kit_api.DiscoveryDescription
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
 			Path:         "/fis/template/discovery/discovered-targets",
-			CallInterval: extutil.Ptr("300s"),
+			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalFis)),
 		},
 	}
 }
@@ -95,9 +118,8 @@ func getFisTemplateAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 }
 
 func getFisTemplateTargets(w http.ResponseWriter, r *http.Request, _ []byte) {
-	targets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, mergeTargets, make([]discovery_kit_api.Target, 0, 100), r.Context())
-	if err != nil {
-		exthttp.WriteError(w, extension_kit.ToError("Failed to collect FIS Template information", err))
+	if discoveryError != nil {
+		exthttp.WriteError(w, *discoveryError)
 	} else {
 		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 	}
@@ -115,10 +137,6 @@ func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]di
 		return nil, err
 	}
 	return &targets, nil
-}
-
-func mergeTargets(merged []discovery_kit_api.Target, eachResult []discovery_kit_api.Target) ([]discovery_kit_api.Target, error) {
-	return append(merged, eachResult...), nil
 }
 
 type FisApi interface {

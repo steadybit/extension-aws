@@ -5,10 +5,14 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/require"
 	"sort"
 	"testing"
+	"time"
 )
 
 func TestGetAccountSupportsRootAccount(t *testing.T) {
@@ -63,29 +67,62 @@ func TestGetAccountReportsErrorWhenMissing(t *testing.T) {
 func TestForEachAccountWithoutRoleAssumption(t *testing.T) {
 	accounts := getTestAccountsWithoutRoleAssumption()
 
-	result, err := ForEveryAccount(&accounts, getAccountNumber, reduceAccountNumbers, make([]string, 0, 2), context.Background())
+	result, err := ForEveryAccount(&accounts, getTestFunction(nil), context.Background(), "discovery")
 
 	require.NoError(t, err)
-	require.Equal(t, []string{"root"}, result)
+	var values []string
+	for _, target := range *result {
+		values = append(values, target.Attributes["aws.account"][0])
+	}
+	require.Equal(t, []string{"root"}, values)
 }
 
 func TestForEachAccountWithRoleAssumption(t *testing.T) {
 	accounts := getTestAccountsWithRoleAssumption()
 
-	result, err := ForEveryAccount(&accounts, getAccountNumber, reduceAccountNumbers, make([]string, 0, 2), context.Background())
+	result, err := ForEveryAccount(&accounts, getTestFunction(nil), context.Background(), "discovery")
 
 	require.NoError(t, err)
 	// for stable test execution
-	sort.Strings(result)
-	require.Equal(t, []string{"assumed1", "assumed2"}, result)
+	var values []string
+	for _, target := range *result {
+		values = append(values, target.Attributes["aws.account"][0])
+	}
+	sort.Strings(values)
+	require.Equal(t, []string{"assumed1", "assumed2", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
 }
 
-func getAccountNumber(account *AwsAccount, _ context.Context) (*string, error) {
-	return &account.AccountNumber, nil
+func TestForEachAccountWithRoleAssumptionAndError(t *testing.T) {
+	accounts := getTestAccountsWithRoleAssumption()
+
+	result, err := ForEveryAccount(&accounts, getTestFunction(extutil.Ptr("assumed2")), context.Background(), "discovery")
+
+	require.NoError(t, err)
+	// for stable test execution
+	var values []string
+	for _, target := range *result {
+		values = append(values, target.Attributes["aws.account"][0])
+	}
+	sort.Strings(values)
+	require.Equal(t, []string{"assumed1", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
 }
 
-func reduceAccountNumbers(accountNumbers []string, accountNumber string) ([]string, error) {
-	return append(accountNumbers, accountNumber), nil
+func getTestFunction(errorForAccount *string) func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+	return func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+		if (errorForAccount != nil) && (*errorForAccount == account.AccountNumber) {
+			return nil, errors.New("damn broken discovery")
+		}
+		var targets []discovery_kit_api.Target
+		targets = append(targets, discovery_kit_api.Target{
+			TargetType: "example",
+			Label:      "label",
+			Attributes: map[string][]string{
+				"aws.account": {account.AccountNumber},
+			},
+		})
+		time.Sleep(500 * time.Millisecond)
+		return &targets, nil
+	}
 }
 
 func getTestAccountsWithRoleAssumption() AwsAccounts {
@@ -99,6 +136,27 @@ func getTestAccountsWithRoleAssumption() AwsAccounts {
 			},
 			"assumed2": {
 				AccountNumber: "assumed2",
+			},
+			"assumed3": {
+				AccountNumber: "assumed3",
+			},
+			"assumed4": {
+				AccountNumber: "assumed4",
+			},
+			"assumed5": {
+				AccountNumber: "assumed5",
+			},
+			"assumed6": {
+				AccountNumber: "assumed6",
+			},
+			"assumed7": {
+				AccountNumber: "assumed7",
+			},
+			"assumed8": {
+				AccountNumber: "assumed8",
+			},
+			"assumed9": {
+				AccountNumber: "assumed9",
 			},
 		},
 	}

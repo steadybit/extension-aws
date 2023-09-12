@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.11
+
+- Make Discovery Intervals configurable
+- Keep a copy of current targets in discoveries and call aws apis not in the context of the agent request.
+- Allow parallel API calls using a configurable amount of worker threads via `STEADYBIT_EXTENSION_WORKER_THREADS`
+
 ## v2.2.10
 
 - Add enrichment rules for kubernetes deployments

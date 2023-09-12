@@ -13,12 +13,19 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
+	"time"
+)
+
+var (
+	clusterTargets        []discovery_kit_api.Target
+	clusterDiscoveryError *extension_kit.ExtensionError
 )
 
 func RegisterClusterDiscoveryHandlers() {
@@ -26,6 +33,23 @@ func RegisterClusterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler("/rds/cluster/discovery/target-description", exthttp.GetterAsHandler(getRdsClusterTargetDescription))
 	exthttp.RegisterHttpHandler("/rds/cluster/discovery/attribute-descriptions", exthttp.GetterAsHandler(getRdsClusterAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/rds/cluster/discovery/discovered-targets", getRdsClusterDiscoveryResults)
+	clusterTargets = []discovery_kit_api.Target{}
+	go func() {
+		for {
+			start := time.Now()
+			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getClusterTargetsForAccount, context.Background(), "RDS cluster")
+			if err != nil {
+				clusterDiscoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect RDS cluster information", err))
+				clusterTargets = []discovery_kit_api.Target{}
+			} else {
+				clusterDiscoveryError = nil
+				clusterTargets = *updatedTargets
+			}
+			elapsed := time.Since(start)
+			log.Debug().Msgf("Updated %d RDS cluster targets in %s", len(clusterTargets), elapsed)
+			time.Sleep(time.Duration(config.Config.DiscoveryIntervalRds) * time.Second)
+		}
+	}()
 }
 
 func getRdsClusterDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
@@ -35,7 +59,7 @@ func getRdsClusterDiscoveryDescription() discovery_kit_api.DiscoveryDescription 
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
 			Path:         "/rds/cluster/discovery/discovered-targets",
-			CallInterval: extutil.Ptr("30s"),
+			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalRds)),
 		},
 	}
 }
@@ -115,11 +139,10 @@ func getRdsClusterAttributeDescriptions() discovery_kit_api.AttributeDescription
 }
 
 func getRdsClusterDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []byte) {
-	targets, err := utils.ForEveryAccount(utils.Accounts, getClusterTargetsForAccount, mergeTargets, make([]discovery_kit_api.Target, 0, 100), r.Context())
-	if err != nil {
-		exthttp.WriteError(w, extension_kit.ToError("Failed to collect RDS cluster information", err))
+	if clusterDiscoveryError != nil {
+		exthttp.WriteError(w, *clusterDiscoveryError)
 	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
+		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &clusterTargets})
 	}
 }
 

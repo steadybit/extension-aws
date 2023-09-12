@@ -7,12 +7,14 @@ package extlambda
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
@@ -20,15 +22,38 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const discoveryBasePath = "/lambda/discovery"
+
+var (
+	targets        []discovery_kit_api.Target
+	discoveryError *extension_kit.ExtensionError
+)
 
 func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler(discoveryBasePath, exthttp.GetterAsHandler(getDiscoveryDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredTargets)
+	targets = []discovery_kit_api.Target{}
+	go func() {
+		for {
+			start := time.Now()
+			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, context.Background(), "lambda function")
+			if err != nil {
+				discoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect lambda function information", err))
+				targets = []discovery_kit_api.Target{}
+			} else {
+				discoveryError = nil
+				targets = *updatedTargets
+			}
+			elapsed := time.Since(start)
+			log.Debug().Msgf("Updated %d lambda function targets in %s", len(targets), elapsed)
+			time.Sleep(time.Duration(config.Config.DiscoveryIntervalLambda) * time.Second)
+		}
+	}()
 }
 
 func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
@@ -38,7 +63,7 @@ func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
 			Path:         discoveryBasePath + "/discovered-targets",
-			CallInterval: extutil.Ptr("1m"),
+			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalLambda)),
 		},
 	}
 }
@@ -170,9 +195,8 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 }
 
 func getDiscoveredTargets(w http.ResponseWriter, r *http.Request, _ []byte) {
-	targets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, mergeTargets, make([]discovery_kit_api.Target, 0, 100), r.Context())
-	if err != nil {
-		exthttp.WriteError(w, extension_kit.ToError("Failed to collect lambda function information", err))
+	if discoveryError != nil {
+		exthttp.WriteError(w, *discoveryError)
 	} else {
 		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 	}
@@ -214,10 +238,6 @@ func getAllAwsLambdaFunctions(ctx context.Context, client lambda.ListFunctionsAP
 		}
 	}
 	return &result, nil
-}
-
-func mergeTargets(merged []discovery_kit_api.Target, eachResult []discovery_kit_api.Target) ([]discovery_kit_api.Target, error) {
-	return append(merged, eachResult...), nil
 }
 
 func toTarget(function types.FunctionConfiguration, awsAccountNumber string, awsAccountRegion string) discovery_kit_api.Target {

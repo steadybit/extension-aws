@@ -21,6 +21,12 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
 	"strings"
+	"time"
+)
+
+var (
+	targets        []discovery_kit_api.Target
+	discoveryError *extension_kit.ExtensionError
 )
 
 func RegisterDiscoveryHandlers() {
@@ -33,6 +39,23 @@ func RegisterDiscoveryHandlers() {
 	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
 		exthttp.RegisterHttpHandler(fmt.Sprintf("/ec2/instance/discovery/rules/ec2-to-%s", targetType), exthttp.GetterAsHandler(getEc2InstanceToXEnrichmentRule(targetType)))
 	}
+	targets = []discovery_kit_api.Target{}
+	go func() {
+		for {
+			start := time.Now()
+			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, context.Background(), "EC2-instance")
+			if err != nil {
+				discoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect EC2 instance information", err))
+				targets = []discovery_kit_api.Target{}
+			} else {
+				discoveryError = nil
+				targets = *updatedTargets
+			}
+			elapsed := time.Since(start)
+			log.Debug().Msgf("Updated %d EC2 instance targets in %s", len(targets), elapsed)
+			time.Sleep(time.Duration(config.Config.DiscoveryIntervalEc2) * time.Second)
+		}
+	}()
 }
 
 func getEc2InstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
@@ -42,7 +65,7 @@ func getEc2InstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
 			Path:         "/ec2/instance/discovery/discovered-targets",
-			CallInterval: extutil.Ptr("30s"),
+			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEc2)),
 		},
 	}
 }
@@ -227,10 +250,9 @@ func getEc2InstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 	}
 }
 
-func getEc2InstanceTargets(w http.ResponseWriter, r *http.Request, _ []byte) {
-	targets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, mergeTargets, make([]discovery_kit_api.Target, 0, 100), r.Context())
-	if err != nil {
-		exthttp.WriteError(w, extension_kit.ToError("Failed to collect EC2 instance information", err))
+func getEc2InstanceTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
+	if discoveryError != nil {
+		exthttp.WriteError(w, *discoveryError)
 	} else {
 		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 	}
@@ -248,10 +270,6 @@ func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]di
 		return nil, err
 	}
 	return &targets, nil
-}
-
-func mergeTargets(merged []discovery_kit_api.Target, eachResult []discovery_kit_api.Target) ([]discovery_kit_api.Target, error) {
-	return append(merged, eachResult...), nil
 }
 
 type Ec2DescribeInstancesApi interface {
