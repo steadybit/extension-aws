@@ -8,6 +8,7 @@ import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/require"
 	"sort"
@@ -77,7 +78,24 @@ func TestForEachAccountWithoutRoleAssumption(t *testing.T) {
 	require.Equal(t, []string{"root"}, values)
 }
 
-func TestForEachAccountWithRoleAssumption(t *testing.T) {
+func TestForEachAccountWithRoleAssumptionAndSingleWorker(t *testing.T) {
+	config.Config.WorkerThreads = 1
+	accounts := getTestAccountsWithRoleAssumption()
+
+	result, err := ForEveryAccount(&accounts, getTestFunction(nil), context.Background(), "discovery")
+
+	require.NoError(t, err)
+	// for stable test execution
+	var values []string
+	for _, target := range *result {
+		values = append(values, target.Attributes["aws.account"][0])
+	}
+	sort.Strings(values)
+	require.Equal(t, []string{"assumed1", "assumed2", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
+}
+
+func TestForEachAccountWithRoleAssumptionAndMultipleWorkers(t *testing.T) {
+	config.Config.WorkerThreads = 4
 	accounts := getTestAccountsWithRoleAssumption()
 
 	result, err := ForEveryAccount(&accounts, getTestFunction(nil), context.Background(), "discovery")
@@ -120,7 +138,7 @@ func getTestFunction(errorForAccount *string) func(account *AwsAccount, ctx cont
 				"aws.account": {account.AccountNumber},
 			},
 		})
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		return &targets, nil
 	}
 }
