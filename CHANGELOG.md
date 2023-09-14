@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.12
+
+- Fix: `DiscoveryDisabled*`-Properties are working again
+
 ## v2.2.11
 
 - Make Discovery Intervals configurable

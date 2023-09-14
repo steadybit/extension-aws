@@ -20,7 +20,7 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
-	"time"
+	"os"
 )
 
 var (
@@ -28,27 +28,19 @@ var (
 	discoveryError *extension_kit.ExtensionError
 )
 
-func RegisterDiscoveryHandlers() {
+func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 	exthttp.RegisterHttpHandler("/az/discovery", exthttp.GetterAsHandler(getAZDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/az/discovery/target-description", exthttp.GetterAsHandler(getAZTargetDescription))
 	exthttp.RegisterHttpHandler("/az/discovery/discovered-targets", getAZDiscoveryResults)
-	targets = []discovery_kit_api.Target{}
-	go func() {
-		for {
-			start := time.Now()
-			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, context.Background(), "availability zones")
-			if err != nil {
-				discoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect availability zones", err))
-				targets = []discovery_kit_api.Target{}
-			} else {
-				discoveryError = nil
-				targets = *updatedTargets
-			}
-			elapsed := time.Since(start)
-			log.Debug().Msgf("Updated %d availability zone targets in %s", len(targets), elapsed)
-			time.Sleep(time.Duration(config.Config.DiscoveryIntervalZone) * time.Second)
-		}
-	}()
+	utils.StartDiscoveryTask(
+		stopCh,
+		"availability zone",
+		config.Config.DiscoveryIntervalZone,
+		getTargetsForAccount,
+		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
+			targets = updatedTargets
+			discoveryError = err
+		})
 }
 
 func getAZDiscoveryDescription() discovery_kit_api.DiscoveryDescription {

@@ -36,10 +36,10 @@ func TestGetAccountSupportsAssumedAccount(t *testing.T) {
 
 func TestMustPreferAssumedAccount(t *testing.T) {
 	accounts := AwsAccounts{
-		rootAccount: AwsAccount{
+		RootAccount: AwsAccount{
 			AccountNumber: "root",
 		},
-		accounts: map[string]AwsAccount{
+		Accounts: map[string]AwsAccount{
 			"assumed1": {
 				AccountNumber: "assumed1",
 			},
@@ -145,10 +145,10 @@ func getTestFunction(errorForAccount *string) func(account *AwsAccount, ctx cont
 
 func getTestAccountsWithRoleAssumption() AwsAccounts {
 	return AwsAccounts{
-		rootAccount: AwsAccount{
+		RootAccount: AwsAccount{
 			AccountNumber: "root",
 		},
-		accounts: map[string]AwsAccount{
+		Accounts: map[string]AwsAccount{
 			"assumed1": {
 				AccountNumber: "assumed1",
 			},
@@ -182,9 +182,9 @@ func getTestAccountsWithRoleAssumption() AwsAccounts {
 
 func getTestAccountsWithoutRoleAssumption() AwsAccounts {
 	return AwsAccounts{
-		rootAccount: AwsAccount{
+		RootAccount: AwsAccount{
 			AccountNumber: "root",
 		},
-		accounts: map[string]AwsAccount{},
+		Accounts: map[string]AwsAccount{},
 	}
 }

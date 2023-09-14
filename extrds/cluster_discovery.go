@@ -20,7 +20,7 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
-	"time"
+	"os"
 )
 
 var (
@@ -28,28 +28,21 @@ var (
 	clusterDiscoveryError *extension_kit.ExtensionError
 )
 
-func RegisterClusterDiscoveryHandlers() {
+func RegisterClusterDiscoveryHandlers(stopCh chan os.Signal) {
 	exthttp.RegisterHttpHandler("/rds/cluster/discovery", exthttp.GetterAsHandler(getRdsClusterDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/rds/cluster/discovery/target-description", exthttp.GetterAsHandler(getRdsClusterTargetDescription))
 	exthttp.RegisterHttpHandler("/rds/cluster/discovery/attribute-descriptions", exthttp.GetterAsHandler(getRdsClusterAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/rds/cluster/discovery/discovered-targets", getRdsClusterDiscoveryResults)
-	clusterTargets = []discovery_kit_api.Target{}
-	go func() {
-		for {
-			start := time.Now()
-			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getClusterTargetsForAccount, context.Background(), "RDS cluster")
-			if err != nil {
-				clusterDiscoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect RDS cluster information", err))
-				clusterTargets = []discovery_kit_api.Target{}
-			} else {
-				clusterDiscoveryError = nil
-				clusterTargets = *updatedTargets
-			}
-			elapsed := time.Since(start)
-			log.Debug().Msgf("Updated %d RDS cluster targets in %s", len(clusterTargets), elapsed)
-			time.Sleep(time.Duration(config.Config.DiscoveryIntervalRds) * time.Second)
-		}
-	}()
+
+	utils.StartDiscoveryTask(
+		stopCh,
+		"rds cluster",
+		config.Config.DiscoveryIntervalRds,
+		getClusterTargetsForAccount,
+		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
+			clusterTargets = targets
+			clusterDiscoveryError = err
+		})
 }
 
 func getRdsClusterDiscoveryDescription() discovery_kit_api.DiscoveryDescription {

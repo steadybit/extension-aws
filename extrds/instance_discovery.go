@@ -20,7 +20,7 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
-	"time"
+	"os"
 )
 
 var (
@@ -28,28 +28,21 @@ var (
 	discoveryError *extension_kit.ExtensionError
 )
 
-func RegisterInstanceDiscoveryHandlers() {
+func RegisterInstanceDiscoveryHandlers(stopCh chan os.Signal) {
 	exthttp.RegisterHttpHandler("/rds/instance/discovery", exthttp.GetterAsHandler(getRdsInstanceDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/rds/instance/discovery/target-description", exthttp.GetterAsHandler(getRdsInstanceTargetDescription))
 	exthttp.RegisterHttpHandler("/rds/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getRdsInstanceAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/rds/instance/discovery/discovered-targets", getRdsInstanceDiscoveryResults)
-	targets = []discovery_kit_api.Target{}
-	go func() {
-		for {
-			start := time.Now()
-			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getInstanceTargetsForAccount, context.Background(), "RDS instance")
-			if err != nil {
-				discoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect RDS instance information", err))
-				targets = []discovery_kit_api.Target{}
-			} else {
-				discoveryError = nil
-				targets = *updatedTargets
-			}
-			elapsed := time.Since(start)
-			log.Debug().Msgf("Updated %d RDS instance targets in %s", len(targets), elapsed)
-			time.Sleep(time.Duration(config.Config.DiscoveryIntervalRds) * time.Second)
-		}
-	}()
+
+	utils.StartDiscoveryTask(
+		stopCh,
+		"rds instance",
+		config.Config.DiscoveryIntervalRds,
+		getInstanceTargetsForAccount,
+		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
+			targets = updatedTargets
+			discoveryError = err
+		})
 }
 
 func getRdsInstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {

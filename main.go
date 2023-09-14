@@ -6,7 +6,6 @@ package main
 import (
 	"fmt"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
@@ -22,6 +21,9 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extlogging"
 	"github.com/steadybit/extension-kit/extruntime"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -34,40 +36,56 @@ func main() {
 	config.ParseConfiguration()
 	utils.InitializeAwsAccountAccess(config.Config)
 
-	utils.RegisterCommonDiscoveryHandlers()
-
-	extrds.RegisterInstanceDiscoveryHandlers()
-	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceRebootAttack())
-	action_kit_sdk.RegisterAction(extrds.NewRdsInstanceStopAttack())
-
-	extrds.RegisterClusterDiscoveryHandlers()
-	action_kit_sdk.RegisterAction(extrds.NewRdsClusterFailoverAttack())
-
-	extaz.RegisterDiscoveryHandlers()
-	action_kit_sdk.RegisterAction(extaz.NewAzBlackholeAction())
-
-	extec2.RegisterDiscoveryHandlers()
-	action_kit_sdk.RegisterAction(extec2.NewEc2InstanceStateAction())
-
-	extfis.RegisterFisInstanceDiscoveryHandlers()
-	action_kit_sdk.RegisterAction(extfis.NewFisExperimentAction())
-
-	extlambda.RegisterDiscoveryHandlers()
-	action_kit_sdk.RegisterAction(extlambda.NewInjectStatusCodeAction())
-	action_kit_sdk.RegisterAction(extlambda.NewInjectExceptionAction())
-	action_kit_sdk.RegisterAction(extlambda.NewInjectLatencyAction())
-	action_kit_sdk.RegisterAction(extlambda.NewFillDiskspaceAction())
-	action_kit_sdk.RegisterAction(extlambda.NewDenylistAction())
+	stopCh := make(chan os.Signal, 1)
+	signal.Notify(stopCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1)
+	registerHandlers(stopCh)
 
 	action_kit_sdk.InstallSignalHandler()
 	action_kit_sdk.RegisterCoverageEndpoints()
 	exthealth.SetReady(true)
 
-	log.Info().Msgf("Enriching EC2 data for target types: %v", config.Config.EnrichEc2DataForTargetTypes)
-	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 	exthttp.Listen(exthttp.ListenOpts{
 		Port: 8085,
 	})
+}
+
+func registerHandlers(stopCh chan os.Signal) {
+	cfg := config.Config
+	utils.RegisterCommonDiscoveryHandlers()
+	if !cfg.DiscoveryDisabledRds {
+		extrds.RegisterInstanceDiscoveryHandlers(stopCh)
+		action_kit_sdk.RegisterAction(extrds.NewRdsInstanceRebootAttack())
+		action_kit_sdk.RegisterAction(extrds.NewRdsInstanceStopAttack())
+
+		extrds.RegisterClusterDiscoveryHandlers(stopCh)
+		action_kit_sdk.RegisterAction(extrds.NewRdsClusterFailoverAttack())
+	}
+
+	if !cfg.DiscoveryDisabledZone {
+		extaz.RegisterDiscoveryHandlers(stopCh)
+		action_kit_sdk.RegisterAction(extaz.NewAzBlackholeAction())
+	}
+
+	if !cfg.DiscoveryDisabledEc2 {
+		extec2.RegisterDiscoveryHandlers(stopCh)
+		action_kit_sdk.RegisterAction(extec2.NewEc2InstanceStateAction())
+	}
+
+	if !cfg.DiscoveryDisabledFis {
+		extfis.RegisterFisInstanceDiscoveryHandlers(stopCh)
+		action_kit_sdk.RegisterAction(extfis.NewFisExperimentAction())
+	}
+
+	if !cfg.DiscoveryDisabledLambda {
+		extlambda.RegisterDiscoveryHandlers(stopCh)
+		action_kit_sdk.RegisterAction(extlambda.NewInjectStatusCodeAction())
+		action_kit_sdk.RegisterAction(extlambda.NewInjectExceptionAction())
+		action_kit_sdk.RegisterAction(extlambda.NewInjectLatencyAction())
+		action_kit_sdk.RegisterAction(extlambda.NewFillDiskspaceAction())
+		action_kit_sdk.RegisterAction(extlambda.NewDenylistAction())
+	}
+
+	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
 }
 
 type ExtensionListResponse struct {
@@ -76,6 +94,18 @@ type ExtensionListResponse struct {
 }
 
 func getExtensionList() ExtensionListResponse {
+	return ExtensionListResponse{
+		ActionList: action_kit_sdk.GetActionList(),
+		DiscoveryList: discovery_kit_api.DiscoveryList{
+			Discoveries:           getDiscoveries(),
+			TargetTypes:           getTargetTypes(),
+			TargetAttributes:      getTargetAttributes(),
+			TargetEnrichmentRules: getEnrichmentRules(),
+		},
+	}
+}
+
+func getDiscoveries() []discovery_kit_api.DescribingEndpointReference {
 	cfg := config.Config
 	discoveries := make([]discovery_kit_api.DescribingEndpointReference, 0)
 	if !cfg.DiscoveryDisabledRds {
@@ -112,78 +142,101 @@ func getExtensionList() ExtensionListResponse {
 			Path:   "/lambda/discovery",
 		})
 	}
+	return discoveries
+}
 
-	targetEnrichmentRules := []discovery_kit_api.DescribingEndpointReference{
-		{
+func getTargetTypes() []discovery_kit_api.DescribingEndpointReference {
+	cfg := config.Config
+	targetTypes := make([]discovery_kit_api.DescribingEndpointReference, 0)
+	if !cfg.DiscoveryDisabledRds {
+		targetTypes = append(targetTypes, discovery_kit_api.DescribingEndpointReference{
 			Method: "GET",
-			Path:   "/ec2/instance/discovery/rules/ec2-to-host",
-		},
-	}
-
-	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
-		targetEnrichmentRules = append(targetEnrichmentRules, discovery_kit_api.DescribingEndpointReference{
+			Path:   "/rds/instance/discovery/target-description",
+		})
+		targetTypes = append(targetTypes, discovery_kit_api.DescribingEndpointReference{
 			Method: "GET",
-			Path:   fmt.Sprintf("/ec2/instance/discovery/rules/ec2-to-%s", targetType),
+			Path:   "/rds/cluster/discovery/target-description",
 		})
 	}
-
-	return ExtensionListResponse{
-		ActionList: action_kit_sdk.GetActionList(),
-		DiscoveryList: discovery_kit_api.DiscoveryList{
-			Discoveries: discoveries,
-			TargetTypes: []discovery_kit_api.DescribingEndpointReference{
-				{
-					Method: "GET",
-					Path:   "/rds/instance/discovery/target-description",
-				},
-				{
-					Method: "GET",
-					Path:   "/rds/cluster/discovery/target-description",
-				},
-				{
-					Method: "GET",
-					Path:   "/az/discovery/target-description",
-				},
-				{
-					Method: "GET",
-					Path:   "/ec2/instance/discovery/target-description",
-				},
-				{
-					Method: "GET",
-					Path:   "/fis/template/discovery/target-description",
-				},
-				{
-					Method: "GET",
-					Path:   "/lambda/discovery/target-description",
-				},
-			},
-			TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
-				{
-					Method: "GET",
-					Path:   "/rds/instance/discovery/attribute-descriptions",
-				},
-				{
-					Method: "GET",
-					Path:   "/rds/cluster/discovery/attribute-descriptions",
-				},
-				{
-					Method: "GET",
-					Path:   "/ec2/instance/discovery/attribute-descriptions",
-				},
-				{
-					Method: "GET",
-					Path:   "/fis/template/discovery/attribute-descriptions",
-				},
-				{
-					Method: "GET",
-					Path:   "/lambda/discovery/attribute-descriptions",
-				},
-				{
-					Method: "GET",
-					Path:   "/common/discovery/attribute-descriptions",
-				},
-			},
-			TargetEnrichmentRules: targetEnrichmentRules,
-		},
+	if !cfg.DiscoveryDisabledEc2 {
+		targetTypes = append(targetTypes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/ec2/instance/discovery/target-description",
+		})
 	}
+	if !cfg.DiscoveryDisabledZone {
+		targetTypes = append(targetTypes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/az/discovery/target-description",
+		})
+	}
+	if !cfg.DiscoveryDisabledFis {
+		targetTypes = append(targetTypes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/fis/template/discovery/target-description",
+		})
+	}
+	if !cfg.DiscoveryDisabledLambda {
+		targetTypes = append(targetTypes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/lambda/discovery/target-description",
+		})
+	}
+	return targetTypes
+}
+
+func getTargetAttributes() []discovery_kit_api.DescribingEndpointReference {
+	cfg := config.Config
+	targetAttributes := make([]discovery_kit_api.DescribingEndpointReference, 0)
+	targetAttributes = append(targetAttributes, discovery_kit_api.DescribingEndpointReference{
+		Method: "GET",
+		Path:   "/common/discovery/attribute-descriptions",
+	})
+	if !cfg.DiscoveryDisabledRds {
+		targetAttributes = append(targetAttributes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/rds/instance/discovery/attribute-descriptions",
+		})
+		targetAttributes = append(targetAttributes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/rds/cluster/discovery/attribute-descriptions",
+		})
+	}
+	if !cfg.DiscoveryDisabledEc2 {
+		targetAttributes = append(targetAttributes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/ec2/instance/discovery/attribute-descriptions",
+		})
+	}
+	if !cfg.DiscoveryDisabledFis {
+		targetAttributes = append(targetAttributes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/fis/template/discovery/attribute-descriptions",
+		})
+	}
+	if !cfg.DiscoveryDisabledLambda {
+		targetAttributes = append(targetAttributes, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/lambda/discovery/attribute-descriptions",
+		})
+	}
+	return targetAttributes
+}
+
+func getEnrichmentRules() []discovery_kit_api.DescribingEndpointReference {
+	cfg := config.Config
+	targetEnrichmentRules := make([]discovery_kit_api.DescribingEndpointReference, 0)
+	if !cfg.DiscoveryDisabledEc2 {
+		targetEnrichmentRules = append(targetEnrichmentRules, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/ec2/instance/discovery/rules/ec2-to-host",
+		})
+		for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
+			targetEnrichmentRules = append(targetEnrichmentRules, discovery_kit_api.DescribingEndpointReference{
+				Method: "GET",
+				Path:   fmt.Sprintf("/ec2/instance/discovery/rules/ec2-to-%s", targetType),
+			})
+		}
+	}
+	return targetEnrichmentRules
 }

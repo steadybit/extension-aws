@@ -20,8 +20,8 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
+	"os"
 	"strings"
-	"time"
 )
 
 var (
@@ -29,33 +29,27 @@ var (
 	discoveryError *extension_kit.ExtensionError
 )
 
-func RegisterDiscoveryHandlers() {
+func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery", exthttp.GetterAsHandler(getEc2InstanceDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/target-description", exthttp.GetterAsHandler(getEc2InstanceTargetDescription))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getEc2InstanceAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/discovered-targets", getEc2InstanceTargets)
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-host", exthttp.GetterAsHandler(getEc2InstanceToHostEnrichmentRule))
 
+	log.Info().Msgf("Enriching EC2 data for target types: %v", config.Config.EnrichEc2DataForTargetTypes)
 	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
 		exthttp.RegisterHttpHandler(fmt.Sprintf("/ec2/instance/discovery/rules/ec2-to-%s", targetType), exthttp.GetterAsHandler(getEc2InstanceToXEnrichmentRule(targetType)))
 	}
-	targets = []discovery_kit_api.Target{}
-	go func() {
-		for {
-			start := time.Now()
-			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, context.Background(), "EC2-instance")
-			if err != nil {
-				discoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect EC2 instance information", err))
-				targets = []discovery_kit_api.Target{}
-			} else {
-				discoveryError = nil
-				targets = *updatedTargets
-			}
-			elapsed := time.Since(start)
-			log.Debug().Msgf("Updated %d EC2 instance targets in %s", len(targets), elapsed)
-			time.Sleep(time.Duration(config.Config.DiscoveryIntervalEc2) * time.Second)
-		}
-	}()
+
+	utils.StartDiscoveryTask(
+		stopCh,
+		"ec2 instance",
+		config.Config.DiscoveryIntervalEc2,
+		getTargetsForAccount,
+		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
+			targets = updatedTargets
+			discoveryError = err
+		})
 }
 
 func getEc2InstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {

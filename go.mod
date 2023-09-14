@@ -24,7 +24,7 @@ require (
 	github.com/rs/zerolog v1.30.0
 	github.com/sosodev/duration v1.1.0
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.7.2
-	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.6
+	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.7
 	github.com/steadybit/action-kit/go/action_kit_test v1.2.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.4.2
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.0.2
@@ -32,6 +32,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/testcontainers/testcontainers-go v0.23.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.23.0
+	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 )
 
 require (
@@ -144,7 +145,6 @@ require (
 	github.com/yosssi/ace v0.0.5 // indirect
 	golang.org/x/arch v0.5.0 // indirect
 	golang.org/x/crypto v0.13.0 // indirect
-	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect

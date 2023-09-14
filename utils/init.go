@@ -42,19 +42,19 @@ func InitializeAwsAccountAccess(specification extConfig.Specification) {
 	}
 
 	Accounts = &AwsAccounts{
-		rootAccount: AwsAccount{
+		RootAccount: AwsAccount{
 			AccountNumber: aws.ToString(identityOutput.Account),
 			AwsConfig:     awsConfigForRootAccount,
 		},
-		accounts: make(map[string]AwsAccount),
+		Accounts: make(map[string]AwsAccount),
 	}
 
 	if len(specification.AssumeRoles) > 0 {
 		log.Debug().Msgf("Executing role assumption in other AWS Accounts.")
 
 		for _, roleArn := range specification.AssumeRoles {
-			assumedAccount := initializeRoleAssumption(stsClientForRootAccount, roleArn, Accounts.rootAccount)
-			Accounts.accounts[assumedAccount.AccountNumber] = assumedAccount
+			assumedAccount := initializeRoleAssumption(stsClientForRootAccount, roleArn, Accounts.RootAccount)
+			Accounts.Accounts[assumedAccount.AccountNumber] = assumedAccount
 		}
 	}
 }

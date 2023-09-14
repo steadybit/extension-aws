@@ -21,8 +21,8 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
+	"os"
 	"strconv"
-	"time"
 )
 
 const discoveryBasePath = "/lambda/discovery"
@@ -32,28 +32,21 @@ var (
 	discoveryError *extension_kit.ExtensionError
 )
 
-func RegisterDiscoveryHandlers() {
+func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 	exthttp.RegisterHttpHandler(discoveryBasePath, exthttp.GetterAsHandler(getDiscoveryDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredTargets)
-	targets = []discovery_kit_api.Target{}
-	go func() {
-		for {
-			start := time.Now()
-			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, context.Background(), "lambda function")
-			if err != nil {
-				discoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect lambda function information", err))
-				targets = []discovery_kit_api.Target{}
-			} else {
-				discoveryError = nil
-				targets = *updatedTargets
-			}
-			elapsed := time.Since(start)
-			log.Debug().Msgf("Updated %d lambda function targets in %s", len(targets), elapsed)
-			time.Sleep(time.Duration(config.Config.DiscoveryIntervalLambda) * time.Second)
-		}
-	}()
+
+	utils.StartDiscoveryTask(
+		stopCh,
+		"lambda function",
+		config.Config.DiscoveryIntervalLambda,
+		getTargetsForAccount,
+		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
+			targets = updatedTargets
+			discoveryError = err
+		})
 }
 
 func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {

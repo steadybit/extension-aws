@@ -18,10 +18,10 @@ type AwsAccount struct {
 }
 
 type AwsAccounts struct {
-	rootAccount AwsAccount
+	RootAccount AwsAccount
 
 	// accounts is a map of AWS account numbers to AwsAccount for which roles are to be assumed.
-	accounts map[string]AwsAccount
+	Accounts map[string]AwsAccount
 }
 
 type GetAccountApi interface {
@@ -29,17 +29,17 @@ type GetAccountApi interface {
 }
 
 func (accounts *AwsAccounts) GetRootAccount() *AwsAccount {
-	return &accounts.rootAccount
+	return &accounts.RootAccount
 }
 
 func (accounts *AwsAccounts) GetAccount(accountNumber string) (*AwsAccount, error) {
-	account, ok := accounts.accounts[accountNumber]
+	account, ok := accounts.Accounts[accountNumber]
 	if ok {
 		return &account, nil
 	}
 
-	if accountNumber == accounts.rootAccount.AccountNumber {
-		return &accounts.rootAccount, nil
+	if accountNumber == accounts.RootAccount.AccountNumber {
+		return &accounts.RootAccount, nil
 	}
 
 	return nil, fmt.Errorf("AWS account '%s' not found", accountNumber)
@@ -51,7 +51,7 @@ func ForEveryAccount(
 	ctx context.Context,
 	discovery string,
 ) (*[]discovery_kit_api.Target, error) {
-	numAccounts := len(accounts.accounts)
+	numAccounts := len(accounts.Accounts)
 	if numAccounts > 0 {
 		accountsChannel := make(chan AwsAccount, numAccounts)
 		resultsChannel := make(chan *[]discovery_kit_api.Target, numAccounts)
@@ -67,7 +67,7 @@ func ForEveryAccount(
 				}
 			}(w, accountsChannel, resultsChannel)
 		}
-		for _, account := range accounts.accounts {
+		for _, account := range accounts.Accounts {
 			accountsChannel <- account
 		}
 		close(accountsChannel)
@@ -80,6 +80,6 @@ func ForEveryAccount(
 		}
 		return &resultTargets, nil
 	} else {
-		return supplier(&accounts.rootAccount, ctx)
+		return supplier(&accounts.RootAccount, ctx)
 	}
 }

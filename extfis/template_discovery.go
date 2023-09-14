@@ -21,6 +21,7 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -30,28 +31,21 @@ var (
 	discoveryError *extension_kit.ExtensionError
 )
 
-func RegisterFisInstanceDiscoveryHandlers() {
+func RegisterFisInstanceDiscoveryHandlers(stopCh chan os.Signal) {
 	exthttp.RegisterHttpHandler("/fis/template/discovery", exthttp.GetterAsHandler(getFisTemplateDiscoveryDescription))
 	exthttp.RegisterHttpHandler("/fis/template/discovery/target-description", exthttp.GetterAsHandler(getFisTemplateTargetDescription))
 	exthttp.RegisterHttpHandler("/fis/template/discovery/attribute-descriptions", exthttp.GetterAsHandler(getFisTemplateAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/fis/template/discovery/discovered-targets", getFisTemplateTargets)
-	targets = []discovery_kit_api.Target{}
-	go func() {
-		for {
-			start := time.Now()
-			updatedTargets, err := utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, context.Background(), "FIS Template")
-			if err != nil {
-				discoveryError = extutil.Ptr(extension_kit.ToError("Failed to collect FIS Template information", err))
-				targets = []discovery_kit_api.Target{}
-			} else {
-				discoveryError = nil
-				targets = *updatedTargets
-			}
-			elapsed := time.Since(start)
-			log.Debug().Msgf("Updated %d FIS Template targets in %s", len(targets), elapsed)
-			time.Sleep(time.Duration(config.Config.DiscoveryIntervalFis) * time.Second)
-		}
-	}()
+
+	utils.StartDiscoveryTask(
+		stopCh,
+		"fis template",
+		config.Config.DiscoveryIntervalFis,
+		getTargetsForAccount,
+		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
+			targets = updatedTargets
+			discoveryError = err
+		})
 }
 
 func getFisTemplateDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
