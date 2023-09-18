@@ -83,6 +83,9 @@ topologySpreadConstraints: []
 # affinity -- Affinities to influence pod assignment.
 affinity: {}
 
+# podSecurityContext -- SecurityContext to apply to the pod.
+podSecurityContext: {}
+
 # extraEnv -- Array with extra environment variables to add to the container
 # e.g:
 # extraEnv:
