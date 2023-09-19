@@ -68,7 +68,7 @@ func TestGetAccountReportsErrorWhenMissing(t *testing.T) {
 func TestForEachAccountWithoutRoleAssumption(t *testing.T) {
 	accounts := getTestAccountsWithoutRoleAssumption()
 
-	result, err := ForEveryAccount(&accounts, getTestFunction(nil), context.Background(), "discovery")
+	result, err := ForEveryAccount(&accounts, getTestFunction(nil, nil), context.Background(), "discovery")
 
 	require.NoError(t, err)
 	var values []string
@@ -82,7 +82,7 @@ func TestForEachAccountWithRoleAssumptionAndSingleWorker(t *testing.T) {
 	config.Config.WorkerThreads = 1
 	accounts := getTestAccountsWithRoleAssumption()
 
-	result, err := ForEveryAccount(&accounts, getTestFunction(nil), context.Background(), "discovery")
+	result, err := ForEveryAccount(&accounts, getTestFunction(nil, nil), context.Background(), "discovery")
 
 	require.NoError(t, err)
 	// for stable test execution
@@ -98,7 +98,7 @@ func TestForEachAccountWithRoleAssumptionAndMultipleWorkers(t *testing.T) {
 	config.Config.WorkerThreads = 4
 	accounts := getTestAccountsWithRoleAssumption()
 
-	result, err := ForEveryAccount(&accounts, getTestFunction(nil), context.Background(), "discovery")
+	result, err := ForEveryAccount(&accounts, getTestFunction(nil, nil), context.Background(), "discovery")
 
 	require.NoError(t, err)
 	// for stable test execution
@@ -111,9 +111,10 @@ func TestForEachAccountWithRoleAssumptionAndMultipleWorkers(t *testing.T) {
 }
 
 func TestForEachAccountWithRoleAssumptionAndError(t *testing.T) {
+	config.Config.WorkerThreads = 4
 	accounts := getTestAccountsWithRoleAssumption()
 
-	result, err := ForEveryAccount(&accounts, getTestFunction(extutil.Ptr("assumed2")), context.Background(), "discovery")
+	result, err := ForEveryAccount(&accounts, getTestFunction(extutil.Ptr("assumed2"), nil), context.Background(), "discovery")
 
 	require.NoError(t, err)
 	// for stable test execution
@@ -125,10 +126,30 @@ func TestForEachAccountWithRoleAssumptionAndError(t *testing.T) {
 	require.Equal(t, []string{"assumed1", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
 }
 
-func getTestFunction(errorForAccount *string) func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func TestForEachAccountWithRoleAssumptionAndEmptyLists(t *testing.T) {
+	config.Config.WorkerThreads = 4
+	accounts := getTestAccountsWithRoleAssumption()
+
+	result, err := ForEveryAccount(&accounts, getTestFunction(nil, extutil.Ptr("assumed2")), context.Background(), "discovery")
+
+	require.NoError(t, err)
+	// for stable test execution
+	var values []string
+	for _, target := range *result {
+		values = append(values, target.Attributes["aws.account"][0])
+	}
+	sort.Strings(values)
+	require.Equal(t, []string{"assumed1", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
+}
+
+func getTestFunction(errorForAccount *string, emptyForAccount *string) func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
 	return func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
 		if (errorForAccount != nil) && (*errorForAccount == account.AccountNumber) {
 			return nil, errors.New("damn broken discovery")
+		}
+		if (emptyForAccount != nil) && (*emptyForAccount == account.AccountNumber) {
+			result := make([]discovery_kit_api.Target, 0, 100)
+			return &result, nil
 		}
 		var targets []discovery_kit_api.Target
 		targets = append(targets, discovery_kit_api.Target{
