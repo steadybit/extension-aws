@@ -24,8 +24,8 @@ import (
 )
 
 var (
-	targets        []discovery_kit_api.Target
-	discoveryError *extension_kit.ExtensionError
+	instanceTargets *[]discovery_kit_api.Target
+	discoveryError  *extension_kit.ExtensionError
 )
 
 func RegisterInstanceDiscoveryHandlers(stopCh chan os.Signal) {
@@ -40,7 +40,7 @@ func RegisterInstanceDiscoveryHandlers(stopCh chan os.Signal) {
 		config.Config.DiscoveryIntervalRds,
 		getInstanceTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			targets = updatedTargets
+			instanceTargets = &updatedTargets
 			discoveryError = err
 		})
 }
@@ -119,13 +119,13 @@ func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []
 	if discoveryError != nil {
 		exthttp.WriteError(w, *discoveryError)
 	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
+		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: instanceTargets})
 	}
 }
 
 func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	targets, err := GetAllRdsInstances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAllRdsInstances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -134,7 +134,7 @@ func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context
 		}
 		return nil, err
 	}
-	return &targets, nil
+	return &result, nil
 }
 
 func GetAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {

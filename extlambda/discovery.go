@@ -28,7 +28,7 @@ import (
 const discoveryBasePath = "/lambda/discovery"
 
 var (
-	targets        []discovery_kit_api.Target
+	targets        *[]discovery_kit_api.Target
 	discoveryError *extension_kit.ExtensionError
 )
 
@@ -44,7 +44,7 @@ func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 		config.Config.DiscoveryIntervalLambda,
 		getTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			targets = updatedTargets
+			targets = &updatedTargets
 			discoveryError = err
 		})
 }
@@ -191,7 +191,7 @@ func getDiscoveredTargets(w http.ResponseWriter, r *http.Request, _ []byte) {
 	if discoveryError != nil {
 		exthttp.WriteError(w, *discoveryError)
 	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
+		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: targets})
 	}
 }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.13
+
+- Fix: `slice index out of range` error in discovery
+
 ## v2.2.12
 
 - Fix: `DiscoveryDisabled*`-Properties are working again

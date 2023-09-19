@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	targets        []discovery_kit_api.Target
+	targets        *[]discovery_kit_api.Target
 	discoveryError *extension_kit.ExtensionError
 )
 
@@ -47,7 +47,7 @@ func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 		config.Config.DiscoveryIntervalEc2,
 		getTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			targets = updatedTargets
+			targets = &updatedTargets
 			discoveryError = err
 		})
 }
@@ -248,13 +248,13 @@ func getEc2InstanceTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	if discoveryError != nil {
 		exthttp.WriteError(w, *discoveryError)
 	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
+		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: targets})
 	}
 }
 
 func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
 	client := ec2.NewFromConfig(account.AwsConfig)
-	targets, err := GetAllEc2Instances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAllEc2Instances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -263,7 +263,7 @@ func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]di
 		}
 		return nil, err
 	}
-	return &targets, nil
+	return &result, nil
 }
 
 type Ec2DescribeInstancesApi interface {

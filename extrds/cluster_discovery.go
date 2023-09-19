@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	clusterTargets        []discovery_kit_api.Target
+	clusterTargets        *[]discovery_kit_api.Target
 	clusterDiscoveryError *extension_kit.ExtensionError
 )
 
@@ -40,7 +40,7 @@ func RegisterClusterDiscoveryHandlers(stopCh chan os.Signal) {
 		config.Config.DiscoveryIntervalRds,
 		getClusterTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			clusterTargets = targets
+			clusterTargets = &updatedTargets
 			clusterDiscoveryError = err
 		})
 }
@@ -135,13 +135,13 @@ func getRdsClusterDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []b
 	if clusterDiscoveryError != nil {
 		exthttp.WriteError(w, *clusterDiscoveryError)
 	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &clusterTargets})
+		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: clusterTargets})
 	}
 }
 
 func getClusterTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	targets, err := GetAllRdsClusters(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAllRdsClusters(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -150,7 +150,7 @@ func getClusterTargetsForAccount(account *utils.AwsAccount, ctx context.Context)
 		}
 		return nil, err
 	}
-	return &targets, nil
+	return &result, nil
 }
 
 func GetAllRdsClusters(ctx context.Context, rdsApi rdsDBClusterApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
