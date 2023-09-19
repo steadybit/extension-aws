@@ -34,6 +34,7 @@ USER $USERNAME
 WORKDIR /
 
 COPY --from=build /app/extension /extension
+COPY --from=build /app/licenses /licenses
 
 EXPOSE 8085
 EXPOSE 8086

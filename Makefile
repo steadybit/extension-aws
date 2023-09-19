@@ -8,6 +8,13 @@ help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
 
+## licenses-report: generate a report of all licenses
+.PHONY: licenses-report
+licenses-report:
+	rm -rf ./licenses
+	go run github.com/google/go-licenses@v1.6.0 save . --save_path ./licenses
+	go run github.com/google/go-licenses@v1.6.0 report . > ./licenses/THIRD-PARTY.csv
+	cp LICENSE ./licenses/LICENSE.txt
 
 # ==================================================================================== #
 # QUALITY CONTROL
@@ -60,6 +67,7 @@ run: tidy build
 container:
 	docker build --build-arg BUILD_WITH_COVERAGE="true" -t extension-aws:latest .
 
+## linuxpkg: build the linux packages
 .PHONY: linuxpkg
 linuxpkg:
 	goreleaser release --clean --snapshot
