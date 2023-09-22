@@ -67,6 +67,16 @@ spec:
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             - name: STEADYBIT_EXTENSION_ASSUME_ROLES
               value: {{ join "," .Values.aws.assumeRoles | quote }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
+              value: {{ join "," .Values.aws.attributes.excludes.ec2 | quote }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
+              value: {{ join "," .Values.aws.attributes.excludes.zone | quote }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
+              value: {{ join "," .Values.aws.attributes.excludes.fis | quote }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
+              value: {{ join "," .Values.aws.attributes.excludes.lambda | quote }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
+              value: {{ join "," .Values.aws.attributes.excludes.rds | quote }}
             {{- with .Values.extraEnv }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

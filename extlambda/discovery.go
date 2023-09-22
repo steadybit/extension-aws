@@ -230,7 +230,7 @@ func getAllAwsLambdaFunctions(ctx context.Context, client lambda.ListFunctionsAP
 			marker = output.NextMarker
 		}
 	}
-	return &result, nil
+	return extutil.Ptr(discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributeExcludesLambda)), nil
 }
 
 func toTarget(function types.FunctionConfiguration, awsAccountNumber string, awsAccountRegion string) discovery_kit_api.Target {

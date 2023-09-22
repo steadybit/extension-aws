@@ -152,7 +152,7 @@ func GetAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, awsAccount
 		}
 	}
 
-	return result, nil
+	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributeExcludesRds), nil
 }
 
 func toInstanceTarget(dbInstance types.DBInstance, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {

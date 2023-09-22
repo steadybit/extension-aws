@@ -118,7 +118,7 @@ func GetAllAvailabilityZones(ctx context.Context, ec2Api AZDescribeAvailabilityZ
 		result = append(result, toTarget(availabilityZone, awsAccountNumber))
 	}
 
-	return result, nil
+	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributeExcludesZone), nil
 }
 
 func toTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string) discovery_kit_api.Target {

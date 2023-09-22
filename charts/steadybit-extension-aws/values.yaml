@@ -5,6 +5,19 @@
 aws:
   # aws.assumeRoles -- List of AWS IAM roles the extension should assume. You can use `--set aws.assumeRoles="{ARN1,ARN2}"` to set this value via the Helm CLI.
   assumeRoles: []
+  attributes:
+    excludes:
+      # aws.attributes.excludes.ec2 -- List of attributes to exclude from EC2 discovery.
+      ec2: []
+      # aws.attributes.excludes.rds -- List of attributes to exclude from RDS discovery.
+      rds: []
+      # aws.attributes.excludes.zone -- List of attributes to exclude from AZ discovery.
+      zone: []
+      # aws.attributes.excludes.fis -- List of attributes to exclude from FIS discovery.
+      fis: []
+      # aws.attributes.excludes.lambda -- List of attributes to exclude from Lambda discovery.
+      lambda: []
+
 
 image:
   # image.name -- The container image to use for the steadybit AWS extension.
