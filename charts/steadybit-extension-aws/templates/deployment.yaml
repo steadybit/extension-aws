@@ -68,23 +68,23 @@ spec:
             - name: STEADYBIT_EXTENSION_ASSUME_ROLES
               value: {{ join "," .Values.aws.assumeRoles | quote }}
             {{- if .Values.aws.discovery.attributes.excludes.ec2 }}
-            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EC2
               value: {{ join "," .Values.aws.discovery.attributes.excludes.ec2 | quote }}
             {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.zone }}
-            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ZONE
               value: {{ join "," .Values.aws.discovery.attributes.excludes.zone | quote }}
             {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.fis }}
-            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS
               value: {{ join "," .Values.aws.discovery.attributes.excludes.fis | quote }}
             {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.lambda }}
-            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA
               value: {{ join "," .Values.aws.discovery.attributes.excludes.lambda | quote }}
             {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.rds }}
-            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS
               value: {{ join "," .Values.aws.discovery.attributes.excludes.rds | quote }}
             {{- end }}
             {{- with .Values.extraEnv }}

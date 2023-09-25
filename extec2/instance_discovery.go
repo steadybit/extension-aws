@@ -286,7 +286,7 @@ func GetAllEc2Instances(ctx context.Context, ec2Api Ec2DescribeInstancesApi, aws
 		}
 	}
 
-	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributeExcludesEc2), nil
+	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEc2), nil
 }
 
 func toTarget(ec2Instance types.Instance, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {

@@ -157,7 +157,7 @@ func GetAllFisTemplates(ctx context.Context, fisApi FisApi, awsAccountNumber str
 		}
 	}
 
-	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributeExcludesFis), nil
+	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesFis), nil
 }
 
 func toTarget(template types.ExperimentTemplateSummary, awsAccountNumber string, awsRegion string, totalDuration *time.Duration) discovery_kit_api.Target {

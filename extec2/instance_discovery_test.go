@@ -88,7 +88,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	// Given
 	// set env var to filter out all attributes starting with "aws-ec2"
-	config.Config.DiscoveryAttributeExcludesEc2 = []string{"aws-ec2.label.*", "aws-ec2.image"}
+	config.Config.DiscoveryAttributesExcludesEc2 = []string{"aws-ec2.label.*", "aws-ec2.image"}
 	mockedApi := new(ec2ClientMock)
 	mockedReturnValue := ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
