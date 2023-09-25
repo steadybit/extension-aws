@@ -31,16 +31,6 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
-                  value: ""
               image: ghcr.io/steadybit/extension-aws:latest
               imagePullPolicy: Always
               livenessProbe:
@@ -107,16 +97,6 @@ manifest should match snapshot with TLS:
                 - name: STEADYBIT_EXTENSION_TLS_SERVER_KEY
                   value: /etc/extension/certificates/server-cert/tls.key
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
                   value: ""
               image: ghcr.io/steadybit/extension-aws:latest
               imagePullPolicy: Always
@@ -187,16 +167,6 @@ manifest should match snapshot with extra env vars:
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
                   value: ""
                 - name: FOO
                   value: bar
@@ -270,16 +240,6 @@ manifest should match snapshot with extra labels:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
-                  value: ""
               image: ghcr.io/steadybit/extension-aws:latest
               imagePullPolicy: Always
               livenessProbe:
@@ -348,16 +308,6 @@ manifest should match snapshot with mutual TLS:
                 - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
                   value: /etc/extension/certificates/client-cert-a/tls.crt,/etc/extension/certificates/client-cert-a/tls.crt
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
                   value: ""
               image: ghcr.io/steadybit/extension-aws:latest
               imagePullPolicy: Always
@@ -442,16 +392,6 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: /etc/tls/ca.crt,/etc/tls/ca2.crt
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
-                  value: ""
               image: ghcr.io/steadybit/extension-aws:latest
               imagePullPolicy: Always
               livenessProbe:
@@ -514,16 +454,6 @@ manifest should match snapshot with podSecurityContext:
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
                   value: ""
               image: ghcr.io/steadybit/extension-aws:latest
               imagePullPolicy: Always
@@ -589,16 +519,6 @@ manifest should match snapshot without TLS:
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_EC2
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_ZONE
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_FIS
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_LAMBDA
-                  value: ""
-                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTE_EXCLUDES_RDS
                   value: ""
               image: ghcr.io/steadybit/extension-aws:latest
               imagePullPolicy: Always
