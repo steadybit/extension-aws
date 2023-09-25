@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
@@ -152,7 +153,7 @@ func GetAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, awsAccount
 		}
 	}
 
-	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesRds), nil
+	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesRds), nil
 }
 
 func toInstanceTarget(dbInstance types.DBInstance, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {

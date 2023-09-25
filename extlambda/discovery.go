@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
@@ -230,7 +231,7 @@ func getAllAwsLambdaFunctions(ctx context.Context, client lambda.ListFunctionsAP
 			marker = output.NextMarker
 		}
 	}
-	return extutil.Ptr(discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesLambda)), nil
+	return extutil.Ptr(discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesLambda)), nil
 }
 
 func toTarget(function types.FunctionConfiguration, awsAccountNumber string, awsAccountRegion string) discovery_kit_api.Target {

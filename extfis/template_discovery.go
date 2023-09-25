@@ -14,6 +14,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/sosodev/duration"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
@@ -157,7 +158,7 @@ func GetAllFisTemplates(ctx context.Context, fisApi FisApi, awsAccountNumber str
 		}
 	}
 
-	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesFis), nil
+	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesFis), nil
 }
 
 func toTarget(template types.ExperimentTemplateSummary, awsAccountNumber string, awsRegion string, totalDuration *time.Duration) discovery_kit_api.Target {

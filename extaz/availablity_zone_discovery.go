@@ -13,6 +13,7 @@ import (
 	types2 "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
@@ -118,7 +119,7 @@ func GetAllAvailabilityZones(ctx context.Context, ec2Api AZDescribeAvailabilityZ
 		result = append(result, toTarget(availabilityZone, awsAccountNumber))
 	}
 
-	return discovery_kit_api.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesZone), nil
+	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesZone), nil
 }
 
 func toTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string) discovery_kit_api.Target {
