@@ -97,6 +97,9 @@ topologySpreadConstraints: []
 # affinity -- Affinities to influence pod assignment.
 affinity: {}
 
+# priorityClassName -- Priority class used to influence pod scheduling priority.
+priorityClassName: ""
+
 # podSecurityContext -- SecurityContext to apply to the pod.
 podSecurityContext: {}
 

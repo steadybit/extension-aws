@@ -72,3 +72,8 @@ tests:
         runAsUser: 2222
     asserts:
       - matchSnapshot: {}
+  - it: manifest should match snapshot with priority class
+    set:
+      priorityClassName: my-priority-class
+    asserts:
+      - matchSnapshot: {}
