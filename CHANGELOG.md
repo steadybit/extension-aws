@@ -1,5 +1,10 @@
 # Changelog
 
+
+## v2.2.14
+
+- Possibility to exclude attributes from discovery
+
 ## v2.2.13
 
 - Fix: `slice index out of range` error in discovery

@@ -7,23 +7,23 @@ go 1.20
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.21.0
-	github.com/aws/aws-sdk-go-v2/config v1.18.39
-	github.com/aws/aws-sdk-go-v2/credentials v1.13.37
+	github.com/aws/aws-sdk-go-v2/config v1.18.42
+	github.com/aws/aws-sdk-go-v2/credentials v1.13.40
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.11
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.117.0
-	github.com/aws/aws-sdk-go-v2/service/fis v1.15.5
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.121.0
+	github.com/aws/aws-sdk-go-v2/service/fis v1.16.0
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.39.5
 	github.com/aws/aws-sdk-go-v2/service/rds v1.54.0
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.37.5
-	github.com/aws/aws-sdk-go-v2/service/sts v1.21.5
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.38.0
+	github.com/aws/aws-sdk-go-v2/service/sts v1.22.0
 	github.com/aws/smithy-go v1.14.2
 	github.com/docker/go-connections v0.4.0
 	github.com/google/uuid v1.3.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.30.0
+	github.com/rs/zerolog v1.31.0
 	github.com/sosodev/duration v1.1.0
-	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.7.2
+	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.7.3
 	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.7
 	github.com/steadybit/action-kit/go/action_kit_test v1.2.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.4.2
@@ -33,7 +33,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/testcontainers/testcontainers-go v0.23.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.23.0
-	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 )
 
 require (
@@ -50,10 +50,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.13 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.41 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.35 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.42 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.43 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.35 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.13.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.15.6 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.14.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.17.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bytedance/sonic v1.10.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
@@ -79,13 +79,13 @@ require (
 	github.com/go-openapi/swag v0.22.4 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.3 // indirect
+	github.com/go-playground/validator/v10 v10.15.4 // indirect
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/gomarkdown/markdown v0.0.0-20230716120725-531d2d74bc12 // indirect
+	github.com/gomarkdown/markdown v0.0.0-20230922112808-5421fefb8386 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
@@ -96,13 +96,13 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kataras/blocks v0.0.7 // indirect
+	github.com/kataras/blocks v0.0.8 // indirect
 	github.com/kataras/golog v0.1.9 // indirect
-	github.com/kataras/iris/v12 v12.2.6-0.20230908161203-24ba4e8933b9 // indirect
+	github.com/kataras/iris/v12 v12.2.7 // indirect
 	github.com/kataras/pio v0.0.12 // indirect
 	github.com/kataras/sitemap v0.0.6 // indirect
 	github.com/kataras/tunnel v0.0.4 // indirect
-	github.com/klauspost/compress v1.16.7 // indirect
+	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/labstack/echo/v4 v4.11.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
@@ -153,7 +153,7 @@ require (
 	golang.org/x/term v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.12.0 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
 	google.golang.org/grpc v1.57.0 // indirect
