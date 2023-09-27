@@ -148,14 +148,14 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean ${{ !startsWith(github.ref, 'refs/tags/') && '--snapshot' || '' }}
+          args: release --clean ${{ !startsWith(github.ref, 'refs/tags/') && '--snapshot' || '' }} ${{ github.event_name == 'pull_request' && '--skip sign' || '' }}
         env:
           NFPM_KEY_FILE: gpg.key
           NFPM_DEFAULT_PASSPHRASE: ${{ secrets.MAVEN_GPG_PRIVATE_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: "[build] Upload packages to internal repositories"
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        if: github.event_name != 'pull_request'
         run: |
           REPO_USER="${{ secrets.STEADYBIT_ARTIFACT_SERVER_USERNAME }}:${{ secrets.STEADYBIT_ARTIFACT_SERVER_PASSWORD }}"
           echo "Uploading deb packages to artifacts server"
