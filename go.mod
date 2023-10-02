@@ -31,8 +31,8 @@ require (
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.0.2
 	github.com/steadybit/extension-kit v1.8.8
 	github.com/stretchr/testify v1.8.4
-	github.com/testcontainers/testcontainers-go v0.24.1
-	github.com/testcontainers/testcontainers-go/modules/localstack v0.23.0
+	github.com/testcontainers/testcontainers-go v0.25.0
+	github.com/testcontainers/testcontainers-go/modules/localstack v0.25.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 )
 
