@@ -7,3 +7,8 @@ indent_style = tab
 indent_size = 2
 trim_trailing_whitespace = true
 charset = utf-8
+
+[*.yaml]
+indent_style = space
+ij_yaml_spaces_within_braces = false
+ij_yaml_spaces_within_brackets = false
