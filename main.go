@@ -232,6 +232,10 @@ func getEnrichmentRules() []discovery_kit_api.DescribingEndpointReference {
 			Method: "GET",
 			Path:   "/ec2/instance/discovery/rules/ec2-to-host",
 		})
+		targetEnrichmentRules = append(targetEnrichmentRules, discovery_kit_api.DescribingEndpointReference{
+			Method: "GET",
+			Path:   "/ec2/instance/discovery/rules/ec2-to-kubernetes-node",
+		})
 		for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
 			targetEnrichmentRules = append(targetEnrichmentRules, discovery_kit_api.DescribingEndpointReference{
 				Method: "GET",

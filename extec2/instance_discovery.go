@@ -35,7 +35,13 @@ func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/target-description", exthttp.GetterAsHandler(getEc2InstanceTargetDescription))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getEc2InstanceAttributeDescriptions))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/discovered-targets", getEc2InstanceTargets)
-	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-host", exthttp.GetterAsHandler(getEc2InstanceToHostEnrichmentRule))
+	//Not yet generic because we want to keep the id until enrichment rules gets deleted automatically in the platform
+	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-host", exthttp.GetterAsHandler(func() discovery_kit_api.TargetEnrichmentRule {
+		return getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_aws.ec2-instance-to-host", "com.steadybit.extension_host.host")
+	}))
+	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-kubernetes-node", exthttp.GetterAsHandler(func() discovery_kit_api.TargetEnrichmentRule {
+		return getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_aws.ec2-instance-to-host", "com.steadybit.extension_kubernetes.kubernetes-node")
+	}))
 
 	log.Info().Msgf("Enriching EC2 data for target types: %v", config.Config.EnrichEc2DataForTargetTypes)
 	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
@@ -93,9 +99,9 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getEc2InstanceToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+func getEc2InstanceToHostEnrichmentRule(id string, target string) discovery_kit_api.TargetEnrichmentRule {
 	return discovery_kit_api.TargetEnrichmentRule{
-		Id:      "com.steadybit.extension_aws.ec2-instance-to-host",
+		Id:      id,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: ec2TargetId,
@@ -104,7 +110,7 @@ func getEc2InstanceToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule
 			},
 		},
 		Dest: discovery_kit_api.SourceOrDestination{
-			Type: "com.steadybit.extension_host.host",
+			Type: target,
 			Selector: map[string]string{
 				"host.hostname": "${src.aws-ec2.hostname.internal}",
 			},
