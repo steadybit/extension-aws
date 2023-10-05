@@ -44,6 +44,7 @@ func Test_getExtensionList(t *testing.T) {
 				"/ec2/instance/discovery/attribute-descriptions",
 				"/ec2/instance/discovery/rules/ec2-to-com.steadybit.extension_aws.test",
 				"/ec2/instance/discovery/rules/ec2-to-host",
+				"/ec2/instance/discovery/rules/ec2-to-kubernetes-node",
 				"/ec2/instance/discovery/target-description",
 			},
 		},
