@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 var (
@@ -51,7 +52,7 @@ func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 	utils.StartDiscoveryTask(
 		stopCh,
 		"ec2 instance",
-		config.Config.DiscoveryIntervalEc2,
+		time.Duration(config.Config.DiscoveryIntervalEc2)*time.Second,
 		getTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
 			targets = &updatedTargets

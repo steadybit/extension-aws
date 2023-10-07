@@ -22,6 +22,7 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -36,7 +37,7 @@ func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 	utils.StartDiscoveryTask(
 		stopCh,
 		"availability zone",
-		config.Config.DiscoveryIntervalZone,
+		time.Duration(config.Config.DiscoveryIntervalZone)*time.Second,
 		getTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
 			targets = &updatedTargets
@@ -79,7 +80,7 @@ func getAZTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getAZDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []byte) {
+func getAZDiscoveryResults(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	if discoveryError != nil {
 		exthttp.WriteError(w, *discoveryError)
 	} else {

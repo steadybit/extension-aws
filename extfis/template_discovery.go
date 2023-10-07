@@ -41,7 +41,7 @@ func RegisterFisInstanceDiscoveryHandlers(stopCh chan os.Signal) {
 	utils.StartDiscoveryTask(
 		stopCh,
 		"fis template",
-		config.Config.DiscoveryIntervalFis,
+		time.Duration(config.Config.DiscoveryIntervalFis)*time.Second,
 		getTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
 			targets = &updatedTargets
@@ -112,7 +112,7 @@ func getFisTemplateAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 	}
 }
 
-func getFisTemplateTargets(w http.ResponseWriter, r *http.Request, _ []byte) {
+func getFisTemplateTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	if discoveryError != nil {
 		exthttp.WriteError(w, *discoveryError)
 	} else {
@@ -255,9 +255,9 @@ func calculateTotalDuration(experimentTemplate *types.ExperimentTemplate) *time.
 
 	log.Debug().Msgf("Calculated total durations for FIS Experiment %s: %v", *experimentTemplate.Id, totalDurations)
 	longestDuration := time.Duration(0)
-	for _, duration := range totalDurations {
-		if duration > longestDuration {
-			longestDuration = duration
+	for _, d := range totalDurations {
+		if d > longestDuration {
+			longestDuration = d
 		}
 	}
 	return &longestDuration

@@ -22,6 +22,7 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -38,7 +39,7 @@ func RegisterInstanceDiscoveryHandlers(stopCh chan os.Signal) {
 	utils.StartDiscoveryTask(
 		stopCh,
 		"rds instance",
-		config.Config.DiscoveryIntervalRds,
+		time.Duration(config.Config.DiscoveryIntervalRds)*time.Second,
 		getInstanceTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
 			instanceTargets = &updatedTargets
@@ -116,7 +117,7 @@ func getRdsInstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptio
 	}
 }
 
-func getRdsInstanceDiscoveryResults(w http.ResponseWriter, r *http.Request, _ []byte) {
+func getRdsInstanceDiscoveryResults(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	if discoveryError != nil {
 		exthttp.WriteError(w, *discoveryError)
 	} else {

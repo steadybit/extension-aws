@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 const discoveryBasePath = "/lambda/discovery"
@@ -42,7 +43,7 @@ func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 	utils.StartDiscoveryTask(
 		stopCh,
 		"lambda function",
-		config.Config.DiscoveryIntervalLambda,
+		time.Duration(config.Config.DiscoveryIntervalLambda)*time.Second,
 		getTargetsForAccount,
 		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
 			targets = &updatedTargets
@@ -188,7 +189,7 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 	}
 }
 
-func getDiscoveredTargets(w http.ResponseWriter, r *http.Request, _ []byte) {
+func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	if discoveryError != nil {
 		exthttp.WriteError(w, *discoveryError)
 	} else {

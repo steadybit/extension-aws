@@ -13,37 +13,37 @@ import (
 
 func StartDiscoveryTask(
 	stopCh chan os.Signal,
-	discovery string,
-	interval int,
+	discoveryName string,
+	interval time.Duration,
 	supplier func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error),
 	updateResults func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError)) {
 	//init empty results
 	updateResults([]discovery_kit_api.Target{}, nil)
 	//start first discovery immediately
-	discover(supplier, discovery, updateResults)
+	discover(supplier, discoveryName, updateResults)
 	//start loop
 	go func() {
-		log.Info().Msgf("Starting %s discovery", discovery)
+		log.Info().Msgf("Starting %s discovery", discoveryName)
 		for {
 			select {
 			case <-stopCh:
-				log.Info().Msgf("Stopping %s discovery", discovery)
+				log.Info().Msgf("Stopping %s discovery", discoveryName)
 				return
-			case <-time.After(time.Duration(interval) * time.Second):
-				discover(supplier, discovery, updateResults)
+			case <-time.After(interval):
+				discover(supplier, discoveryName, updateResults)
 			}
 		}
 	}()
 }
 
-func discover(supplier func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error), discovery string, updateResults func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError)) {
+func discover(supplier func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error), discoveryName string, updateResults func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError)) {
 	start := time.Now()
-	updatedTargets, err := ForEveryAccount(Accounts, supplier, context.Background(), discovery)
+	updatedTargets, err := ForEveryAccount(Accounts, supplier, context.Background(), discoveryName)
 	if err != nil {
-		updateResults([]discovery_kit_api.Target{}, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to collect %s information", discovery), err)))
+		updateResults([]discovery_kit_api.Target{}, extutil.Ptr(extension_kit.ToError(fmt.Sprintf("Failed to collect %s information", discoveryName), err)))
 	} else {
 		updateResults(*updatedTargets, nil)
 		elapsed := time.Since(start)
-		log.Debug().Msgf("Updated %d %s targets in %s", len(*updatedTargets), discovery, elapsed)
+		log.Debug().Msgf("Updated %d %s targets in %s", len(*updatedTargets), discoveryName, elapsed)
 	}
 }
