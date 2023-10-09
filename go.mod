@@ -15,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.39.5
 	github.com/aws/aws-sdk-go-v2/service/rds v1.55.2
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.38.0
-	github.com/aws/aws-sdk-go-v2/service/sts v1.22.0
+	github.com/aws/aws-sdk-go-v2/service/sts v1.23.1
 	github.com/aws/smithy-go v1.15.0
 	github.com/docker/go-connections v0.4.0
 	github.com/google/uuid v1.3.1
