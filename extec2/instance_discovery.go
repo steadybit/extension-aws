@@ -41,7 +41,7 @@ func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
 		return getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_aws.ec2-instance-to-host", "com.steadybit.extension_host.host")
 	}))
 	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-kubernetes-node", exthttp.GetterAsHandler(func() discovery_kit_api.TargetEnrichmentRule {
-		return getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_aws.ec2-instance-to-host", "com.steadybit.extension_kubernetes.kubernetes-node")
+		return getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_aws.ec2-instance-to-kubernetes-node", "com.steadybit.extension_kubernetes.kubernetes-node")
 	}))
 
 	log.Info().Msgf("Enriching EC2 data for target types: %v", config.Config.EnrichEc2DataForTargetTypes)
