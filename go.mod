@@ -12,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.13
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.122.0
 	github.com/aws/aws-sdk-go-v2/service/fis v1.16.0
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.39.5
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.40.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.38.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.23.1
@@ -48,7 +48,7 @@ require (
 	github.com/Shopify/goreferrer v0.0.0-20220729165902-8cddb4f5de06 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.13 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.14 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.43 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.37 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.44 // indirect
