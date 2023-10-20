@@ -10,10 +10,6 @@ ARG BUILD_SNAPSHOT=true
 
 WORKDIR /app
 
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
-
 COPY . .
 
 RUN goreleaser build --snapshot="${BUILD_SNAPSHOT}" --single-target -o extension
