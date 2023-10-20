@@ -3,8 +3,9 @@
 ##
 ## Build
 ##
-FROM goreleaser/goreleaser:v1.19.2 AS build
+FROM --platform=$BUILDPLATFORM goreleaser/goreleaser:v1.19.2 AS build
 
+ARG TARGETOS TARGETARCH
 ARG BUILD_WITH_COVERAGE
 ARG BUILD_SNAPSHOT=true
 
@@ -12,11 +13,11 @@ WORKDIR /app
 
 COPY . .
 
-RUN goreleaser build --snapshot="${BUILD_SNAPSHOT}" --single-target -o extension
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH goreleaser build --snapshot="${BUILD_SNAPSHOT}" --single-target -o extension
 ##
 ## Runtime
 ##
-FROM alpine:3.17
+FROM alpine:3.18
 
 LABEL "steadybit.com.discovery-disabled"="true"
 
