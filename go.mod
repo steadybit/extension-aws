@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.42
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.13
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.128.0
-	github.com/aws/aws-sdk-go-v2/service/fis v1.16.2
+	github.com/aws/aws-sdk-go-v2/service/fis v1.17.0
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.40.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.39.0
