@@ -23,7 +23,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.31.0
 	github.com/sosodev/duration v1.2.0
-	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.7.3
+	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.8.0
 	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.8
 	github.com/steadybit/action-kit/go/action_kit_test v1.2.1
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.4.2
@@ -63,7 +63,7 @@ require (
 	github.com/containerd/containerd v1.7.6 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/deepmap/oapi-codegen v1.15.0 // indirect
+	github.com/deepmap/oapi-codegen v1.16.1 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v24.0.6+incompatible // indirect
 	github.com/docker/go-units v0.5.0 // indirect
