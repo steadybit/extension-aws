@@ -105,8 +105,8 @@ github.com/cyphar/filepath-securejoin v0.2.3/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxG
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/deepmap/oapi-codegen v1.15.0 h1:SQqViaeb4k2vMul8gx12oDOIadEtoRqTdLkxjzqtQ90=
-github.com/deepmap/oapi-codegen v1.15.0/go.mod h1:a6KoHV7lMRwsPoEg2C6NDHiXYV3EQfiFocOlJ8dgJQE=
+github.com/deepmap/oapi-codegen v1.16.1 h1:HzcBqD6f+fQCNLZVNOTH+OlbZNLYh7v4MRlBEac4I8Y=
+github.com/deepmap/oapi-codegen v1.16.1/go.mod h1:rdYoEA2GE+riuZ91DvpmBX9hJbQpuY9wchXpfQ3n+ho=
 github.com/docker/distribution v2.8.2+incompatible h1:T3de5rq0dB1j30rp0sA2rER+m322EBzniBPB6ZIzuh8=
 github.com/docker/distribution v2.8.2+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
 github.com/docker/docker v24.0.6+incompatible h1:hceabKCtUgDqPu+qm0NgsaXf28Ljf4/pWFL7xjWWDgE=
@@ -332,8 +332,8 @@ github.com/sosodev/duration v1.2.0/go.mod h1:RQIBBX0+fMLc/D9+Jb/fwvVmo0eZvDDEERA
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
 github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/spkg/bom v0.0.0-20160624110644-59b7046e48ad/go.mod h1:qLr4V1qq6nMqFKkMo8ZTx3f+BZEkzsRUY10Xsm2mwU0=
-github.com/steadybit/action-kit/go/action_kit_api/v2 v2.7.3 h1:IJjaEM7pE++wT1T8kZEQ4Q1tjinl6n3dmbBcomS8L2Q=
-github.com/steadybit/action-kit/go/action_kit_api/v2 v2.7.3/go.mod h1:BfFV+JOMe24695cTWvN/7Iuhc3izy6G1qt0vUzeksWg=
+github.com/steadybit/action-kit/go/action_kit_api/v2 v2.8.0 h1:mo+wf8we5LVnxgUuJvvN/DDVA42uZt6RLKCBJtkWL/4=
+github.com/steadybit/action-kit/go/action_kit_api/v2 v2.8.0/go.mod h1:q9fyUhgf3LnhMRCzZ9tBjj8w2le5SUJi0vHw6A3PIKw=
 github.com/steadybit/action-kit/go/action_kit_sdk v1.1.8 h1:kcpEVZw0iv5bIE7GNmjC54XRKxUlwPkDsvfMGeudIrQ=
 github.com/steadybit/action-kit/go/action_kit_sdk v1.1.8/go.mod h1:h2E1gRdpIhWvfQy5XsRIfQi3AujlpdcXxt3tNU9829U=
 github.com/steadybit/action-kit/go/action_kit_test v1.2.1 h1:eBELpUdYHrUz4WL6REq7TcF0zsVH0gpTmMv8Mu4JPjA=
