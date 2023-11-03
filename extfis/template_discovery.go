@@ -15,53 +15,41 @@ import (
 	"github.com/sosodev/duration"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
-	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
-	"os"
 	"strings"
 	"time"
 )
 
+type fisTemplateDiscovery struct{}
+
 var (
-	targets        *[]discovery_kit_api.Target
-	discoveryError *extension_kit.ExtensionError
+	_ discovery_kit_sdk.TargetDescriber    = (*fisTemplateDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber = (*fisTemplateDiscovery)(nil)
 )
 
-func RegisterFisInstanceDiscoveryHandlers(stopCh chan os.Signal) {
-	exthttp.RegisterHttpHandler("/fis/template/discovery", exthttp.GetterAsHandler(getFisTemplateDiscoveryDescription))
-	exthttp.RegisterHttpHandler("/fis/template/discovery/target-description", exthttp.GetterAsHandler(getFisTemplateTargetDescription))
-	exthttp.RegisterHttpHandler("/fis/template/discovery/attribute-descriptions", exthttp.GetterAsHandler(getFisTemplateAttributeDescriptions))
-	exthttp.RegisterHttpHandler("/fis/template/discovery/discovered-targets", getFisTemplateTargets)
-
-	utils.StartDiscoveryTask(
-		stopCh,
-		"fis template",
-		time.Duration(config.Config.DiscoveryIntervalFis)*time.Second,
-		getTargetsForAccount,
-		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			targets = &updatedTargets
-			discoveryError = err
-		})
+func NewFisTemplateDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
+	discovery := &fisTemplateDiscovery{}
+	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
+		discovery_kit_sdk.WithRefreshTargetsNow(),
+		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalFis)*time.Second),
+	)
 }
 
-func getFisTemplateDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
+func (f *fisTemplateDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         fisTargetId,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			Method:       "GET",
-			Path:         "/fis/template/discovery/discovered-targets",
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalFis)),
 		},
 	}
 }
 
-func getFisTemplateTargetDescription() discovery_kit_api.TargetDescription {
+func (f *fisTemplateDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       fisTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "FIS experiment", Other: "FIS experiments"},
@@ -86,52 +74,44 @@ func getFisTemplateTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getFisTemplateAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
-	return discovery_kit_api.AttributeDescriptions{
-		Attributes: []discovery_kit_api.AttributeDescription{
-			{
-				Attribute: "aws.fis.experiment.template.name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "template name",
-					Other: "template names",
-				},
-			}, {
-				Attribute: "aws.fis.experiment.template.description",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "description",
-					Other: "descriptions",
-				},
-			}, {
-				Attribute: "aws.fis.experiment.template.duration",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "duration",
-					Other: "durations",
-				},
+func (f *fisTemplateDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
+	return []discovery_kit_api.AttributeDescription{
+		{
+			Attribute: "aws.fis.experiment.template.name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "template name",
+				Other: "template names",
+			},
+		}, {
+			Attribute: "aws.fis.experiment.template.description",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "description",
+				Other: "descriptions",
+			},
+		}, {
+			Attribute: "aws.fis.experiment.template.duration",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "duration",
+				Other: "durations",
 			},
 		},
 	}
 }
-
-func getFisTemplateTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	if discoveryError != nil {
-		exthttp.WriteError(w, *discoveryError)
-	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: targets})
-	}
+func (f *fisTemplateDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "fis-template")
 }
-
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := fis.NewFromConfig(account.AwsConfig)
 	result, err := GetAllFisTemplates(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
 			log.Error().Msgf("Not Authorized to discover fis experiment templates for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS=true. Details: %s", account.AccountNumber, re.Error())
-			return extutil.Ptr([]discovery_kit_api.Target{}), nil
+			return []discovery_kit_api.Target{}, nil
 		}
 		return nil, err
 	}
-	return &result, nil
+	return result, nil
 }
 
 type FisApi interface {

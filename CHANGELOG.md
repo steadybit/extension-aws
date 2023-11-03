@@ -1,5 +1,8 @@
 # Changelog
 
+## next
+
+- use discovery_kit_sdk for discoveries
 
 ## v2.2.15
 

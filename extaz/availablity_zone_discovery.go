@@ -14,50 +14,40 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
-	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
-	"os"
 	"time"
 )
 
-var (
-	targets        *[]discovery_kit_api.Target
-	discoveryError *extension_kit.ExtensionError
-)
-
-func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
-	exthttp.RegisterHttpHandler("/az/discovery", exthttp.GetterAsHandler(getAZDiscoveryDescription))
-	exthttp.RegisterHttpHandler("/az/discovery/target-description", exthttp.GetterAsHandler(getAZTargetDescription))
-	exthttp.RegisterHttpHandler("/az/discovery/discovered-targets", getAZDiscoveryResults)
-	utils.StartDiscoveryTask(
-		stopCh,
-		"availability zone",
-		time.Duration(config.Config.DiscoveryIntervalZone)*time.Second,
-		getTargetsForAccount,
-		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			targets = &updatedTargets
-			discoveryError = err
-		})
+type azDiscovery struct {
 }
 
-func getAZDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
+var (
+	_ discovery_kit_sdk.TargetDescriber = (*azDiscovery)(nil)
+)
+
+func NewAzDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
+	discovery := &azDiscovery{}
+	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
+		discovery_kit_sdk.WithRefreshTargetsNow(),
+		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalZone)*time.Second),
+	)
+}
+
+func (a *azDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         azTargetType,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			Method:       "GET",
-			Path:         "/az/discovery/discovered-targets",
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalZone)),
 		},
 	}
 }
 
-func getAZTargetDescription() discovery_kit_api.TargetDescription {
+func (a *azDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       azTargetType,
 		Label:    discovery_kit_api.PluralLabel{One: "Availability Zone", Other: "Availability Zones"},
@@ -80,28 +70,24 @@ func getAZTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getAZDiscoveryResults(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	if discoveryError != nil {
-		exthttp.WriteError(w, *discoveryError)
-	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: targets})
-	}
+func (a *azDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "availability zone")
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ec2.NewFromConfig(account.AwsConfig)
-	result, err := GetAllAvailabilityZones(ctx, client, account.AccountNumber)
+	result, err := getAllAvailabilityZones(ctx, client, account.AccountNumber)
 	if err != nil {
 		return nil, err
 	}
-	return &result, nil
+	return result, nil
 }
 
 type AZDescribeAvailabilityZonesApi interface {
 	DescribeAvailabilityZones(ctx context.Context, params *ec2.DescribeAvailabilityZonesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeAvailabilityZonesOutput, error)
 }
 
-func GetAllAvailabilityZones(ctx context.Context, ec2Api AZDescribeAvailabilityZonesApi, awsAccountNumber string) ([]discovery_kit_api.Target, error) {
+func getAllAvailabilityZones(ctx context.Context, ec2Api AZDescribeAvailabilityZonesApi, awsAccountNumber string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	output, err := ec2Api.DescribeAvailabilityZones(ctx, &ec2.DescribeAvailabilityZonesInput{

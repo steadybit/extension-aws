@@ -14,52 +14,41 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
-	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
-	"os"
 	"time"
 )
 
-var (
-	instanceTargets *[]discovery_kit_api.Target
-	discoveryError  *extension_kit.ExtensionError
-)
-
-func RegisterInstanceDiscoveryHandlers(stopCh chan os.Signal) {
-	exthttp.RegisterHttpHandler("/rds/instance/discovery", exthttp.GetterAsHandler(getRdsInstanceDiscoveryDescription))
-	exthttp.RegisterHttpHandler("/rds/instance/discovery/target-description", exthttp.GetterAsHandler(getRdsInstanceTargetDescription))
-	exthttp.RegisterHttpHandler("/rds/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getRdsInstanceAttributeDescriptions))
-	exthttp.RegisterHttpHandler("/rds/instance/discovery/discovered-targets", getRdsInstanceDiscoveryResults)
-
-	utils.StartDiscoveryTask(
-		stopCh,
-		"rds instance",
-		time.Duration(config.Config.DiscoveryIntervalRds)*time.Second,
-		getInstanceTargetsForAccount,
-		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			instanceTargets = &updatedTargets
-			discoveryError = err
-		})
+type rdsInstanceDiscovery struct {
 }
 
-func getRdsInstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
+var (
+	_ discovery_kit_sdk.TargetDescriber    = (*rdsInstanceDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber = (*rdsInstanceDiscovery)(nil)
+)
+
+func NewRdsInstanceDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
+	discovery := &rdsInstanceDiscovery{}
+	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
+		discovery_kit_sdk.WithRefreshTargetsNow(),
+		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalRds)*time.Second),
+	)
+}
+
+func (r *rdsInstanceDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         rdsInstanceTargetId,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			Method:       "GET",
-			Path:         "/rds/instance/discovery/discovered-targets",
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalRds)),
 		},
 	}
 }
 
-func getRdsInstanceTargetDescription() discovery_kit_api.TargetDescription {
+func (r *rdsInstanceDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       rdsInstanceTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "RDS instance", Other: "RDS instances"},
@@ -84,62 +73,56 @@ func getRdsInstanceTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getRdsInstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
-	return discovery_kit_api.AttributeDescriptions{
-		Attributes: []discovery_kit_api.AttributeDescription{
-			{
-				Attribute: "aws.rds.engine",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS database engine",
-					Other: "AWS RDS database engines",
-				},
-			}, {
-				Attribute: "aws.rds.cluster",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS cluster",
-					Other: "AWS RDS clusters",
-				},
-			}, {
-				Attribute: "aws.rds.instance.id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS instance ID",
-					Other: "AWS RDS instance IDs",
-				},
-			}, {
-				// See https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/accessing-monitoring.html#Overview.DBInstance.Status
-				Attribute: "aws.rds.instance.status",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS instance status",
-					Other: "AWS RDS instance status",
-				},
+func (r *rdsInstanceDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
+	return []discovery_kit_api.AttributeDescription{
+		{
+			Attribute: "aws.rds.engine",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS database engine",
+				Other: "AWS RDS database engines",
+			},
+		}, {
+			Attribute: "aws.rds.cluster",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS cluster",
+				Other: "AWS RDS clusters",
+			},
+		}, {
+			Attribute: "aws.rds.instance.id",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS instance ID",
+				Other: "AWS RDS instance IDs",
+			},
+		}, {
+			// See https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/accessing-monitoring.html#Overview.DBInstance.Status
+			Attribute: "aws.rds.instance.status",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS instance status",
+				Other: "AWS RDS instance status",
 			},
 		},
 	}
 }
 
-func getRdsInstanceDiscoveryResults(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	if discoveryError != nil {
-		exthttp.WriteError(w, *discoveryError)
-	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: instanceTargets})
-	}
+func (r *rdsInstanceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return utils.ForEveryAccount(utils.Accounts, getInstanceTargetsForAccount, ctx, "rds-instance")
 }
 
-func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	result, err := GetAllRdsInstances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := getAllRdsInstances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
 			log.Error().Msgf("Not Authorized to discover rds-instances for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true. Details: %s", account.AccountNumber, re.Error())
-			return extutil.Ptr([]discovery_kit_api.Target{}), nil
+			return []discovery_kit_api.Target{}, nil
 		}
 		return nil, err
 	}
-	return &result, nil
+	return result, nil
 }
 
-func GetAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := rds.NewDescribeDBInstancesPaginator(rdsApi, &rds.DescribeDBInstancesInput{})

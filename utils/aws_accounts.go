@@ -47,16 +47,16 @@ func (accounts *AwsAccounts) GetAccount(accountNumber string) (*AwsAccount, erro
 
 func ForEveryAccount(
 	accounts *AwsAccounts,
-	supplier func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error),
+	supplier func(account *AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error),
 	ctx context.Context,
 	discovery string,
-) (*[]discovery_kit_api.Target, error) {
+) ([]discovery_kit_api.Target, error) {
 	numAccounts := len(accounts.Accounts)
 	if numAccounts > 0 {
 		accountsChannel := make(chan AwsAccount, numAccounts)
-		resultsChannel := make(chan *[]discovery_kit_api.Target, numAccounts)
+		resultsChannel := make(chan []discovery_kit_api.Target, numAccounts)
 		for w := 1; w <= config.Config.WorkerThreads; w++ {
-			go func(w int, accounts <-chan AwsAccount, result <-chan *[]discovery_kit_api.Target) {
+			go func(w int, accounts <-chan AwsAccount, result <-chan []discovery_kit_api.Target) {
 				for account := range accounts {
 					log.Trace().Int("worker", w).Msgf("Collecting %s for account %s", discovery, account.AccountNumber)
 					eachResult, eachErr := supplier(&account, ctx)
@@ -75,10 +75,10 @@ func ForEveryAccount(
 		for a := 1; a <= numAccounts; a++ {
 			targets := <-resultsChannel
 			if targets != nil {
-				resultTargets = append(resultTargets, *targets...)
+				resultTargets = append(resultTargets, targets...)
 			}
 		}
-		return &resultTargets, nil
+		return resultTargets, nil
 	} else {
 		return supplier(&accounts.RootAccount, ctx)
 	}
