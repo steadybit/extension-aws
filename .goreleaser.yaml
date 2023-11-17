@@ -16,6 +16,7 @@ builds:
       - arm64
     flags:
       - -cover={{ if index .Env "BUILD_WITH_COVERAGE"  }}{{ .Env.BUILD_WITH_COVERAGE }}{{ else }}false{{ end }}
+      - -covermode=atomic
     ldflags:
       - -s -w
       - -X github.com/steadybit/extension-kit/extbuild.ExtensionName={{.ProjectName}}
