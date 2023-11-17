@@ -1,6 +1,12 @@
 # Changelog
 
 
+## v2.2.15
+
+- Added `pprof` endpoints for debugging purposes
+- Update dependencies
+- Enrichment for kubernetes-statefulsets, -daemonsets, -nodes and -pods
+
 ## v2.2.14
 
 - Possibility to exclude attributes from discovery
@@ -92,7 +98,7 @@
 ## v1.7.0
 
  - Support creation of a TLS server through the environment variables `STEADYBIT_EXTENSION_TLS_SERVER_CERT` and `STEADYBIT_EXTENSION_TLS_SERVER_KEY`. Both environment variables must refer to files containing the certificate and key in PEM format.
- - Support mutual TLS through the environment variable `STEADYBIT_EXTENSION_TLS_CLIENT_CAS`. The environment must refer to a comma-separated list of files containing allowed clients' CA certificates in PEM format. 
+ - Support mutual TLS through the environment variable `STEADYBIT_EXTENSION_TLS_CLIENT_CAS`. The environment must refer to a comma-separated list of files containing allowed clients' CA certificates in PEM format.
 
 ## v1.6.0
 
@@ -105,7 +111,7 @@
 ## v1.4.0
 
  - Restrict discovery execution to AWS agents to avoid common issues.
- - The log level can now be configured through the `STEADYBIT_LOG_LEVEL` environment variable. 
+ - The log level can now be configured through the `STEADYBIT_LOG_LEVEL` environment variable.
 
 ## v1.3.0
 
