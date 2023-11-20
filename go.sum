@@ -54,8 +54,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.1 h1:rpkF4n0
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.1/go.mod h1:l9ymW25HOqymeU2m1gbUQ3rUIsTwKs8gYHXkqDQUhiI=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.3 h1:kJOolE8xBAD13xTCgOakByZkyP4D/owNmvEiioeUNAg=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.3/go.mod h1:Owv1I59vaghv1Ax8zz8ELY8DN7/Y0rGS+WWAmjgi950=
-github.com/aws/aws-sdk-go-v2/service/lambda v1.47.0 h1:uvXQ0OXcanfgO0XbzQWXW6fYZ7cCpgACECHiGm8nNVU=
-github.com/aws/aws-sdk-go-v2/service/lambda v1.47.0/go.mod h1:80TuTBIg7+OWOOA85SdMfvV393HGXPwqoepFTQn6/qA=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.48.0 h1:Q1ajPX+B64b/OyxuaSDBjqOMmVrpNLhPfTFghpU783k=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.48.0/go.mod h1:80TuTBIg7+OWOOA85SdMfvV393HGXPwqoepFTQn6/qA=
 github.com/aws/aws-sdk-go-v2/service/rds v1.62.4 h1:ouOW1mT+ob7Se9dZ3YOpwOoCgtM82mw4v7SY0w5HH4M=
 github.com/aws/aws-sdk-go-v2/service/rds v1.62.4/go.mod h1:C73+OVOdaMZNc/Z8PhnLoArk6mCqxkiqfgmCrvNrDDM=
 github.com/aws/aws-sdk-go-v2/service/ssm v1.42.2 h1:RcO+28sK4dBo/XFmF7QXCUxQh2D+DNQN2mvc+xfKyIo=
