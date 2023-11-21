@@ -55,6 +55,22 @@ logging:
   # logging.format -- The format of the log entries. One of text, json
   format: text
 
+probes:
+  # probes.readiness.* -- Configuration of the Kubernetes readiness probe
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  # probes.liveness.* -- Configuration of the Kubernetes liveness probe
+  liveness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+
 resources:
   requests:
     # resources.requests.memory -- The minimal amount of memory needed
