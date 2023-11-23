@@ -6,16 +6,16 @@ module github.com/steadybit/extension-aws
 go 1.21
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.23.0
-	github.com/aws/aws-sdk-go-v2/config v1.25.3
-	github.com/aws/aws-sdk-go-v2/credentials v1.16.2
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.4
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.136.0
-	github.com/aws/aws-sdk-go-v2/service/fis v1.19.2
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.48.0
-	github.com/aws/aws-sdk-go-v2/service/rds v1.63.0
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.42.2
-	github.com/aws/aws-sdk-go-v2/service/sts v1.25.3
+	github.com/aws/aws-sdk-go-v2 v1.23.1
+	github.com/aws/aws-sdk-go-v2/config v1.25.5
+	github.com/aws/aws-sdk-go-v2/credentials v1.16.4
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.5
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.137.1
+	github.com/aws/aws-sdk-go-v2/service/fis v1.19.3
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.48.1
+	github.com/aws/aws-sdk-go-v2/service/rds v1.63.1
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.43.1
+	github.com/aws/aws-sdk-go-v2/service/sts v1.25.4
 	github.com/aws/smithy-go v1.17.0
 	github.com/docker/go-connections v0.4.0
 	github.com/google/uuid v1.4.0
@@ -49,13 +49,13 @@ require (
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.5.1 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.3 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.3 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.4 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.17.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.20.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.17.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.20.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
@@ -143,8 +143,8 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.1 // indirect
-	github.com/tdewolff/minify/v2 v2.20.6 // indirect
-	github.com/tdewolff/parse/v2 v2.7.4 // indirect
+	github.com/tdewolff/minify/v2 v2.20.7 // indirect
+	github.com/tdewolff/parse/v2 v2.7.5 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
@@ -156,6 +156,7 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yosssi/ace v0.0.5 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
+	github.com/zmwangx/debounce v1.0.0 // indirect
 	golang.org/x/arch v0.6.0 // indirect
 	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
