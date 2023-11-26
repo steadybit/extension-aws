@@ -97,20 +97,23 @@ func Test_getExtensionList(t *testing.T) {
 			},
 		},
 	}
+	utils.Accounts = &utils.AwsAccounts{
+		RootAccount: utils.AwsAccount{
+			AccountNumber: "123456789012",
+			AwsConfig:     aws.Config{},
+		},
+		Accounts: make(map[string]utils.AwsAccount),
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			utils.Accounts = &utils.AwsAccounts{
-				RootAccount: utils.AwsAccount{
-					AccountNumber: "123456789012",
-					AwsConfig:     aws.Config{},
-				},
-				Accounts: make(map[string]utils.AwsAccount),
-			}
 			action_kit_sdk.ClearRegisteredActions()
 			discovery_kit_sdk.ClearRegisteredDiscoveries()
 			http.DefaultServeMux = http.NewServeMux()
 			config.Config = tt.config
-			registerHandlers(context.Background())
+			background, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			registerHandlers(background)
 
 			got := getExtensionList()
 			routes := make([]string, 0)
