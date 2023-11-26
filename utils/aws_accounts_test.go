@@ -72,7 +72,7 @@ func TestForEachAccountWithoutRoleAssumption(t *testing.T) {
 
 	require.NoError(t, err)
 	var values []string
-	for _, target := range *result {
+	for _, target := range result {
 		values = append(values, target.Attributes["aws.account"][0])
 	}
 	require.Equal(t, []string{"root"}, values)
@@ -87,7 +87,7 @@ func TestForEachAccountWithRoleAssumptionAndSingleWorker(t *testing.T) {
 	require.NoError(t, err)
 	// for stable test execution
 	var values []string
-	for _, target := range *result {
+	for _, target := range result {
 		values = append(values, target.Attributes["aws.account"][0])
 	}
 	sort.Strings(values)
@@ -103,7 +103,7 @@ func TestForEachAccountWithRoleAssumptionAndMultipleWorkers(t *testing.T) {
 	require.NoError(t, err)
 	// for stable test execution
 	var values []string
-	for _, target := range *result {
+	for _, target := range result {
 		values = append(values, target.Attributes["aws.account"][0])
 	}
 	sort.Strings(values)
@@ -119,7 +119,7 @@ func TestForEachAccountWithRoleAssumptionAndError(t *testing.T) {
 	require.NoError(t, err)
 	// for stable test execution
 	var values []string
-	for _, target := range *result {
+	for _, target := range result {
 		values = append(values, target.Attributes["aws.account"][0])
 	}
 	sort.Strings(values)
@@ -135,21 +135,20 @@ func TestForEachAccountWithRoleAssumptionAndEmptyLists(t *testing.T) {
 	require.NoError(t, err)
 	// for stable test execution
 	var values []string
-	for _, target := range *result {
+	for _, target := range result {
 		values = append(values, target.Attributes["aws.account"][0])
 	}
 	sort.Strings(values)
 	require.Equal(t, []string{"assumed1", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
 }
 
-func getTestFunction(errorForAccount *string, emptyForAccount *string) func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
-	return func(account *AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func getTestFunction(errorForAccount *string, emptyForAccount *string) func(account *AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return func(account *AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 		if (errorForAccount != nil) && (*errorForAccount == account.AccountNumber) {
 			return nil, errors.New("damn broken discovery")
 		}
 		if (emptyForAccount != nil) && (*emptyForAccount == account.AccountNumber) {
-			result := make([]discovery_kit_api.Target, 0, 100)
-			return &result, nil
+			return []discovery_kit_api.Target{}, nil
 		}
 		var targets []discovery_kit_api.Target
 		targets = append(targets, discovery_kit_api.Target{
@@ -160,7 +159,7 @@ func getTestFunction(errorForAccount *string, emptyForAccount *string) func(acco
 			},
 		})
 		time.Sleep(100 * time.Millisecond)
-		return &targets, nil
+		return targets, nil
 	}
 }
 

@@ -33,7 +33,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
 	// When
-	targets, err := GetAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -68,7 +68,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
 	// When
-	targets, err := GetAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -119,7 +119,7 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	}), nil)
 
 	// When
-	targets, err := GetAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -135,7 +135,7 @@ func TestGetAllRdsInstancesError(t *testing.T) {
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := GetAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
+	_, err := getAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

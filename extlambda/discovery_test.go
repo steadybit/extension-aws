@@ -21,7 +21,7 @@ type lambdaClientMock struct {
 }
 
 func (m *lambdaClientMock) ListFunctions(ctx context.Context, params *lambda.ListFunctionsInput, optFns ...func(*lambda.Options)) (*lambda.ListFunctionsOutput, error) {
-	args := m.Called(ctx, params)
+	args := m.Called(ctx, params, optFns)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -55,16 +55,16 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 			},
 		},
 	}
-	api.On("ListFunctions", mock.Anything, mock.Anything).Return(&listedFunction, nil)
+	api.On("ListFunctions", mock.Anything, mock.Anything, mock.Anything).Return(&listedFunction, nil)
 
 	// When
 	targets, err := getAllAwsLambdaFunctions(context.Background(), api, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
-	assert.Equal(t, 1, len(*targets))
+	assert.Len(t, targets, 1)
 
-	target := (*targets)[0]
+	target := targets[0]
 	assert.Equal(t, lambdaTargetID, target.TargetType)
 	assert.Equal(t, "name", target.Label)
 	assert.Equal(t, "arn", target.Id)
@@ -85,7 +85,7 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 	withoutMarker := mock.MatchedBy(func(arg *lambda.ListFunctionsInput) bool {
 		return arg.Marker == nil
 	})
-	mockedApi.On("ListFunctions", mock.Anything, withoutMarker).Return(&lambda.ListFunctionsOutput{
+	mockedApi.On("ListFunctions", mock.Anything, withoutMarker, mock.Anything).Return(&lambda.ListFunctionsOutput{
 		NextMarker: discovery_kit_api.Ptr("marker"),
 		Functions: []types.FunctionConfiguration{
 			{
@@ -93,7 +93,7 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 			},
 		},
 	}, nil)
-	mockedApi.On("ListFunctions", mock.Anything, withMarker).Return(&lambda.ListFunctionsOutput{
+	mockedApi.On("ListFunctions", mock.Anything, withMarker, mock.Anything).Return(&lambda.ListFunctionsOutput{
 		Functions: []types.FunctionConfiguration{
 			{
 				FunctionArn: extutil.Ptr("arn2"),
@@ -106,15 +106,15 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 
 	// Then
 	assert.Equal(t, nil, err)
-	assert.Equal(t, 2, len(*targets))
-	assert.Equal(t, "arn1", (*targets)[0].Id)
-	assert.Equal(t, "arn2", (*targets)[1].Id)
+	assert.Len(t, targets, 2)
+	assert.Equal(t, "arn1", targets[0].Id)
+	assert.Equal(t, "arn2", targets[1].Id)
 }
 
 func Test_getAllAwsLambdaFunctions_withError(t *testing.T) {
 	// Given
 	api := new(lambdaClientMock)
-	api.On("ListFunctions", mock.Anything, mock.Anything).Return(nil, errors.New("error"))
+	api.On("ListFunctions", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
 	// When
 	_, err := getAllAwsLambdaFunctions(context.Background(), api, "42", "us-east-1")

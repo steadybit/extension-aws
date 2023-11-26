@@ -33,7 +33,7 @@ func TestGetAllRdsClusters(t *testing.T) {
 	mockedApi.On("DescribeDBClusters", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
 	// When
-	targets, err := GetAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -85,7 +85,7 @@ func TestGetAllRdsClustersWithPagination(t *testing.T) {
 	}), nil)
 
 	// When
-	targets, err := GetAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -101,7 +101,7 @@ func TestGetAllRdsClustersError(t *testing.T) {
 	mockedApi.On("DescribeDBClusters", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := GetAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
+	_, err := getAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

@@ -13,52 +13,41 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
-	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
-	"os"
 	"time"
 )
 
-var (
-	clusterTargets        *[]discovery_kit_api.Target
-	clusterDiscoveryError *extension_kit.ExtensionError
-)
-
-func RegisterClusterDiscoveryHandlers(stopCh chan os.Signal) {
-	exthttp.RegisterHttpHandler("/rds/cluster/discovery", exthttp.GetterAsHandler(getRdsClusterDiscoveryDescription))
-	exthttp.RegisterHttpHandler("/rds/cluster/discovery/target-description", exthttp.GetterAsHandler(getRdsClusterTargetDescription))
-	exthttp.RegisterHttpHandler("/rds/cluster/discovery/attribute-descriptions", exthttp.GetterAsHandler(getRdsClusterAttributeDescriptions))
-	exthttp.RegisterHttpHandler("/rds/cluster/discovery/discovered-targets", getRdsClusterDiscoveryResults)
-
-	utils.StartDiscoveryTask(
-		stopCh,
-		"rds cluster",
-		time.Duration(config.Config.DiscoveryIntervalRds)*time.Second,
-		getClusterTargetsForAccount,
-		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			clusterTargets = &updatedTargets
-			clusterDiscoveryError = err
-		})
+type rdsClusterDiscovery struct {
 }
 
-func getRdsClusterDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
+var (
+	_ discovery_kit_sdk.TargetDescriber    = (*rdsClusterDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber = (*rdsClusterDiscovery)(nil)
+)
+
+func NewRdsClusterDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
+	discovery := &rdsClusterDiscovery{}
+	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
+		discovery_kit_sdk.WithRefreshTargetsNow(),
+		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalRds)*time.Second),
+	)
+}
+
+func (r *rdsClusterDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         rdsClusterTargetId,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			Method:       "GET",
-			Path:         "/rds/cluster/discovery/discovered-targets",
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalRds)),
 		},
 	}
 }
 
-func getRdsClusterTargetDescription() discovery_kit_api.TargetDescription {
+func (r *rdsClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       rdsClusterTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "RDS cluster", Other: "RDS clusters"},
@@ -82,79 +71,73 @@ func getRdsClusterTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getRdsClusterAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
-	return discovery_kit_api.AttributeDescriptions{
-		Attributes: []discovery_kit_api.AttributeDescription{
-			{
-				Attribute: "aws.rds.engine",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS database engine",
-					Other: "AWS RDS database engines",
-				},
-			}, {
-				Attribute: "aws.rds.cluster",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS cluster",
-					Other: "AWS RDS clusters",
-				},
-			}, {
-				Attribute: "aws.rds.cluster.id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS cluster ID",
-					Other: "AWS RDS cluster IDs",
-				},
-			}, {
-				Attribute: "aws.rds.cluster.status",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS cluster status",
-					Other: "AWS RDS cluster status",
-				},
-			}, {
-				Attribute: "aws.rds.cluster.multi-az",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS cluster Multi-AZ",
-					Other: "AWS RDS cluster Multi-AZ",
-				},
-			}, {
-				Attribute: "aws.rds.cluster.reader",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS cluster reader instance",
-					Other: "AWS RDS cluster reader instances",
-				},
-			}, {
-				Attribute: "aws.rds.cluster.writer",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "AWS RDS cluster writer instance",
-					Other: "AWS RDS cluster writer instances",
-				},
+func (r *rdsClusterDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
+	return []discovery_kit_api.AttributeDescription{
+		{
+			Attribute: "aws.rds.engine",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS database engine",
+				Other: "AWS RDS database engines",
+			},
+		}, {
+			Attribute: "aws.rds.cluster",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS cluster",
+				Other: "AWS RDS clusters",
+			},
+		}, {
+			Attribute: "aws.rds.cluster.id",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS cluster ID",
+				Other: "AWS RDS cluster IDs",
+			},
+		}, {
+			Attribute: "aws.rds.cluster.status",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS cluster status",
+				Other: "AWS RDS cluster status",
+			},
+		}, {
+			Attribute: "aws.rds.cluster.multi-az",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS cluster Multi-AZ",
+				Other: "AWS RDS cluster Multi-AZ",
+			},
+		}, {
+			Attribute: "aws.rds.cluster.reader",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS cluster reader instance",
+				Other: "AWS RDS cluster reader instances",
+			},
+		}, {
+			Attribute: "aws.rds.cluster.writer",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS RDS cluster writer instance",
+				Other: "AWS RDS cluster writer instances",
 			},
 		},
 	}
 }
 
-func getRdsClusterDiscoveryResults(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	if clusterDiscoveryError != nil {
-		exthttp.WriteError(w, *clusterDiscoveryError)
-	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: clusterTargets})
-	}
+func (r *rdsClusterDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return utils.ForEveryAccount(utils.Accounts, getClusterTargetsForAccount, ctx, "rds-cluster")
 }
 
-func getClusterTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func getClusterTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	result, err := GetAllRdsClusters(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := getAllRdsClusters(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
 			log.Error().Msgf("Not Authorized to discover rds-clusters for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true. Details: %s", account.AccountNumber, re.Error())
-			return extutil.Ptr([]discovery_kit_api.Target{}), nil
+			return []discovery_kit_api.Target{}, nil
 		}
 		return nil, err
 	}
-	return &result, nil
+	return result, nil
 }
 
-func GetAllRdsClusters(ctx context.Context, rdsApi rdsDBClusterApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func getAllRdsClusters(ctx context.Context, rdsApi rdsDBClusterApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := rds.NewDescribeDBClustersPaginator(rdsApi, &rds.DescribeDBClustersInput{})

@@ -20,7 +20,7 @@ type ec2ClientMock struct {
 }
 
 func (m *ec2ClientMock) DescribeAvailabilityZones(ctx context.Context, params *ec2.DescribeAvailabilityZonesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeAvailabilityZonesOutput, error) {
-	args := m.Called(ctx, params)
+	args := m.Called(ctx, params, optFns)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -39,10 +39,10 @@ func TestGetAllAvailabilityZones(t *testing.T) {
 			},
 		},
 	}
-	mockedApi.On("DescribeAvailabilityZones", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
+	mockedApi.On("DescribeAvailabilityZones", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
 	// When
-	targets, err := GetAllAvailabilityZones(context.Background(), mockedApi, "42")
+	targets, err := getAllAvailabilityZones(context.Background(), mockedApi, "42")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -63,10 +63,10 @@ func TestGetAllAvailabilityZonesError(t *testing.T) {
 	// Given
 	mockedApi := new(ec2ClientMock)
 
-	mockedApi.On("DescribeAvailabilityZones", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
+	mockedApi.On("DescribeAvailabilityZones", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := GetAllAvailabilityZones(context.Background(), mockedApi, "42")
+	_, err := getAllAvailabilityZones(context.Background(), mockedApi, "42")
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

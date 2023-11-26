@@ -14,65 +14,42 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
-	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
-	"os"
 	"strings"
 	"time"
 )
 
+type ec2Discovery struct{}
+
 var (
-	targets        *[]discovery_kit_api.Target
-	discoveryError *extension_kit.ExtensionError
+	_ discovery_kit_sdk.TargetDescriber          = (*ec2Discovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber       = (*ec2Discovery)(nil)
+	_ discovery_kit_sdk.EnrichmentRulesDescriber = (*ec2Discovery)(nil)
 )
 
-func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
-	exthttp.RegisterHttpHandler("/ec2/instance/discovery", exthttp.GetterAsHandler(getEc2InstanceDiscoveryDescription))
-	exthttp.RegisterHttpHandler("/ec2/instance/discovery/target-description", exthttp.GetterAsHandler(getEc2InstanceTargetDescription))
-	exthttp.RegisterHttpHandler("/ec2/instance/discovery/attribute-descriptions", exthttp.GetterAsHandler(getEc2InstanceAttributeDescriptions))
-	exthttp.RegisterHttpHandler("/ec2/instance/discovery/discovered-targets", getEc2InstanceTargets)
-	//Not yet generic because we want to keep the id until enrichment rules gets deleted automatically in the platform
-	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-host", exthttp.GetterAsHandler(func() discovery_kit_api.TargetEnrichmentRule {
-		return getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_aws.ec2-instance-to-host", "com.steadybit.extension_host.host")
-	}))
-	exthttp.RegisterHttpHandler("/ec2/instance/discovery/rules/ec2-to-kubernetes-node", exthttp.GetterAsHandler(func() discovery_kit_api.TargetEnrichmentRule {
-		return getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_aws.ec2-instance-to-kubernetes-node", "com.steadybit.extension_kubernetes.kubernetes-node")
-	}))
-
-	log.Info().Msgf("Enriching EC2 data for target types: %v", config.Config.EnrichEc2DataForTargetTypes)
-	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
-		exthttp.RegisterHttpHandler(fmt.Sprintf("/ec2/instance/discovery/rules/ec2-to-%s", targetType), exthttp.GetterAsHandler(getEc2InstanceToXEnrichmentRule(targetType)))
-	}
-
-	utils.StartDiscoveryTask(
-		stopCh,
-		"ec2 instance",
-		time.Duration(config.Config.DiscoveryIntervalEc2)*time.Second,
-		getTargetsForAccount,
-		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			targets = &updatedTargets
-			discoveryError = err
-		})
+func NewEc2InstanceDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
+	discovery := &ec2Discovery{}
+	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
+		discovery_kit_sdk.WithRefreshTargetsNow(),
+		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalEc2)*time.Second),
+	)
 }
 
-func getEc2InstanceDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
+func (e *ec2Discovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         ec2TargetId,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			Method:       "GET",
-			Path:         "/ec2/instance/discovery/discovered-targets",
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEc2)),
 		},
 	}
 }
 
-func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
+func (e *ec2Discovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       ec2TargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "EC2-instance", Other: "EC2-instances"},
@@ -100,7 +77,19 @@ func getEc2InstanceTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getEc2InstanceToHostEnrichmentRule(id string, target string) discovery_kit_api.TargetEnrichmentRule {
+func (e *ec2Discovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
+	rules := []discovery_kit_api.TargetEnrichmentRule{
+		getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_host.host"),
+		getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_kubernetes.kubernetes-node"),
+	}
+	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
+		rules = append(rules, getEc2InstanceToXEnrichmentRule(targetType))
+	}
+	return rules
+}
+
+func getEc2InstanceToHostEnrichmentRule(target string) discovery_kit_api.TargetEnrichmentRule {
+	id := fmt.Sprintf("com.steadybit.extension_aws.ec2-instance-to-%s", target)
 	return discovery_kit_api.TargetEnrichmentRule{
 		Id:      id,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
@@ -171,107 +160,99 @@ func getEc2InstanceToHostEnrichmentRule(id string, target string) discovery_kit_
 	}
 }
 
-func getEc2InstanceToXEnrichmentRule(destTargetType string) func() discovery_kit_api.TargetEnrichmentRule {
+func getEc2InstanceToXEnrichmentRule(destTargetType string) discovery_kit_api.TargetEnrichmentRule {
 	id := fmt.Sprintf("com.steadybit.extension_aws.ec2-instance-to-%s", destTargetType)
-	return func() discovery_kit_api.TargetEnrichmentRule {
-		return discovery_kit_api.TargetEnrichmentRule{
-			Id:      id,
-			Version: extbuild.GetSemverVersionStringOrUnknown(),
-			Src: discovery_kit_api.SourceOrDestination{
-				Type: ec2TargetId,
-				Selector: map[string]string{
-					"aws-ec2.hostname.internal": "${dest.host.hostname}",
-				},
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      id,
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: ec2TargetId,
+			Selector: map[string]string{
+				"aws-ec2.hostname.internal": "${dest.host.hostname}",
 			},
-			Dest: discovery_kit_api.SourceOrDestination{
-				Type: destTargetType,
-				Selector: map[string]string{
-					"host.hostname": "${src.aws-ec2.hostname.internal}",
-				},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: destTargetType,
+			Selector: map[string]string{
+				"host.hostname": "${src.aws-ec2.hostname.internal}",
 			},
-			Attributes: []discovery_kit_api.Attribute{
-				{
-					Matcher: discovery_kit_api.Equals,
-					Name:    "aws.account",
-				}, {
-					Matcher: discovery_kit_api.Equals,
-					Name:    "aws.region",
-				},
-				{
-					Matcher: discovery_kit_api.Equals,
-					Name:    "aws.zone",
-				},
-				{
-					Matcher: discovery_kit_api.Equals,
-					Name:    "aws-ec2.instance.id",
-				},
-				{
-					Matcher: discovery_kit_api.StartsWith,
-					Name:    "aws-ec2.label.",
-				},
-			},
-		}
-	}
-}
-
-func getEc2InstanceAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
-	return discovery_kit_api.AttributeDescriptions{
-		Attributes: []discovery_kit_api.AttributeDescription{
+		},
+		Attributes: []discovery_kit_api.Attribute{
 			{
-				Attribute: "aws-ec2.hostname.internal",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "internal hostname",
-					Other: "internal hostnames",
-				},
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.account",
 			}, {
-				Attribute: "aws-ec2.hostname.public",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "public hostname",
-					Other: "public hostnames",
-				},
-			}, {
-				Attribute: "aws.ec2.instance.id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Instance ID",
-					Other: "Instance IDs",
-				},
-			}, {
-				Attribute: "aws.ec2.instance.name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Instance Name",
-					Other: "Instance Names",
-				},
-			}, {
-				Attribute: "aws-ec2.state",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Instance State",
-					Other: "Instance States",
-				},
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.region",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.zone",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.instance.id",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "aws-ec2.label.",
 			},
 		},
 	}
 }
 
-func getEc2InstanceTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	if discoveryError != nil {
-		exthttp.WriteError(w, *discoveryError)
-	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: targets})
+func (e *ec2Discovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
+	return []discovery_kit_api.AttributeDescription{
+		{
+			Attribute: "aws-ec2.hostname.internal",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "internal hostname",
+				Other: "internal hostnames",
+			},
+		}, {
+			Attribute: "aws-ec2.hostname.public",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "public hostname",
+				Other: "public hostnames",
+			},
+		}, {
+			Attribute: "aws.ec2.instance.id",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Instance ID",
+				Other: "Instance IDs",
+			},
+		}, {
+			Attribute: "aws.ec2.instance.name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Instance Name",
+				Other: "Instance Names",
+			},
+		}, {
+			Attribute: "aws-ec2.state",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Instance State",
+				Other: "Instance States",
+			},
+		},
 	}
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func (e *ec2Discovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "ec2-instance")
+}
+
+func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ec2.NewFromConfig(account.AwsConfig)
 	result, err := GetAllEc2Instances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
 			log.Error().Msgf("Not Authorized to discover ec2-instances for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2=true. Details: %s", account.AccountNumber, re.Error())
-			return extutil.Ptr([]discovery_kit_api.Target{}), nil
+			return []discovery_kit_api.Target{}, nil
 		}
 		return nil, err
 	}
-	return &result, nil
+	return result, nil
 }
 
 type Ec2DescribeInstancesApi interface {

@@ -15,55 +15,41 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
-	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
-	"os"
 	"strconv"
 	"time"
 )
 
-const discoveryBasePath = "/lambda/discovery"
+type lambdaDiscovery struct{}
 
 var (
-	targets        *[]discovery_kit_api.Target
-	discoveryError *extension_kit.ExtensionError
+	_ discovery_kit_sdk.TargetDescriber    = (*lambdaDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber = (*lambdaDiscovery)(nil)
 )
 
-func RegisterDiscoveryHandlers(stopCh chan os.Signal) {
-	exthttp.RegisterHttpHandler(discoveryBasePath, exthttp.GetterAsHandler(getDiscoveryDescription))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredTargets)
-
-	utils.StartDiscoveryTask(
-		stopCh,
-		"lambda function",
-		time.Duration(config.Config.DiscoveryIntervalLambda)*time.Second,
-		getTargetsForAccount,
-		func(updatedTargets []discovery_kit_api.Target, err *extension_kit.ExtensionError) {
-			targets = &updatedTargets
-			discoveryError = err
-		})
+func NewLambdaDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
+	discovery := &lambdaDiscovery{}
+	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
+		discovery_kit_sdk.WithRefreshTargetsNow(),
+		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalLambda)*time.Second),
+	)
 }
 
-func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
+func (l *lambdaDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         lambdaTargetID,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			Method:       "GET",
-			Path:         discoveryBasePath + "/discovered-targets",
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalLambda)),
 		},
 	}
 }
 
-func getTargetDescription() discovery_kit_api.TargetDescription {
+func (*lambdaDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:      lambdaTargetID,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
@@ -92,126 +78,120 @@ func getTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
-	return discovery_kit_api.AttributeDescriptions{
-		Attributes: []discovery_kit_api.AttributeDescription{
-			{
-				Attribute: "aws.lambda.function-name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Function Name",
-					Other: "Function Names",
-				},
+func (*lambdaDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
+	return []discovery_kit_api.AttributeDescription{
+		{
+			Attribute: "aws.lambda.function-name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Function Name",
+				Other: "Function Names",
 			},
-			{
-				Attribute: "aws.lambda.runtime",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Runtime",
-					Other: "Runtimes",
-				},
+		},
+		{
+			Attribute: "aws.lambda.runtime",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Runtime",
+				Other: "Runtimes",
 			},
-			{
-				Attribute: "aws.lambda.handler",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Handler",
-					Other: "Handlers",
-				},
+		},
+		{
+			Attribute: "aws.lambda.handler",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Handler",
+				Other: "Handlers",
 			},
-			{
-				Attribute: "aws.lambda.codeSize",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Code Size",
-					Other: "Code Sizes",
-				},
-			}, {
-				Attribute: "aws.lambda.description",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Description",
-					Other: "Descriptions",
-				},
-			}, {
-				Attribute: "aws.lambda.timeout",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Timeout",
-					Other: "Timeouts",
-				},
-			}, {
-				Attribute: "aws.lambda.memory-size",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Memory Size",
-					Other: "Memory Sizes",
-				},
-			}, {
-				Attribute: "aws.lambda.last-modified",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Last Modified",
-					Other: "Last Modified",
-				},
-			}, {
-				Attribute: "aws.lambda.version",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Version",
-					Other: "Versions",
-				},
+		},
+		{
+			Attribute: "aws.lambda.codeSize",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Code Size",
+				Other: "Code Sizes",
 			},
-			{
-				Attribute: "aws.lambda.revision-id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Revision ID",
-					Other: "Revision IDs",
-				},
+		}, {
+			Attribute: "aws.lambda.description",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Description",
+				Other: "Descriptions",
 			},
-			{
-				Attribute: "aws.lambda.package-type",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Package Type",
-					Other: "Package Types",
-				},
-			}, {
-				Attribute: "aws.lambda.architecture",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Architecture",
-					Other: "Architectures",
-				},
-			}, {
-				Attribute: "aws.lambda.failure-injection-param",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Failure Injection SSM Parameter",
-					Other: "Failure Injection SSM Parameters",
-				},
-			}, {
-				Attribute: "aws.lambda.master-arn",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "ARN of the main function.",
-					Other: "ARN of the main functions.",
-				},
+		}, {
+			Attribute: "aws.lambda.timeout",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Timeout",
+				Other: "Timeouts",
+			},
+		}, {
+			Attribute: "aws.lambda.memory-size",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Memory Size",
+				Other: "Memory Sizes",
+			},
+		}, {
+			Attribute: "aws.lambda.last-modified",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Last Modified",
+				Other: "Last Modified",
+			},
+		}, {
+			Attribute: "aws.lambda.version",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Version",
+				Other: "Versions",
+			},
+		},
+		{
+			Attribute: "aws.lambda.revision-id",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Revision ID",
+				Other: "Revision IDs",
+			},
+		},
+		{
+			Attribute: "aws.lambda.package-type",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Package Type",
+				Other: "Package Types",
+			},
+		}, {
+			Attribute: "aws.lambda.architecture",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Architecture",
+				Other: "Architectures",
+			},
+		}, {
+			Attribute: "aws.lambda.failure-injection-param",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Failure Injection SSM Parameter",
+				Other: "Failure Injection SSM Parameters",
+			},
+		}, {
+			Attribute: "aws.lambda.master-arn",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "ARN of the main function.",
+				Other: "ARN of the main functions.",
 			},
 		},
 	}
 }
 
-func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	if discoveryError != nil {
-		exthttp.WriteError(w, *discoveryError)
-	} else {
-		exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: targets})
-	}
+func (l *lambdaDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "lambda")
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) (*[]discovery_kit_api.Target, error) {
+func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := lambda.NewFromConfig(account.AwsConfig)
 	result, err := getAllAwsLambdaFunctions(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
 			log.Error().Msgf("Not Authorized to discover lambda functions for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA=true. Details: %s", account.AccountNumber, re.Error())
-			return extutil.Ptr([]discovery_kit_api.Target{}), nil
+			return []discovery_kit_api.Target{}, nil
 		}
 		return nil, err
 	}
 	return result, nil
 }
 
-func getAllAwsLambdaFunctions(ctx context.Context, client lambda.ListFunctionsAPIClient, awsAccountNumber string, awsAccountRegion string) (*[]discovery_kit_api.Target, error) {
+func getAllAwsLambdaFunctions(ctx context.Context, client lambda.ListFunctionsAPIClient, awsAccountNumber string, awsAccountRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 100)
 	var marker *string = nil
 	for {
@@ -232,7 +212,7 @@ func getAllAwsLambdaFunctions(ctx context.Context, client lambda.ListFunctionsAP
 			marker = output.NextMarker
 		}
 	}
-	return extutil.Ptr(discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesLambda)), nil
+	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesLambda), nil
 }
 
 func toTarget(function types.FunctionConfiguration, awsAccountNumber string, awsAccountRegion string) discovery_kit_api.Target {

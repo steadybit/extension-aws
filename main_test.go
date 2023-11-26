@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 	"net/http"
-	"os"
-	"reflect"
 	"testing"
 )
 
@@ -35,32 +36,30 @@ func Test_getExtensionList(t *testing.T) {
 		wantedRoutes []string
 	}{
 		{
-			name:   "disabledAllButEc2",
+			name:   "disabled all but ec2",
 			config: createConfig(false, true, true, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.ec2_instance.state",
-				"/common/discovery/attribute-descriptions",
-				"/ec2/instance/discovery",
-				"/ec2/instance/discovery/attribute-descriptions",
-				"/ec2/instance/discovery/rules/ec2-to-com.steadybit.extension_aws.test",
-				"/ec2/instance/discovery/rules/ec2-to-host",
-				"/ec2/instance/discovery/rules/ec2-to-kubernetes-node",
-				"/ec2/instance/discovery/target-description",
+				"/com.steadybit.extension_aws.ec2-instance/discovery",
+				"/com.steadybit.extension_aws.ec2-instance/discovery/target-description",
+				"/discovery/attributes",
+				"/discovery/enrichment-rules/com.steadybit.extension_aws.ec2-instance-to-com.steadybit.extension_aws.test",
+				"/discovery/enrichment-rules/com.steadybit.extension_aws.ec2-instance-to-com.steadybit.extension_host.host",
+				"/discovery/enrichment-rules/com.steadybit.extension_aws.ec2-instance-to-com.steadybit.extension_kubernetes.kubernetes-node",
 			},
 		},
 		{
-			name:   "disabledAllButFis",
+			name:   "disabled all but fis",
 			config: createConfig(true, false, true, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.fis.start_experiment",
-				"/common/discovery/attribute-descriptions",
-				"/fis/template/discovery",
-				"/fis/template/discovery/attribute-descriptions",
-				"/fis/template/discovery/target-description",
+				"/com.steadybit.extension_aws.fis-experiment-template/discovery",
+				"/com.steadybit.extension_aws.fis-experiment-template/discovery/target-description",
+				"/discovery/attributes",
 			},
 		},
 		{
-			name:   "disabledAllButLambda",
+			name:   "disabled all but lambda",
 			config: createConfig(true, true, false, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.lambda.denylist",
@@ -68,53 +67,53 @@ func Test_getExtensionList(t *testing.T) {
 				"/com.steadybit.extension_aws.lambda.exception",
 				"/com.steadybit.extension_aws.lambda.latency",
 				"/com.steadybit.extension_aws.lambda.statusCode",
-				"/common/discovery/attribute-descriptions",
-				"/lambda/discovery",
-				"/lambda/discovery/attribute-descriptions",
-				"/lambda/discovery/target-description",
+				"/com.steadybit.extension_aws.lambda/discovery",
+				"/com.steadybit.extension_aws.lambda/discovery/target-description",
+				"/discovery/attributes",
 			},
 		},
 		{
-			name:   "disabledAllButRds",
+			name:   "disabled all but rds",
 			config: createConfig(true, true, true, false, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.rds.cluster.failover",
 				"/com.steadybit.extension_aws.rds.instance.reboot",
 				"/com.steadybit.extension_aws.rds.instance.stop",
-				"/common/discovery/attribute-descriptions",
-				"/rds/cluster/discovery",
-				"/rds/cluster/discovery/attribute-descriptions",
-				"/rds/cluster/discovery/target-description",
-				"/rds/instance/discovery",
-				"/rds/instance/discovery/attribute-descriptions",
-				"/rds/instance/discovery/target-description",
+				"/com.steadybit.extension_aws.rds.cluster/discovery",
+				"/com.steadybit.extension_aws.rds.cluster/discovery/target-description",
+				"/com.steadybit.extension_aws.rds.instance/discovery",
+				"/com.steadybit.extension_aws.rds.instance/discovery/target-description",
+				"/discovery/attributes",
 			},
 		},
 		{
-			name:   "disabledAllButZone",
+			name:   "disabled all but zone",
 			config: createConfig(true, true, true, true, false),
 			wantedRoutes: []string{
-				"/az/discovery",
-				"/az/discovery/target-description",
 				"/com.steadybit.extension_aws.az.blackhole",
-				"/common/discovery/attribute-descriptions",
+				"/com.steadybit.extension_aws.zone/discovery",
+				"/com.steadybit.extension_aws.zone/discovery/target-description",
+				"/discovery/attributes",
 			},
 		},
 	}
+	utils.Accounts = &utils.AwsAccounts{
+		RootAccount: utils.AwsAccount{
+			AccountNumber: "123456789012",
+			AwsConfig:     aws.Config{},
+		},
+		Accounts: make(map[string]utils.AwsAccount),
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			utils.Accounts = &utils.AwsAccounts{
-				RootAccount: utils.AwsAccount{
-					AccountNumber: "123456789012",
-					AwsConfig:     aws.Config{},
-				},
-				Accounts: make(map[string]utils.AwsAccount),
-			}
 			action_kit_sdk.ClearRegisteredActions()
+			discovery_kit_sdk.ClearRegisteredDiscoveries()
 			http.DefaultServeMux = http.NewServeMux()
 			config.Config = tt.config
-			stopCh := make(chan os.Signal)
-			registerHandlers(stopCh)
+			background, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			registerHandlers(background)
 
 			got := getExtensionList()
 			routes := make([]string, 0)
@@ -134,11 +133,9 @@ func Test_getExtensionList(t *testing.T) {
 				routes = append(routes, route.Path)
 			}
 			slices.Sort(routes)
-			stopCh <- os.Interrupt
+			slices.Sort(tt.wantedRoutes)
 
-			if !reflect.DeepEqual(routes, tt.wantedRoutes) {
-				t.Errorf("routes = %v, want %v", routes, tt.wantedRoutes)
-			}
+			assert.Equal(t, tt.wantedRoutes, routes)
 		})
 	}
 }
