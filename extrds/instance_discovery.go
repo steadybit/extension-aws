@@ -76,18 +76,6 @@ func (r *rdsInstanceDiscovery) DescribeTarget() discovery_kit_api.TargetDescript
 func (r *rdsInstanceDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
 	return []discovery_kit_api.AttributeDescription{
 		{
-			Attribute: "aws.rds.engine",
-			Label: discovery_kit_api.PluralLabel{
-				One:   "AWS RDS database engine",
-				Other: "AWS RDS database engines",
-			},
-		}, {
-			Attribute: "aws.rds.cluster",
-			Label: discovery_kit_api.PluralLabel{
-				One:   "AWS RDS cluster",
-				Other: "AWS RDS clusters",
-			},
-		}, {
 			Attribute: "aws.rds.instance.id",
 			Label: discovery_kit_api.PluralLabel{
 				One:   "AWS RDS instance ID",
