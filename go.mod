@@ -7,15 +7,15 @@ go 1.21
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.23.1
-	github.com/aws/aws-sdk-go-v2/config v1.25.5
-	github.com/aws/aws-sdk-go-v2/credentials v1.16.4
+	github.com/aws/aws-sdk-go-v2/config v1.25.6
+	github.com/aws/aws-sdk-go-v2/credentials v1.16.5
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.5
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.137.1
-	github.com/aws/aws-sdk-go-v2/service/fis v1.19.3
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.48.1
-	github.com/aws/aws-sdk-go-v2/service/rds v1.63.1
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.43.1
-	github.com/aws/aws-sdk-go-v2/service/sts v1.25.4
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.137.2
+	github.com/aws/aws-sdk-go-v2/service/fis v1.20.1
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.48.2
+	github.com/aws/aws-sdk-go-v2/service/rds v1.63.4
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.43.2
+	github.com/aws/aws-sdk-go-v2/service/sts v1.25.5
 	github.com/aws/smithy-go v1.17.0
 	github.com/docker/go-connections v0.4.0
 	github.com/google/uuid v1.4.0
@@ -27,13 +27,13 @@ require (
 	github.com/steadybit/action-kit/go/action_kit_test v1.2.1
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.5.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.1.0
-	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.0.0
+	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.0.2
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.1.0
 	github.com/steadybit/extension-kit v1.8.11
 	github.com/stretchr/testify v1.8.4
 	github.com/testcontainers/testcontainers-go v0.26.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.26.0
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
+	golang.org/x/exp v0.0.0-20231127185646-65229373498e
 )
 
 require (
@@ -54,8 +54,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.17.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.20.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.17.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.20.2 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
@@ -73,7 +73,7 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
-	github.com/getkin/kin-openapi v0.120.0 // indirect
+	github.com/getkin/kin-openapi v0.121.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
@@ -158,15 +158,15 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	github.com/zmwangx/debounce v1.0.0 // indirect
 	golang.org/x/arch v0.6.0 // indirect
-	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.18.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
-	golang.org/x/term v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/time v0.4.0 // indirect
-	golang.org/x/tools v0.15.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
+	golang.org/x/tools v0.16.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
 	google.golang.org/grpc v1.57.1 // indirect
