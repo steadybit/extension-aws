@@ -8,11 +8,11 @@ FROM --platform=$BUILDPLATFORM goreleaser/goreleaser:v1.22.1 AS build
 ARG TARGETOS TARGETARCH
 ARG BUILD_WITH_COVERAGE
 ARG BUILD_SNAPSHOT=true
+ARG SKIP_LICENSES_REPORT=false
 
 WORKDIR /app
 
 COPY . .
-
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH goreleaser build --snapshot="${BUILD_SNAPSHOT}" --single-target -o extension
 ##
 ## Runtime
