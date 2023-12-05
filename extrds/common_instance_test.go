@@ -5,6 +5,7 @@ package extrds
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/stretchr/testify/mock"
 )
@@ -33,4 +34,13 @@ func (m *rdsDBInstanceApiMock) DescribeDBInstances(ctx context.Context, params *
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*rds.DescribeDBInstancesOutput), args.Error(1)
+}
+
+type zoneMock struct {
+	mock.Mock
+}
+
+func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string) *types.AvailabilityZone {
+	args := m.Called(awsAccountNumber, awsZone)
+	return args.Get(0).(*types.AvailabilityZone)
 }

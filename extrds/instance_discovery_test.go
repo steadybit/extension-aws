@@ -6,6 +6,7 @@ package extrds
 import (
 	"context"
 	"errors"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
@@ -23,7 +24,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 			{
 				DBInstanceArn:        discovery_kit_api.Ptr("arn"),
 				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier"),
-				AvailabilityZone:     discovery_kit_api.Ptr("az"),
+				AvailabilityZone:     discovery_kit_api.Ptr("us-east-1a"),
 				Engine:               discovery_kit_api.Ptr("engine"),
 				DBClusterIdentifier:  discovery_kit_api.Ptr("cluster"),
 				DBInstanceStatus:     discovery_kit_api.Ptr("status"),
@@ -32,8 +33,16 @@ func TestGetAllRdsInstances(t *testing.T) {
 	}
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
+	mockedZoneUtil := new(zoneMock)
+	mockedZone := ec2types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+
 	// When
-	targets, err := getAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -43,11 +52,13 @@ func TestGetAllRdsInstances(t *testing.T) {
 	assert.Equal(t, rdsInstanceTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 8, len(target.Attributes))
+	assert.Equal(t, 9, len(target.Attributes))
 	assert.Equal(t, []string{"cluster"}, target.Attributes["aws.rds.cluster"])
 	assert.Equal(t, []string{"status"}, target.Attributes["aws.rds.instance.status"])
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
+	assert.Equal(t, []string{"us-east-1a"}, target.Attributes["aws.zone"])
+	assert.Equal(t, []string{"us-east-1a-id"}, target.Attributes["aws.zone.id"])
 }
 
 func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
@@ -58,7 +69,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 			{
 				DBInstanceArn:        discovery_kit_api.Ptr("arn"),
 				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier"),
-				AvailabilityZone:     discovery_kit_api.Ptr("az"),
+				AvailabilityZone:     discovery_kit_api.Ptr("us-east-1a"),
 				Engine:               discovery_kit_api.Ptr("engine"),
 				DBInstanceStatus:     discovery_kit_api.Ptr("status"),
 				DBClusterIdentifier:  nil,
@@ -66,9 +77,16 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 		},
 	}
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
+	mockedZoneUtil := new(zoneMock)
+	mockedZone := ec2types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
-	targets, err := getAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -78,13 +96,20 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	assert.Equal(t, rdsInstanceTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 7, len(target.Attributes))
+	assert.Equal(t, 8, len(target.Attributes))
 	assert.Equal(t, []string(nil), target.Attributes["aws.rds.cluster"])
 }
 
 func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	// Given
 	mockedApi := new(rdsDBInstanceApiMock)
+	mockedZoneUtil := new(zoneMock)
+	mockedZone := ec2types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
 
 	withMarker := mock.MatchedBy(func(arg *rds.DescribeDBInstancesInput) bool {
 		return arg.Marker != nil
@@ -119,7 +144,7 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	}), nil)
 
 	// When
-	targets, err := getAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -131,11 +156,18 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 func TestGetAllRdsInstancesError(t *testing.T) {
 	// Given
 	mockedApi := new(rdsDBInstanceApiMock)
+	mockedZoneUtil := new(zoneMock)
+	mockedZone := ec2types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
 
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := getAllRdsInstances(context.Background(), mockedApi, "42", "us-east-1")
+	_, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

@@ -5,13 +5,9 @@ package extaz
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	types2 "github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
@@ -74,39 +70,16 @@ func (a *azDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.
 	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "availability zone")
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
-	client := ec2.NewFromConfig(account.AwsConfig)
-	result, err := getAllAvailabilityZones(ctx, client, account.AccountNumber)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+func getTargetsForAccount(account *utils.AwsAccount, _ context.Context) ([]discovery_kit_api.Target, error) {
+	return getAllAvailabilityZones(utils.Zones, account.AccountNumber), nil
 }
 
-type AZDescribeAvailabilityZonesApi interface {
-	DescribeAvailabilityZones(ctx context.Context, params *ec2.DescribeAvailabilityZonesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeAvailabilityZonesOutput, error)
-}
-
-func getAllAvailabilityZones(ctx context.Context, ec2Api AZDescribeAvailabilityZonesApi, awsAccountNumber string) ([]discovery_kit_api.Target, error) {
+func getAllAvailabilityZones(zones utils.GetZonesUtil, awsAccountNumber string) []discovery_kit_api.Target {
 	result := make([]discovery_kit_api.Target, 0, 20)
-
-	output, err := ec2Api.DescribeAvailabilityZones(ctx, &ec2.DescribeAvailabilityZonesInput{
-		AllAvailabilityZones: aws.Bool(false),
-	})
-	if err != nil {
-		var re *awshttp.ResponseError
-		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
-			log.Error().Msgf("Not Authorized to discover availability zones for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE=true. Details: %s", awsAccountNumber, re.Error())
-			return result, nil
-		}
-		return result, err
-	}
-
-	for _, availabilityZone := range output.AvailabilityZones {
+	for _, availabilityZone := range zones.GetZones(awsAccountNumber) {
 		result = append(result, toTarget(availabilityZone, awsAccountNumber))
 	}
-
-	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesZone), nil
+	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesZone)
 }
 
 func toTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string) discovery_kit_api.Target {

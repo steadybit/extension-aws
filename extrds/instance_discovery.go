@@ -98,7 +98,7 @@ func (r *rdsInstanceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery
 
 func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	result, err := getAllRdsInstances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := getAllRdsInstances(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -110,7 +110,7 @@ func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context
 	return result, nil
 }
 
-func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := rds.NewDescribeDBInstancesPaginator(rdsApi, &rds.DescribeDBInstancesInput{})
@@ -121,21 +121,26 @@ func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, awsAccount
 		}
 
 		for _, dbInstance := range output.DBInstances {
-			result = append(result, toInstanceTarget(dbInstance, awsAccountNumber, awsRegion))
+			result = append(result, toInstanceTarget(dbInstance, zoneUtil, awsAccountNumber, awsRegion))
 		}
 	}
 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesRds), nil
 }
 
-func toInstanceTarget(dbInstance types.DBInstance, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toInstanceTarget(dbInstance types.DBInstance, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
 	arn := aws.ToString(dbInstance.DBInstanceArn)
 	label := aws.ToString(dbInstance.DBInstanceIdentifier)
+	availabilityZoneName := aws.ToString(dbInstance.AvailabilityZone)
+	availabilityZoneApi := zoneUtil.GetZone(awsAccountNumber, availabilityZoneName)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws.arn"] = []string{arn}
-	attributes["aws.zone"] = []string{aws.ToString(dbInstance.AvailabilityZone)}
+	attributes["aws.zone"] = []string{availabilityZoneName}
+	if availabilityZoneApi != nil {
+		attributes["aws.zone.id"] = []string{*availabilityZoneApi.ZoneId}
+	}
 	attributes["aws.region"] = []string{awsRegion}
 	attributes["aws.rds.engine"] = []string{aws.ToString(dbInstance.Engine)}
 	attributes["aws.rds.instance.id"] = []string{label}

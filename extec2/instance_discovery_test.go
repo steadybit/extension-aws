@@ -8,6 +8,7 @@ import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,15 @@ func (m *ec2ClientMock) DescribeInstances(ctx context.Context, params *ec2.Descr
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*ec2.DescribeInstancesOutput), args.Error(1)
+}
+
+type zoneMock struct {
+	mock.Mock
+}
+
+func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string) *types.AvailabilityZone {
+	args := m.Called(awsAccountNumber, awsZone)
+	return args.Get(0).(*types.AvailabilityZone)
 }
 
 var instance = types.Instance{
@@ -60,8 +70,16 @@ func TestGetAllEc2Instances(t *testing.T) {
 	}
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
+	mockedZoneUtil := new(zoneMock)
+	mockedZone := types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+
 	// When
-	targets, err := GetAllEc2Instances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -74,6 +92,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"ami-02fc9c535f43bbc91"}, target.Attributes["aws-ec2.image"])
 	assert.Equal(t, []string{"us-east-1b"}, target.Attributes["aws.zone"])
+	assert.Equal(t, []string{"us-east-1b-id"}, target.Attributes["aws.zone.id"])
 	assert.Equal(t, []string{"10.3.92.28"}, target.Attributes["aws-ec2.ipv4.private"])
 	assert.Equal(t, []string{"i-0ef9adc9fbd3b19c5"}, target.Attributes["aws-ec2.instance.id"])
 	assert.Equal(t, []string{"ip-10-3-92-28.eu-central-1.compute.internal"}, target.Attributes["aws-ec2.hostname.internal"])
@@ -101,8 +120,16 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	}
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
+	mockedZoneUtil := new(zoneMock)
+	mockedZone := types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+
 	// When
-	targets, err := GetAllEc2Instances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -114,6 +141,7 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"us-east-1b"}, target.Attributes["aws.zone"])
+	assert.Equal(t, []string{"us-east-1b-id"}, target.Attributes["aws.zone.id"])
 	assert.Equal(t, []string{"10.3.92.28"}, target.Attributes["aws-ec2.ipv4.private"])
 	assert.Equal(t, []string{"i-0ef9adc9fbd3b19c5"}, target.Attributes["aws-ec2.instance.id"])
 	assert.Equal(t, []string{"ip-10-3-92-28.eu-central-1.compute.internal"}, target.Attributes["aws-ec2.hostname.internal"])
@@ -145,8 +173,16 @@ func TestNameNotSet(t *testing.T) {
 	}
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
+	mockedZoneUtil := new(zoneMock)
+	mockedZone := types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+
 	// When
-	targets, err := GetAllEc2Instances(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -162,8 +198,16 @@ func TestGetAllEc2InstancesError(t *testing.T) {
 
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
+	mockedZoneUtil := new(zoneMock)
+	mockedZone := types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+
 	// When
-	_, err := GetAllEc2Instances(context.Background(), mockedApi, "42", "us-east-1")
+	_, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

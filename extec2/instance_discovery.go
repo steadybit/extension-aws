@@ -119,6 +119,10 @@ func getEc2InstanceToHostEnrichmentRule(target string) discovery_kit_api.TargetE
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.zone.id",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
 				Name:    "aws-ec2.arn",
 			},
 			{
@@ -191,6 +195,10 @@ func getEc2InstanceToXEnrichmentRule(destTargetType string) discovery_kit_api.Ta
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.zone.id",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
 				Name:    "aws-ec2.instance.id",
 			},
 			{
@@ -243,7 +251,7 @@ func (e *ec2Discovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api
 
 func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ec2.NewFromConfig(account.AwsConfig)
-	result, err := GetAllEc2Instances(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAllEc2Instances(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -259,7 +267,7 @@ type Ec2DescribeInstancesApi interface {
 	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
 }
 
-func GetAllEc2Instances(ctx context.Context, ec2Api Ec2DescribeInstancesApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func GetAllEc2Instances(ctx context.Context, ec2Api Ec2DescribeInstancesApi, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := ec2.NewDescribeInstancesPaginator(ec2Api, &ec2.DescribeInstancesInput{})
@@ -270,7 +278,7 @@ func GetAllEc2Instances(ctx context.Context, ec2Api Ec2DescribeInstancesApi, aws
 		}
 		for _, reservation := range output.Reservations {
 			for _, ec2Instance := range reservation.Instances {
-				result = append(result, toTarget(ec2Instance, awsAccountNumber, awsRegion))
+				result = append(result, toTarget(ec2Instance, zoneUtil, awsAccountNumber, awsRegion))
 			}
 		}
 	}
@@ -278,7 +286,7 @@ func GetAllEc2Instances(ctx context.Context, ec2Api Ec2DescribeInstancesApi, aws
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEc2), nil
 }
 
-func toTarget(ec2Instance types.Instance, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toTarget(ec2Instance types.Instance, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
 	var name *string
 	for _, tag := range ec2Instance.Tags {
 		if *tag.Key == "Name" {
@@ -291,11 +299,16 @@ func toTarget(ec2Instance types.Instance, awsAccountNumber string, awsRegion str
 	if name != nil {
 		label = label + " / " + *name
 	}
+	availabilityZoneName := aws.ToString(ec2Instance.Placement.AvailabilityZone)
+	availabilityZoneApi := zoneUtil.GetZone(awsAccountNumber, availabilityZoneName)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws-ec2.image"] = []string{aws.ToString(ec2Instance.ImageId)}
-	attributes["aws.zone"] = []string{aws.ToString(ec2Instance.Placement.AvailabilityZone)}
+	attributes["aws.zone"] = []string{availabilityZoneName}
+	if availabilityZoneApi != nil {
+		attributes["aws.zone.id"] = []string{*availabilityZoneApi.ZoneId}
+	}
 	attributes["aws.region"] = []string{awsRegion}
 	attributes["aws-ec2.ipv4.private"] = []string{aws.ToString(ec2Instance.PrivateIpAddress)}
 	if ec2Instance.PublicIpAddress != nil {

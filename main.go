@@ -37,6 +37,7 @@ func main() {
 
 	config.ParseConfiguration()
 	utils.InitializeAwsAccountAccess(config.Config)
+	utils.InitializeAwsZones()
 
 	ctx, cancel := SignalCanceledContext()
 	defer cancel()
