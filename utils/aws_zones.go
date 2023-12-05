@@ -64,7 +64,7 @@ type GetZonesUtil interface {
 	GetZones(awsAccountNumber string) []types.AvailabilityZone
 }
 
-func (zones AwsZones) GetZones(awsAccountNumber string) []types.AvailabilityZone {
+func (zones *AwsZones) GetZones(awsAccountNumber string) []types.AvailabilityZone {
 	value, ok := zones.zones.Load(awsAccountNumber)
 	if !ok {
 		return []types.AvailabilityZone{}
@@ -72,7 +72,7 @@ func (zones AwsZones) GetZones(awsAccountNumber string) []types.AvailabilityZone
 	return value.([]types.AvailabilityZone)
 }
 
-func (zones AwsZones) GetZone(awsAccountNumber string, awsZone string) *types.AvailabilityZone {
+func (zones *AwsZones) GetZone(awsAccountNumber string, awsZone string) *types.AvailabilityZone {
 	value, ok := zones.zones.Load(awsAccountNumber)
 	if !ok {
 		return nil
