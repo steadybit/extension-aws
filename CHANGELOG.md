@@ -1,8 +1,10 @@
 # Changelog
 
-## next
+## v2.2.16
 
 - use discovery_kit_sdk for discoveries
+- add `aws.zone.id` to ec2- and rds-instances
+- added `aws.zone.id` to all enrichment rules
 
 ## v2.2.15
 
