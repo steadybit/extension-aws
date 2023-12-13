@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.17
+
+- ignore erroneous roleArns during initialization
+
 ## v2.2.16
 
 - use discovery_kit_sdk for discoveries

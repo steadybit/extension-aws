@@ -54,7 +54,9 @@ func InitializeAwsAccountAccess(specification extConfig.Specification) {
 
 		for _, roleArn := range specification.AssumeRoles {
 			assumedAccount := initializeRoleAssumption(stsClientForRootAccount, roleArn, Accounts.RootAccount)
-			Accounts.Accounts[assumedAccount.AccountNumber] = assumedAccount
+			if assumedAccount != nil {
+				Accounts.Accounts[assumedAccount.AccountNumber] = *assumedAccount
+			}
 		}
 	}
 }
@@ -98,19 +100,20 @@ var customLoggerMiddleware = middleware.InitializeMiddlewareFunc("customLoggerMi
 		return next.HandleInitialize(ctx, in)
 	})
 
-func initializeRoleAssumption(stsServiceForRootAccount *sts.Client, roleArn string, rootAccount AwsAccount) AwsAccount {
+func initializeRoleAssumption(stsServiceForRootAccount *sts.Client, roleArn string, rootAccount AwsAccount) *AwsAccount {
 	awsConfig := rootAccount.AwsConfig.Copy()
 	awsConfig.Credentials = aws.NewCredentialsCache(stscreds.NewAssumeRoleProvider(stsServiceForRootAccount, roleArn, setSessionName))
 
 	stsClient := sts.NewFromConfig(awsConfig)
 	identityOutput, err := stsClient.GetCallerIdentity(context.Background(), nil)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to identify AWS account number for account assumed via role '%s'", roleArn)
+		log.Error().Err(err).Msgf("Failed to identify AWS account number for account assumed via role '%s'. The roleArn will be ignored until the next restart of the extension.", roleArn)
+		return nil
 	}
 
 	log.Info().Msgf("Successfully assumed role '%s' in account '%s' (region '%s')", roleArn, aws.ToString(identityOutput.Account), awsConfig.Region)
 
-	return AwsAccount{
+	return &AwsAccount{
 		AccountNumber: aws.ToString(identityOutput.Account),
 		AwsConfig:     awsConfig,
 	}

@@ -48,10 +48,10 @@ func getAllAvailabilityZones(ctx context.Context, ec2Api AZDescribeAvailabilityZ
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
-			log.Error().Msgf("Not Authorized to discover availability cache for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE=true. Details: %s", awsAccountNumber, re.Error())
+			log.Error().Msgf("Not Authorized to discover availability zones for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE=true. Details: %s", awsAccountNumber, re.Error())
 			return []types.AvailabilityZone{}
 		}
-		log.Fatal().Err(err).Msgf("Failed to load availability cache for account %s.", awsAccountNumber)
+		log.Error().Err(err).Msgf("Failed to load availability zones for account %s.", awsAccountNumber)
 		return []types.AvailabilityZone{}
 	}
 	return output.AvailabilityZones
