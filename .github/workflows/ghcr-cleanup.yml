@@ -6,7 +6,7 @@ on:
     - cron: "0 8 * * 1"
 
 jobs:
-  extension-ci:
+  ghcr-cleanup:
     uses: steadybit/extension-kit/.github/workflows/reusable-ghcr-cleanup.yml@main
     secrets:
       token: ${{ secrets.GHCR_CLEANUP_PAT }}
