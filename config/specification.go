@@ -17,7 +17,7 @@ type Specification struct {
 	DiscoveryIntervalZone             int      `json:"discoveryIntervalZone" split_words:"true" required:"false" default:"300"`
 	DiscoveryIntervalFis              int      `json:"discoveryIntervalFis" split_words:"true" required:"false" default:"300"`
 	DiscoveryIntervalLambda           int      `json:"discoveryIntervalLambda" split_words:"true" required:"false" default:"60"`
-	EnrichEc2DataForTargetTypes       []string `json:"EnrichEc2DataForTargetTypes" split_words:"true" default:"com.steadybit.extension_jvm.application,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.kubernetes-deployment,com.steadybit.extension_kubernetes.kubernetes-pod,com.steadybit.extension_kubernetes.kubernetes-daemonset,com.steadybit.extension_kubernetes.kubernetes-statefulset"`
+	EnrichEc2DataForTargetTypes       []string `json:"EnrichEc2DataForTargetTypes" split_words:"true" default:"com.steadybit.extension_jvm.jvm-instance,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.kubernetes-deployment,com.steadybit.extension_kubernetes.kubernetes-pod,com.steadybit.extension_kubernetes.kubernetes-daemonset,com.steadybit.extension_kubernetes.kubernetes-statefulset"`
 	DiscoveryAttributesExcludesEc2    []string `json:"discoveryAttributesExcludesEc2" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesZone   []string `json:"discoveryAttributesExcludesZone" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesFis    []string `json:"discoveryAttributesExcludesFis" split_words:"true" required:"false"`
