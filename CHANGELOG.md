@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.18
+
+- Update dependencies
+- fixed enrichment for jvm instances
+
 ## v2.2.17
 
 - ignore erroneous roleArns during initialization
