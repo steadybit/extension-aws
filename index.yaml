@@ -11,6 +11,35 @@ entries:
         - name: Steadybit reliability hub
           url: https://hub.steadybit.com
     apiVersion: v2
+    appVersion: v2.2.19
+    created: "2024-01-27T17:45:10.591748707Z"
+    dependencies:
+    - name: extensionlib
+      repository: https://steadybit.github.io/helm-charts
+      version: ^1.4.4
+    description: Steadybit AWS extension Helm chart for Kubernetes.
+    digest: 585eb2d8723141116f33dd1d2a7eb6475fe3a8e29abff19d4132a3b539bf19c2
+    home: https://www.steadybit.com/
+    icon: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+    maintainers:
+    - email: daniel.reuter@steadybit.com
+      name: reuda
+    name: steadybit-extension-aws
+    sources:
+    - https://github.com/steadybit/extension-aws
+    urls:
+    - https://github.com/steadybit/extension-aws/releases/download/steadybit-extension-aws-2.1.1/steadybit-extension-aws-2.1.1.tgz
+    version: 2.1.1
+  - annotations:
+      artifacthub.io/images: |
+        - name: logo
+          image: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+      artifacthub.io/links: |-
+        - name: Steadybit website
+          url: https://www.steadybit.com
+        - name: Steadybit reliability hub
+          url: https://hub.steadybit.com
+    apiVersion: v2
     appVersion: v2.2.18
     created: "2024-01-27T17:23:08.798235334Z"
     dependencies:
@@ -726,4 +755,4 @@ entries:
     urls:
     - https://github.com/steadybit/extension-aws/releases/download/steadybit-extension-aws-1.9.5/steadybit-extension-aws-1.9.5.tgz
     version: 1.9.5
-generated: "2024-01-27T17:23:08.798393831Z"
+generated: "2024-01-27T17:45:10.591999944Z"
