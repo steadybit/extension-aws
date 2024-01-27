@@ -54,6 +54,18 @@ charttesting:
 chartlint:
 	ct lint --config chartTesting.yaml
 
+## chart-bump-version: Bump the patch version and optionally set the appVersion
+.PHONY: chart-bump-version
+chart-bump-version:
+	@set -e; \
+	for dir in charts/steadybit-extension-*; do \
+		if [ ! -z "$(APP_VERSION)" ]; then \
+					yq -i ".appVersion = strenv(APP_VERSION)" $$dir/Chart.yaml; \
+		fi; \
+		CHART_VERSION=$$(semver -i patch $$(yq '.version' $$dir/Chart.yaml)) \
+		yq -i ".version = strenv(CHART_VERSION)" $$dir/Chart.yaml; \
+		grep -e "^version:" -e "^appVersion:" $$dir/Chart.yaml; \
+	done
 # ==================================================================================== #
 # BUILD
 # ==================================================================================== #

@@ -34,7 +34,7 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5
@@ -114,7 +114,7 @@ manifest should match snapshot with TLS:
                   value: /etc/extension/certificates/server-cert/tls.key
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5
@@ -204,7 +204,7 @@ manifest should match snapshot with extra env vars:
                   name: env-configmap
                 - name: env-secrets
                   secretRef: null
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5
@@ -282,7 +282,7 @@ manifest should match snapshot with extra labels:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5
@@ -364,7 +364,7 @@ manifest should match snapshot with mutual TLS:
                   value: /etc/extension/certificates/client-cert-a/tls.crt,/etc/extension/certificates/client-cert-a/tls.crt
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5
@@ -460,7 +460,7 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: /etc/tls/ca.crt,/etc/tls/ca2.crt
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5
@@ -536,7 +536,7 @@ manifest should match snapshot with podSecurityContext:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5
@@ -614,7 +614,7 @@ manifest should match snapshot with priority class:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5
@@ -691,7 +691,7 @@ manifest should match snapshot without TLS:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
-              image: ghcr.io/steadybit/extension-aws:latest
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 5

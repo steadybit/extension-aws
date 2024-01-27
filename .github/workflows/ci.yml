@@ -19,6 +19,7 @@ jobs:
     uses: steadybit/extension-kit/.github/workflows/reusable-extension-ci.yml@main
     with:
       build_linux_packages: true
+      VERSION_BUMPER_APPID: ${{ vars.GH_APP_STEADYBIT_APP_ID }}
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       PAT_TOKEN_EXTENSION_DEPLOYER: ${{ secrets.PAT_TOKEN_EXTENSION_DEPLOYER }}
@@ -28,3 +29,4 @@ jobs:
       STEADYBIT_ARTIFACT_SERVER_USERNAME: ${{ secrets.STEADYBIT_ARTIFACT_SERVER_USERNAME }}
       STEADYBIT_ARTIFACT_SERVER_PASSWORD: ${{ secrets.STEADYBIT_ARTIFACT_SERVER_PASSWORD }}
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      VERSION_BUMPER_SECRET: ${{ secrets.GH_APP_STEADYBIT_PRIVATE_KEY }}
