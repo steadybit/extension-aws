@@ -41,8 +41,7 @@ func NewEc2InstanceDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscov
 
 func (e *ec2Discovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id:         ec2TargetId,
-		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
+		Id: ec2TargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEc2)),
 		},

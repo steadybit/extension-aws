@@ -41,8 +41,7 @@ func NewLambdaDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
 
 func (l *lambdaDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id:         lambdaTargetID,
-		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
+		Id: lambdaTargetID,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalLambda)),
 		},
