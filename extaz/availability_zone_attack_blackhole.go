@@ -136,7 +136,7 @@ func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, 
 	}
 
 	if agentAwsAccountId == "" {
-		return nil, extension_kit.ToError("Could not get AWS Account of the agent. Attack is disabled to prevent an agent lockout. Please check https://github.com/steadybit/extension-aws#agent-lockout---outpost-requirements", nil)
+		return nil, extension_kit.ToError("Could not get AWS Account of the agent. Attack is disabled to prevent an agent lockout. Please check https://github.com/steadybit/extension-aws#agent-lockout---requirements", nil)
 	}
 
 	if targetAccount[0] == agentAwsAccountId {

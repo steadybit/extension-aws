@@ -372,7 +372,7 @@ steps:
    }
    ```
 
-### Agent Lockout - Outpost Requirements
+### Agent Lockout - Requirements
 
 In order to prevent the agent or the extension of beeing locked out by their own attacks, we implemented some security
 checks.
@@ -380,21 +380,21 @@ checks.
 For example, the blackhole az attack won't start, if
 
 - the extension is running in the attacked account
-- the outpost is running in the attacked account
+- the agent is running in the attacked account
 
 The extension can verify the own account based on the authentication described above.
 
-For the outpost you need make sure, that the outpost can determine the aws account where it is running on. The outpost
+For the agent you need make sure, that the agent can determine the aws account where it is running on. The agent
 tries to get the account id from:
 
 1. A static configuration property `steadybit.agent.aws.accountId` or env `STEADYBIT_AGENT_AWS_ACCOUNT_ID`
 2. The EC2-Metadata-Service if reachable
-3. sts:GetCallerIdentity. You don't need any special permissions for that call, but the outpost agents needs to provide
+3. sts:GetCallerIdentity. You don't need any special permissions for that call, but the agent agents needs to provide
    credentials for the api. Same
-   authentication setup mechanism as for the extensions apply for the outpost setup. Make sure to
+   authentication setup mechanism as for the extensions apply for the agent setup. Make sure to
    check [Authentication Setup](#Authentication-Setup) for
    more details. For example, if running in kubernetes and using a ServiceAccount, you can
-   use `serviceAccount.eksRoleArn` of the outpost helm chart to link
+   use `serviceAccount.eksRoleArn` of the agent helm chart to link
    your serviceAccount to a given role.
 
 ## Installation
@@ -420,7 +420,7 @@ helm upgrade steadybit-extension-aws \
 ### Linux Package
 
 Please use
-our [outpost-linux.sh script](https://docs.steadybit.com/install-and-configure/install-outpost-agent-preview/install-on-linux-hosts)
+our [agent-linux.sh script](https://docs.steadybit.com/install-and-configure/install-agent/install-on-linux-hosts)
 to install the
 extension on your Linux machine.
 The script will download the latest version of the extension and install it using the package manager.
