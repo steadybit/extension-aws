@@ -6,6 +6,7 @@ package extrds
 import (
 	"context"
 	"errors"
+
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
@@ -27,6 +28,9 @@ func TestGetAllRdsClusters(t *testing.T) {
 				Engine:              discovery_kit_api.Ptr("engine"),
 				Status:              discovery_kit_api.Ptr("status"),
 				MultiAZ:             discovery_kit_api.Ptr(true),
+				TagList: []types.Tag{
+					{Key: discovery_kit_api.Ptr("SpecialTag"), Value: discovery_kit_api.Ptr("Great Thing")},
+				},
 			},
 		},
 	}
@@ -43,11 +47,12 @@ func TestGetAllRdsClusters(t *testing.T) {
 	assert.Equal(t, rdsClusterTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 8, len(target.Attributes))
+	assert.Equal(t, 9, len(target.Attributes))
 	assert.Equal(t, []string{"status"}, target.Attributes["aws.rds.cluster.status"])
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"true"}, target.Attributes["aws.rds.cluster.multi-az"])
+	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws.rds.cluster.label.specialtag"])
 }
 
 func TestGetAllRdsClustersWithPagination(t *testing.T) {

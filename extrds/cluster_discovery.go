@@ -7,6 +7,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
@@ -18,7 +21,6 @@ import (
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"time"
 )
 
 type rdsClusterDiscovery struct {
@@ -169,6 +171,11 @@ func toClusterTarget(dbCluster types.DBCluster, awsAccountNumber string, awsRegi
 	if dbCluster.MultiAZ != nil {
 		attributes["aws.rds.cluster.multi-az"] = []string{fmt.Sprintf("%t", *dbCluster.MultiAZ)}
 	}
+
+	for _, tag := range dbCluster.TagList {
+		attributes[fmt.Sprintf("aws.rds.cluster.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+
 	for _, member := range dbCluster.DBClusterMembers {
 		if member.IsClusterWriter == nil {
 			continue
