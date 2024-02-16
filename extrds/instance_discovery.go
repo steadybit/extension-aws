@@ -7,6 +7,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
@@ -19,7 +22,6 @@ import (
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"time"
 )
 
 type rdsInstanceDiscovery struct {
@@ -147,6 +149,9 @@ func toInstanceTarget(dbInstance types.DBInstance, zoneUtil utils.GetZoneUtil, a
 
 	if dbInstance.DBClusterIdentifier != nil {
 		attributes["aws.rds.cluster"] = []string{aws.ToString(dbInstance.DBClusterIdentifier)}
+	}
+	for _, tag := range dbInstance.TagList {
+		attributes[fmt.Sprintf("aws.rds.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
 	}
 
 	return discovery_kit_api.Target{
