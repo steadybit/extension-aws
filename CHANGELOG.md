@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.20
+
+- consume RDS instance and cluster tags
+- Update dependencies
+
 ## v2.2.19
 
 - Update dependencies
