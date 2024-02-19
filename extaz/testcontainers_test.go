@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/localstack"
+	"github.com/testcontainers/testcontainers-go/network"
 	"testing"
 )
 
@@ -52,15 +53,11 @@ func WithTestContainers(t *testing.T, testCases []WithTestContainersCase) {
 }
 
 func setupTestContainers(t *testing.T, ctx context.Context) *TestContainers {
-	networkName := "localstack-network"
 	localstackImage := "localstack/localstack:1.4"
 
-	_, err := testcontainers.GenericNetwork(ctx, testcontainers.GenericNetworkRequest{
-		NetworkRequest: testcontainers.NetworkRequest{
-			Name: networkName,
-		},
-	})
+	networkCreated, err := network.New(ctx)
 	require.Nil(t, err)
+	networkName := networkCreated.Name
 
 	container, err := localstack.RunContainer(
 		ctx,
