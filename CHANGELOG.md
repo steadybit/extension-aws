@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.21
+
+- Update discovery_kit_sdk to v1.0.5, to resolve error in caching discovery
+- Update dependencies
+
 ## v2.2.20
 
 - consume RDS instance and cluster tags
