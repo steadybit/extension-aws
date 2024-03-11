@@ -4,13 +4,14 @@
 module github.com/steadybit/extension-aws
 
 go 1.21
+toolchain go1.22.1
 
 require (
 	github.com/KimMachineGun/automemlimit v0.5.0
-	github.com/aws/aws-sdk-go-v2 v1.25.2
+	github.com/aws/aws-sdk-go-v2 v1.25.3
 	github.com/aws/aws-sdk-go-v2/config v1.27.4
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.4
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.15.2
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.15.3
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.149.2
 	github.com/aws/aws-sdk-go-v2/service/fis v1.23.1
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.53.1
