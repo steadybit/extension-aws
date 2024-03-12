@@ -10,18 +10,6 @@ our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extensio
 
 ## Configuration
 
-### Environment Variables
-
-The extension supports all environment variables provided
-by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
-
-### Disable parts of the extension
-
-If you don't want to use certain parts of the extension and therefore don't want to provide the required permissions,
-you can disable these parts by providing
-the following environment variables. Actions using these targets will not be shown in the ui, as there are no targets
-reported.
-
 | Environment Variable                                       | Helm value                                 | Meaning                                                                                                                                 | Required | Default                                                                                                                                      |
 |------------------------------------------------------------|--------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | `STEADYBIT_EXTENSION_WORKER_THREADS`                       |                                            | How many parallel workers should call aws apis (only used if `STEADYBIT_EXTENSION_ASSUME_ROLES` is used)                                | no       | 1                                                                                                                                            |
@@ -42,6 +30,10 @@ reported.
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS`    | `aws.discovery.attributes.excludes.zone`   | List of FIS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"              | no       |                                                                                                                                              |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA` | `aws.discovery.attributes.excludes.fis`    | List of Lambda Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"           | no       |                                                                                                                                              |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS`    | `aws.discovery.attributes.excludes.lambda` | List of RDS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"              | no       |                                                                                                                                              |
+
+The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
+
+When installed as linux package this configuration is done in the file `/etc/steadybit/extension-aws`.
 
 ### Authentication
 
