@@ -95,13 +95,13 @@ func getEc2InstanceToHostEnrichmentRule(target string) discovery_kit_api.TargetE
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: ec2TargetId,
 			Selector: map[string]string{
-				"aws-ec2.hostname.internal": "${dest.host.hostname}",
+				"aws-ec2.hostname.internal": fmt.Sprintf("${dest.%s}", config.Config.EnrichEc2DataMatcherAttribute),
 			},
 		},
 		Dest: discovery_kit_api.SourceOrDestination{
 			Type: target,
 			Selector: map[string]string{
-				"host.hostname": "${src.aws-ec2.hostname.internal}",
+				config.Config.EnrichEc2DataMatcherAttribute: "${src.aws-ec2.hostname.internal}",
 			},
 		},
 		Attributes: []discovery_kit_api.Attribute{
@@ -171,13 +171,13 @@ func getEc2InstanceToXEnrichmentRule(destTargetType string) discovery_kit_api.Ta
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: ec2TargetId,
 			Selector: map[string]string{
-				"aws-ec2.hostname.internal": "${dest.host.hostname}",
+				"aws-ec2.hostname.internal": fmt.Sprintf("${dest.%s}", config.Config.EnrichEc2DataMatcherAttribute),
 			},
 		},
 		Dest: discovery_kit_api.SourceOrDestination{
 			Type: destTargetType,
 			Selector: map[string]string{
-				"host.hostname": "${src.aws-ec2.hostname.internal}",
+				config.Config.EnrichEc2DataMatcherAttribute: "${src.aws-ec2.hostname.internal}",
 			},
 		},
 		Attributes: []discovery_kit_api.Attribute{
