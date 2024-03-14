@@ -1,8 +1,13 @@
 # Changelog
 
-## v2.2.23
+## v2.2.24
 
 - Make attribute for EC2 data enrichment configurable via `STEADYBIT_EXTENSION_ENRICH_EC2_DATA_MATCHER_ATTRIBUTE`
+- Update dependnecies
+
+## v2.2.23
+
+- Update dependnecies
 
 ## v2.2.22
 
