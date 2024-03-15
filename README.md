@@ -61,7 +61,7 @@ by tweaking the `Resource` clause.
         "rds:StopDBInstance",
         "rds:RebootDBInstance",
         "rds:DescribeDBInstances",
-        "rds:FailoverDBClusters",
+        "rds:FailoverDBCluster",
         "rds:DescribeDBClusters"
       ],
       "Resource": "*"
