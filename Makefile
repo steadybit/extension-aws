@@ -83,7 +83,7 @@ run: tidy build
 ## container: build the container image
 .PHONY: container
 container:
-	docker build --build-arg BUILD_WITH_COVERAGE="true" --build-arg SKIP_LICENSES_REPORT="true" -t extension-aws:latest .
+	docker build --build-arg ADDITIONAL_BUILD_PARAMS="-cover -covermode=atomic" --build-arg BUILD_WITH_COVERAGE="true" --build-arg SKIP_LICENSES_REPORT="true" -t extension-aws:latest .
 
 ## linuxpkg: build the linux packages
 .PHONY: linuxpkg
