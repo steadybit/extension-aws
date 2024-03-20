@@ -31,10 +31,6 @@ func TestWithMinikube(t *testing.T) {
 				"--set-string", "extraEnv[4].value=true",
 				"--set", "extraEnv[5].name=STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS", //missing localstack support
 				"--set-string", "extraEnv[5].value=true",
-				"--set", "extraEnv[6].name=STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2", //server 500 from localstack
-				"--set-string", "extraEnv[6].value=true",
-				"--set", "extraEnv[7].name=STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE", //server 500 from localstack
-				"--set-string", "extraEnv[7].value=true",
 			}
 		},
 	}
