@@ -3,6 +3,12 @@ kind: Deployment
 metadata:
   name: {{ include "extensionlib.names.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  {{ if .Values.deploymentAnnotations }}
+  annotations:
+    {{- with .Values.deploymentAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
   labels:
   {{- range $key, $value := .Values.extraLabels }}
     {{ $key }}: {{ $value }}

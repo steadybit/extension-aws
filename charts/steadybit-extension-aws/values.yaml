@@ -94,6 +94,9 @@ serviceAccount:
 # extra labels to apply to the Kubernetes resources
 extraLabels: {}
 
+# deploymentAnnotations: Additional annotations to be added to the deployment.
+deploymentAnnotations: {}
+
 # podAnnotations -- Additional annotations to be added to the pods.
 podAnnotations: {}
 
