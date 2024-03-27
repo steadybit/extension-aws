@@ -18,6 +18,9 @@ import (
 func TestPrepareInstanceReboot(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
+		Config: map[string]interface{}{
+			"forceFailover": true,
+		},
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.rds.instance.id": {"my-instance"},
@@ -35,6 +38,7 @@ func TestPrepareInstanceReboot(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 	assert.Equal(t, "my-instance", state.DBInstanceIdentifier)
+	assert.Equal(t, true, state.ForceFailover)
 }
 
 func TestPrepareInstanceRebootMustRequireAnInstanceId(t *testing.T) {
