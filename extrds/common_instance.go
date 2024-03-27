@@ -9,6 +9,7 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extutil"
 )
 
 const (
@@ -18,6 +19,7 @@ const (
 type RdsInstanceAttackState struct {
 	DBInstanceIdentifier string
 	Account              string
+	ForceFailover        bool
 }
 
 type rdsDBInstanceApi interface {
@@ -40,6 +42,7 @@ func convertInstanceAttackState(request action_kit_api.PrepareActionRequestBody,
 
 	state.Account = account[0]
 	state.DBInstanceIdentifier = instanceId[0]
+	state.ForceFailover = extutil.ToBool(request.Config["forceFailover"])
 	return nil
 }
 

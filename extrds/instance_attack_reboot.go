@@ -47,7 +47,20 @@ func (f rdsInstanceRebootAttack) Describe() action_kit_api.ActionDescription {
 		Category:    extutil.Ptr("resource"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
-		Parameters:  []action_kit_api.ActionParameter{},
+		Parameters: []action_kit_api.ActionParameter{
+			{
+				Advanced:     extutil.Ptr(false),
+				DefaultValue: extutil.Ptr("false"),
+				Description:  extutil.Ptr("Specifies whether the reboot is conducted through a Multi-AZ failover."),
+				Hint: &action_kit_api.ActionHint{
+					Content: "You can't enable force failover if the instance isn't configured for Multi-AZ.",
+					Type:    action_kit_api.HintInfo,
+				},
+				Label: "Force Failover",
+				Name:  "force-failover",
+				Type:  action_kit_api.Boolean,
+			},
+		},
 	}
 }
 
@@ -63,6 +76,7 @@ func (f rdsInstanceRebootAttack) Start(ctx context.Context, state *RdsInstanceAt
 
 	input := rds.RebootDBInstanceInput{
 		DBInstanceIdentifier: &state.DBInstanceIdentifier,
+		ForceFailover:        &state.ForceFailover,
 	}
 	_, err = client.RebootDBInstance(ctx, &input)
 	if err != nil {
