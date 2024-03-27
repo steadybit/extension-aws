@@ -42,7 +42,7 @@ func convertInstanceAttackState(request action_kit_api.PrepareActionRequestBody,
 
 	state.Account = account[0]
 	state.DBInstanceIdentifier = instanceId[0]
-	state.ForceFailover = extutil.ToBool(request.Config["forceFailover"])
+	state.ForceFailover = extutil.ToBool(request.Config["force-failover"])
 	return nil
 }
 

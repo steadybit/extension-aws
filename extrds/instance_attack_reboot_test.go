@@ -19,7 +19,7 @@ func TestPrepareInstanceReboot(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
-			"forceFailover": true,
+			"force-failover": true,
 		},
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
@@ -86,11 +86,13 @@ func TestStartInstanceReboot(t *testing.T) {
 	api := new(rdsDBInstanceApiMock)
 	api.On("RebootDBInstance", mock.Anything, mock.MatchedBy(func(params *rds.RebootDBInstanceInput) bool {
 		require.Equal(t, "dev-db", *params.DBInstanceIdentifier)
+		require.Equal(t, true, *params.ForceFailover)
 		return true
 	}), mock.Anything).Return(nil, nil)
 	state := RdsInstanceAttackState{
 		DBInstanceIdentifier: "dev-db",
 		Account:              "42",
+		ForceFailover:        true,
 	}
 	action := rdsInstanceRebootAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
 		return api, nil
