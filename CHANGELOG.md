@@ -1,13 +1,18 @@
 # Changelog
 
+## v2.2.25
+
+- Update dependencies
+- Add Force Failover parameter to Trigger RDS Instance Reboot
+
 ## v2.2.24
 
 - Make attribute for EC2 data enrichment configurable via `STEADYBIT_EXTENSION_ENRICH_EC2_DATA_MATCHER_ATTRIBUTE`
-- Update dependnecies
+- Update dependencies
 
 ## v2.2.23
 
-- Update dependnecies
+- Update dependencies
 
 ## v2.2.22
 
