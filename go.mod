@@ -8,7 +8,7 @@ go 1.21.0
 toolchain go1.21.6
 
 require (
-	github.com/KimMachineGun/automemlimit v0.5.0
+	github.com/KimMachineGun/automemlimit v0.6.0
 	github.com/aws/aws-sdk-go-v2 v1.26.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.11
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.11
