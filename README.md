@@ -405,7 +405,7 @@ helm upgrade steadybit-extension-aws \
     --wait \
     --timeout 5m0s \
     --create-namespace \
-    --namespace steadybit-extension \
+    --namespace steadybit-agent \
     --serviceAccount.eksRoleArn={{YOUR_SERVICE_ACCOUNT_ARN_IF_RUNNING_IN_EKS}} \
     steadybit-extension-aws/steadybit-extension-aws
 ```
