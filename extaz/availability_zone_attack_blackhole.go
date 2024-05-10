@@ -392,17 +392,20 @@ func rollbackBlackholeViaTags(ctx context.Context, state *BlackholeState, client
 		return extension_kit.ToError("Failed to get network ACLs created by Steadybit", err)
 	}
 
-	networkAclIdsCreadedBySteadybit := make(map[string]struct{}) // a Set of network ACL IDs created by Steadybit to be deleted later
-	oldNetworkAclIds := make(map[string]string)                  // key: new association ID, value: old network ACL ID --> to be used to rollback the network ACL association
+	networkAclIdsCreadedBySteadybit := make(map[string]*[]types.TagDescription) // a Set of network ACL IDs created by Steadybit to be deleted later
+	oldNetworkAclIds := make(map[string]string)                                 // key: new association ID, value: old network ACL ID --> to be used to rollback the network ACL association
 
 	var errors []string
 
 	for _, networkAclsAssociatedWithSubnet := range *networkAclsAssociatedWithSubnets {
-		networkAclIdsCreadedBySteadybit[*networkAclsAssociatedWithSubnet.NetworkAclId] = struct{}{}
-		tags, err := getTagsOfNacl(clientEc2, ctx, *networkAclsAssociatedWithSubnet.NetworkAclId)
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to get tags of network ACL")
-			errors = append(errors, err.Error())
+		tags, ok := networkAclIdsCreadedBySteadybit[*networkAclsAssociatedWithSubnet.NetworkAclId]
+		if !ok {
+			tags, err = getTagsOfNacl(clientEc2, ctx, *networkAclsAssociatedWithSubnet.NetworkAclId)
+			if err != nil {
+				log.Error().Err(err).Msg("Failed to get tags of network ACL")
+				errors = append(errors, err.Error())
+			}
+			networkAclIdsCreadedBySteadybit[*networkAclsAssociatedWithSubnet.NetworkAclId] = tags
 		}
 
 		for _, tag := range *tags {

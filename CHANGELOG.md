@@ -3,6 +3,7 @@
 ## v2.2.26 (next)
 
 - Update dependencies (go 1.22)
+- Reduced API calls for AZ Blackhole attack
 
 ## v2.2.25
 
