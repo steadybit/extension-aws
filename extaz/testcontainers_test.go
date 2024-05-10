@@ -7,10 +7,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	middleware2 "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/smithy-go/middleware"
 	"github.com/docker/go-connections/nat"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
@@ -53,7 +55,7 @@ func WithTestContainers(t *testing.T, testCases []WithTestContainersCase) {
 }
 
 func setupTestContainers(t *testing.T, ctx context.Context) *TestContainers {
-	localstackImage := "localstack/localstack:1.4"
+	localstackImage := "localstack/localstack:3.4.0"
 
 	networkCreated, err := network.New(ctx)
 	require.Nil(t, err)
@@ -77,6 +79,31 @@ func setupTestContainers(t *testing.T, ctx context.Context) *TestContainers {
 		LocalStackContainer: container,
 	}
 }
+
+// localstack does not implement api throttling, so we need to simulate it. PermittedApiCalls is a map that contains the number of permitted calls for each API call and can also be used to count the actual calls in a specific test.
+var PermittedApiCalls = map[string]int{
+	"CreateNetworkAcl":             1000,
+	"CreateNetworkAclEntry":        1000,
+	"DeleteNetworkAcl":             1000,
+	"DescribeNetworkAcls":          1000,
+	"DescribeSubnets":              1000,
+	"DescribeTags":                 1000,
+	"ReplaceNetworkAclAssociation": 1000,
+}
+
+var apiThrottlingMiddleware = middleware.InitializeMiddlewareFunc("apiThrottlingMiddleware",
+	func(ctx context.Context, in middleware.InitializeInput, next middleware.InitializeHandler) (out middleware.InitializeOutput, metadata middleware.Metadata, err error) {
+		operationName := middleware2.GetOperationName(ctx)
+		permitted, ok := PermittedApiCalls[operationName]
+		if !ok {
+			return out, metadata, fmt.Errorf("API call not permitted: %s", operationName)
+		}
+		if permitted == 0 {
+			return out, metadata, fmt.Errorf("simulated API Throttling for %s", operationName)
+		}
+		PermittedApiCalls[operationName]--
+		return next.HandleInitialize(ctx, in)
+	})
 
 func setupEc2Client(ctx context.Context, l *localstack.LocalStackContainer) (*ec2.Client, error) {
 	mappedPort, err := l.MappedPort(ctx, nat.Port("4566/tcp"))
@@ -108,6 +135,9 @@ func setupEc2Client(ctx context.Context, l *localstack.LocalStackContainer) (*ec
 		config.WithEndpointResolverWithOptions(customResolver),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("accesskey", "secretkey", "token")),
 	)
+	awsCfg.APIOptions = append(awsCfg.APIOptions, func(stack *middleware.Stack) error {
+		return stack.Initialize.Add(apiThrottlingMiddleware, middleware.After)
+	})
 	if err != nil {
 		return nil, err
 	}
