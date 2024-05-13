@@ -465,9 +465,7 @@ func getAllNACLsCreatedBySteadybit(clientEc2 azBlackholeEC2Api, ctx context.Cont
 			log.Error().Err(err).Msg("Failed to get network ACLs")
 			return nil, err
 		}
-		for _, networkAcl := range describeNetworkAclsResult.NetworkAcls {
-			result = append(result, networkAcl)
-		}
+		result = append(result, describeNetworkAclsResult.NetworkAcls...)
 	}
 	return &result, nil
 }
