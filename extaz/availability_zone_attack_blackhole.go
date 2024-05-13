@@ -43,7 +43,6 @@ type BlackholeState struct {
 type azBlackholeEC2Api interface {
 	ec2.DescribeSubnetsAPIClient
 	ec2.DescribeNetworkAclsAPIClient
-	ec2.DescribeTagsAPIClient
 	CreateNetworkAcl(ctx context.Context, params *ec2.CreateNetworkAclInput, optFns ...func(*ec2.Options)) (*ec2.CreateNetworkAclOutput, error)
 	CreateNetworkAclEntry(ctx context.Context, params *ec2.CreateNetworkAclEntryInput, optFns ...func(*ec2.Options)) (*ec2.CreateNetworkAclEntryOutput, error)
 	ReplaceNetworkAclAssociation(ctx context.Context, params *ec2.ReplaceNetworkAclAssociationInput, optFns ...func(*ec2.Options)) (*ec2.ReplaceNetworkAclAssociationOutput, error)
@@ -170,26 +169,26 @@ func (e *azBlackholeAction) Start(ctx context.Context, state *BlackholeState) (*
 	for vpcId, subnetIds := range state.TargetSubnets {
 		log.Info().Msgf("Creating temporary ACL to block traffic in VPC %s", vpcId)
 		//Find existing to be modified network acl associations matching the subnetIds in the given VPC
-		desiredAclAssociations, err := getNetworkAclAssociations(ctx, clientEc2, vpcId, subnetIds)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to get network ACL associations for VPC %s", vpcId)
-			err = extension_kit.ToError(fmt.Sprintf("Failed to get network ACL associations for VPC %s", vpcId), err)
+		desiredAclAssociations, getNetworkAclAssociationsErr := getNetworkAclAssociations(ctx, clientEc2, vpcId, subnetIds)
+		if getNetworkAclAssociationsErr != nil {
+			log.Error().Err(getNetworkAclAssociationsErr).Msgf("Failed to get network ACL associations for VPC %s", vpcId)
+			err = extension_kit.ToError(fmt.Sprintf("Failed to get network ACL associations for VPC %s", vpcId), getNetworkAclAssociationsErr)
 			break
 		}
 		log.Info().Msgf("Found %d network ACL associations to modify", len(desiredAclAssociations))
 
-		networkAclId, err := createNetworkAcl(ctx, state, clientEc2, vpcId, desiredAclAssociations)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to create network ACL for VPC %s", vpcId)
-			err = extension_kit.ToError(fmt.Sprintf("Failed to create network ACL for VPC %s", vpcId), err)
+		networkAclId, createNetworkAclErr := createNetworkAcl(ctx, state, clientEc2, vpcId, desiredAclAssociations)
+		if createNetworkAclErr != nil {
+			log.Error().Err(createNetworkAclErr).Msgf("Failed to create network ACL for VPC %s", vpcId)
+			err = extension_kit.ToError(fmt.Sprintf("Failed to create network ACL for VPC %s", vpcId), createNetworkAclErr)
 			break
 		}
 
 		//Replace the association IDs for the above subnets with the new network acl which will deny all traffic for those subnets in that AZ
-		err = replaceNetworkAclAssociations(ctx, state, clientEc2, desiredAclAssociations, networkAclId)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to replace network ACL associations for VPC %s", vpcId)
-			err = extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL associations for VPC %s", vpcId), err)
+		replaceNetworkAclAssociationsErr := replaceNetworkAclAssociations(ctx, state, clientEc2, desiredAclAssociations, networkAclId)
+		if replaceNetworkAclAssociationsErr != nil {
+			log.Error().Err(replaceNetworkAclAssociationsErr).Msgf("Failed to replace network ACL associations for VPC %s", vpcId)
+			err = extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL associations for VPC %s", vpcId), replaceNetworkAclAssociationsErr)
 			break
 		}
 	}
@@ -336,8 +335,9 @@ func createNetworkAclEntry(ctx context.Context, clientEc2 azBlackholeEC2Api, net
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to create network ACL entry")
+	} else {
+		log.Debug().Msgf("Created network ACL entry for network ACL %+v", createdNetworkAclEntry)
 	}
-	log.Debug().Msgf("Created network ACL entry for network ACL %+v", createdNetworkAclEntry)
 }
 
 func getNetworkAclAssociations(ctx context.Context, clientEc2 azBlackholeEC2Api, vpcId string, targetSubnetIds []string) ([]types.NetworkAclAssociation, error) {
@@ -386,103 +386,66 @@ func (e *azBlackholeAction) Stop(ctx context.Context, state *BlackholeState) (*a
 
 func rollbackBlackholeViaTags(ctx context.Context, state *BlackholeState, clientEc2 azBlackholeEC2Api) error {
 	// get all network ACLs created by Steadybit
-	networkAclsAssociatedWithSubnets, err := getAllNACLsCreatedBySteadybit(clientEc2, ctx, state.AttackExecutionId)
+	networkAcls, err := getAllNACLsCreatedBySteadybit(clientEc2, ctx, state.AttackExecutionId)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get network ACLs created by Steadybit")
 		return extension_kit.ToError("Failed to get network ACLs created by Steadybit", err)
 	}
 
-	networkAclIdsCreadedBySteadybit := make(map[string]*[]types.TagDescription) // a Set of network ACL IDs created by Steadybit to be deleted later
-	oldNetworkAclIds := make(map[string]string)                                 // key: new association ID, value: old network ACL ID --> to be used to rollback the network ACL association
-
 	var errors []string
-
-	for _, networkAclsAssociatedWithSubnet := range *networkAclsAssociatedWithSubnets {
-		tags, ok := networkAclIdsCreadedBySteadybit[*networkAclsAssociatedWithSubnet.NetworkAclId]
-		if !ok {
-			tags, err = getTagsOfNacl(clientEc2, ctx, *networkAclsAssociatedWithSubnet.NetworkAclId)
-			if err != nil {
-				log.Error().Err(err).Msg("Failed to get tags of network ACL")
-				errors = append(errors, err.Error())
-			}
-			networkAclIdsCreadedBySteadybit[*networkAclsAssociatedWithSubnet.NetworkAclId] = tags
-		}
-
-		for _, tag := range *tags {
+	for _, networkAcl := range *networkAcls {
+		for _, tag := range networkAcl.Tags {
 			// find tags beginning with "steadybit-replaced "
 			if strings.HasPrefix(*tag.Key, "steadybit-replaced ") {
 				subnetId := strings.TrimPrefix(*tag.Key, "steadybit-replaced ")
-				if *networkAclsAssociatedWithSubnet.SubnetId == subnetId {
-					// get the old network ACL ID
-					oldNetworkAclId := tag.Value
-					oldNetworkAclIds[*networkAclsAssociatedWithSubnet.NetworkAclAssociationId] = *oldNetworkAclId
+				for _, networkAclAssociation := range networkAcl.Associations {
+					if *networkAclAssociation.SubnetId == subnetId {
+						networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
+							AssociationId: aws.String(*networkAclAssociation.NetworkAclAssociationId),
+							NetworkAclId:  aws.String(*tag.Value),
+						}
+						log.Debug().Msgf("Rolling back to old acl %+v", networkAclAssociationInput)
+						replaceNetworkAclAssociationResponse, replaceErr := clientEc2.ReplaceNetworkAclAssociation(context.Background(), networkAclAssociationInput)
+						if replaceErr != nil {
+							log.Error().Err(replaceErr).Msgf("Failed to rollback to old acl entry %+v", networkAclAssociationInput)
+							errors = append(errors, replaceErr.Error())
+						} else {
+							log.Debug().Msgf("Rolled back to old acl %+v", replaceNetworkAclAssociationResponse)
+						}
+					}
 				}
 			}
 		}
 	}
 
-	for associationId, oldNetworkAclIdValue := range oldNetworkAclIds {
-		networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{
-			AssociationId: aws.String(associationId),
-			NetworkAclId:  aws.String(oldNetworkAclIdValue),
+	//Don't delete any network ACLs if there are errors in rollback because their tags contains information about the old network ACLs
+	if errors != nil {
+		return extension_kit.ToError(fmt.Sprintf("Failed to rollback network ACL association: %s", strings.Join(errors, ", ")), nil)
+	} else {
+		for _, networkAcl := range *networkAcls {
+			//Delete NACL
+			deleteNetworkAclInput := &ec2.DeleteNetworkAclInput{
+				NetworkAclId: aws.String(*networkAcl.NetworkAclId),
+			}
+			log.Debug().Msgf("Deleting network acl %+v", deleteNetworkAclInput)
+			deleteNetworkAclResponse, deleteErr := clientEc2.DeleteNetworkAcl(context.Background(), deleteNetworkAclInput)
+			if deleteErr != nil {
+				log.Error().Err(deleteErr).Msgf("Failed to delete network acl %+v", deleteNetworkAclInput)
+				errors = append(errors, deleteErr.Error())
+			} else {
+				log.Debug().Msgf("Deleted network acl entry  %+v", deleteNetworkAclResponse)
+			}
 		}
-		log.Debug().Msgf("Rolling back to old acl entry %+v", networkAclAssociationInput)
-		replaceNetworkAclAssociationResponse, err := clientEc2.ReplaceNetworkAclAssociation(context.Background(), networkAclAssociationInput)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to rollback to old acl entry %+v", networkAclAssociationInput)
-			errors = append(errors, err.Error())
-		}
-		log.Debug().Msgf("Rolled back to old acl entry  %+v", replaceNetworkAclAssociationResponse)
 	}
 
-	for networkAclId := range networkAclIdsCreadedBySteadybit {
-		deleteNetworkAclInput := &ec2.DeleteNetworkAclInput{
-			NetworkAclId: aws.String(networkAclId),
-		}
-		log.Debug().Msgf("Deleting network acl entry %+v", deleteNetworkAclInput)
-		deleteNetworkAclResponse, err := clientEc2.DeleteNetworkAcl(context.Background(), deleteNetworkAclInput)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to delete network acl entry %+v", deleteNetworkAclInput)
-			errors = append(errors, err.Error())
-		}
-		log.Debug().Msgf("Deleted network acl entry  %+v", deleteNetworkAclResponse)
-	}
 	if errors != nil {
-		return extension_kit.ToError(fmt.Sprintf("Failed to replace network ACL association: %s", strings.Join(errors, ", ")), nil)
+		return extension_kit.ToError(fmt.Sprintf("Failed to delete network acls: %s", strings.Join(errors, ", ")), nil)
 	}
 	return nil
 }
 
-func getTagsOfNacl(clientEc2 azBlackholeEC2Api, ctx context.Context, networkAclId string) (*[]types.TagDescription, error) {
-	tagsOfNacl := make([]types.TagDescription, 0)
-
-	paginator := ec2.NewDescribeTagsPaginator(clientEc2, &ec2.DescribeTagsInput{
-		Filters: []types.Filter{
-			{
-				Name:   aws.String("resource-id"),
-				Values: []string{networkAclId},
-			},
-			{
-				Name:   aws.String("resource-type"),
-				Values: []string{"network-acl"},
-			},
-		},
-	})
-
-	for paginator.HasMorePages() {
-		describeTagsResult, err := paginator.NextPage(ctx)
-
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to get network ACLs Tags")
-			return nil, err
-		}
-		tagsOfNacl = append(tagsOfNacl, describeTagsResult.Tags...)
-	}
-	return &tagsOfNacl, nil
-}
-
-func getAllNACLsCreatedBySteadybit(clientEc2 azBlackholeEC2Api, ctx context.Context, executionId uuid.UUID) (*[]types.NetworkAclAssociation, error) {
-	networkAclsAssociatedWithSubnets := make([]types.NetworkAclAssociation, 0)
+func getAllNACLsCreatedBySteadybit(clientEc2 azBlackholeEC2Api, ctx context.Context, executionId uuid.UUID) (*[]types.NetworkAcl, error) {
+	result := make([]types.NetworkAcl, 0)
 	paginator := ec2.NewDescribeNetworkAclsPaginator(clientEc2, &ec2.DescribeNetworkAclsInput{
 		Filters: []types.Filter{
 			{
@@ -503,10 +466,10 @@ func getAllNACLsCreatedBySteadybit(clientEc2 azBlackholeEC2Api, ctx context.Cont
 			return nil, err
 		}
 		for _, networkAcl := range describeNetworkAclsResult.NetworkAcls {
-			networkAclsAssociatedWithSubnets = append(networkAclsAssociatedWithSubnets, networkAcl.Associations...)
+			result = append(result, networkAcl)
 		}
 	}
-	return &networkAclsAssociatedWithSubnets, nil
+	return &result, nil
 }
 
 func defaultClientProvider(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {

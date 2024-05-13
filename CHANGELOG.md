@@ -3,7 +3,10 @@
 ## v2.2.26 (next)
 
 - Update dependencies (go 1.22)
-- Reduced API calls for AZ Blackhole attack
+- Revisited AZ Blackhole attack
+  - Reduced amount of required API calls
+  - Added tests for rollback behaviour
+  - Fixed a bug where an unused network acl wasn't deleted
 
 ## v2.2.25
 

@@ -71,14 +71,6 @@ func (m *clientEC2ApiMock) DeleteNetworkAcl(ctx context.Context, params *ec2.Del
 	return args.Get(0).(*ec2.DeleteNetworkAclOutput), args.Error(1)
 }
 
-func (m *clientEC2ApiMock) DescribeTags(ctx context.Context, params *ec2.DescribeTagsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeTagsOutput, error) {
-	args := m.Called(ctx, params, optFns)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*ec2.DescribeTagsOutput), args.Error(1)
-}
-
 type clientImdsApiMock struct {
 	mock.Mock
 }
@@ -447,6 +439,16 @@ func TestStopBlackhole(t *testing.T) {
 	}), mock.Anything).Return(extutil.Ptr(ec2.DescribeNetworkAclsOutput{
 		NetworkAcls: []types.NetworkAcl{
 			{
+				NetworkAclId: extutil.Ptr("NEW nacl-4"),
+				Tags: []types.Tag{
+					{
+						Key:   extutil.Ptr("steadybit-replaced subnet-1"),
+						Value: extutil.Ptr("nacl-1"),
+					}, {
+						Key:   extutil.Ptr("steadybit-replaced subnet-2"),
+						Value: extutil.Ptr("nacl-2"),
+					},
+				},
 				Associations: []types.NetworkAclAssociation{
 					{
 						NetworkAclAssociationId: extutil.Ptr("NEW association-4"),
@@ -458,24 +460,6 @@ func TestStopBlackhole(t *testing.T) {
 						SubnetId:                extutil.Ptr("subnet-2"),
 					},
 				},
-			},
-		},
-	}), nil)
-
-	clientEc2.On("DescribeTags", mock.Anything, mock.MatchedBy(func(params *ec2.DescribeTagsInput) bool {
-		require.Equal(t, aws.String("resource-id"), params.Filters[0].Name)
-		require.Equal(t, "NEW nacl-4", params.Filters[0].Values[0])
-		require.Equal(t, aws.String("resource-type"), params.Filters[1].Name)
-		require.Equal(t, "network-acl", params.Filters[1].Values[0])
-		return true
-	}), mock.Anything).Return(extutil.Ptr(ec2.DescribeTagsOutput{
-		Tags: []types.TagDescription{
-			{
-				Key:   extutil.Ptr("steadybit-replaced subnet-1"),
-				Value: extutil.Ptr("nacl-1"),
-			}, {
-				Key:   extutil.Ptr("steadybit-replaced subnet-2"),
-				Value: extutil.Ptr("nacl-2"),
 			},
 		},
 	}), nil)

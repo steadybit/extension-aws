@@ -87,7 +87,6 @@ var PermittedApiCalls = map[string]int{
 	"DeleteNetworkAcl":             1000,
 	"DescribeNetworkAcls":          1000,
 	"DescribeSubnets":              1000,
-	"DescribeTags":                 1000,
 	"ReplaceNetworkAclAssociation": 1000,
 }
 
