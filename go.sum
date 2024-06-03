@@ -43,8 +43,8 @@ github.com/aws/aws-sdk-go-v2/service/lambda v1.54.3 h1:EfBXCCBDd5uLKwOS+4Xht/6I/
 github.com/aws/aws-sdk-go-v2/service/lambda v1.54.3/go.mod h1:RDNknjCSYlR3S3TTi3UhHKBUXnh8q+7m5zmPaEu+0NA=
 github.com/aws/aws-sdk-go-v2/service/rds v1.79.2 h1:yY7c6UHtXyqMHSIuQKz77hCERU3lvq45wDuVgR5zHt4=
 github.com/aws/aws-sdk-go-v2/service/rds v1.79.2/go.mod h1:/SU1vNf8MsUyfRkEkv3Hcz9y5uSTyBS+ohATQOj6ioQ=
-github.com/aws/aws-sdk-go-v2/service/ssm v1.50.3 h1:R0cDljGteICdlJ07/RipvzJpxPX70kGR4Bxj4nHAEao=
-github.com/aws/aws-sdk-go-v2/service/ssm v1.50.3/go.mod h1:uRCbiDLweN10yl6W80fLygiLUDTIonz8/RpH+6lsEnY=
+github.com/aws/aws-sdk-go-v2/service/ssm v1.50.4 h1:SgDxM/2kJEeSavji5ob+oluTPo3CQOQmP56F3yUz/kE=
+github.com/aws/aws-sdk-go-v2/service/ssm v1.50.4/go.mod h1:uRCbiDLweN10yl6W80fLygiLUDTIonz8/RpH+6lsEnY=
 github.com/aws/aws-sdk-go-v2/service/sso v1.20.9 h1:aD7AGQhvPuAxlSUfo0CWU7s6FpkbyykMhGYMvlqTjVs=
 github.com/aws/aws-sdk-go-v2/service/sso v1.20.9/go.mod h1:c1qtZUWtygI6ZdvKppzCSXsDOq5I4luJPZ0Ud3juFCA=
 github.com/aws/aws-sdk-go-v2/service/ssooidc v1.24.3 h1:Pav5q3cA260Zqez42T9UhIlsd9QeypszRPwC9LdSSsQ=
