@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	middleware2 "github.com/aws/aws-sdk-go-v2/aws/middleware"
+	aws_middleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
@@ -92,7 +92,7 @@ var PermittedApiCalls = map[string]int{
 
 var apiThrottlingMiddleware = middleware.InitializeMiddlewareFunc("apiThrottlingMiddleware",
 	func(ctx context.Context, in middleware.InitializeInput, next middleware.InitializeHandler) (out middleware.InitializeOutput, metadata middleware.Metadata, err error) {
-		operationName := middleware2.GetOperationName(ctx)
+		operationName := aws_middleware.GetOperationName(ctx)
 		permitted, ok := PermittedApiCalls[operationName]
 		if !ok {
 			return out, metadata, fmt.Errorf("API call not permitted: %s", operationName)
@@ -120,20 +120,11 @@ func setupEc2Client(ctx context.Context, l *localstack.LocalStackContainer) (*ec
 		return nil, err
 	}
 
-	customResolver := aws.EndpointResolverWithOptionsFunc(
-		func(service, region string, opts ...interface{}) (aws.Endpoint, error) {
-			return aws.Endpoint{
-				PartitionID:   "aws",
-				URL:           fmt.Sprintf("http://%s:%d", host, mappedPort.Int()),
-				SigningRegion: region,
-			}, nil
-		})
-
 	awsCfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion("eu-west-1"),
-		config.WithEndpointResolverWithOptions(customResolver),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("accesskey", "secretkey", "token")),
 	)
+
 	awsCfg.APIOptions = append(awsCfg.APIOptions, func(stack *middleware.Stack) error {
 		return stack.Initialize.Add(apiThrottlingMiddleware, middleware.After)
 	})
@@ -141,14 +132,13 @@ func setupEc2Client(ctx context.Context, l *localstack.LocalStackContainer) (*ec
 		return nil, err
 	}
 
-	client := ec2.NewFromConfig(awsCfg, func(o *ec2.Options) {
-	})
+	awsCfg.BaseEndpoint = aws.String(fmt.Sprintf("http://%s:%d", host, mappedPort.Int()))
 
-	return client, nil
+	return ec2.NewFromConfig(awsCfg), nil
 }
 
 func setupImdsClient(ctx context.Context, l *localstack.LocalStackContainer) (*imds.Client, error) {
-	mappedPort, err := l.MappedPort(ctx, nat.Port("4566/tcp"))
+	mappedPort, err := l.MappedPort(ctx, "4566/tcp")
 	if err != nil {
 		return nil, err
 	}
@@ -163,20 +153,11 @@ func setupImdsClient(ctx context.Context, l *localstack.LocalStackContainer) (*i
 		return nil, err
 	}
 
-	customResolver := aws.EndpointResolverWithOptionsFunc(
-		func(service, region string, opts ...interface{}) (aws.Endpoint, error) {
-			return aws.Endpoint{
-				PartitionID:   "aws",
-				URL:           fmt.Sprintf("http://%s:%d", host, mappedPort.Int()),
-				SigningRegion: region,
-			}, nil
-		})
-
 	awsCfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion("eu-west-1"),
-		config.WithEndpointResolverWithOptions(customResolver),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("accesskey", "secretkey", "token")),
 	)
+	awsCfg.BaseEndpoint = aws.String(fmt.Sprintf("http://%s:%d", host, mappedPort.Int()))
 	if err != nil {
 		return nil, err
 	}

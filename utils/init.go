@@ -23,7 +23,7 @@ var (
 
 func InitializeAwsAccountAccess(specification extConfig.Specification) {
 	ctx := context.Background()
-	awsConfigForRootAccount, err := config.LoadDefaultConfig(ctx, config.WithEndpointResolverWithOptions(overridingEndpointResolver(specification)))
+	awsConfigForRootAccount, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to load AWS configuration")
 	}
@@ -34,6 +34,11 @@ func InitializeAwsAccountAccess(specification extConfig.Specification) {
 	awsConfigForRootAccount.APIOptions = append(awsConfigForRootAccount.APIOptions, func(stack *middleware.Stack) error {
 		return stack.Initialize.Add(customLoggerMiddleware, middleware.After)
 	})
+
+	if specification.AwsEndpointOverride != "" {
+		log.Warn().Msgf("Overriding AWS base endpoint with '%s'", specification.AwsEndpointOverride)
+		awsConfigForRootAccount.BaseEndpoint = &specification.AwsEndpointOverride
+	}
 
 	stsClientForRootAccount := sts.NewFromConfig(awsConfigForRootAccount)
 	identityOutput, err := stsClientForRootAccount.GetCallerIdentity(ctx, nil)
@@ -59,19 +64,6 @@ func InitializeAwsAccountAccess(specification extConfig.Specification) {
 			}
 		}
 	}
-}
-
-func overridingEndpointResolver(specification extConfig.Specification) aws.EndpointResolverWithOptions {
-	return aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-		if specification.AwsEndpointOverride != "" {
-			log.Warn().Msgf("Overriding AWS endpoint for service '%s' in region '%s' with '%s'", service, region, specification.AwsEndpointOverride)
-			return aws.Endpoint{
-				URL: specification.AwsEndpointOverride,
-			}, nil
-		}
-
-		return aws.Endpoint{}, &aws.EndpointNotFoundError{}
-	})
 }
 
 type logForwarder struct {
