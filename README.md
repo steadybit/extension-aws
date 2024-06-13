@@ -47,23 +47,25 @@ become active
 by tweaking the `Resource` clause.
 
 <details>
-    <summary>RDS-Discovery & Actions</summary>
+    <summary>Availability Zone-Discovery & Availability Zone Blackhole</summary>
 
 ```yaml
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Effect": "Allow",
       "Action": [
-        "rds:RebootDBCluster",
-        "rds:ListTagsForResource",
-        "rds:StopDBInstance",
-        "rds:RebootDBInstance",
-        "rds:DescribeDBInstances",
-        "rds:FailoverDBClusters",
-        "rds:DescribeDBClusters"
+        "ec2:DescribeTags",
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeNetworkAcls",
+        "ec2:CreateNetworkAcl",
+        "ec2:CreateNetworkAclEntry",
+        "ec2:ReplaceNetworkAclAssociation",
+        "ec2:DeleteNetworkAcl",
+        "ec2:CreateTags"
       ],
+      "Effect": "Allow",
       "Resource": "*"
     }
   ]
@@ -95,25 +97,21 @@ by tweaking the `Resource` clause.
 
 </details>
 <details>
-    <summary>Availability Zone-Discovery & Availability Zone Blackhole</summary>
+    <summary>ECS-Discovery & Actions</summary>
 
 ```yaml
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Action": [
-        "ec2:DescribeTags",
-        "ec2:DescribeAvailabilityZones",
-        "ec2:DescribeSubnets",
-        "ec2:DescribeNetworkAcls",
-        "ec2:CreateNetworkAcl",
-        "ec2:CreateNetworkAclEntry",
-        "ec2:ReplaceNetworkAclAssociation",
-        "ec2:DeleteNetworkAcl",
-        "ec2:CreateTags"
-      ],
       "Effect": "Allow",
+      "Action": [
+        "ecs:ListTasks",
+        "ecs:DescribeTasks",
+        "ecs:ListClusters",
+				"ecs:StopTask",
+				"ecs:UpdateService",
+      ],
       "Resource": "*"
     }
   ]
@@ -171,6 +169,31 @@ start the very first fis experiment via the steadybit agent, you will need to ad
         "lambda:ListFunctions"
       ],
       "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+<details>
+    <summary>RDS-Discovery & Actions</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "rds:RebootDBCluster",
+        "rds:ListTagsForResource",
+        "rds:StopDBInstance",
+        "rds:RebootDBInstance",
+        "rds:DescribeDBInstances",
+        "rds:FailoverDBClusters",
+        "rds:DescribeDBClusters"
+      ],
       "Resource": "*"
     }
   ]

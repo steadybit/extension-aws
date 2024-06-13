@@ -7,6 +7,17 @@
   - Reduced amount of required API calls
   - Added tests for rollback behaviour
   - Fixed a bug where an unused network acl wasn't deleted
+- Added ECS Support
+  - Discovery for Tasks and Services
+  - Requires new permissions (or needs to be disabled via `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS`)
+    ```
+    "ecs:ListTasks",
+    "ecs:DescribeTasks",
+    "ecs:ListClusters",
+    "ecs:StopTask",
+    "ecs:UpdateService"
+	  ```
+
 
 ## v2.2.25
 

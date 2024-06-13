@@ -6,6 +6,42 @@ tests:
   - it: manifest should match snapshot without TLS
     asserts:
       - matchSnapshot: { }
+  - it: manifest should add aws env vars
+    set:
+      aws:
+        assumeRoles:
+          - "arn:aws:iam::123456789012:role/role1"
+          - "arn:aws:iam::123456789012:role/role2"
+        discovery:
+          disabled:
+            ec2: true
+            ecs: true
+            fis: true
+            lambda: true
+            rds: true
+            zone: true
+          attributes:
+            excludes:
+              ec2:
+                - "example.ec2.1"
+                - "example.ec2.2"
+              ecs:
+                - "example.ecs.1"
+                - "example.ecs.2"
+              fis:
+                - "example.fis.1"
+                - "example.fis.2"
+              lambda:
+                - "example.lambda.1"
+                - "example.lambda.2"
+              rds:
+                - "example.rds.1"
+                - "example.rds.2"
+              zone:
+                - "example.zone.1"
+                - "example.zone.2"
+    asserts:
+      - matchSnapshot: {}
   - it: manifest should match snapshot using podAnnotations and Labels
     set:
       podAnnotations:

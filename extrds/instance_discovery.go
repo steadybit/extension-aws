@@ -103,7 +103,7 @@ func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
-			log.Error().Msgf("Not Authorized to discover rds-instances for account %s. If this intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true. Details: %s", account.AccountNumber, re.Error())
+			log.Error().Msgf("Not Authorized to discover rds-instances for account %s. If this is intended, you can disable the discovery by setting STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS=true. Details: %s", account.AccountNumber, re.Error())
 			return []discovery_kit_api.Target{}, nil
 		}
 		return nil, err

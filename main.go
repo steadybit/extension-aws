@@ -14,6 +14,7 @@ import (
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/extaz"
 	"github.com/steadybit/extension-aws/extec2"
+	"github.com/steadybit/extension-aws/extecs"
 	"github.com/steadybit/extension-aws/extfis"
 	"github.com/steadybit/extension-aws/extlambda"
 	"github.com/steadybit/extension-aws/extrds"
@@ -109,6 +110,10 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extlambda.NewInjectLatencyAction())
 		action_kit_sdk.RegisterAction(extlambda.NewFillDiskspaceAction())
 		action_kit_sdk.RegisterAction(extlambda.NewDenylistAction())
+	}
+
+	if !cfg.DiscoveryDisabledEcs {
+		discovery_kit_sdk.Register(extecs.NewEcsTaskDiscovery(ctx))
 	}
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))

@@ -1,3 +1,103 @@
+manifest should add aws env vars:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        steadybit.com/discovery-disabled: "true"
+        steadybit.com/extension: "true"
+      name: RELEASE-NAME-steadybit-extension-aws
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: steadybit-extension-aws
+      template:
+        metadata:
+          annotations:
+            oneagent.dynatrace.com/injection: "false"
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: steadybit-extension-aws
+            steadybit.com/discovery-disabled: "true"
+            steadybit.com/extension: "true"
+        spec:
+          containers:
+            - env:
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
+                  value: arn:aws:iam::123456789012:role/role1,arn:aws:iam::123456789012:role/role2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EC2
+                  value: example.ec2.1,example.ec2.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ECS
+                  value: example.ecs.1,example.ecs.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ZONE
+                  value: example.zone.1,example.zone.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS
+                  value: example.fis.1,example.fis.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA
+                  value: example.lambda.1,example.lambda.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS
+                  value: example.rds.1,example.rds.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE
+                  value: "true"
+              image: ghcr.io/steadybit/extension-aws:v0.0.0
+              imagePullPolicy: Always
+              livenessProbe:
+                failureThreshold: 5
+                httpGet:
+                  path: /health/liveness
+                  port: 8086
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 5
+              name: extension
+              ports:
+                - containerPort: 8085
+              readinessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /health/readiness
+                  port: 8086
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
+              volumeMounts: null
+          serviceAccountName: steadybit-extension-aws
+          volumes: null
 manifest should match snapshot using podAnnotations and Labels:
   1: |
     apiVersion: apps/v1
@@ -34,6 +134,8 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -114,6 +216,8 @@ manifest should match snapshot with TLS:
                   value: /etc/extension/certificates/server-cert/tls.key
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -199,6 +303,8 @@ manifest should match snapshot with extra env vars:
                   value: ""
                 - name: FOO
                   value: bar
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               envFrom:
                 - configMapRef: null
                   name: env-configmap
@@ -282,6 +388,8 @@ manifest should match snapshot with extra labels:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -364,6 +472,8 @@ manifest should match snapshot with mutual TLS:
                   value: /etc/extension/certificates/client-cert-a/tls.crt,/etc/extension/certificates/client-cert-a/tls.crt
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -460,6 +570,8 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: /etc/tls/ca.crt,/etc/tls/ca2.crt
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -536,6 +648,8 @@ manifest should match snapshot with podSecurityContext:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -614,6 +728,8 @@ manifest should match snapshot with priority class:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -691,6 +807,8 @@ manifest should match snapshot without TLS:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:

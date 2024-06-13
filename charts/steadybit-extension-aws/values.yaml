@@ -6,19 +6,33 @@ aws:
   # aws.assumeRoles -- List of AWS IAM roles the extension should assume. You can use `--set aws.assumeRoles="{ARN1,ARN2}"` to set this value via the Helm CLI.
   assumeRoles: []
   discovery:
+    disabled:
+      # aws.discovery.disabled.ec2 -- Disables EC2 discovery and the related actions.
+      ec2: false
+      # aws.discovery.disabled.ecs -- Disables ECS discovery and the related actions. (BETA feature, disabled by default)
+      ecs: true
+      # aws.discovery.disabled.fis -- Disables FIS discovery and the related actions.
+      fis: false
+      # aws.discovery.disabled.lambda -- Disables Lambda discovery and the related actions.
+      lambda: false
+      # aws.discovery.disabled.rds -- Disables RDS discovery and the related actions.
+      rds: false
+      # aws.discovery.disabled.zone -- Disables AZ discovery and the related actions.
+      zone: false
     attributes:
       excludes:
         # aws.discovery.attributes.excludes.ec2 -- List of attributes to exclude from EC2 discovery.
         ec2: []
-        # aws.discovery.attributes.excludes.rds -- List of attributes to exclude from RDS discovery.
-        rds: []
-        # aws.discovery.attributes.excludes.zone -- List of attributes to exclude from AZ discovery.
-        zone: []
+        # aws.discovery.attributes.excludes.ecs -- List of attributes to exclude from ECS discovery.
+        ecs: []
         # aws.discovery.attributes.excludes.fis -- List of attributes to exclude from FIS discovery.
         fis: []
         # aws.discovery.attributes.excludes.lambda -- List of attributes to exclude from Lambda discovery.
         lambda: []
-
+        # aws.discovery.attributes.excludes.rds -- List of attributes to exclude from RDS discovery.
+        rds: []
+        # aws.discovery.attributes.excludes.zone -- List of attributes to exclude from AZ discovery.
+        zone: []
 
 image:
   # image.name -- The container image to use for the steadybit AWS extension.
