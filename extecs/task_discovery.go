@@ -144,6 +144,7 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 				describeTasksOutput, err := ecsApi.DescribeTasks(ctx, &ecs.DescribeTasksInput{
 					Cluster: extutil.Ptr(clusterArn),
 					Tasks:   taskArnPage,
+					Include: []types.TaskField{types.TaskFieldTags},
 				})
 				if err != nil {
 					return nil, err
