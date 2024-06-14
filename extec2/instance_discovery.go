@@ -51,7 +51,7 @@ func (e *ec2Discovery) Describe() discovery_kit_api.DiscoveryDescription {
 func (e *ec2Discovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       ec2TargetId,
-		Label:    discovery_kit_api.PluralLabel{One: "EC2-instance", Other: "EC2-instances"},
+		Label:    discovery_kit_api.PluralLabel{One: "EC2 instance", Other: "EC2 instances"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(ec2Icon),
@@ -223,13 +223,13 @@ func (e *ec2Discovery) DescribeAttributes() []discovery_kit_api.AttributeDescrip
 				Other: "public hostnames",
 			},
 		}, {
-			Attribute: "aws.ec2.instance.id",
+			Attribute: "aws-ec2.instance.id",
 			Label: discovery_kit_api.PluralLabel{
 				One:   "Instance ID",
 				Other: "Instance IDs",
 			},
 		}, {
-			Attribute: "aws.ec2.instance.name",
+			Attribute: "aws-ec2.instance.name",
 			Label: discovery_kit_api.PluralLabel{
 				One:   "Instance Name",
 				Other: "Instance Names",
