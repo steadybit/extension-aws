@@ -179,7 +179,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
 	// Then
-	assert.Error(t, err, "The extension is running in the same AWS account (42) as the target. Attack is disabled to prevent an extension lockout.")
+	assert.ErrorContains(t, err, "The extension is running in the same AWS account (42) as the target. Attack is disabled to prevent an extension lockout.")
 	clientImds.AssertExpectations(t)
 }
 
@@ -214,7 +214,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
 	// Then
-	assert.Error(t, err, "The extension is running in the same AWS account (42) as the target. Attack is disabled to prevent an extension lockout.")
+	assert.ErrorContains(t, err, "The extension is running in the same AWS account (42) as the target. Attack is disabled to prevent an extension lockout.")
 	clientImds.AssertExpectations(t)
 }
 
@@ -249,7 +249,7 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
 	// Then
-	assert.Error(t, err, "Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.")
+	assert.ErrorContains(t, err, "Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.")
 	clientImds.AssertExpectations(t)
 }
 
@@ -284,7 +284,7 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
 	// Then
-	assert.Error(t, err, "Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.")
+	assert.ErrorContains(t, err, "Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.")
 	clientImds.AssertExpectations(t)
 }
 
@@ -323,7 +323,7 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 	// When
 	_, err := action.Prepare(ctx, &state, requestBody)
 	// Then
-	assert.Error(t, err, "The agent is running in the same AWS account (41) as the target. Attack is disabled to prevent an agent lockout.")
+	assert.ErrorContains(t, err, "The agent is running in the same AWS account (41) as the target. Attack is disabled to prevent an agent lockout.")
 
 	clientImds.AssertExpectations(t)
 }

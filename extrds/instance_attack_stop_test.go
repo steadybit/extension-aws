@@ -115,6 +115,6 @@ func TestStartInstanceStopForwardStopError(t *testing.T) {
 	_, err := action.Start(context.Background(), &state)
 
 	// Then
-	assert.Error(t, err, "Failed to execute database instance stop")
+	assert.ErrorContains(t, err, "Failed to stop database instance")
 	api.AssertExpectations(t)
 }

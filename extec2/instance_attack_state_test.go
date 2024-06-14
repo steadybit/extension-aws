@@ -251,7 +251,7 @@ func TestStartInstanceStateChangeForwardsError(t *testing.T) {
 	})
 
 	// Then
-	assert.Error(t, err, "Failed to execute state change attack")
+	assert.ErrorContains(t, err, "Failed to execute state change attack")
 	assert.Nil(t, result)
 
 	api.AssertExpectations(t)

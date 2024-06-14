@@ -121,6 +121,6 @@ func TestStartInstanceRebootForwardRebootError(t *testing.T) {
 	_, err := action.Start(context.Background(), &state)
 
 	// Then
-	assert.Error(t, err, "Failed to reboot database instance")
+	assert.ErrorContains(t, err, "Failed to reboot database instance")
 	api.AssertExpectations(t)
 }
