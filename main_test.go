@@ -54,6 +54,7 @@ func Test_getExtensionList(t *testing.T) {
 			name:   "disabled all but ecs",
 			config: createConfig(true, false, true, true, true, true),
 			wantedRoutes: []string{
+				"/com.steadybit.extension_aws.ecs-task.stop",
 				"/com.steadybit.extension_aws.ecs-task/discovery",
 				"/com.steadybit.extension_aws.ecs-task/discovery/target-description",
 				"/discovery/attributes",
