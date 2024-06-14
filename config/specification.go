@@ -14,6 +14,7 @@ type Specification struct {
 	DiscoveryDisabledRds              bool     `json:"discoveryDisabledRds" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledZone             bool     `json:"discoveryDisabledZone" split_words:"true" required:"false" default:"false"`
 	DiscoveryIntervalEc2              int      `json:"discoveryIntervalEc2" split_words:"true" required:"false" default:"30"`
+	DiscoveryIntervalEcsService       int      `json:"discoveryIntervalEcsService" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalEcsTask          int      `json:"discoveryIntervalEcsTask" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalFis              int      `json:"discoveryIntervalFis" split_words:"true" required:"false" default:"300"`
 	DiscoveryIntervalLambda           int      `json:"discoveryIntervalLambda" split_words:"true" required:"false" default:"60"`

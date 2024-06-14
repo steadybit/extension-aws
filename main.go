@@ -114,6 +114,7 @@ func registerHandlers(ctx context.Context) {
 
 	if !cfg.DiscoveryDisabledEcs {
 		discovery_kit_sdk.Register(extecs.NewEcsTaskDiscovery(ctx))
+		discovery_kit_sdk.Register(extecs.NewEcsServiceDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStopAction())
 	}
 
