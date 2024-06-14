@@ -12,13 +12,14 @@
   - Action to stop a Task
   - Requires new permissions (or needs to be disabled via `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS`)
     ```
+    "ecs:ListClusters",
     "ecs:ListTasks",
     "ecs:DescribeTasks",
-    "ecs:ListClusters",
+    "ecs:ListServices",
+    "ecs:DescribeServices",
     "ecs:StopTask",
     "ecs:UpdateService"
 	  ```
-
 
 ## v2.2.25
 
