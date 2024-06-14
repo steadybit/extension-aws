@@ -50,7 +50,7 @@ func NewEcsServiceDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscove
 
 func (e *ecsServiceDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id: ecsServiceId,
+		Id: ecsServiceTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEcsService)),
 		},
@@ -59,7 +59,7 @@ func (e *ecsServiceDiscovery) Describe() discovery_kit_api.DiscoveryDescription 
 
 func (e *ecsServiceDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
-		Id: ecsServiceId,
+		Id: ecsServiceTargetId,
 		Label: discovery_kit_api.PluralLabel{
 			One:   "ECS service",
 			Other: "ECS services",
@@ -194,7 +194,7 @@ func toServiceTarget(service types.Service, awsAccountNumber string, awsRegion s
 	return discovery_kit_api.Target{
 		Id:         serviceArn,
 		Label:      serviceName,
-		TargetType: ecsServiceId,
+		TargetType: ecsServiceTargetId,
 		Attributes: attributes,
 	}
 }

@@ -76,7 +76,7 @@ func TestGetAllEcsServices(t *testing.T) {
 	assert.Len(t, targets, 1)
 
 	target := targets[0]
-	assert.Equal(t, ecsServiceId, target.TargetType)
+	assert.Equal(t, ecsServiceTargetId, target.TargetType)
 	assert.Equal(t, serviceArn, target.Id)
 	assert.Equal(t, serviceName, target.Label)
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])

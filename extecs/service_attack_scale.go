@@ -46,14 +46,14 @@ func (e *ecsServiceScaleAction) NewEmptyState() ServiceScaleState {
 
 func (e *ecsServiceScaleAction) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.scale", ecsServiceId),
+		Id:          fmt.Sprintf("%s.scale", ecsServiceTargetId),
 		Label:       "Scale ECS Service",
 		Description: "Up-/ or downscale an ECS service",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(ecsServiceIcon),
 		Kind:        action_kit_api.Attack,
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
-			TargetType: ecsTaskTargetId,
+			TargetType: ecsServiceTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "by service and cluster",
