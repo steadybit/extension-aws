@@ -151,7 +151,9 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 				}
 
 				for _, task := range describeTasksOutput.Tasks {
-					result = append(result, toTarget(task, zoneUtil, awsAccountNumber, awsRegion))
+					if task.LastStatus != nil && *task.LastStatus == "RUNNING" {
+						result = append(result, toTarget(task, zoneUtil, awsAccountNumber, awsRegion))
+					}
 				}
 			}
 		}
@@ -203,7 +205,6 @@ func toTarget(task types.Task, zoneUtil utils.GetZoneUtil, awsAccountNumber stri
 	if service != nil {
 		attributes["aws-ecs.service.name"] = []string{*service}
 	}
-	attributes["aws-ecs.task.state"] = []string{aws.ToString(task.LastStatus)}
 	attributes["aws-ecs.task.launch-type"] = []string{string(task.LaunchType)}
 	for _, tag := range task.Tags {
 		if aws.ToString(tag.Key) == "aws:ecs:serviceName" || aws.ToString(tag.Key) == "aws:ecs:clusterName" {

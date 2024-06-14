@@ -66,6 +66,19 @@ var task = types.Task{
 		{Key: extutil.Ptr("test"), Value: extutil.Ptr("123")},
 	},
 }
+var taskArn2 = "arn:aws:ecs:eu-central-1:42:task/sandbox-demo-ecs-fargate/15ac9bc28dce4a6fb757580ac87eb855"
+var taskStopped = types.Task{
+	TaskArn:          extutil.Ptr(taskArn2),
+	AvailabilityZone: extutil.Ptr("us-east-1b"),
+	ClusterArn:       extutil.Ptr(clusterArn),
+	LastStatus:       extutil.Ptr("STOPPED"),
+	LaunchType:       types.LaunchTypeFargate,
+	Tags: []types.Tag{
+		{Key: extutil.Ptr("aws:ecs:clusterName"), Value: extutil.Ptr("sandbox-demo-ecs-fargate")},
+		{Key: extutil.Ptr("aws:ecs:serviceName"), Value: extutil.Ptr("ecs-demo-gateway-service")},
+		{Key: extutil.Ptr("test"), Value: extutil.Ptr("123")},
+	},
+}
 
 func TestGetAllEcsTasks(t *testing.T) {
 	// Given
@@ -74,10 +87,10 @@ func TestGetAllEcsTasks(t *testing.T) {
 		ClusterArns: []string{clusterArn},
 	}, nil)
 	mockedApi.On("ListTasks", mock.Anything, mock.Anything).Return(&ecs.ListTasksOutput{
-		TaskArns: []string{taskArn},
+		TaskArns: []string{taskArn, taskArn2},
 	}, nil)
 	mockedApi.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
-		Tasks: []types.Task{task},
+		Tasks: []types.Task{task, taskStopped},
 	}, nil)
 
 	mockedZoneUtil := new(zoneMock)
@@ -103,7 +116,6 @@ func TestGetAllEcsTasks(t *testing.T) {
 	assert.Equal(t, []string{"us-east-1b"}, target.Attributes["aws.zone"])
 	assert.Equal(t, []string{"us-east-1b-id"}, target.Attributes["aws.zone.id"])
 	assert.Equal(t, []string{"123"}, target.Attributes["aws-ecs.task.label.test"])
-	assert.Equal(t, []string{"RUNNING"}, target.Attributes["aws-ecs.task.state"])
 	assert.Equal(t, []string{clusterArn}, target.Attributes["aws-ecs.cluster.arn"])
 	assert.Equal(t, []string{"ecs-demo-gateway-service"}, target.Attributes["aws-ecs.service.name"])
 	assert.Equal(t, []string{"sandbox-demo-ecs-fargate"}, target.Attributes["aws-ecs.cluster.name"])
