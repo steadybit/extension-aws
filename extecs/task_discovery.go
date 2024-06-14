@@ -23,6 +23,9 @@ import (
 	"time"
 )
 
+// pageSize is restricted by AWS ECS API.
+const taskPageSize = 100
+
 type ecsTaskDiscovery struct{}
 
 var (
@@ -139,7 +142,7 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 				return result, err
 			}
 
-			taskArnPages := splitIntoPages(output.TaskArns)
+			taskArnPages := splitIntoPages(output.TaskArns, taskPageSize)
 			for _, taskArnPage := range taskArnPages {
 				describeTasksOutput, err := ecsApi.DescribeTasks(ctx, &ecs.DescribeTasksInput{
 					Cluster: extutil.Ptr(clusterArn),
