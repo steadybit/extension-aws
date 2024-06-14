@@ -15,7 +15,7 @@ tests:
         discovery:
           disabled:
             ec2: true
-            ecs: true
+            ecs: false
             fis: true
             lambda: true
             rds: true

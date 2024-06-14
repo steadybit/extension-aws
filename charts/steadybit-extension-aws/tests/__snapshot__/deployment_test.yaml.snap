@@ -47,7 +47,7 @@ manifest should add aws env vars:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA
