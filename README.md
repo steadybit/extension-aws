@@ -111,6 +111,8 @@ by tweaking the `Resource` clause.
         "ecs:ListClusters",
 				"ecs:StopTask",
 				"ecs:UpdateService",
+				"ecs:ListServices",
+				"ecs:DescribeServices"
       ],
       "Resource": "*"
     }
