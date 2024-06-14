@@ -56,6 +56,7 @@ func Test_getExtensionList(t *testing.T) {
 			config: createConfig(true, false, true, true, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.ecs-task.stop",
+				"/com.steadybit.extension_aws.ecs-service.scale",
 				"/com.steadybit.extension_aws.ecs-task/discovery",
 				"/com.steadybit.extension_aws.ecs-task/discovery/target-description",
 				"/com.steadybit.extension_aws.ecs-service/discovery",

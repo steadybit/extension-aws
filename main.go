@@ -116,6 +116,7 @@ func registerHandlers(ctx context.Context) {
 		discovery_kit_sdk.Register(extecs.NewEcsTaskDiscovery(ctx))
 		discovery_kit_sdk.Register(extecs.NewEcsServiceDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStopAction())
+		action_kit_sdk.RegisterAction(extecs.NewEcsServiceScaleAction())
 	}
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))

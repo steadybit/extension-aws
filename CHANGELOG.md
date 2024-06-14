@@ -10,6 +10,7 @@
 - Added ECS Support
   - Discovery for Tasks and Services
   - Action to stop a Task
+  - Action to scale a Service
   - Requires new permissions (or needs to be disabled via `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS`)
     ```
     "ecs:ListClusters",
