@@ -139,7 +139,7 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 				return result, err
 			}
 
-			taskArnPages := splitIntoPages(output)
+			taskArnPages := splitIntoPages(output.TaskArns)
 			for _, taskArnPage := range taskArnPages {
 				describeTasksOutput, err := ecsApi.DescribeTasks(ctx, &ecs.DescribeTasksInput{
 					Cluster: extutil.Ptr(clusterArn),
@@ -160,19 +160,6 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 	}
 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEcs), nil
-}
-
-func splitIntoPages(output *ecs.ListTasksOutput) [][]string {
-	taskArnPages := make([][]string, 0, 10)
-	for i := 0; i < len(output.TaskArns); {
-		end := i + 100
-		if end > len(output.TaskArns) {
-			end = len(output.TaskArns)
-		}
-		taskArnPages = append(taskArnPages, output.TaskArns[i:end])
-		i = end
-	}
-	return taskArnPages
 }
 
 func toTarget(task types.Task, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
