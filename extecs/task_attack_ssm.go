@@ -133,13 +133,20 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 		TimeoutSeconds:  extutil.Ptr(int32(30)),
 	})
 
-	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed start %s on ECS Task %s", e.description.Label, state.TaskArn), err)
-	} else {
+	result := &action_kit_api.StartResult{Messages: &[]action_kit_api.Message{}}
+	if err == nil {
 		state.CommandId = *output.Command.CommandId
+		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
+			Message: fmt.Sprintf("Sent SSM command (%s) on ECS Task %s using document %s(%s) parameters %v", state.CommandId, state.TaskArn, state.DocumentName, state.DocumentVersion, state.Parameters),
+		}))
+	} else {
+		result.Error = &action_kit_api.ActionKitError{
+			Title:  fmt.Sprintf("Failed to start %s on ECS Task %s", e.description.Label, state.TaskArn),
+			Detail: extutil.Ptr(fmt.Sprintf("Sending SSM command on ECS Task %s failed. Using document %s(%s) and parameters %v: %s", state.TaskArn, state.DocumentName, state.DocumentVersion, state.Parameters, err.Error())),
+		}
 	}
 
-	return nil, nil
+	return result, nil
 }
 
 func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState) (*action_kit_api.StatusResult, error) {
@@ -153,14 +160,50 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed get status for %s on ECS Task %s", e.description.Label, state.TaskArn), err)
 	}
 
-	if output.Status == types.CommandInvocationStatusSuccess ||
-		output.Status == types.CommandInvocationStatusFailed ||
-		output.Status == types.CommandInvocationStatusTimedOut ||
-		output.Status == types.CommandInvocationStatusCancelled {
+	if hasEnded(output) {
 		return &action_kit_api.StatusResult{Completed: true}, nil
 	}
 
 	return nil, nil
+}
+
+func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) (*action_kit_api.StopResult, error) {
+	client, err := e.clientProvider(state.Account)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err = client.CancelCommand(ctx, &ssm.CancelCommandInput{CommandId: &state.CommandId, InstanceIds: []string{state.ManagedInstanceId}}); err != nil {
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to cancel %s on ECS Task %s", e.description.Label, state.TaskArn), err)
+	}
+
+	output, err := ssm.NewCommandExecutedWaiter(client, withCommandStatusRetryable()).WaitForOutput(ctx, e.createCommandInvocationInput(state), 10*time.Second)
+	if output == nil {
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to await end of %s on ECS Task %s", e.description.Label, state.TaskArn), err)
+	}
+
+	result := action_kit_api.StopResult{Messages: &[]action_kit_api.Message{{
+		Message: fmt.Sprintf("SSM command (%s) using document %s(%s) ended with rc=%d and status %s", state.CommandId, *output.DocumentName, *output.DocumentVersion, output.ResponseCode, *output.StatusDetails),
+	}}}
+
+	if output.Status != types.CommandInvocationStatusSuccess {
+		result.Error = &action_kit_api.ActionKitError{
+			Title: fmt.Sprintf("Ended SSM command %s on ECS Task %s with statuss %s", e.description.Label, state.TaskArn, *output.StatusDetails),
+		}
+	}
+
+	if output.StandardOutputContent != nil {
+		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
+			Message: fmt.Sprintf("%s stdout:\n%s", state.CommandId, *output.StandardOutputContent),
+		}))
+	}
+	if output.StandardErrorContent != nil {
+		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
+			Message: fmt.Sprintf("%s stderr:\n%s", state.CommandId, *output.StandardErrorContent),
+		}))
+	}
+
+	return &result, nil
 }
 
 func (e *ecsTaskSsmAction) createCommandInvocationInput(state *TaskSsmActionState) *ssm.GetCommandInvocationInput {
@@ -174,50 +217,22 @@ func (e *ecsTaskSsmAction) createCommandInvocationInput(state *TaskSsmActionStat
 	return input
 }
 
-func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) (*action_kit_api.StopResult, error) {
-	client, err := e.clientProvider(state.Account)
-	if err != nil {
-		return nil, err
-	}
+func hasEnded(output *ssm.GetCommandInvocationOutput) bool {
+	return output != nil && (output.Status == types.CommandInvocationStatusSuccess || output.Status == types.CommandInvocationStatusFailed || output.Status == types.CommandInvocationStatusTimedOut || output.Status == types.CommandInvocationStatusCancelled)
+}
 
-	_, err = client.CancelCommand(ctx, &ssm.CancelCommandInput{
-		CommandId:   &state.CommandId,
-		InstanceIds: []string{state.ManagedInstanceId},
-	})
-	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to cancel %s on ECS Task %s", e.description.Label, state.TaskArn), err)
-	}
-
-	output, err := ssm.NewCommandExecutedWaiter(client).WaitForOutput(ctx, e.createCommandInvocationInput(state), 10*time.Second)
-	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to await end of %s on ECS Task %s", e.description.Label, state.TaskArn), err)
-	}
-
-	result := action_kit_api.StopResult{Messages: &[]action_kit_api.Message{}}
-	if output.Status != types.CommandInvocationStatusSuccess {
-		result.Error = &action_kit_api.ActionKitError{
-			Title: fmt.Sprintf("Ended %s on ECS Task %s with %s", e.description.Label, state.TaskArn, *output.StatusDetails),
+func withCommandStatusRetryable() func(options *ssm.CommandExecutedWaiterOptions) {
+	return func(options *ssm.CommandExecutedWaiterOptions) {
+		options.Retryable = func(ctx context.Context, input *ssm.GetCommandInvocationInput, output *ssm.GetCommandInvocationOutput, err error) (bool, error) {
+			if err != nil {
+				var errorType *types.InvocationDoesNotExist
+				if errors.As(err, &errorType) {
+					return true, nil
+				}
+			}
+			return !hasEnded(output), nil
 		}
 	}
-
-	result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-		Level:   extutil.Ptr(action_kit_api.Info),
-		Message: fmt.Sprintf("%s(%s) RC=%d", *output.DocumentName, *output.DocumentVersion, output.ResponseCode),
-	}))
-	if output.StandardOutputContent != nil {
-		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Level:   extutil.Ptr(action_kit_api.Info),
-			Message: fmt.Sprintf("stdout:\n%s", *output.StandardOutputContent),
-		}))
-	}
-	if output.StandardErrorContent != nil {
-		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Level:   extutil.Ptr(action_kit_api.Error),
-			Message: fmt.Sprintf("stderr:\n%s", *output.StandardErrorContent),
-		}))
-	}
-
-	return &result, nil
 }
 
 func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, account, taskArn string) (string, error) {
