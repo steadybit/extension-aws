@@ -33,7 +33,7 @@ type ecsTaskStopApi interface {
 }
 
 func NewEcsTaskStopAction() action_kit_sdk.Action[TaskStopState] {
-	return &ecsTaskStopAction{defaultClientProvider}
+	return &ecsTaskStopAction{defaultTaskStopClientProvider}
 }
 
 func (e *ecsTaskStopAction) NewEmptyState() TaskStopState {
@@ -92,7 +92,7 @@ func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*a
 	return nil, nil
 }
 
-func defaultClientProvider(account string) (ecsTaskStopApi, error) {
+func defaultTaskStopClientProvider(account string) (ecsTaskStopApi, error) {
 	awsAccount, err := utils.Accounts.GetAccount(account)
 	if err != nil {
 		return nil, err

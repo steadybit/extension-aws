@@ -65,6 +65,11 @@ var task = types.Task{
 		{Key: extutil.Ptr("aws:ecs:serviceName"), Value: extutil.Ptr("ecs-demo-gateway-service")},
 		{Key: extutil.Ptr("test"), Value: extutil.Ptr("123")},
 	},
+	Containers: []types.Container{
+		{
+			Image: extutil.Ptr("public.ecr.aws/amazon-ssm-agent/amazon-ssm-agent:latest"),
+		},
+	},
 }
 var taskArn2 = "arn:aws:ecs:eu-central-1:42:task/sandbox-demo-ecs-fargate/15ac9bc28dce4a6fb757580ac87eb855"
 var taskStopped = types.Task{
@@ -120,4 +125,5 @@ func TestGetAllEcsTasks(t *testing.T) {
 	assert.Equal(t, []string{"ecs-demo-gateway-service"}, target.Attributes["aws-ecs.service.name"])
 	assert.Equal(t, []string{"sandbox-demo-ecs-fargate"}, target.Attributes["aws-ecs.cluster.name"])
 	assert.Equal(t, []string{"FARGATE"}, target.Attributes["aws-ecs.task.launch-type"])
+	assert.Equal(t, []string{"true"}, target.Attributes["aws-ecs.task.amazon-ssm-agent"])
 }
