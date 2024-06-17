@@ -98,7 +98,15 @@ func (e *ecsTaskDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDes
 				One:   "ECS service name",
 				Other: "ECS service names",
 			},
-		}}
+		},
+		{
+			Attribute: "aws-ecs.task.amazon-ssm-agent",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "ECS task includes Amazon SSM agent",
+				Other: "ECS task includes Amazon SSM agent",
+			},
+		},
+	}
 }
 
 func (e *ecsTaskDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
@@ -203,10 +211,23 @@ func toTarget(task types.Task, zoneUtil utils.GetZoneUtil, awsAccountNumber stri
 		attributes[fmt.Sprintf("aws-ecs.task.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
 	}
 
+	if hasAmazonSsmSidecar(task) {
+		attributes["aws-ecs.task.amazon-ssm-agent"] = []string{"true"}
+	}
+
 	return discovery_kit_api.Target{
 		Id:         arn,
 		Label:      arn,
 		TargetType: ecsTaskTargetId,
 		Attributes: attributes,
 	}
+}
+
+func hasAmazonSsmSidecar(task types.Task) bool {
+	for _, container := range task.Containers {
+		if container.Image != nil && strings.Contains(*container.Image, "amazon-ssm-agent") {
+			return true
+		}
+	}
+	return false
 }
