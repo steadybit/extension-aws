@@ -57,6 +57,7 @@ func Test_getExtensionList(t *testing.T) {
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.ecs-task.stop",
 				"/com.steadybit.extension_aws.ecs-service.scale",
+				"/com.steadybit.extension_aws.ecs-service.task_count_check",
 				"/com.steadybit.extension_aws.ecs-task.fill_disk",
 				"/com.steadybit.extension_aws.ecs-task.stress_cpu",
 				"/com.steadybit.extension_aws.ecs-task.stress_mem",
