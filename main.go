@@ -121,6 +121,7 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressMemoryAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressIoAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskFillDiskAction())
+		action_kit_sdk.RegisterAction(extecs.NewServiceTaskCountCheckAction())
 	}
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
