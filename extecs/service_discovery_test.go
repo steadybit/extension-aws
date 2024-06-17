@@ -13,11 +13,11 @@ import (
 	"testing"
 )
 
-type ecsServiceClientMock struct {
+type ecsServiceDiscoveryApiMock struct {
 	mock.Mock
 }
 
-func (m *ecsServiceClientMock) ListClusters(ctx context.Context, params *ecs.ListClustersInput, optFns ...func(*ecs.Options)) (*ecs.ListClustersOutput, error) {
+func (m *ecsServiceDiscoveryApiMock) ListClusters(ctx context.Context, params *ecs.ListClustersInput, optFns ...func(*ecs.Options)) (*ecs.ListClustersOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -25,7 +25,7 @@ func (m *ecsServiceClientMock) ListClusters(ctx context.Context, params *ecs.Lis
 	return args.Get(0).(*ecs.ListClustersOutput), args.Error(1)
 }
 
-func (m *ecsServiceClientMock) ListServices(ctx context.Context, params *ecs.ListServicesInput, optFns ...func(*ecs.Options)) (*ecs.ListServicesOutput, error) {
+func (m *ecsServiceDiscoveryApiMock) ListServices(ctx context.Context, params *ecs.ListServicesInput, optFns ...func(*ecs.Options)) (*ecs.ListServicesOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -33,7 +33,7 @@ func (m *ecsServiceClientMock) ListServices(ctx context.Context, params *ecs.Lis
 	return args.Get(0).(*ecs.ListServicesOutput), args.Error(1)
 }
 
-func (m *ecsServiceClientMock) DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, optFns ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error) {
+func (m *ecsServiceDiscoveryApiMock) DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, optFns ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -57,7 +57,7 @@ var service = types.Service{
 
 func TestGetAllEcsServices(t *testing.T) {
 	// Given
-	mockedApi := new(ecsServiceClientMock)
+	mockedApi := new(ecsServiceDiscoveryApiMock)
 	mockedApi.On("ListClusters", mock.Anything, mock.Anything).Return(&ecs.ListClustersOutput{
 		ClusterArns: []string{clusterArn},
 	}, nil)

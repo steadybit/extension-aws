@@ -34,7 +34,7 @@ var (
 	_ discovery_kit_sdk.AttributeDescriber = (*ecsServiceDiscovery)(nil)
 )
 
-type EcsServiceApi interface {
+type ecsServiceDiscoveryApi interface {
 	ListClusters(ctx context.Context, params *ecs.ListClustersInput, optFns ...func(*ecs.Options)) (*ecs.ListClustersOutput, error)
 	ListServices(ctx context.Context, params *ecs.ListServicesInput, optFns ...func(*ecs.Options)) (*ecs.ListServicesOutput, error)
 	DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, optFns ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error)
@@ -121,7 +121,7 @@ func getEcsServicesForAccount(account *utils.AwsAccount, ctx context.Context) ([
 	return result, nil
 }
 
-func GetAllEcsServices(awsRegion string, awsAccountNumber string, ecsServiceApi EcsServiceApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func GetAllEcsServices(awsRegion string, awsAccountNumber string, ecsServiceApi ecsServiceDiscoveryApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	listClusterOutput, err := ecsServiceApi.ListClusters(ctx, &ecs.ListClustersInput{})
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func GetAllEcsServices(awsRegion string, awsAccountNumber string, ecsServiceApi 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEcs), nil
 }
 
-func getAllServicesInCluster(clusterArn string, awsRegion string, awsAccountNumber string, ecsServiceApi EcsServiceApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getAllServicesInCluster(clusterArn string, awsRegion string, awsAccountNumber string, ecsServiceApi ecsServiceDiscoveryApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 	paginator := ecs.NewListServicesPaginator(ecsServiceApi, &ecs.ListServicesInput{
 		Cluster: extutil.Ptr(clusterArn),
