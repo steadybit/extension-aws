@@ -114,6 +114,9 @@ func registerHandlers(ctx context.Context) {
 	}
 
 	if !cfg.DiscoveryDisabledEcs {
+		serviceDiscoveryPoller := extecs.NewServiceDescriptionPoller()
+		serviceDiscoveryPoller.Start(ctx)
+
 		discovery_kit_sdk.Register(extecs.NewEcsTaskDiscovery(ctx))
 		discovery_kit_sdk.Register(extecs.NewEcsServiceDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStopAction())
@@ -122,7 +125,7 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressMemoryAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressIoAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskFillDiskAction())
-		action_kit_sdk.RegisterAction(extecs.NewServiceTaskCountCheckAction())
+		action_kit_sdk.RegisterAction(extecs.NewServiceTaskCountCheckAction(serviceDiscoveryPoller))
 	}
 
 	if !cfg.DiscoveryDisabledElb {

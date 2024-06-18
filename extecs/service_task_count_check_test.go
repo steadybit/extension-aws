@@ -15,11 +15,11 @@ import (
 	"time"
 )
 
-type ecsServiceTaskCountCheckApiMock struct {
+type ecsDescribeServicesApiMock struct {
 	mock.Mock
 }
 
-func (m *ecsServiceTaskCountCheckApiMock) DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, _ ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error) {
+func (m *ecsDescribeServicesApiMock) DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, _ ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -29,13 +29,22 @@ func (m *ecsServiceTaskCountCheckApiMock) DescribeServices(ctx context.Context, 
 
 func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 	// Given
-	mockedApi := new(ecsServiceTaskCountCheckApiMock)
-	mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
-		Services: []types.Service{{
-			DesiredCount: 3,
-			RunningCount: 2,
-		}},
-	}, nil)
+	ctx, cancel := context.WithCancel(context.Background())
+	poller := NewServiceDescriptionPoller()
+	poller.ticker = time.NewTicker(1 * time.Millisecond)
+	poller.apiClientProvider = func(account string) (ecsDescribeServicesApi, error) {
+		mockedApi := new(ecsDescribeServicesApiMock)
+		mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
+			Services: []types.Service{{
+				ServiceArn:   extutil.Ptr("service-arn"),
+				DesiredCount: 3,
+				RunningCount: 2,
+			}},
+		}, nil)
+		return mockedApi, nil
+	}
+	poller.Start(ctx)
+
 	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
 			"Duration":              100,
@@ -49,15 +58,15 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 			},
 		}),
 	})
+
 	action := ServiceTaskCountCheckAction{
-		getApiClient: func(account string) (ecsServiceTaskCountCheckApi, error) {
-			return mockedApi, nil
-		},
+		poller: poller,
 	}
 	state := action.NewEmptyState()
 
 	// When
-	_, err := action.Prepare(context.Background(), &state, request)
+	_, err := action.Prepare(ctx, &state, request)
+	cancel()
 
 	// Then
 	assert.NoError(t, err)
@@ -200,18 +209,31 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// Given
-			mockedApi := new(ecsServiceTaskCountCheckApiMock)
-			mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
-				Services: []types.Service{test.service},
-			}, nil)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			poller := NewServiceDescriptionPoller()
+			poller.apiClientProvider = func(account string) (ecsDescribeServicesApi, error) {
+				mockedApi := new(ecsDescribeServicesApiMock)
+				mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
+					Services: []types.Service{test.service},
+				}, nil)
+				return mockedApi, nil
+			}
+			poller.Register(test.state.AwsAccount, test.state.ClusterArn, test.state.ServiceArn)
+			poller.pollAll(ctx)
+
 			action := ServiceTaskCountCheckAction{
-				getApiClient: func(account string) (ecsServiceTaskCountCheckApi, error) {
-					return mockedApi, nil
-				},
+				poller: poller,
 			}
 
 			// When
-			result, err := action.Status(context.Background(), &test.state)
+			_, err := action.Start(ctx, &test.state)
+			assert.NoError(t, err)
+			result, err := action.Status(ctx, &test.state)
+			assert.NoError(t, err)
+			_, err = action.Stop(ctx, &test.state)
+			assert.NoError(t, err)
 
 			// Then
 			assert.NoError(t, err)
