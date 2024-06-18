@@ -67,6 +67,7 @@ func (e *albDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "aws-elb.alb.name"},
 				{Attribute: "aws-elb.alb.dns"},
+				{Attribute: "aws.account"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{
 				{
