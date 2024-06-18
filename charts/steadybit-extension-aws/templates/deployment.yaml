@@ -95,6 +95,10 @@ spec:
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ECS
               value: {{ join "," .Values.aws.discovery.attributes.excludes.ecs | quote }}
             {{- end }}
+            {{- if .Values.aws.discovery.attributes.excludes.elb }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELB
+              value: {{ join "," .Values.aws.discovery.attributes.excludes.elb | quote }}
+            {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.zone }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ZONE
               value: {{ join "," .Values.aws.discovery.attributes.excludes.zone | quote }}
@@ -120,6 +124,8 @@ spec:
             {{- end }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
               value: "{{.Values.aws.discovery.disabled.ecs}}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
+              value: "{{.Values.aws.discovery.disabled.elb}}"
             {{- if .Values.aws.discovery.disabled.fis }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS
               value: "true"

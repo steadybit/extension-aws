@@ -90,13 +90,6 @@ func (e *ecsTaskDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDes
 			},
 		},
 		{
-			Attribute: "aws-ecs.cluster.name",
-			Label: discovery_kit_api.PluralLabel{
-				One:   "ECS cluster name",
-				Other: "ECS cluster names",
-			},
-		},
-		{
 			Attribute: "aws-ecs.task.amazon-ssm-agent",
 			Label: discovery_kit_api.PluralLabel{
 				One:   "ECS task includes Amazon SSM agent",
@@ -147,7 +140,7 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 				return result, err
 			}
 
-			taskArnPages := splitIntoPages(output.TaskArns, taskPageSize)
+			taskArnPages := utils.SplitIntoPages(output.TaskArns, taskPageSize)
 			for _, taskArnPage := range taskArnPages {
 				describeTasksOutput, err := ecsApi.DescribeTasks(ctx, &ecs.DescribeTasksInput{
 					Cluster: extutil.Ptr(clusterArn),

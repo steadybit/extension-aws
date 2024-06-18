@@ -11,6 +11,8 @@ aws:
       ec2: false
       # aws.discovery.disabled.ecs -- Disables ECS discovery and the related actions. (BETA feature, disabled by default)
       ecs: true
+      # aws.discovery.disabled.elb -- Disables ELB discovery and the related actions. (BETA feature, disabled by default)
+      elb: true
       # aws.discovery.disabled.fis -- Disables FIS discovery and the related actions.
       fis: false
       # aws.discovery.disabled.lambda -- Disables Lambda discovery and the related actions.
@@ -25,6 +27,8 @@ aws:
         ec2: []
         # aws.discovery.attributes.excludes.ecs -- List of attributes to exclude from ECS discovery.
         ecs: []
+        # aws.discovery.attributes.excludes.elb -- List of attributes to exclude from ELB discovery.
+        elb: []
         # aws.discovery.attributes.excludes.fis -- List of attributes to exclude from FIS discovery.
         fis: []
         # aws.discovery.attributes.excludes.lambda -- List of attributes to exclude from Lambda discovery.

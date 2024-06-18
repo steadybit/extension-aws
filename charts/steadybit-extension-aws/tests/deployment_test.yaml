@@ -16,6 +16,7 @@ tests:
           disabled:
             ec2: true
             ecs: false
+            elb: false
             fis: true
             lambda: true
             rds: true
@@ -28,6 +29,9 @@ tests:
               ecs:
                 - "example.ecs.1"
                 - "example.ecs.2"
+              elb:
+                - "example.elb.1"
+                - "example.elb.2"
               fis:
                 - "example.fis.1"
                 - "example.fis.2"

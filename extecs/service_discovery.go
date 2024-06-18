@@ -150,7 +150,7 @@ func getAllServicesInCluster(clusterArn string, awsRegion string, awsAccountNumb
 			return nil, err
 		}
 
-		serviceArnPages := splitIntoPages(output.ServiceArns, servicePageSize)
+		serviceArnPages := utils.SplitIntoPages(output.ServiceArns, servicePageSize)
 		for _, serviceArnPage := range serviceArnPages {
 			describeServicesOutput, err := ecsServiceApi.DescribeServices(ctx, &ecs.DescribeServicesInput{
 				Cluster:  extutil.Ptr(clusterArn),

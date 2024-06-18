@@ -15,6 +15,7 @@ import (
 	"github.com/steadybit/extension-aws/extaz"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extecs"
+	"github.com/steadybit/extension-aws/extelb"
 	"github.com/steadybit/extension-aws/extfis"
 	"github.com/steadybit/extension-aws/extlambda"
 	"github.com/steadybit/extension-aws/extrds"
@@ -122,6 +123,10 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressIoAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskFillDiskAction())
 		action_kit_sdk.RegisterAction(extecs.NewServiceTaskCountCheckAction())
+	}
+
+	if !cfg.DiscoveryDisabledElb {
+		discovery_kit_sdk.Register(extelb.NewAlbDiscovery(ctx))
 	}
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))

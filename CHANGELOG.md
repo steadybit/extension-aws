@@ -20,7 +20,15 @@
     "ecs:DescribeServices",
     "ecs:StopTask",
     "ecs:UpdateService"
-	  ```
+    ```
+- Added ELB Support
+  - Discovery for Application Load Balancers
+  - Requires new permissions (or needs to be disabled via `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB`)
+    ```
+    "elasticloadbalancing:DescribeLoadBalancers",
+    "elasticloadbalancing:DescribeListeners",
+    "elasticloadbalancing:DescribeTags"
+    ```
 
 ## v2.2.25
 
