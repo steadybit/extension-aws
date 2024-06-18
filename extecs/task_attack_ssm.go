@@ -1,9 +1,9 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
+
 /*
  * Copyright 2024 steadybit GmbH. All rights reserved.
  */
-
-// SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
 package extecs
 
@@ -44,6 +44,7 @@ type TaskSsmActionState struct {
 	CommandId         string
 	Parameters        map[string][]string
 	Comment           string
+	Completed         bool
 }
 
 type ecsTaskSsmApi interface {
@@ -162,6 +163,7 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 	}
 
 	if hasEnded(output) {
+		state.Completed = true
 		return &action_kit_api.StatusResult{Completed: true}, nil
 	}
 
@@ -179,11 +181,17 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
 			Message: fmt.Sprintf("No SSM command to cancel for %s on ECS Task %s", e.description.Label, state.TaskArn),
 		}))
-		return nil, nil
+		return &result, nil
 	}
 
-	if _, err = client.CancelCommand(ctx, &ssm.CancelCommandInput{CommandId: &state.CommandId, InstanceIds: []string{state.ManagedInstanceId}}); err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to cancel %s on ECS Task %s", e.description.Label, state.TaskArn), err)
+	if !state.Completed {
+		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
+			Message: fmt.Sprintf("Cancelling SSM command (%s) for %s on ECS Task %s", state.CommandId, e.description.Label, state.TaskArn),
+		}))
+
+		if _, err := client.CancelCommand(ctx, &ssm.CancelCommandInput{CommandId: &state.CommandId, InstanceIds: []string{state.ManagedInstanceId}}); err != nil {
+			return nil, extension_kit.ToError(fmt.Sprintf("Failed to cancel SSM command (%s) for %s on ECS Task %s", state.CommandId, e.description.Label, state.TaskArn), err)
+		}
 	}
 
 	output, err := ssm.NewCommandExecutedWaiter(client, withCommandStatusRetryable()).WaitForOutput(ctx, &ssm.GetCommandInvocationInput{
@@ -201,10 +209,9 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 
 	if output.Status != types.CommandInvocationStatusSuccess {
 		result.Error = &action_kit_api.ActionKitError{
-			Title: fmt.Sprintf("Ended SSM command %s on ECS Task %s with statuss %s", e.description.Label, state.TaskArn, *output.StatusDetails),
+			Title: fmt.Sprintf("Ended SSM command %s on ECS Task %s with status %s", e.description.Label, state.TaskArn, *output.StatusDetails),
 		}
 	}
-
 	if output.StandardOutputContent != nil {
 		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
 			Message: fmt.Sprintf("%s stdout:\n%s", state.CommandId, *output.StandardOutputContent),
