@@ -64,13 +64,9 @@ func (e *ecsTaskStopAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *ecsTaskStopAction) Prepare(_ context.Context, state *TaskStopState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	account := request.Target.Attributes["aws.account"]
-	clusterArn := request.Target.Attributes["aws-ecs.cluster.arn"]
-	taskArn := request.Target.Attributes["aws-ecs.task.arn"]
-
-	state.Account = account[0]
-	state.ClusterArn = clusterArn[0]
-	state.TaskArn = taskArn[0]
+	state.Account = request.Target.Attributes["aws.account"][0]
+	state.ClusterArn = request.Target.Attributes["aws-ecs.cluster.arn"][0]
+	state.TaskArn = request.Target.Attributes["aws-ecs.task.arn"][0]
 	return nil, nil
 }
 

@@ -84,19 +84,12 @@ func (e *ecsServiceScaleAction) Describe() action_kit_api.ActionDescription {
 	}
 }
 
-func (e *ecsServiceScaleAction) Prepare(_ context.Context, state *ServiceScaleState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	account := request.Target.Attributes["aws.account"]
-	clusterArn := request.Target.Attributes["aws-ecs.cluster.arn"]
-	serviceName := request.Target.Attributes["aws-ecs.service.name"]
-
-	state.Account = account[0]
-	state.ClusterArn = clusterArn[0]
-	state.ServiceName = serviceName[0]
+func (e *ecsServiceScaleAction) Prepare(ctx context.Context, state *ServiceScaleState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+	state.Account = request.Target.Attributes["aws.account"][0]
+	state.ClusterArn = request.Target.Attributes["aws-ecs.cluster.arn"][0]
+	state.ServiceName = request.Target.Attributes["aws-ecs.service.name"][0]
 	state.DesiredCount = extutil.ToInt32(request.Config["desiredCount"])
-	return nil, nil
-}
 
-func (e *ecsServiceScaleAction) Start(ctx context.Context, state *ServiceScaleState) (*action_kit_api.StartResult, error) {
 	client, err := e.clientProvider(state.Account)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
@@ -110,6 +103,14 @@ func (e *ecsServiceScaleAction) Start(ctx context.Context, state *ServiceScaleSt
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to fetch ecs service '%s'", state.ServiceName), err)
 	}
 	state.InitialDesiredCount = serviceFetchResult.Services[0].DesiredCount
+	return nil, nil
+}
+
+func (e *ecsServiceScaleAction) Start(ctx context.Context, state *ServiceScaleState) (*action_kit_api.StartResult, error) {
+	client, err := e.clientProvider(state.Account)
+	if err != nil {
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
+	}
 
 	_, err = client.UpdateService(ctx, &ecs.UpdateServiceInput{
 		Cluster:      &state.ClusterArn,

@@ -17,7 +17,15 @@ import (
 )
 
 func TestEcsServiceScaleAction_Prepare(t *testing.T) {
-	action := ecsServiceScaleAction{}
+	// Given
+	api := new(ecsServiceClientApiMock)
+	api.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
+		Services: []types.Service{{DesiredCount: 2}},
+	}, nil)
+
+	action := ecsServiceScaleAction{clientProvider: func(account string) (ecsServiceScaleApi, error) {
+		return api, nil
+	}}
 
 	tests := []struct {
 		name        string
@@ -43,10 +51,11 @@ func TestEcsServiceScaleAction_Prepare(t *testing.T) {
 			}),
 
 			wantedState: &ServiceScaleState{
-				Account:      "42",
-				ClusterArn:   "my-cluster-arn",
-				ServiceName:  "my-service-name",
-				DesiredCount: 5,
+				Account:             "42",
+				ClusterArn:          "my-cluster-arn",
+				ServiceName:         "my-service-name",
+				DesiredCount:        5,
+				InitialDesiredCount: 2,
 			},
 		},
 	}
@@ -68,6 +77,8 @@ func TestEcsServiceScaleAction_Prepare(t *testing.T) {
 				assert.Equal(t, tt.wantedState.Account, state.Account)
 				assert.Equal(t, tt.wantedState.ClusterArn, state.ClusterArn)
 				assert.EqualValues(t, tt.wantedState.ServiceName, state.ServiceName)
+				assert.EqualValues(t, tt.wantedState.DesiredCount, state.DesiredCount)
+				assert.EqualValues(t, tt.wantedState.InitialDesiredCount, state.InitialDesiredCount)
 			}
 		})
 	}
@@ -89,9 +100,6 @@ func (m *ecsServiceClientApiMock) DescribeServices(ctx context.Context, params *
 func TestEcsServiceScaleAction_Start(t *testing.T) {
 	// Given
 	api := new(ecsServiceClientApiMock)
-	api.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
-		Services: []types.Service{{DesiredCount: 2}},
-	}, nil)
 	api.On("UpdateService", mock.Anything, mock.MatchedBy(func(params *ecs.UpdateServiceInput) bool {
 		require.Equal(t, "my-service-name", *params.Service)
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
@@ -105,17 +113,17 @@ func TestEcsServiceScaleAction_Start(t *testing.T) {
 
 	// When
 	state := &ServiceScaleState{
-		Account:      "42",
-		ClusterArn:   "my-cluster-arn",
-		ServiceName:  "my-service-name",
-		DesiredCount: int32(5),
+		Account:             "42",
+		ClusterArn:          "my-cluster-arn",
+		ServiceName:         "my-service-name",
+		InitialDesiredCount: int32(2),
+		DesiredCount:        int32(5),
 	}
 	result, err := action.Start(context.Background(), state)
 
 	// Then
 	assert.NoError(t, err)
 	assert.Nil(t, result)
-	assert.Equal(t, int32(2), state.InitialDesiredCount)
 
 	api.AssertExpectations(t)
 }
@@ -155,9 +163,6 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 func TestEcsServiceScaleActionForwardsError(t *testing.T) {
 	// Given
 	api := new(ecsServiceClientApiMock)
-	api.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
-		Services: []types.Service{{DesiredCount: 2}},
-	}, nil)
 	api.On("UpdateService", mock.Anything, mock.MatchedBy(func(params *ecs.UpdateServiceInput) bool {
 		require.Equal(t, "my-service-name", *params.Service)
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
