@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package extecs
 
@@ -64,9 +64,9 @@ func (e *ecsTaskStopAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *ecsTaskStopAction) Prepare(_ context.Context, state *TaskStopState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	state.Account = request.Target.Attributes["aws.account"][0]
-	state.ClusterArn = request.Target.Attributes["aws-ecs.cluster.arn"][0]
-	state.TaskArn = request.Target.Attributes["aws-ecs.task.arn"][0]
+	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.ClusterArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
+	state.TaskArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.task.arn")[0]
 	return nil, nil
 }
 

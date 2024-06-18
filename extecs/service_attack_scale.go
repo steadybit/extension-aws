@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package extecs
 
@@ -85,9 +85,9 @@ func (e *ecsServiceScaleAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *ecsServiceScaleAction) Prepare(ctx context.Context, state *ServiceScaleState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	state.Account = request.Target.Attributes["aws.account"][0]
-	state.ClusterArn = request.Target.Attributes["aws-ecs.cluster.arn"][0]
-	state.ServiceName = request.Target.Attributes["aws-ecs.service.name"][0]
+	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.ClusterArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
+	state.ServiceName = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.service.name")[0]
 	state.DesiredCount = extutil.ToInt32(request.Config["desiredCount"])
 
 	client, err := e.clientProvider(state.Account)

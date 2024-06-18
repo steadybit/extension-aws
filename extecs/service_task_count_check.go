@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2022 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package extecs
 
@@ -142,9 +142,9 @@ func (f ServiceTaskCountCheckAction) Prepare(ctx context.Context, state *Service
 		return nil, extensionkit.ToError("Failed to unmarshal the config.", err)
 	}
 
-	awsAccount := request.Target.Attributes["aws.account"][0]
-	clusterArn := request.Target.Attributes["aws-ecs.cluster.arn"][0]
-	serviceArn := request.Target.Attributes["aws-ecs.service.arn"][0]
+	awsAccount := extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	clusterArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
+	serviceArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.service.arn")[0]
 
 	client, err := f.getApiClient(awsAccount)
 	if err != nil {

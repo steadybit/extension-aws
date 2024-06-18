@@ -18,7 +18,6 @@ import (
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extutil"
-	"k8s.io/utils/strings"
 	"time"
 )
 
@@ -78,38 +77,29 @@ func (e *ecsTaskSsmAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	if account := request.Target.Attributes["aws.account"]; len(account) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)
-	} else {
-		state.Account = account[0]
-	}
+	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.TaskArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.task.arn")[0]
 
-	if taskArn := request.Target.Attributes["aws-ecs.task.arn"]; len(taskArn) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws-ecs.task.arn' attribute.", nil)
+	if managedInstanceId, err := e.findManagedInstance(ctx, state.Account, state.TaskArn); err == nil {
+		state.ManagedInstanceId = managedInstanceId
 	} else {
-		state.TaskArn = taskArn[0]
-	}
-
-	if managedInstanceId, err := e.findManagedInstance(ctx, state.Account, state.TaskArn); err != nil {
 		prepareErr := extension_kit.ToError(fmt.Sprintf("Failed to find managed instance for ECS Task %s", state.TaskArn), err)
 		if errors.Is(err, errorManagedInstanceNotFound) {
 			prepareErr.Detail = extutil.Ptr("Please make sure that the 'amazon-ssm-agent' is added to the task definition and running.")
 		}
 		return nil, prepareErr
-	} else {
-		state.ManagedInstanceId = managedInstanceId
 	}
 
-	if parameters, err := e.ssmCommandInvocation.getParameters(request); err != nil {
-		return nil, err
-	} else {
+	if parameters, err := e.ssmCommandInvocation.getParameters(request); err == nil {
 		state.Parameters = parameters
+	} else {
+		return nil, err
+	}
 
-		if request.ExecutionContext != nil && request.ExecutionContext.ExecutionId != nil && request.ExecutionContext.ExperimentKey != nil {
-			state.Comment = fmt.Sprintf("Steadybit Experiment %s #%d", *request.ExecutionContext.ExperimentKey, *request.ExecutionContext.ExecutionId)
-		} else {
-			state.Comment = "Steadybit Experiment"
-		}
+	if request.ExecutionContext != nil && request.ExecutionContext.ExecutionId != nil && request.ExecutionContext.ExperimentKey != nil {
+		state.Comment = fmt.Sprintf("Steadybit Experiment %s #%d", *request.ExecutionContext.ExperimentKey, *request.ExecutionContext.ExecutionId)
+	} else {
+		state.Comment = "Steadybit Experiment"
 	}
 
 	return nil, nil
@@ -126,7 +116,7 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 		DocumentVersion: &e.ssmCommandInvocation.documentVersion,
 		InstanceIds:     []string{state.ManagedInstanceId},
 		Parameters:      state.Parameters,
-		Comment:         extutil.Ptr(strings.ShortenString(state.Comment, 100)),
+		Comment:         extutil.Ptr(shorten(state.Comment, 100)),
 		TimeoutSeconds:  extutil.Ptr(int32(30)),
 	})
 
@@ -144,6 +134,13 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 	}
 
 	return result, nil
+}
+
+func shorten(s string, i int) string {
+	if len(s) > i {
+		return s[:i]
+	}
+	return s
 }
 
 func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState) (*action_kit_api.StatusResult, error) {

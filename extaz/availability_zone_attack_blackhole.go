@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package extaz
 
@@ -104,28 +104,20 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	// Get Target Attributes
-	targetAccount := request.Target.Attributes["aws.account"]
-	if len(targetAccount) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws.targetAccount' target attribute.", nil)
-	}
-
-	targetZone := request.Target.Attributes["aws.zone"]
-	if len(targetZone) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws.zone' target attribute.", nil)
-	}
+	targetAccount := extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	targetZone := extutil.MustHaveValue(request.Target.Attributes, "aws.zone")[0]
 
 	// Get AWS Clients
-	clientEc2, clientImds, err := e.clientProvider(targetAccount[0])
+	clientEc2, clientImds, err := e.clientProvider(targetAccount)
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS targetAccount %s", targetAccount[0]), err)
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS targetAccount %s", targetAccount), err)
 	}
 	//Get Extension Account
 	extensionAwsAccount := e.getExtensionAWSAccount(ctx, clientImds)
 	if extensionAwsAccount == "" {
 		return nil, extension_kit.ToError("Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.", nil)
 	}
-	if targetAccount[0] == extensionAwsAccount {
+	if targetAccount == extensionAwsAccount {
 		return nil, extension_kit.ToError(fmt.Sprintf("The extension is running in the same AWS account (%s) as the target. Attack is disabled to prevent an extension lockout.", extensionAwsAccount), nil)
 	}
 
@@ -138,19 +130,19 @@ func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, 
 		return nil, extension_kit.ToError("Could not get AWS Account of the agent. Attack is disabled to prevent an agent lockout. Please check https://github.com/steadybit/extension-aws#agent-lockout---requirements", nil)
 	}
 
-	if targetAccount[0] == agentAwsAccountId {
+	if targetAccount == agentAwsAccountId {
 		return nil, extension_kit.ToError(fmt.Sprintf("The agent is running in the same AWS account (%s) as the target. Attack is disabled to prevent an agent lockout.", extensionAwsAccount), nil)
 	}
 
 	// Get Target Subnets
-	targetSubnets, err := getTargetSubnets(clientEc2, ctx, targetZone[0])
+	targetSubnets, err := getTargetSubnets(clientEc2, ctx, targetZone)
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to get subnets for zone %s", targetZone[0]), err)
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to get subnets for zone %s", targetZone), err)
 	}
 
 	state.AgentAWSAccount = agentAwsAccountId
-	state.ExtensionAwsAccount = targetAccount[0]
-	state.TargetZone = targetZone[0]
+	state.ExtensionAwsAccount = targetAccount
+	state.TargetZone = targetZone
 	state.TargetSubnets = targetSubnets
 	state.AttackExecutionId = request.ExecutionId
 	return nil, nil

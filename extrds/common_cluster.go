@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2022 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package extrds
 
@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-aws/utils"
-	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extutil"
 )
 
 const (
@@ -26,18 +26,8 @@ type rdsDBClusterApi interface {
 }
 
 func convertClusterAttackState(request action_kit_api.PrepareActionRequestBody, state *RdsClusterAttackState) error {
-	clusterId := request.Target.Attributes["aws.rds.cluster.id"]
-	if len(clusterId) == 0 {
-		return extension_kit.ToError("Target is missing the 'aws.rds.cluster.id' target attribute.", nil)
-	}
-
-	account := request.Target.Attributes["aws.account"]
-	if len(account) == 0 {
-		return extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil)
-	}
-
-	state.Account = account[0]
-	state.DBClusterIdentifier = clusterId[0]
+	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.DBClusterIdentifier = extutil.MustHaveValue(request.Target.Attributes, "aws.rds.cluster.id")[0]
 	return nil
 }
 func defaultClusterClientProvider(account string) (rdsDBClusterApi, error) {

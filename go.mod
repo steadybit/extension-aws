@@ -9,17 +9,17 @@ toolchain go1.22.2
 
 require (
 	github.com/KimMachineGun/automemlimit v0.6.1
-	github.com/aws/aws-sdk-go-v2 v1.27.2
-	github.com/aws/aws-sdk-go-v2/config v1.27.18
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.18
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.5
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.1
-	github.com/aws/aws-sdk-go-v2/service/ecs v1.42.0
-	github.com/aws/aws-sdk-go-v2/service/fis v1.24.8
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.54.6
-	github.com/aws/aws-sdk-go-v2/service/rds v1.79.6
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.50.6
-	github.com/aws/aws-sdk-go-v2/service/sts v1.28.12
+	github.com/aws/aws-sdk-go-v2 v1.28.0
+	github.com/aws/aws-sdk-go-v2/config v1.27.19
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.19
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.6
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.2
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.42.1
+	github.com/aws/aws-sdk-go-v2/service/fis v1.24.9
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.54.7
+	github.com/aws/aws-sdk-go-v2/service/rds v1.79.7
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.50.7
+	github.com/aws/aws-sdk-go-v2/service/sts v1.28.13
 	github.com/aws/smithy-go v1.20.2
 	github.com/docker/go-connections v0.5.0
 	github.com/google/uuid v1.6.0
@@ -33,12 +33,12 @@ require (
 	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.1.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.0.6
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.1.2
-	github.com/steadybit/extension-kit v1.8.14
+	github.com/steadybit/extension-kit v1.8.15
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.31.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.31.0
 	go.uber.org/automaxprocs v1.5.3
-	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8
+	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8
 )
 
 require (
@@ -48,13 +48,13 @@ require (
 	github.com/Microsoft/hcsshim v0.12.0 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.9 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.9 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.10 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.10 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.11 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.20.11 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.24.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.12 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.20.12 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.24.6 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cilium/ebpf v0.15.0 // indirect
 	github.com/containerd/cgroups/v3 v3.0.3 // indirect

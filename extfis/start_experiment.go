@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package extfis
 
@@ -88,18 +88,8 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (f FisExperimentAction) Prepare(_ context.Context, state *FisExperimentState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	templateId := request.Target.Attributes["aws.fis.experiment.template.id"]
-	if len(templateId) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws.fis.experiment.template.id' target attribute.", nil)
-	}
-
-	account := request.Target.Attributes["aws.account"]
-	if len(account) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws.account' target attribute.", nil)
-	}
-
-	state.TemplateId = templateId[0]
-	state.Account = account[0]
+	state.TemplateId = extutil.MustHaveValue(request.Target.Attributes, "aws.fis.experiment.template.id")[0]
+	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.ExecutionId = request.ExecutionId
 	return nil, nil
 }

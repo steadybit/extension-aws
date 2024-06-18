@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package extec2
 
@@ -98,23 +98,13 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *ec2InstanceStateAction) Prepare(_ context.Context, state *InstanceStateChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	instanceId := request.Target.Attributes["aws-ec2.instance.id"]
-	if len(instanceId) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil)
-	}
-
-	account := request.Target.Attributes["aws.account"]
-	if len(account) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil)
-	}
-
 	action := request.Config["action"]
 	if action == nil {
 		return nil, extension_kit.ToError("Missing attack action parameter.", nil)
 	}
 
-	state.Account = account[0]
-	state.InstanceId = instanceId[0]
+	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.InstanceId = extutil.MustHaveValue(request.Target.Attributes, "aws-ec2.instance.id")[0]
 	state.Action = action.(string)
 	return nil, nil
 }
