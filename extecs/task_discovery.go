@@ -1,3 +1,7 @@
+/*
+ * Copyright 2024 steadybit GmbH. All rights reserved.
+ */
+
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
@@ -90,13 +94,6 @@ func (e *ecsTaskDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDes
 			Label: discovery_kit_api.PluralLabel{
 				One:   "ECS cluster name",
 				Other: "ECS cluster names",
-			},
-		},
-		{
-			Attribute: "aws-ecs.service.name",
-			Label: discovery_kit_api.PluralLabel{
-				One:   "ECS service name",
-				Other: "ECS service names",
 			},
 		},
 		{
