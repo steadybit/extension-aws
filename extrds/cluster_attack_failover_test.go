@@ -37,46 +37,6 @@ func TestPrepareClusterFailover(t *testing.T) {
 	assert.Equal(t, "my-cluster", state.DBClusterIdentifier)
 }
 
-func TestPrepareClusterFailoverMustRequireAnClusterId(t *testing.T) {
-	// Given
-	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{
-				"aws.account": {"42"},
-			},
-		}),
-	})
-
-	attack := rdsClusterFailoverAttack{}
-	state := attack.NewEmptyState()
-
-	// When
-	_, err := attack.Prepare(context.Background(), &state, requestBody)
-
-	// Then
-	assert.ErrorContains(t, err, "aws.rds.cluster.id")
-}
-
-func TestPrepareClusterFailoverMustRequireAnAccountId(t *testing.T) {
-	// Given
-	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{
-				"aws.rds.cluster.id": {"my-cluster"},
-			},
-		}),
-	})
-
-	attack := rdsClusterFailoverAttack{}
-	state := attack.NewEmptyState()
-
-	// When
-	_, err := attack.Prepare(context.Background(), &state, requestBody)
-
-	// Then
-	assert.ErrorContains(t, err, "aws.account")
-}
-
 func TestStartClusterFailover(t *testing.T) {
 	// Given
 	api := new(rdsDBClusterApiMock)

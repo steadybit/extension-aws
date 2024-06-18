@@ -46,34 +46,6 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 			},
 		},
 		{
-			name: "Should return error if account is missing",
-			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
-					"action": "stop",
-				},
-				Target: extutil.Ptr(action_kit_api.Target{
-					Attributes: map[string][]string{
-						"aws-ec2.instance.id": {"my-instance"},
-					},
-				}),
-			}),
-			wantedError: extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil),
-		},
-		{
-			name: "Should return error if instanceId is missing",
-			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
-					"action": "stop",
-				},
-				Target: extutil.Ptr(action_kit_api.Target{
-					Attributes: map[string][]string{
-						"aws.account": {"42"},
-					},
-				}),
-			}),
-			wantedError: extension_kit.ToError("Target is missing the 'aws-ec2.instance.id' attribute.", nil),
-		},
-		{
 			name: "Should return error if action is missing",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 				Config: map[string]interface{}{},

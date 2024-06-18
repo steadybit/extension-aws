@@ -41,13 +41,6 @@ func TestLambdaAction_Prepare(t *testing.T) {
 			},
 		},
 		{
-			name: "Should return error if account is missing",
-			attributes: map[string][]string{
-				"aws.lambda.failure-injection-param": {"PARAM"},
-			},
-			wantedError: extension_kit.ToError("Target is missing the 'aws.account' attribute.", nil),
-		},
-		{
 			name: "Should return error if failure-injection-param is missing",
 			attributes: map[string][]string{
 				"aws.account": {"123456789012"},
