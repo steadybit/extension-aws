@@ -19,10 +19,10 @@ import (
 
 func NewEcsTaskStressMemoryAction() action_kit_sdk.Action[TaskSsmActionState] {
 	return newEcsTaskSsmAction(getEcsTaskStressMemoryDescription, ssmCommandInvocation{
-		documentName:      "AWSFIS-Run-Memory-Stress",
-		documentVersion:   "13",
-		stepNameForStatus: "ExecuteStressNg",
-		getParameters:     getEcsTaskStressMemoryParameters,
+		documentName:    "AWSFIS-Run-Memory-Stress",
+		documentVersion: "13",
+		stepNameOutput:  "ExecuteStressNg",
+		getParameters:   getEcsTaskStressMemoryParameters,
 	})
 }
 

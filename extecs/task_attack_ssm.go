@@ -42,10 +42,7 @@ type TaskSsmActionState struct {
 	TaskArn           string
 	ManagedInstanceId string
 	CommandId         string
-	DocumentVersion   string
-	DocumentName      string
 	Parameters        map[string][]string
-	StepNameForStatus string
 	Comment           string
 }
 
@@ -57,10 +54,10 @@ type ecsTaskSsmApi interface {
 }
 
 type ssmCommandInvocation struct {
-	documentVersion   string
-	documentName      string
-	getParameters     func(action_kit_api.PrepareActionRequestBody) (map[string][]string, error)
-	stepNameForStatus string
+	documentVersion string
+	documentName    string
+	getParameters   func(action_kit_api.PrepareActionRequestBody) (map[string][]string, error)
+	stepNameOutput  string
 }
 
 func newEcsTaskSsmAction(description func() action_kit_api.ActionDescription, invocation ssmCommandInvocation) action_kit_sdk.ActionWithStop[TaskSsmActionState] {
@@ -105,14 +102,12 @@ func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionStat
 	if parameters, err := e.ssmCommandInvocation.getParameters(request); err != nil {
 		return nil, err
 	} else {
-		state.DocumentName = e.ssmCommandInvocation.documentName
-		state.DocumentVersion = e.ssmCommandInvocation.documentVersion
 		state.Parameters = parameters
-		state.StepNameForStatus = e.ssmCommandInvocation.stepNameForStatus
+
 		if request.ExecutionContext != nil && request.ExecutionContext.ExecutionId != nil && request.ExecutionContext.ExperimentKey != nil {
-			state.Comment = fmt.Sprintf("Run by Steadybit for experiment %s #%d", *request.ExecutionContext.ExperimentKey, *request.ExecutionContext.ExecutionId)
+			state.Comment = fmt.Sprintf("Steadybit Experiment %s #%d", *request.ExecutionContext.ExperimentKey, *request.ExecutionContext.ExecutionId)
 		} else {
-			state.Comment = "Run by Steadybit"
+			state.Comment = "Steadybit Experiment"
 		}
 	}
 
@@ -126,8 +121,8 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 	}
 
 	output, err := client.SendCommand(ctx, &ssm.SendCommandInput{
-		DocumentName:    &state.DocumentName,
-		DocumentVersion: &state.DocumentVersion,
+		DocumentName:    &e.ssmCommandInvocation.documentName,
+		DocumentVersion: &e.ssmCommandInvocation.documentVersion,
 		InstanceIds:     []string{state.ManagedInstanceId},
 		Parameters:      state.Parameters,
 		Comment:         extutil.Ptr(strings.ShortenString(state.Comment, 100)),
@@ -138,12 +133,12 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 	if err == nil {
 		state.CommandId = *output.Command.CommandId
 		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Message: fmt.Sprintf("Sent SSM command (%s) on ECS Task %s using document %s(%s) parameters %v", state.CommandId, state.TaskArn, state.DocumentName, state.DocumentVersion, state.Parameters),
+			Message: fmt.Sprintf("Sent SSM command (%s) on ECS Task %s using document %s(%s) parameters %v", state.CommandId, state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters),
 		}))
 	} else {
 		result.Error = &action_kit_api.ActionKitError{
 			Title:  fmt.Sprintf("Failed to start %s on ECS Task %s", e.description.Label, state.TaskArn),
-			Detail: extutil.Ptr(fmt.Sprintf("Sending SSM command on ECS Task %s failed. Using document %s(%s) and parameters %v: %s", state.TaskArn, state.DocumentName, state.DocumentVersion, state.Parameters, err.Error())),
+			Detail: extutil.Ptr(fmt.Sprintf("Sending SSM command on ECS Task %s failed. Using document %s(%s) and parameters %v: %s", state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters, err.Error())),
 		}
 	}
 
@@ -156,7 +151,8 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 		return nil, err
 	}
 
-	output, err := client.GetCommandInvocation(ctx, e.createCommandInvocationInput(state))
+	output, err := client.GetCommandInvocation(ctx, &ssm.GetCommandInvocationInput{CommandId: &state.CommandId, InstanceId: &state.ManagedInstanceId})
+
 	if err != nil {
 		if isErrInvocationDoesNotExist(err) {
 			return nil, nil
@@ -190,7 +186,11 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to cancel %s on ECS Task %s", e.description.Label, state.TaskArn), err)
 	}
 
-	output, err := ssm.NewCommandExecutedWaiter(client, withCommandStatusRetryable()).WaitForOutput(ctx, e.createCommandInvocationInput(state), 10*time.Second)
+	output, err := ssm.NewCommandExecutedWaiter(client, withCommandStatusRetryable()).WaitForOutput(ctx, &ssm.GetCommandInvocationInput{
+		CommandId:  &state.CommandId,
+		InstanceId: &state.ManagedInstanceId,
+		PluginName: &e.ssmCommandInvocation.stepNameOutput,
+	}, 10*time.Second)
 	if output == nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to await end of %s on ECS Task %s", e.description.Label, state.TaskArn), err)
 	}
@@ -217,17 +217,6 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 	}
 
 	return &result, nil
-}
-
-func (e *ecsTaskSsmAction) createCommandInvocationInput(state *TaskSsmActionState) *ssm.GetCommandInvocationInput {
-	input := &ssm.GetCommandInvocationInput{
-		CommandId:  &state.CommandId,
-		InstanceId: &state.ManagedInstanceId,
-	}
-	if state.StepNameForStatus != "" {
-		input.PluginName = &state.StepNameForStatus
-	}
-	return input
 }
 
 func hasEnded(output *ssm.GetCommandInvocationOutput) bool {
