@@ -18,6 +18,7 @@ import (
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extutil"
+	"k8s.io/utils/strings"
 	"time"
 )
 
@@ -108,8 +109,8 @@ func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionStat
 		state.DocumentVersion = e.ssmCommandInvocation.documentVersion
 		state.Parameters = parameters
 		state.StepNameForStatus = e.ssmCommandInvocation.stepNameForStatus
-		if request.ExecutionContext != nil && request.ExecutionContext.ExecutionId != nil && request.ExecutionContext.ExperimentKey != nil && request.ExecutionContext.ExecutionUri != nil {
-			state.Comment = fmt.Sprintf("Run by Steadybit for experiment %s #%d %s", *request.ExecutionContext.ExperimentKey, *request.ExecutionContext.ExecutionId, *request.ExecutionContext.ExecutionUri)
+		if request.ExecutionContext != nil && request.ExecutionContext.ExecutionId != nil && request.ExecutionContext.ExperimentKey != nil {
+			state.Comment = fmt.Sprintf("Run by Steadybit for experiment %s #%d", *request.ExecutionContext.ExperimentKey, *request.ExecutionContext.ExecutionId)
 		} else {
 			state.Comment = "Run by Steadybit"
 		}
@@ -129,7 +130,7 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 		DocumentVersion: &state.DocumentVersion,
 		InstanceIds:     []string{state.ManagedInstanceId},
 		Parameters:      state.Parameters,
-		Comment:         extutil.Ptr(state.Comment),
+		Comment:         extutil.Ptr(strings.ShortenString(state.Comment, 100)),
 		TimeoutSeconds:  extutil.Ptr(int32(30)),
 	})
 
@@ -157,7 +158,11 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 
 	output, err := client.GetCommandInvocation(ctx, e.createCommandInvocationInput(state))
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed get status for %s on ECS Task %s", e.description.Label, state.TaskArn), err)
+		if isErrInvocationDoesNotExist(err) {
+			return nil, nil
+		} else {
+			return nil, extension_kit.ToError(fmt.Sprintf("Failed get status for %s on ECS Task %s", e.description.Label, state.TaskArn), err)
+		}
 	}
 
 	if hasEnded(output) {
@@ -173,6 +178,14 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		return nil, err
 	}
 
+	result := action_kit_api.StopResult{Messages: &[]action_kit_api.Message{}}
+	if state.CommandId == "" {
+		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
+			Message: fmt.Sprintf("No SSM command to cancel for %s on ECS Task %s", e.description.Label, state.TaskArn),
+		}))
+		return nil, nil
+	}
+
 	if _, err = client.CancelCommand(ctx, &ssm.CancelCommandInput{CommandId: &state.CommandId, InstanceIds: []string{state.ManagedInstanceId}}); err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to cancel %s on ECS Task %s", e.description.Label, state.TaskArn), err)
 	}
@@ -182,9 +195,9 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to await end of %s on ECS Task %s", e.description.Label, state.TaskArn), err)
 	}
 
-	result := action_kit_api.StopResult{Messages: &[]action_kit_api.Message{{
+	result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
 		Message: fmt.Sprintf("SSM command (%s) using document %s(%s) ended with rc=%d and status %s", state.CommandId, *output.DocumentName, *output.DocumentVersion, output.ResponseCode, *output.StatusDetails),
-	}}}
+	}))
 
 	if output.Status != types.CommandInvocationStatusSuccess {
 		result.Error = &action_kit_api.ActionKitError{
@@ -221,13 +234,19 @@ func hasEnded(output *ssm.GetCommandInvocationOutput) bool {
 	return output != nil && (output.Status == types.CommandInvocationStatusSuccess || output.Status == types.CommandInvocationStatusFailed || output.Status == types.CommandInvocationStatusTimedOut || output.Status == types.CommandInvocationStatusCancelled)
 }
 
+func isErrInvocationDoesNotExist(err error) bool {
+	var errorType *types.InvocationDoesNotExist
+	return errors.As(err, &errorType)
+}
+
 func withCommandStatusRetryable() func(options *ssm.CommandExecutedWaiterOptions) {
 	return func(options *ssm.CommandExecutedWaiterOptions) {
 		options.Retryable = func(ctx context.Context, input *ssm.GetCommandInvocationInput, output *ssm.GetCommandInvocationOutput, err error) (bool, error) {
 			if err != nil {
-				var errorType *types.InvocationDoesNotExist
-				if errors.As(err, &errorType) {
+				if isErrInvocationDoesNotExist(err) {
 					return true, nil
+				} else {
+					return false, nil
 				}
 			}
 			return !hasEnded(output), nil
