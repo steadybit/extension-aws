@@ -6,10 +6,9 @@ package extecs
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
-	"github.com/steadybit/extension-aws/utils"
 	extensionkit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extconversion"
@@ -44,20 +43,17 @@ type escServiceTaskCounts struct {
 	desired int
 }
 
-type ecsServiceTaskCountCheckApi interface {
-	DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, optFns ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error)
-}
-
 type ServiceTaskCountCheckAction struct {
-	getApiClient func(account string) (ecsServiceTaskCountCheckApi, error)
+	poller *ServiceDescriptionPoller
 }
 
 var _ action_kit_sdk.Action[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
 var _ action_kit_sdk.ActionWithStatus[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
+var _ action_kit_sdk.ActionWithStop[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
 
-func NewServiceTaskCountCheckAction() action_kit_sdk.Action[ServiceTaskCountCheckState] {
+func NewServiceTaskCountCheckAction(poller *ServiceDescriptionPoller) action_kit_sdk.Action[ServiceTaskCountCheckState] {
 	return ServiceTaskCountCheckAction{
-		getApiClient: defaultServiceTaskCountClientProvider,
+		poller: poller,
 	}
 }
 
@@ -136,7 +132,7 @@ func (f ServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescription
 	}
 }
 
-func (f ServiceTaskCountCheckAction) Prepare(ctx context.Context, state *ServiceTaskCountCheckState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (f ServiceTaskCountCheckAction) Prepare(_ context.Context, state *ServiceTaskCountCheckState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	var config ServiceTaskCountCheckConfig
 	if err := extconversion.Convert(request.Config, &config); err != nil {
 		return nil, extensionkit.ToError("Failed to unmarshal the config.", err)
@@ -146,65 +142,65 @@ func (f ServiceTaskCountCheckAction) Prepare(ctx context.Context, state *Service
 	clusterArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
 	serviceArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.service.arn")[0]
 
-	client, err := f.getApiClient(awsAccount)
-	if err != nil {
-		return nil, err
-	}
-
-	counts, err := f.getRunningAndDesiredTaskCount(serviceArn, clusterArn, client, ctx)
+	f.poller.Register(awsAccount, clusterArn, serviceArn)
+	counts, err := f.initialRunningCount(awsAccount, clusterArn, serviceArn)
 	if err != nil {
 		return nil, err
 	}
 
 	state.Timeout = time.Now().Add(time.Millisecond * time.Duration(config.Duration))
 	state.RunningCountCheckMode = config.RunningCountCheckMode
-	state.ServiceArn = serviceArn
-	state.ClusterArn = clusterArn
 	state.AwsAccount = awsAccount
+	state.ClusterArn = clusterArn
+	state.ServiceArn = serviceArn
 	state.InitialRunningCount = counts.running
 
 	return nil, nil
+}
+
+func (f ServiceTaskCountCheckAction) initialRunningCount(awsAccount string, clusterArn string, serviceArn string) (*escServiceTaskCounts, error) {
+	latest := f.poller.AwaitLatest(awsAccount, clusterArn, serviceArn)
+	if latest != nil {
+		if latest.service != nil {
+			return toServiceTaskCounts(latest.service), nil
+		} else if latest.failure != nil {
+			message := fmt.Sprintf("error accessing service %q in cluster %q: %s", serviceArn, clusterArn, *latest.failure.Reason)
+			return nil, extensionkit.ToError(message, nil)
+		}
+	}
+	message := fmt.Sprintf("service %q in cluster %q not found", serviceArn, clusterArn)
+	return nil, extensionkit.ToError(message, nil)
 }
 
 func (f ServiceTaskCountCheckAction) Start(_ context.Context, _ *ServiceTaskCountCheckState) (*action_kit_api.StartResult, error) {
 	return nil, nil
 }
 
-func (f ServiceTaskCountCheckAction) Status(ctx context.Context, state *ServiceTaskCountCheckState) (*action_kit_api.StatusResult, error) {
-	now := time.Now()
-	client, err := f.getApiClient(state.AwsAccount)
-	if err != nil {
-		return nil, err
-	}
-
-	counts, err := f.getRunningAndDesiredTaskCount(state.ServiceArn, state.ClusterArn, client, ctx)
-	if err != nil {
-		return nil, err
-	}
-	failedCheck := f.checkRunningAndDesiredCount(state, counts)
-
-	timeIsUp := now.After(state.Timeout)
-	return &action_kit_api.StatusResult{
-		Completed: timeIsUp || failedCheck == nil,
-		Error:     failedCheck,
-	}, nil
+func (f ServiceTaskCountCheckAction) Stop(_ context.Context, state *ServiceTaskCountCheckState) (*action_kit_api.StopResult, error) {
+	f.poller.Unregister(state.AwsAccount, state.ClusterArn, state.ServiceArn)
+	return nil, nil
 }
 
-func (f ServiceTaskCountCheckAction) getRunningAndDesiredTaskCount(serviceArn string, clusterArn string, ecsServiceApi ecsServiceTaskCountCheckApi, ctx context.Context) (*escServiceTaskCounts, error) {
-	services, err := ecsServiceApi.DescribeServices(ctx, &ecs.DescribeServicesInput{
-		Services: []string{serviceArn},
-		Cluster:  extutil.Ptr(clusterArn),
-	})
-	if err != nil {
-		return nil, err
+func (f ServiceTaskCountCheckAction) Status(_ context.Context, state *ServiceTaskCountCheckState) (*action_kit_api.StatusResult, error) {
+	latest := f.poller.Latest(state.AwsAccount, state.ClusterArn, state.ServiceArn)
+
+	var checkError *action_kit_api.ActionKitError
+	if latest != nil {
+		if latest.service != nil {
+			counts := toServiceTaskCounts(latest.service)
+			checkError = f.checkRunningAndDesiredCount(state, counts)
+		} else if latest.failure != nil {
+			checkError = &action_kit_api.ActionKitError{
+				Title: fmt.Sprintf("error accessing service %q in cluster %q: %s", state.ServiceArn, state.ClusterArn, *latest.failure.Reason),
+			}
+		}
 	}
-	for _, service := range services.Services {
-		return &escServiceTaskCounts{
-			running: extutil.ToInt(service.RunningCount),
-			desired: extutil.ToInt(service.DesiredCount),
-		}, nil
-	}
-	return nil, extensionkit.ToError(fmt.Sprintf("service %q in cluster %q not found", serviceArn, clusterArn), nil)
+
+	timeIsUp := time.Now().After(state.Timeout)
+	return &action_kit_api.StatusResult{
+		Completed: timeIsUp || checkError == nil,
+		Error:     checkError,
+	}, nil
 }
 
 func (f ServiceTaskCountCheckAction) checkRunningAndDesiredCount(state *ServiceTaskCountCheckState, counts *escServiceTaskCounts) *action_kit_api.ActionKitError {
@@ -242,10 +238,9 @@ func (f ServiceTaskCountCheckAction) checkRunningAndDesiredCount(state *ServiceT
 	return nil
 }
 
-func defaultServiceTaskCountClientProvider(account string) (ecsServiceTaskCountCheckApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
-	if err != nil {
-		return nil, err
+func toServiceTaskCounts(service *types.Service) *escServiceTaskCounts {
+	return &escServiceTaskCounts{
+		running: extutil.ToInt(service.RunningCount),
+		desired: extutil.ToInt(service.DesiredCount),
 	}
-	return ecs.NewFromConfig(awsAccount.AwsConfig), nil
 }
