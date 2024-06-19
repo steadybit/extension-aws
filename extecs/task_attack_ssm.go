@@ -247,7 +247,7 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		}
 		if state.ManagedInstanceMissing {
 			result.Error.Detail = extutil.Ptr("The SSM Agent is gone while the command was running.")
-		} else if stepOutput != nil && stepOutput.StandardOutputContent != nil && strings.Contains(*output.StandardOutputContent, "Another stress-ng command is running, exiting...") {
+		} else if stepOutput != nil && stepOutput.StandardOutputContent != nil && strings.Contains(*stepOutput.StandardOutputContent, "Another stress-ng command is running, exiting...") {
 			result.Error.Detail = extutil.Ptr("Parallel stress attack already running on this instance")
 		}
 	}
