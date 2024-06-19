@@ -196,11 +196,16 @@ func (f ServiceTaskCountCheckAction) Status(_ context.Context, state *ServiceTas
 		}
 	}
 
-	timeIsUp := time.Now().After(state.Timeout)
-	return &action_kit_api.StatusResult{
-		Completed: timeIsUp || checkError == nil,
-		Error:     checkError,
-	}, nil
+	if time.Now().After(state.Timeout) {
+		return &action_kit_api.StatusResult{
+			Completed: true,
+			Error:     checkError,
+		}, nil
+	} else {
+		return &action_kit_api.StatusResult{
+			Completed: checkError == nil,
+		}, nil
+	}
 }
 
 func (f ServiceTaskCountCheckAction) checkRunningAndDesiredCount(state *ServiceTaskCountCheckState, counts *escServiceTaskCounts) *action_kit_api.ActionKitError {

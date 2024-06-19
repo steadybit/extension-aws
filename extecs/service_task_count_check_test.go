@@ -92,7 +92,6 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
-				Timeout:               time.Now().Add(10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
 				assert.True(t, result.Completed)
@@ -100,7 +99,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			},
 		},
 		{
-			name: "successful_check_on_timeout",
+			name: "completed_check_on_timeout",
 			service: types.Service{
 				RunningCount: 0,
 			},
@@ -119,10 +118,9 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
-				Timeout:               time.Now().Add(10 * time.Second),
+				Timeout:               time.Now().Add(-10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "no running task")
 			},
@@ -135,10 +133,9 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountEqualsDesiredCount,
-				Timeout:               time.Now().Add(10 * time.Second),
+				Timeout:               time.Now().Add(-10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "1 of desired 2")
 			},
@@ -151,10 +148,9 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountLessThanDesiredCount,
-				Timeout:               time.Now().Add(10 * time.Second),
+				Timeout:               time.Now().Add(-10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "has all 1 desired")
 			},
@@ -166,11 +162,10 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountIncreased,
-				Timeout:               time.Now().Add(10 * time.Second),
+				Timeout:               time.Now().Add(-10 * time.Second),
 				InitialRunningCount:   2,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "didn't increase")
 			},
@@ -182,11 +177,10 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountDecreased,
-				Timeout:               time.Now().Add(10 * time.Second),
+				Timeout:               time.Now().Add(-10 * time.Second),
 				InitialRunningCount:   2,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "didn't decrease")
 			},
@@ -196,10 +190,9 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			service: types.Service{},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: "notExisting",
-				Timeout:               time.Now().Add(10 * time.Second),
+				Timeout:               time.Now().Add(-10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "unsupported check type")
 			},
