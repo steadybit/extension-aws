@@ -164,9 +164,7 @@ func statusExperiment(ctx context.Context, state *FisExperimentState, clientProv
 	summary := actionSummary(experiment.Experiment)
 	if summary != state.LastSummary {
 		state.LastSummary = summary
-		result.Messages = &action_kit_api.Messages{
-			action_kit_api.Message{Level: extutil.Ptr(action_kit_api.Info), Message: summary},
-		}
+		result.Messages = utils.AppendMessagef(result.Messages, action_kit_api.Info, summary)
 	}
 
 	result.Completed = false

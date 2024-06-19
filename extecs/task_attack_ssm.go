@@ -19,6 +19,7 @@ import (
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
+	"strings"
 	"time"
 )
 
@@ -38,13 +39,14 @@ var (
 )
 
 type TaskSsmActionState struct {
-	Account           string
-	TaskArn           string
-	ManagedInstanceId string
-	CommandId         string
-	Parameters        map[string][]string
-	Comment           string
-	CommandEnded      bool
+	Account                string
+	TaskArn                string
+	ManagedInstanceId      string
+	CommandId              string
+	Parameters             map[string][]string
+	Comment                string
+	CommandEnded           bool
+	ManagedInstanceMissing bool
 }
 
 type ecsTaskSsmApi interface {
@@ -148,9 +150,7 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 	result := &action_kit_api.StartResult{Messages: &[]action_kit_api.Message{}}
 	if err == nil {
 		state.CommandId = *output.Command.CommandId
-		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Message: fmt.Sprintf("Sent SSM command (%s) on ECS Task %s using document %s(%s) parameters %+v", state.CommandId, state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters),
-		}))
+		result.Messages = utils.AppendInfof(result.Messages, "Sent SSM command (%s) on ECS Task %s using document %s(%s) parameters %+v", state.CommandId, state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters)
 	} else {
 		result.Error = &action_kit_api.ActionKitError{
 			Title:  fmt.Sprintf("Failed to start %s on ECS Task %s", e.description.Label, state.TaskArn),
@@ -191,6 +191,7 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 	//As the command will be stuck "InProgress" if the executing managed instance has vanished, we need to check if it still there, so we don't wait on the command timeout.
 	if _, err := e.findManagedInstance(ctx, client, state.TaskArn); err != nil {
 		if errors.Is(err, errorManagedInstanceNotFound) {
+			state.ManagedInstanceMissing = true
 			return &action_kit_api.StatusResult{Completed: true}, nil
 		} else {
 			return nil, extension_kit.ToError(fmt.Sprintf("Failed to find managed instance for %s on ECS Task %s", e.description.Label, state.TaskArn), err)
@@ -208,16 +209,12 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 
 	result := &action_kit_api.StopResult{Messages: &[]action_kit_api.Message{}}
 	if state.CommandId == "" {
-		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Message: fmt.Sprintf("No SSM command to cancel for %s on ECS Task %s", e.description.Label, state.TaskArn),
-		}))
+		result.Messages = utils.AppendInfof(result.Messages, "No SSM command to cancel for %s on ECS Task %s", e.description.Label, state.TaskArn)
 		return result, nil
 	}
 
 	if !state.CommandEnded {
-		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Message: fmt.Sprintf("Cancelling SSM command (%s) for %s on ECS Task %s", state.CommandId, e.description.Label, state.TaskArn),
-		}))
+		result.Messages = utils.AppendInfof(result.Messages, "Cancelling SSM command (%s) for %s on ECS Task %s", state.CommandId, e.description.Label, state.TaskArn)
 
 		if _, err := client.CancelCommand(ctx, &ssm.CancelCommandInput{CommandId: &state.CommandId, InstanceIds: []string{state.ManagedInstanceId}}); err != nil {
 			return nil, extension_kit.ToError(fmt.Sprintf("Failed to cancel SSM command (%s) for %s on ECS Task %s", state.CommandId, e.description.Label, state.TaskArn), err)
@@ -228,32 +225,31 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to await end of %s on ECS Task %s", e.description.Label, state.TaskArn), err)
 	}
+
+	result.Messages = utils.AppendInfof(result.Messages, "SSM command (%s) using document %s(%s) ended with rc=%d and status %s", state.CommandId, *output.DocumentName, *output.DocumentVersion, output.ResponseCode, *output.StatusDetails)
+
+	//when the step hasn't run yet, an error status is returned, hence we wait the command status and the step output separately
+	stepOutput, err := client.GetCommandInvocation(ctx, &ssm.GetCommandInvocationInput{CommandId: &state.CommandId, InstanceId: &state.ManagedInstanceId, PluginName: &e.ssmCommandInvocation.stepNameToOutput})
+	if err == nil {
+		if stepOutput.StandardOutputContent != nil {
+			result.Messages = utils.AppendInfof(result.Messages, "%s stdout:\n%s", state.CommandId, *stepOutput.StandardOutputContent)
+		}
+		if stepOutput.StandardErrorContent != nil {
+			result.Messages = utils.AppendInfof(result.Messages, "%s stderr:\n%s", state.CommandId, *stepOutput.StandardErrorContent)
+		}
+	} else {
+		result.Messages = utils.AppendWarnf(result.Messages, "Failed to read output for step %s: %v", e.ssmCommandInvocation.stepNameToOutput, err)
+	}
+
 	if output.Status != types.CommandInvocationStatusSuccess {
 		result.Error = &action_kit_api.ActionKitError{
 			Title: fmt.Sprintf("Ended SSM command %s on ECS Task %s with status %s", e.description.Label, state.TaskArn, *output.StatusDetails),
 		}
-	}
-	result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-		Message: fmt.Sprintf("SSM command (%s) using document %s(%s) ended with rc=%d and status %s", state.CommandId, *output.DocumentName, *output.DocumentVersion, output.ResponseCode, *output.StatusDetails),
-	}))
-
-	//when the step hasn't run yet, an error status is returned, hence we wait the command status and the step output separately
-	output, err = client.GetCommandInvocation(ctx, &ssm.GetCommandInvocationInput{CommandId: &state.CommandId, InstanceId: &state.ManagedInstanceId, PluginName: &e.ssmCommandInvocation.stepNameToOutput})
-	if err != nil {
-		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Level:   extutil.Ptr(action_kit_api.Warn),
-			Message: fmt.Sprintf("Failed to read output for step %s: %v", e.ssmCommandInvocation.stepNameToOutput, err),
-		}))
-	}
-	if output.StandardOutputContent != nil {
-		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Message: fmt.Sprintf("%s stdout:\n%s", state.CommandId, *output.StandardOutputContent),
-		}))
-	}
-	if output.StandardErrorContent != nil {
-		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Message: fmt.Sprintf("%s stderr:\n%s", state.CommandId, *output.StandardErrorContent),
-		}))
+		if state.ManagedInstanceMissing {
+			result.Error.Detail = extutil.Ptr("The SSM Agent is gone while the command was running.")
+		} else if stepOutput != nil && stepOutput.StandardOutputContent != nil && strings.Contains(*output.StandardOutputContent, "Another stress-ng command is running, exiting...") {
+			result.Error.Detail = extutil.Ptr("Parallel stress attack already running on this instance")
+		}
 	}
 
 	return result, nil
