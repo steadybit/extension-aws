@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
-	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 	"strconv"
 	"time"
@@ -41,21 +40,6 @@ func getEcsTaskStressMemoryDescription() action_kit_api.ActionDescription {
 		Id:          fmt.Sprintf("%s.stress_mem", ecsTaskTargetId),
 		Label:       "Stress Memory",
 		Description: "Stresses Memory for the given duration.",
-		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(ecsTaskIcon),
-		TargetSelection: &action_kit_api.TargetSelection{
-			TargetType: ecsTaskTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
-				{
-					Label:       "by service and cluster",
-					Description: extutil.Ptr("Find ecs task by cluster and service name"),
-					Query:       "aws-ecs.cluster.name=\"\" and aws-ecs.service.name=\"\" and aws-ecs.task.amazon-ssm-agent=\"true\"",
-				},
-			}),
-		},
-		Category:    extutil.Ptr("resource"),
-		Kind:        action_kit_api.Attack,
-		TimeControl: action_kit_api.TimeControlInternal,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "percent",

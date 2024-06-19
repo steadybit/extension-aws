@@ -17,6 +17,7 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 	"time"
 )
@@ -60,10 +61,29 @@ type ssmCommandInvocation struct {
 	stepNameOutput  string
 }
 
-func newEcsTaskSsmAction(description func() action_kit_api.ActionDescription, invocation ssmCommandInvocation) action_kit_sdk.ActionWithStop[TaskSsmActionState] {
+func newEcsTaskSsmAction(makeDescription func() action_kit_api.ActionDescription, invocation ssmCommandInvocation) action_kit_sdk.ActionWithStop[TaskSsmActionState] {
+	description := makeDescription()
+	description.Version = extbuild.GetSemverVersionStringOrUnknown()
+	description.Icon = extutil.Ptr(ecsTaskIcon)
+	description.TargetSelection = &action_kit_api.TargetSelection{
+		TargetType: ecsTaskTargetId,
+		SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			{
+				Label:       "by service and cluster",
+				Description: extutil.Ptr("Find ecs task by cluster and service name"),
+				Query:       "aws-ecs.cluster.name=\"\" and aws-ecs.service.name=\"\" and aws-ecs.task.amazon-ssm-agent=\"true\"",
+			},
+		}),
+	}
+	description.Category = extutil.Ptr("resource")
+	description.Kind = action_kit_api.Attack
+	description.TimeControl = action_kit_api.TimeControlInternal
+	description.Status = &action_kit_api.MutatingEndpointReferenceWithCallInterval{
+		CallInterval: extutil.Ptr("5s"),
+	}
 	return &ecsTaskSsmAction{
 		clientProvider:       defaultTaskSsmClientProvider,
-		description:          description(),
+		description:          description,
 		ssmCommandInvocation: invocation,
 	}
 }
@@ -80,16 +100,6 @@ func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionStat
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.TaskArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.task.arn")[0]
 
-	if managedInstanceId, err := e.findManagedInstance(ctx, state.Account, state.TaskArn); err == nil {
-		state.ManagedInstanceId = managedInstanceId
-	} else {
-		prepareErr := extension_kit.ToError(fmt.Sprintf("Failed to find managed instance for ECS Task %s", state.TaskArn), err)
-		if errors.Is(err, errorManagedInstanceNotFound) {
-			prepareErr.Detail = extutil.Ptr("Please make sure that the 'amazon-ssm-agent' is added to the task definition and running.")
-		}
-		return nil, prepareErr
-	}
-
 	if parameters, err := e.ssmCommandInvocation.getParameters(request); err == nil {
 		state.Parameters = parameters
 	} else {
@@ -100,6 +110,21 @@ func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionStat
 		state.Comment = fmt.Sprintf("Steadybit Experiment %s #%d", *request.ExecutionContext.ExperimentKey, *request.ExecutionContext.ExecutionId)
 	} else {
 		state.Comment = "Steadybit Experiment"
+	}
+
+	client, err := e.clientProvider(state.Account)
+	if err != nil {
+		return nil, err
+	}
+
+	if managedInstanceId, err := e.findManagedInstance(ctx, client, state.TaskArn); err == nil {
+		state.ManagedInstanceId = managedInstanceId
+	} else {
+		prepareErr := extension_kit.ToError(fmt.Sprintf("Failed to find managed instance for ECS Task %s", state.TaskArn), err)
+		if errors.Is(err, errorManagedInstanceNotFound) {
+			prepareErr.Detail = extutil.Ptr("Please make sure that the 'amazon-ssm-agent' is added to the task definition and running.")
+		}
+		return nil, prepareErr
 	}
 
 	return nil, nil
@@ -150,7 +175,6 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 	}
 
 	output, err := client.GetCommandInvocation(ctx, &ssm.GetCommandInvocationInput{CommandId: &state.CommandId, InstanceId: &state.ManagedInstanceId})
-
 	if err != nil {
 		if isErrInvocationDoesNotExist(err) {
 			return nil, nil
@@ -162,6 +186,16 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 	if hasEnded(output) {
 		state.Completed = true
 		return &action_kit_api.StatusResult{Completed: true}, nil
+	}
+
+	//As the command will be stuck "InProgress" if the executing managed instance has vanished, we need to check if it still there, so we don't wait on the command timeout.
+	if _, err := e.findManagedInstance(ctx, client, state.TaskArn); err != nil {
+		if errors.Is(err, errorManagedInstanceNotFound) {
+			state.Completed = true
+			return &action_kit_api.StatusResult{Completed: true}, nil
+		} else {
+			return nil, extension_kit.ToError(fmt.Sprintf("Failed to find managed instance for %s on ECS Task %s", e.description.Label, state.TaskArn), err)
+		}
 	}
 
 	return nil, nil
@@ -196,19 +230,18 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		InstanceId: &state.ManagedInstanceId,
 		PluginName: &e.ssmCommandInvocation.stepNameOutput,
 	}, 10*time.Second)
-	if output == nil {
+	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to await end of %s on ECS Task %s", e.description.Label, state.TaskArn), err)
 	}
-
-	result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-		Message: fmt.Sprintf("SSM command (%s) using document %s(%s) ended with rc=%d and status %s", state.CommandId, *output.DocumentName, *output.DocumentVersion, output.ResponseCode, *output.StatusDetails),
-	}))
 
 	if output.Status != types.CommandInvocationStatusSuccess {
 		result.Error = &action_kit_api.ActionKitError{
 			Title: fmt.Sprintf("Ended SSM command %s on ECS Task %s with status %s", e.description.Label, state.TaskArn, *output.StatusDetails),
 		}
 	}
+	result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
+		Message: fmt.Sprintf("SSM command (%s) using document %s(%s) ended with rc=%d and status %s", state.CommandId, *output.DocumentName, *output.DocumentVersion, output.ResponseCode, *output.StatusDetails),
+	}))
 	if output.StandardOutputContent != nil {
 		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
 			Message: fmt.Sprintf("%s stdout:\n%s", state.CommandId, *output.StandardOutputContent),
@@ -247,12 +280,7 @@ func withCommandStatusRetryable() func(options *ssm.CommandExecutedWaiterOptions
 	}
 }
 
-func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, account, taskArn string) (string, error) {
-	client, err := e.clientProvider(account)
-	if err != nil {
-		return "", extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", account), err)
-	}
-
+func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, client ecsTaskSsmApi, taskArn string) (string, error) {
 	output, err := client.DescribeInstanceInformation(ctx, &ssm.DescribeInstanceInformationInput{
 		Filters: []types.InstanceInformationStringFilter{
 			{Key: extutil.Ptr("tag:ECS_TASK_ARN"), Values: []string{taskArn}},
