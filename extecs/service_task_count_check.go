@@ -185,13 +185,12 @@ func (f ServiceTaskCountCheckAction) Status(ctx context.Context, state *ServiceT
 
 	timeIsUp := now.After(state.Timeout)
 	return &action_kit_api.StatusResult{
-		Completed: timeIsUp || failedCheck != nil,
+		Completed: timeIsUp || failedCheck == nil,
 		Error:     failedCheck,
 	}, nil
 }
 
 func (f ServiceTaskCountCheckAction) getRunningAndDesiredTaskCount(serviceArn string, clusterArn string, ecsServiceApi ecsServiceTaskCountCheckApi, ctx context.Context) (*escServiceTaskCounts, error) {
-
 	services, err := ecsServiceApi.DescribeServices(ctx, &ecs.DescribeServicesInput{
 		Services: []string{serviceArn},
 		Cluster:  extutil.Ptr(clusterArn),

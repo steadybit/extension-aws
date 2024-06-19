@@ -77,75 +77,107 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 		wanted  func(t *testing.T, result *action_kit_api.StatusResult)
 	}{
 		{
-			name: "runningCountMinTooLow",
+			name: "successful_check_completes_run",
+			service: types.Service{
+				RunningCount: 1,
+			},
+			state: ServiceTaskCountCheckState{
+				RunningCountCheckMode: runningCountMin1,
+				Timeout:               time.Now().Add(10 * time.Second),
+			},
+			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
+				assert.True(t, result.Completed)
+				assert.Nil(t, result.Error)
+			},
+		},
+		{
+			name: "successful_check_on_timeout",
 			service: types.Service{
 				RunningCount: 0,
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
+				Timeout:               time.Now().Add(-10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
 				assert.True(t, result.Completed)
+			},
+		},
+		{
+			name: "runningCountMin1_check_failed",
+			service: types.Service{
+				RunningCount: 0,
+			},
+			state: ServiceTaskCountCheckState{
+				RunningCountCheckMode: runningCountMin1,
+				Timeout:               time.Now().Add(10 * time.Second),
+			},
+			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
+				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "no running task")
 			},
 		},
 		{
-			name: "runningNotEqualsDesired",
+			name: "runningCountEqualsDesiredCount_check_failed",
 			service: types.Service{
 				RunningCount: 1,
 				DesiredCount: 2,
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountEqualsDesiredCount,
+				Timeout:               time.Now().Add(10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.True(t, result.Completed)
+				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "1 of desired 2")
 			},
 		},
 		{
-			name: "runningNotLessThanDesired",
+			name: "runningCountLessThanDesiredCount_check_failed",
 			service: types.Service{
 				RunningCount: 1,
 				DesiredCount: 1,
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountLessThanDesiredCount,
+				Timeout:               time.Now().Add(10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.True(t, result.Completed)
+				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "has all 1 desired")
 			},
 		},
 		{
-			name: "runningNotIncreased",
+			name: "runningCountIncreased_check_failed",
 			service: types.Service{
 				RunningCount: 2,
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountIncreased,
+				Timeout:               time.Now().Add(10 * time.Second),
 				InitialRunningCount:   2,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.True(t, result.Completed)
+				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "didn't increase")
 			},
 		},
 		{
-			name: "runningNotDecreased",
+			name: "runningCountDecreased_check_failed",
 			service: types.Service{
 				RunningCount: 2,
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountDecreased,
+				Timeout:               time.Now().Add(10 * time.Second),
 				InitialRunningCount:   2,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.True(t, result.Completed)
+				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "didn't decrease")
 			},
@@ -155,9 +187,10 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			service: types.Service{},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: "notExisting",
+				Timeout:               time.Now().Add(10 * time.Second),
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
-				assert.True(t, result.Completed)
+				assert.False(t, result.Completed)
 				assert.Equal(t, action_kit_api.Failed, *result.Error.Status)
 				assert.Contains(t, result.Error.Title, "unsupported check type")
 			},
