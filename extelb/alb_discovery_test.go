@@ -170,5 +170,7 @@ func TestGetAllAlbTargets(t *testing.T) {
 	assert.Equal(t, []string{"my-app-balancer-1234567890.us-east-1.elb.amazonaws.com"}, target.Attributes["aws-elb.alb.dns"])
 	assert.Equal(t, []string{albArn}, target.Attributes["aws-elb.alb.arn"])
 	assert.Equal(t, []string{"80", "443"}, target.Attributes["aws-elb.alb.listener.port"])
+	assert.Equal(t, []string{"LoadBalancer"}, target.Attributes["aws-elb.alb.label.service.k8s.aws/resource"])
+	assert.Equal(t, []string{"test-cluster"}, target.Attributes["k8s.cluster-name"])
 	mockedApi.AssertExpectations(t)
 }

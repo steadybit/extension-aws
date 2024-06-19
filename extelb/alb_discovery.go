@@ -202,6 +202,9 @@ func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listen
 	attributes["aws.zone.id"] = zoneIds
 
 	for _, tag := range tags {
+		if *tag.Key == "elbv2.k8s.aws/cluster" {
+			attributes["k8s.cluster-name"] = []string{aws.ToString(tag.Value)}
+		}
 		attributes[fmt.Sprintf("aws-elb.alb.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
 	}
 
