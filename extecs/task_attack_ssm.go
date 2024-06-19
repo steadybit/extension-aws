@@ -55,10 +55,10 @@ type ecsTaskSsmApi interface {
 }
 
 type ssmCommandInvocation struct {
-	documentVersion string
-	documentName    string
-	getParameters   func(action_kit_api.PrepareActionRequestBody) (map[string][]string, error)
-	stepNameOutput  string
+	documentVersion  string
+	documentName     string
+	getParameters    func(action_kit_api.PrepareActionRequestBody) (map[string][]string, error)
+	stepNameToOutput string
 }
 
 func newEcsTaskSsmAction(makeDescription func() action_kit_api.ActionDescription, invocation ssmCommandInvocation) action_kit_sdk.ActionWithStop[TaskSsmActionState] {
@@ -149,12 +149,12 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 	if err == nil {
 		state.CommandId = *output.Command.CommandId
 		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
-			Message: fmt.Sprintf("Sent SSM command (%s) on ECS Task %s using document %s(%s) parameters %v", state.CommandId, state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters),
+			Message: fmt.Sprintf("Sent SSM command (%s) on ECS Task %s using document %s(%s) parameters %+v", state.CommandId, state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters),
 		}))
 	} else {
 		result.Error = &action_kit_api.ActionKitError{
 			Title:  fmt.Sprintf("Failed to start %s on ECS Task %s", e.description.Label, state.TaskArn),
-			Detail: extutil.Ptr(fmt.Sprintf("Sending SSM command on ECS Task %s failed. Using document %s(%s) and parameters %v: %s", state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters, err.Error())),
+			Detail: extutil.Ptr(fmt.Sprintf("Sending SSM command on ECS Task %s failed. Using document %s(%s) and parameters %+v: %s", state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters, err.Error())),
 		}
 	}
 
@@ -174,7 +174,7 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 		return nil, err
 	}
 
-	output, err := client.GetCommandInvocation(ctx, &ssm.GetCommandInvocationInput{CommandId: &state.CommandId, InstanceId: &state.ManagedInstanceId})
+	ciOutput, err := client.GetCommandInvocation(ctx, &ssm.GetCommandInvocationInput{CommandId: &state.CommandId, InstanceId: &state.ManagedInstanceId})
 	if err != nil {
 		if isErrInvocationDoesNotExist(err) {
 			return nil, nil
@@ -183,7 +183,7 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 		}
 	}
 
-	if hasEnded(output) {
+	if hasEnded(ciOutput) {
 		state.Completed = true
 		return &action_kit_api.StatusResult{Completed: true}, nil
 	}
@@ -225,15 +225,10 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		}
 	}
 
-	output, err := ssm.NewCommandExecutedWaiter(client, withCommandStatusRetryable()).WaitForOutput(ctx, &ssm.GetCommandInvocationInput{
-		CommandId:  &state.CommandId,
-		InstanceId: &state.ManagedInstanceId,
-		PluginName: &e.ssmCommandInvocation.stepNameOutput,
-	}, 10*time.Second)
+	output, err := ssm.NewCommandExecutedWaiter(client, withCommandStatusRetryable()).WaitForOutput(ctx, &ssm.GetCommandInvocationInput{CommandId: &state.CommandId, InstanceId: &state.ManagedInstanceId}, 10*time.Second)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to await end of %s on ECS Task %s", e.description.Label, state.TaskArn), err)
 	}
-
 	if output.Status != types.CommandInvocationStatusSuccess {
 		result.Error = &action_kit_api.ActionKitError{
 			Title: fmt.Sprintf("Ended SSM command %s on ECS Task %s with status %s", e.description.Label, state.TaskArn, *output.StatusDetails),
@@ -242,6 +237,15 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 	result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
 		Message: fmt.Sprintf("SSM command (%s) using document %s(%s) ended with rc=%d and status %s", state.CommandId, *output.DocumentName, *output.DocumentVersion, output.ResponseCode, *output.StatusDetails),
 	}))
+
+	//when the step hasn't run yet, an error status is returned, hence we wait the command status and the step output separately
+	output, err = client.GetCommandInvocation(ctx, &ssm.GetCommandInvocationInput{CommandId: &state.CommandId, InstanceId: &state.ManagedInstanceId, PluginName: &e.ssmCommandInvocation.stepNameToOutput})
+	if err != nil {
+		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
+			Level:   extutil.Ptr(action_kit_api.Warn),
+			Message: fmt.Sprintf("Failed to read output for step %s: %v", e.ssmCommandInvocation.stepNameToOutput, err),
+		}))
+	}
 	if output.StandardOutputContent != nil {
 		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
 			Message: fmt.Sprintf("%s stdout:\n%s", state.CommandId, *output.StandardOutputContent),
@@ -256,13 +260,8 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 	return &result, nil
 }
 
-func hasEnded(output *ssm.GetCommandInvocationOutput) bool {
-	return output != nil && (output.Status == types.CommandInvocationStatusSuccess || output.Status == types.CommandInvocationStatusFailed || output.Status == types.CommandInvocationStatusTimedOut || output.Status == types.CommandInvocationStatusCancelled)
-}
-
-func isErrInvocationDoesNotExist(err error) bool {
-	var errorType *types.InvocationDoesNotExist
-	return errors.As(err, &errorType)
+func hasEnded(ciOutput *ssm.GetCommandInvocationOutput) bool {
+	return ciOutput != nil && (ciOutput.Status == types.CommandInvocationStatusSuccess || ciOutput.Status == types.CommandInvocationStatusFailed || ciOutput.Status == types.CommandInvocationStatusTimedOut || ciOutput.Status == types.CommandInvocationStatusCancelled)
 }
 
 func withCommandStatusRetryable() func(options *ssm.CommandExecutedWaiterOptions) {
@@ -271,13 +270,23 @@ func withCommandStatusRetryable() func(options *ssm.CommandExecutedWaiterOptions
 			if err != nil {
 				if isErrInvocationDoesNotExist(err) {
 					return true, nil
-				} else {
+				} else if isErrInvalidPluginName(err) {
 					return false, nil
 				}
 			}
 			return !hasEnded(output), nil
 		}
 	}
+}
+
+func isErrInvocationDoesNotExist(err error) bool {
+	var errorType *types.InvocationDoesNotExist
+	return errors.As(err, &errorType)
+}
+
+func isErrInvalidPluginName(err error) bool {
+	var errorType *types.InvalidPluginName
+	return errors.As(err, &errorType)
 }
 
 func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, client ecsTaskSsmApi, taskArn string) (string, error) {

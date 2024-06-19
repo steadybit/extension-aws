@@ -18,10 +18,10 @@ import (
 
 func NewEcsTaskFillDiskAction() action_kit_sdk.Action[TaskSsmActionState] {
 	return newEcsTaskSsmAction(getEcsTaskFillDiskDescription, ssmCommandInvocation{
-		documentName:    "AWSFIS-Run-Disk-Fill",
-		documentVersion: "8",
-		stepNameOutput:  "ExecuteDiskFill",
-		getParameters:   getEcsTaskFillDiskParameters,
+		documentName:     "AWSFIS-Run-Disk-Fill",
+		documentVersion:  "8",
+		stepNameToOutput: "ExecuteDiskFill",
+		getParameters:    getEcsTaskFillDiskParameters,
 	})
 }
 
