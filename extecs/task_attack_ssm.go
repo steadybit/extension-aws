@@ -44,7 +44,7 @@ type TaskSsmActionState struct {
 	CommandId         string
 	Parameters        map[string][]string
 	Comment           string
-	Completed         bool
+	CommandEnded      bool
 }
 
 type ecsTaskSsmApi interface {
@@ -184,14 +184,13 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 	}
 
 	if hasEnded(ciOutput) {
-		state.Completed = true
+		state.CommandEnded = true
 		return &action_kit_api.StatusResult{Completed: true}, nil
 	}
 
 	//As the command will be stuck "InProgress" if the executing managed instance has vanished, we need to check if it still there, so we don't wait on the command timeout.
 	if _, err := e.findManagedInstance(ctx, client, state.TaskArn); err != nil {
 		if errors.Is(err, errorManagedInstanceNotFound) {
-			state.Completed = true
 			return &action_kit_api.StatusResult{Completed: true}, nil
 		} else {
 			return nil, extension_kit.ToError(fmt.Sprintf("Failed to find managed instance for %s on ECS Task %s", e.description.Label, state.TaskArn), err)
@@ -207,15 +206,15 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		return nil, err
 	}
 
-	result := action_kit_api.StopResult{Messages: &[]action_kit_api.Message{}}
+	result := &action_kit_api.StopResult{Messages: &[]action_kit_api.Message{}}
 	if state.CommandId == "" {
 		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
 			Message: fmt.Sprintf("No SSM command to cancel for %s on ECS Task %s", e.description.Label, state.TaskArn),
 		}))
-		return &result, nil
+		return result, nil
 	}
 
-	if !state.Completed {
+	if !state.CommandEnded {
 		result.Messages = extutil.Ptr(append(*result.Messages, action_kit_api.Message{
 			Message: fmt.Sprintf("Cancelling SSM command (%s) for %s on ECS Task %s", state.CommandId, e.description.Label, state.TaskArn),
 		}))
@@ -257,7 +256,7 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		}))
 	}
 
-	return &result, nil
+	return result, nil
 }
 
 func hasEnded(ciOutput *ssm.GetCommandInvocationOutput) bool {
