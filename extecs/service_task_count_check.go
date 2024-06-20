@@ -44,14 +44,14 @@ type escServiceTaskCounts struct {
 }
 
 type ServiceTaskCountCheckAction struct {
-	poller *ServiceDescriptionPoller
+	poller ServiceDescriptionPoller
 }
 
 var _ action_kit_sdk.Action[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
 var _ action_kit_sdk.ActionWithStatus[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
 var _ action_kit_sdk.ActionWithStop[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
 
-func NewServiceTaskCountCheckAction(poller *ServiceDescriptionPoller) action_kit_sdk.Action[ServiceTaskCountCheckState] {
+func NewServiceTaskCountCheckAction(poller ServiceDescriptionPoller) action_kit_sdk.Action[ServiceTaskCountCheckState] {
 	return ServiceTaskCountCheckAction{
 		poller: poller,
 	}

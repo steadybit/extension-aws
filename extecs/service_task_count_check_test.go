@@ -15,23 +15,13 @@ import (
 	"time"
 )
 
-type ecsDescribeServicesApiMock struct {
-	mock.Mock
-}
-
-func (m *ecsDescribeServicesApiMock) DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, _ ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error) {
-	args := m.Called(ctx, params)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*ecs.DescribeServicesOutput), args.Error(1)
-}
-
 func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 	// Given
 	ctx, cancel := context.WithCancel(context.Background())
 	poller := NewServiceDescriptionPoller()
 	poller.ticker = time.NewTicker(1 * time.Millisecond)
+
+	// Mock the api calls in ServiceDescriptionPoller to check the interactions of ServiceTaskCountCheck with it.
 	poller.apiClientProvider = func(account string) (ecsDescribeServicesApi, error) {
 		mockedApi := new(ecsDescribeServicesApiMock)
 		mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
@@ -79,16 +69,18 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 
 func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 	tests := []struct {
-		name    string
-		service types.Service
-		state   ServiceTaskCountCheckState
-		mode    string
-		wanted  func(t *testing.T, result *action_kit_api.StatusResult)
+		name     string
+		response PollService
+		state    ServiceTaskCountCheckState
+		mode     string
+		wanted   func(t *testing.T, result *action_kit_api.StatusResult)
 	}{
 		{
 			name: "successful_check_completes_run",
-			service: types.Service{
-				RunningCount: 1,
+			response: PollService{
+				service: &types.Service{
+					RunningCount: 1,
+				},
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
@@ -100,8 +92,10 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 		},
 		{
 			name: "completed_check_on_timeout",
-			service: types.Service{
-				RunningCount: 0,
+			response: PollService{
+				service: &types.Service{
+					RunningCount: 0,
+				},
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
@@ -113,8 +107,10 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 		},
 		{
 			name: "runningCountMin1_check_failed",
-			service: types.Service{
-				RunningCount: 0,
+			response: PollService{
+				service: &types.Service{
+					RunningCount: 0,
+				},
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
@@ -127,9 +123,11 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 		},
 		{
 			name: "runningCountEqualsDesiredCount_check_failed",
-			service: types.Service{
-				RunningCount: 1,
-				DesiredCount: 2,
+			response: PollService{
+				service: &types.Service{
+					RunningCount: 1,
+					DesiredCount: 2,
+				},
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountEqualsDesiredCount,
@@ -142,9 +140,11 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 		},
 		{
 			name: "runningCountLessThanDesiredCount_check_failed",
-			service: types.Service{
-				RunningCount: 1,
-				DesiredCount: 1,
+			response: PollService{
+				service: &types.Service{
+					RunningCount: 1,
+					DesiredCount: 1,
+				},
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountLessThanDesiredCount,
@@ -157,8 +157,10 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 		},
 		{
 			name: "runningCountIncreased_check_failed",
-			service: types.Service{
-				RunningCount: 2,
+			response: PollService{
+				service: &types.Service{
+					RunningCount: 2,
+				},
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountIncreased,
@@ -172,8 +174,10 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 		},
 		{
 			name: "runningCountDecreased_check_failed",
-			service: types.Service{
-				RunningCount: 2,
+			response: PollService{
+				service: &types.Service{
+					RunningCount: 2,
+				},
 			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountDecreased,
@@ -186,8 +190,10 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			},
 		},
 		{
-			name:    "wrongMode",
-			service: types.Service{},
+			name: "wrongMode",
+			response: PollService{
+				service: &types.Service{},
+			},
 			state: ServiceTaskCountCheckState{
 				RunningCountCheckMode: "notExisting",
 				Timeout:               time.Now().Add(-10 * time.Second),
@@ -203,30 +209,16 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			// Given
 			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
 
-			poller := NewServiceDescriptionPoller()
-			poller.apiClientProvider = func(account string) (ecsDescribeServicesApi, error) {
-				mockedApi := new(ecsDescribeServicesApiMock)
-				mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
-					Services: []types.Service{test.service},
-				}, nil)
-				return mockedApi, nil
-			}
-			poller.Register(test.state.AwsAccount, test.state.ClusterArn, test.state.ServiceArn)
-			poller.pollAll(ctx)
+			pollerMock := new(ServiceDescriptionPollerMock)
+			pollerMock.On("Latest", test.state.AwsAccount, test.state.ClusterArn, test.state.ServiceArn).Return(&test.response, nil)
 
 			action := ServiceTaskCountCheckAction{
-				poller: poller,
+				poller: pollerMock,
 			}
 
-			// When
-			_, err := action.Start(ctx, &test.state)
-			assert.NoError(t, err)
 			result, err := action.Status(ctx, &test.state)
-			assert.NoError(t, err)
-			_, err = action.Stop(ctx, &test.state)
-			assert.NoError(t, err)
+			cancel()
 
 			// Then
 			assert.NoError(t, err)

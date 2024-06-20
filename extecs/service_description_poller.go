@@ -19,6 +19,14 @@ type ecsDescribeServicesApi interface {
 	DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, optFns ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error)
 }
 
+type ServiceDescriptionPoller interface {
+	Start(ctx context.Context)
+	Register(account string, cluster string, service string)
+	Unregister(account string, cluster string, service string)
+	Latest(account string, cluster string, service string) *PollService
+	AwaitLatest(account string, cluster string, service string) *PollService
+}
+
 type PollService struct {
 	service *types.Service
 	failure *types.Failure
@@ -27,18 +35,19 @@ type pollServices map[string]*PollService
 type pollClusters map[string]pollServices
 type pollAccounts map[string]pollClusters
 
-type ServiceDescriptionPoller struct {
+type EcsServiceDescriptionPoller struct {
 	apiClientProvider func(account string) (ecsDescribeServicesApi, error)
 	ticker            *time.Ticker
 	m                 *sync.RWMutex
 	c                 *sync.Cond
 	polls             pollAccounts
-	lastPolled        time.Time
 }
 
-func NewServiceDescriptionPoller() *ServiceDescriptionPoller {
+var _ ServiceDescriptionPoller = EcsServiceDescriptionPoller{}
+
+func NewServiceDescriptionPoller() *EcsServiceDescriptionPoller {
 	m := sync.RWMutex{}
-	return &ServiceDescriptionPoller{
+	return &EcsServiceDescriptionPoller{
 		apiClientProvider: defaultDescribeServiceProvider,
 		ticker:            time.NewTicker(5 * time.Second),
 		m:                 &m,
@@ -47,7 +56,7 @@ func NewServiceDescriptionPoller() *ServiceDescriptionPoller {
 	}
 }
 
-func (p *ServiceDescriptionPoller) Start(ctx context.Context) {
+func (p EcsServiceDescriptionPoller) Start(ctx context.Context) {
 	go func() {
 		for {
 			select {
@@ -60,7 +69,7 @@ func (p *ServiceDescriptionPoller) Start(ctx context.Context) {
 	}()
 }
 
-func (p *ServiceDescriptionPoller) Register(account string, cluster string, service string) {
+func (p EcsServiceDescriptionPoller) Register(account string, cluster string, service string) {
 	var ok bool
 	p.m.Lock()
 	defer p.m.Unlock()
@@ -83,7 +92,7 @@ func (p *ServiceDescriptionPoller) Register(account string, cluster string, serv
 	}
 }
 
-func (p *ServiceDescriptionPoller) Unregister(account string, cluster string, service string) {
+func (p EcsServiceDescriptionPoller) Unregister(account string, cluster string, service string) {
 	p.m.Lock()
 	defer p.m.Unlock()
 	log.Debug().Msgf("unregister service %s", service)
@@ -101,7 +110,7 @@ func (p *ServiceDescriptionPoller) Unregister(account string, cluster string, se
 	p.c.Broadcast()
 }
 
-func (p *ServiceDescriptionPoller) Latest(account string, cluster string, service string) *PollService {
+func (p EcsServiceDescriptionPoller) Latest(account string, cluster string, service string) *PollService {
 	p.m.RLock()
 	defer p.m.RUnlock()
 	if clusters, ok := p.polls[account]; ok {
@@ -112,7 +121,7 @@ func (p *ServiceDescriptionPoller) Latest(account string, cluster string, servic
 	return nil
 }
 
-func (p *ServiceDescriptionPoller) AwaitLatest(account string, cluster string, service string) *PollService {
+func (p EcsServiceDescriptionPoller) AwaitLatest(account string, cluster string, service string) *PollService {
 	p.m.Lock()
 	defer p.m.Unlock()
 	for {
@@ -132,15 +141,15 @@ func (p *ServiceDescriptionPoller) AwaitLatest(account string, cluster string, s
 	}
 }
 
-func (p *ServiceDescriptionPoller) pollAll(ctx context.Context) {
+func (p EcsServiceDescriptionPoller) pollAll(ctx context.Context) {
 	p.m.Lock()
 	defer p.m.Unlock()
-	lastPolled := time.Now()
+	startTime := time.Now()
 
 	for account, clusters := range p.polls {
 		client, err := p.apiClientProvider(account)
 		if err != nil {
-			log.Warn().TimeDiff("duration", time.Now(), lastPolled).Err(err).Msg("could not create api client")
+			log.Warn().TimeDiff("duration", time.Now(), startTime).Err(err).Msg("could not create api client")
 			continue
 		}
 
@@ -152,7 +161,7 @@ func (p *ServiceDescriptionPoller) pollAll(ctx context.Context) {
 					Cluster:  extutil.Ptr(cluster),
 				})
 				if err != nil {
-					log.Warn().TimeDiff("duration", time.Now(), lastPolled).Err(err).Msg("api call failed")
+					log.Warn().TimeDiff("duration", time.Now(), startTime).Err(err).Msg("api call failed")
 					continue
 				}
 
@@ -169,7 +178,6 @@ func (p *ServiceDescriptionPoller) pollAll(ctx context.Context) {
 			}
 		}
 	}
-	p.lastPolled = lastPolled
 	p.c.Broadcast()
 }
 
