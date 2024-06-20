@@ -127,6 +127,45 @@ by tweaking the `Resource` clause.
 }
 ```
 
+In case you want also to perform the stress CPU/memory/io or fill disk attacks on ECS task you need also the following permission.
+
+> ❗️These attacks also need the [SSM Agent added to the ECS tasks to work](./README-ecs-ssm-setup.md).
+
+```
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeInstanceInformation",
+                "ssm:GetCommandInvocation",
+                "ssm:CancelCommand"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ssm:SendCommand",
+            "Resource": "arn:aws:ssm:*:*:document/AWSFIS-*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ssm:SendCommand",
+            "Resource": "*",
+            "Condition": {
+                "StringLike": {
+                    "ssm:resourceTag/FAULT_INJECTION_SIDECAR": [
+                        "true"
+                    ]
+                }
+            }
+        }
+    ]
+}
+```
+
 </details>
 <details>
     <summary>ELB-Discovery & Actions</summary>
@@ -186,6 +225,8 @@ start the very first fis experiment via the steadybit agent, you will need to ad
 </details>
 <details>
     <summary>Lambda Functions-Discovery & Attacks</summary>
+
+> ❗️These attacks need the [failure-lambda library to be included in your lambdas](https://github.com/gunnargrosch/failure-lambda?tab=readme-ov-file#how-to-install-with-parameter-in-ssm-parameter-store).
 
 ```yaml
 {
