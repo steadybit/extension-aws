@@ -1,16 +1,16 @@
 # Setup for ECS Task attacks using the SSM
 
-To perform the stress CPU/memory/IO and Fill Disk attack on ECS the SSM agent is used.
-You need to add the SSM agent to your ECS Task Definitions and deploy it along with your application in the same ECS Task.
-This is not performed by the extension-aws to not trigger unanticipated restart of your ECS Tasks.
+The SSM agent performs the stress CPU/memory/IO and Fill Disk attack on ECS.
+You must add the SSM agent to your ECS Task Definitions and deploy it with your application in the same ECS Task.
+This is not performed by the extension-aws to not trigger an unanticipated restart of your ECS Tasks.
 
 This setup is the same as you would use for [AWS FIS on ECS Tasks](https://docs.aws.amazon.com/fis/latest/userguide/ecs-task-actions.html)
 
-Please note that the SSM agent is not supported on Windows containers and conflicts with the `enable execute command` feature of the ECS.
+Please note that the SSM agent is not supported on Windows containers or Tasks with the ECS's `execute command` feature enabled.
 
 ## 1. IAM Role for the SSM Managed Instance
 
-The SSM agent will registern in the SSM as managed instance and needs an IAM role to do so.
+The SSM agent will register in the SSM as a managed instance and needs an IAM role to do so.
 Create a role with the [AmazonSSMManagedInstanceCore](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonSSMManagedInstanceCore.html) managed policy attached and add the following policies:
 
 ```json
@@ -37,7 +37,7 @@ Create a role with the [AmazonSSMManagedInstanceCore](https://docs.aws.amazon.co
 
 ## 2. SSM IAM Permissions for the ECS Task Role
 
-Add the following policy to the ECS Task Role used to run the tasks.
+Add the following policy to the ECS Task Role used to run the tasks (! this is not the same role used by the extension).
 Specify the ARN of the role created in step 1 in the Resource section.
 
 ```json{
