@@ -19,6 +19,7 @@ import (
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
+	"golang.org/x/exp/slices"
 	"strings"
 	"time"
 )
@@ -122,8 +123,13 @@ func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionStat
 		state.ManagedInstanceId = managedInstanceId
 	} else {
 		prepareErr := extension_kit.ToError(fmt.Sprintf("Failed to find managed instance for ECS Task %s", state.TaskArn), err)
+
 		if errors.Is(err, errorManagedInstanceNotFound) {
-			prepareErr.Detail = extutil.Ptr("Please make sure that the 'amazon-ssm-agent' is added to the task definition and running.")
+			if slices.Contains(request.Target.Attributes["aws-ecs.task.enable-execute-command"], "true") {
+				prepareErr.Detail = extutil.Ptr("The task has the enable-execute-command set, this may prevent the amazon-ssm-agent from running.")
+			} else {
+				prepareErr.Detail = extutil.Ptr("Please make sure that the 'amazon-ssm-agent' is added to the task definition and running.")
+			}
 		}
 		return nil, prepareErr
 	}

@@ -39,7 +39,7 @@ func getEcsTaskStressIoDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.stress_io", ecsTaskTargetId),
 		Label:       "Stress IO",
-		Description: "Stresses IO for the given duration.",
+		Description: "Stresses IO on the ephemeral storage for the given duration.",
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "percent",

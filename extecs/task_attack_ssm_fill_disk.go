@@ -38,7 +38,7 @@ func getEcsTaskFillDiskDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.fill_disk", ecsTaskTargetId),
 		Label:       "Fill Disk",
-		Description: "Fill Disk for the given duration.",
+		Description: "Fill ephemeral storage for the given duration.",
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "percent",

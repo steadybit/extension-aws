@@ -1,9 +1,9 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
+
 /*
  * Copyright 2024 steadybit GmbH. All rights reserved.
  */
-
-// SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
 package extecs
 
@@ -93,7 +93,14 @@ func (e *ecsTaskDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDes
 			Attribute: "aws-ecs.task.amazon-ssm-agent",
 			Label: discovery_kit_api.PluralLabel{
 				One:   "ECS task includes Amazon SSM agent",
-				Other: "ECS task includes Amazon SSM agent",
+				Other: "ECS tasks includes Amazon SSM agent",
+			},
+		},
+		{
+			Attribute: "aws-ecs.task.enable-execute-command",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "ECS task has execute command enabled",
+				Other: "ECS tasks has execute command enabled",
 			},
 		},
 	}
@@ -203,6 +210,9 @@ func toTarget(task types.Task, zoneUtil utils.GetZoneUtil, awsAccountNumber stri
 
 	if hasAmazonSsmSidecar(task) {
 		attributes["aws-ecs.task.amazon-ssm-agent"] = []string{"true"}
+	}
+	if task.EnableExecuteCommand {
+		attributes["aws-ecs.task.enable-execute-command"] = []string{"true"}
 	}
 
 	return discovery_kit_api.Target{
