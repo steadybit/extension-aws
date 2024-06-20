@@ -49,7 +49,7 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 		}),
 	})
 
-	action := ServiceTaskCountCheckAction{
+	action := EcsServiceTaskCountCheckAction{
 		poller: poller,
 	}
 	state := action.NewEmptyState()
@@ -71,7 +71,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 	tests := []struct {
 		name     string
 		response PollService
-		state    ServiceTaskCountCheckState
+		state    EcsServiceTaskCountCheckState
 		mode     string
 		wanted   func(t *testing.T, result *action_kit_api.StatusResult)
 	}{
@@ -82,7 +82,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 					RunningCount: 1,
 				},
 			},
-			state: ServiceTaskCountCheckState{
+			state: EcsServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult) {
@@ -97,7 +97,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 					RunningCount: 0,
 				},
 			},
-			state: ServiceTaskCountCheckState{
+			state: EcsServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
 				Timeout:               time.Now().Add(-10 * time.Second),
 			},
@@ -112,7 +112,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 					RunningCount: 0,
 				},
 			},
-			state: ServiceTaskCountCheckState{
+			state: EcsServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountMin1,
 				Timeout:               time.Now().Add(-10 * time.Second),
 			},
@@ -129,7 +129,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 					DesiredCount: 2,
 				},
 			},
-			state: ServiceTaskCountCheckState{
+			state: EcsServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountEqualsDesiredCount,
 				Timeout:               time.Now().Add(-10 * time.Second),
 			},
@@ -146,7 +146,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 					DesiredCount: 1,
 				},
 			},
-			state: ServiceTaskCountCheckState{
+			state: EcsServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountLessThanDesiredCount,
 				Timeout:               time.Now().Add(-10 * time.Second),
 			},
@@ -162,7 +162,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 					RunningCount: 2,
 				},
 			},
-			state: ServiceTaskCountCheckState{
+			state: EcsServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountIncreased,
 				Timeout:               time.Now().Add(-10 * time.Second),
 				InitialRunningCount:   2,
@@ -179,7 +179,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 					RunningCount: 2,
 				},
 			},
-			state: ServiceTaskCountCheckState{
+			state: EcsServiceTaskCountCheckState{
 				RunningCountCheckMode: runningCountDecreased,
 				Timeout:               time.Now().Add(-10 * time.Second),
 				InitialRunningCount:   2,
@@ -194,7 +194,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			response: PollService{
 				service: &types.Service{},
 			},
-			state: ServiceTaskCountCheckState{
+			state: EcsServiceTaskCountCheckState{
 				RunningCountCheckMode: "notExisting",
 				Timeout:               time.Now().Add(-10 * time.Second),
 			},
@@ -213,7 +213,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			pollerMock := new(ServiceDescriptionPollerMock)
 			pollerMock.On("Latest", test.state.AwsAccount, test.state.ClusterArn, test.state.ServiceArn).Return(&test.response, nil)
 
-			action := ServiceTaskCountCheckAction{
+			action := EcsServiceTaskCountCheckAction{
 				poller: pollerMock,
 			}
 
