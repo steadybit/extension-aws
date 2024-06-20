@@ -24,7 +24,7 @@ const (
 	runningCountIncreased            = "runningCountIncreased"
 )
 
-type ServiceTaskCountCheckState struct {
+type EcsServiceTaskCountCheckState struct {
 	Timeout               time.Time
 	RunningCountCheckMode string
 	ServiceArn            string
@@ -33,7 +33,7 @@ type ServiceTaskCountCheckState struct {
 	InitialRunningCount   int
 }
 
-type ServiceTaskCountCheckConfig struct {
+type EcsServiceTaskCountCheckConfig struct {
 	Duration              int
 	RunningCountCheckMode string
 }
@@ -43,25 +43,25 @@ type escServiceTaskCounts struct {
 	desired int
 }
 
-type ServiceTaskCountCheckAction struct {
+type EcsServiceTaskCountCheckAction struct {
 	poller ServiceDescriptionPoller
 }
 
-var _ action_kit_sdk.Action[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
-var _ action_kit_sdk.ActionWithStatus[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
-var _ action_kit_sdk.ActionWithStop[ServiceTaskCountCheckState] = (*ServiceTaskCountCheckAction)(nil)
+var _ action_kit_sdk.Action[EcsServiceTaskCountCheckState] = (*EcsServiceTaskCountCheckAction)(nil)
+var _ action_kit_sdk.ActionWithStatus[EcsServiceTaskCountCheckState] = (*EcsServiceTaskCountCheckAction)(nil)
+var _ action_kit_sdk.ActionWithStop[EcsServiceTaskCountCheckState] = (*EcsServiceTaskCountCheckAction)(nil)
 
-func NewServiceTaskCountCheckAction(poller ServiceDescriptionPoller) action_kit_sdk.Action[ServiceTaskCountCheckState] {
-	return ServiceTaskCountCheckAction{
+func NewEcsServiceTaskCountCheckAction(poller ServiceDescriptionPoller) action_kit_sdk.Action[EcsServiceTaskCountCheckState] {
+	return EcsServiceTaskCountCheckAction{
 		poller: poller,
 	}
 }
 
-func (f ServiceTaskCountCheckAction) NewEmptyState() ServiceTaskCountCheckState {
-	return ServiceTaskCountCheckState{}
+func (f EcsServiceTaskCountCheckAction) NewEmptyState() EcsServiceTaskCountCheckState {
+	return EcsServiceTaskCountCheckState{}
 }
 
-func (f ServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescription {
+func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          ecsServiceTaskCountCheckActionId,
 		Label:       "Service Task Count",
@@ -77,7 +77,7 @@ func (f ServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescription
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "default",
-					Description: extutil.Ptr("Find service by cluster and name"),
+					Description: extutil.Ptr("Find service by cluster and service name"),
 					Query:       "aws-ecs.cluster.name=\"\" AND aws-ecs.service.name=\"\"",
 				},
 			}),
@@ -132,8 +132,8 @@ func (f ServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescription
 	}
 }
 
-func (f ServiceTaskCountCheckAction) Prepare(_ context.Context, state *ServiceTaskCountCheckState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	var config ServiceTaskCountCheckConfig
+func (f EcsServiceTaskCountCheckAction) Prepare(_ context.Context, state *EcsServiceTaskCountCheckState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+	var config EcsServiceTaskCountCheckConfig
 	if err := extconversion.Convert(request.Config, &config); err != nil {
 		return nil, extensionkit.ToError("Failed to unmarshal the config.", err)
 	}
@@ -158,7 +158,7 @@ func (f ServiceTaskCountCheckAction) Prepare(_ context.Context, state *ServiceTa
 	return nil, nil
 }
 
-func (f ServiceTaskCountCheckAction) initialRunningCount(awsAccount string, clusterArn string, serviceArn string) (*escServiceTaskCounts, error) {
+func (f EcsServiceTaskCountCheckAction) initialRunningCount(awsAccount string, clusterArn string, serviceArn string) (*escServiceTaskCounts, error) {
 	latest := f.poller.AwaitLatest(awsAccount, clusterArn, serviceArn)
 	if latest != nil {
 		if latest.service != nil {
@@ -172,16 +172,16 @@ func (f ServiceTaskCountCheckAction) initialRunningCount(awsAccount string, clus
 	return nil, extensionkit.ToError(message, nil)
 }
 
-func (f ServiceTaskCountCheckAction) Start(_ context.Context, _ *ServiceTaskCountCheckState) (*action_kit_api.StartResult, error) {
+func (f EcsServiceTaskCountCheckAction) Start(_ context.Context, _ *EcsServiceTaskCountCheckState) (*action_kit_api.StartResult, error) {
 	return nil, nil
 }
 
-func (f ServiceTaskCountCheckAction) Stop(_ context.Context, state *ServiceTaskCountCheckState) (*action_kit_api.StopResult, error) {
+func (f EcsServiceTaskCountCheckAction) Stop(_ context.Context, state *EcsServiceTaskCountCheckState) (*action_kit_api.StopResult, error) {
 	f.poller.Unregister(state.AwsAccount, state.ClusterArn, state.ServiceArn)
 	return nil, nil
 }
 
-func (f ServiceTaskCountCheckAction) Status(_ context.Context, state *ServiceTaskCountCheckState) (*action_kit_api.StatusResult, error) {
+func (f EcsServiceTaskCountCheckAction) Status(_ context.Context, state *EcsServiceTaskCountCheckState) (*action_kit_api.StatusResult, error) {
 	latest := f.poller.Latest(state.AwsAccount, state.ClusterArn, state.ServiceArn)
 
 	var checkError *action_kit_api.ActionKitError
@@ -208,7 +208,7 @@ func (f ServiceTaskCountCheckAction) Status(_ context.Context, state *ServiceTas
 	}
 }
 
-func (f ServiceTaskCountCheckAction) checkRunningAndDesiredCount(state *ServiceTaskCountCheckState, counts *escServiceTaskCounts) *action_kit_api.ActionKitError {
+func (f EcsServiceTaskCountCheckAction) checkRunningAndDesiredCount(state *EcsServiceTaskCountCheckState, counts *escServiceTaskCounts) *action_kit_api.ActionKitError {
 	var checkMessage string
 	switch state.RunningCountCheckMode {
 	case runningCountMin1:
