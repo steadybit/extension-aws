@@ -127,9 +127,9 @@ by tweaking the `Resource` clause.
 }
 ```
 
-In case you want also to perform the stress CPU/memory/io or fill disk attacks on ECS task you need also the following permission.
+To perform the stress CPU/memory/io or fill disk attacks on ECS Tasks you to include the following permission.
 
-> ❗️These attacks also need the [SSM Agent added to the ECS tasks to work](./README-ecs-ssm-setup.md).
+> ❗️These attacks also need an [SSM Agent sidecar added to the ECS Tasks](./README-ecs-ssm-setup.md).
 
 ```
 
