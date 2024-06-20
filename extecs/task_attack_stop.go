@@ -46,6 +46,7 @@ func (e *ecsTaskStopAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Stop Task",
 		Description: "Stop an ECS task",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
+		Category:    extutil.Ptr("state"),
 		Icon:        extutil.Ptr(ecsTaskIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			TargetType: ecsTaskTargetId,
