@@ -49,7 +49,7 @@ The process requires valid access credentials to interact with various AWS APIs.
 
 #### Required permissions (policies)
 
-You will need an IAM Role with the given permissions. You can optionally restrict for which resources the extension may
+The extension needs an IAM Role with the given permissions. You can optionally restrict for which resources the extension may
 become active
 by tweaking the `Resource` clause.
 
@@ -104,7 +104,12 @@ by tweaking the `Resource` clause.
 
 </details>
 <details>
-    <summary>ECS-Discovery & Actions</summary>
+    <summary>ECS-Discovery & Actions</summary><a id='ecs-permissions'></a>
+
+
+Depends on what you want to do on ECS, you might need an additional setup.
+
+If only the action of Stopping the task in ECS is sufficient, then you need to add these permissions.
 
 ```yaml
 {
@@ -126,10 +131,7 @@ by tweaking the `Resource` clause.
   ]
 }
 ```
-
-To perform the stress CPU/memory/io or fill disk attacks on ECS Tasks you to include the following permission.
-
-> ❗️These attacks also need an [SSM Agent sidecar added to the ECS Tasks](./README-ecs-ssm-setup.md).
+If you want to perform the stress CPU/memory/io or fill disk attacks on ECS Tasks you need to include the following permission as well, and then you can proceed with the installation of the **SSM Agent which is needed to run these actions**❗️.
 
 ```
 
@@ -165,7 +167,7 @@ To perform the stress CPU/memory/io or fill disk attacks on ECS Tasks you to inc
     ]
 }
 ```
-
+Installation of the [SSM Agent is redacted here](./README-ecs-ssm-setup.md).
 </details>
 <details>
     <summary>ELB-Discovery & Actions</summary>
@@ -193,7 +195,7 @@ To perform the stress CPU/memory/io or fill disk attacks on ECS Tasks you to inc
 
 FIS will create a [ServiceLinkedRole](https://docs.aws.amazon.com/fis/latest/userguide/using-service-linked-roles.html)
 AWSServiceRoleForFIS when you start an
-experiment. If you started the experiment from the ui and the role is already existing, you can omit the iam:
+experiment. If you started the experiment from the ui and if the role is already existing, you can omit the iam:
 CreateServiceLinkedRole permission. If you want to
 start the very first fis experiment via the steadybit agent, you will need to add the permission.
 
@@ -326,7 +328,7 @@ Steps:
 <details>
     <summary>Authenticate when running as ECS Task</summary>
 
-The `taskRoleArn` of your task definition needs to have the required permissions mentioned before. Make sure, that the
+The `taskRoleArn` of your task definition needs to have the required permissions mentioned [here](#ecs-permissions). Make sure, that the
 role can be assumed by ECS and provide a
 trust relationship to the role.
 
