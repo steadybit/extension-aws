@@ -29,6 +29,7 @@
     "elasticloadbalancing:DescribeLoadBalancers",
     "elasticloadbalancing:DescribeListeners",
     "elasticloadbalancing:DescribeTags",
+    "elasticloadbalancing:DescribeRules",
     "elasticloadbalancing:SetRulePriorities",
     "elasticloadbalancing:CreateRule",
     "elasticloadbalancing:DeleteRule",
