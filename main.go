@@ -130,6 +130,7 @@ func registerHandlers(ctx context.Context) {
 
 	if !cfg.DiscoveryDisabledElb {
 		discovery_kit_sdk.Register(extelb.NewAlbDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extelb.NewAlbStaticResponseAction())
 	}
 
 	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))

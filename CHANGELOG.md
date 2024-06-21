@@ -23,11 +23,17 @@
     ```
 - Added ELB Support
   - Discovery for Application Load Balancers
+  - Action to return a static response for a Load Balancer Listener
   - Requires new permissions (or needs to be disabled via `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB`)
     ```
     "elasticloadbalancing:DescribeLoadBalancers",
     "elasticloadbalancing:DescribeListeners",
-    "elasticloadbalancing:DescribeTags"
+    "elasticloadbalancing:DescribeTags",
+    "elasticloadbalancing:SetRulePriorities",
+    "elasticloadbalancing:CreateRule",
+    "elasticloadbalancing:DeleteRule",
+    "elasticloadbalancing:AddTags",
+    "elasticloadbalancing:RemoveTags"
     ```
 
 ## v2.2.25

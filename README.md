@@ -181,7 +181,12 @@ Installation of the [SSM Agent is redacted here](./README-ecs-ssm-setup.md).
       "Action": [
         "elasticloadbalancing:DescribeLoadBalancers",
         "elasticloadbalancing:DescribeListeners",
-        "elasticloadbalancing:DescribeTags"
+        "elasticloadbalancing:DescribeTags",
+        "elasticloadbalancing:SetRulePriorities",
+        "elasticloadbalancing:CreateRule",
+        "elasticloadbalancing:DeleteRule",
+        "elasticloadbalancing:AddTags",
+        "elasticloadbalancing:RemoveTags"
       ],
       "Resource": "*"
     }

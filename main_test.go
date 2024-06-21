@@ -75,6 +75,7 @@ func Test_getExtensionList(t *testing.T) {
 			name:   "disabled all but elb",
 			config: createConfig(true, true, false, true, true, true, true),
 			wantedRoutes: []string{
+				"/com.steadybit.extension_aws.alb.static_response",
 				"/com.steadybit.extension_aws.alb/discovery",
 				"/com.steadybit.extension_aws.alb/discovery/target-description",
 				"/discovery/attributes",
