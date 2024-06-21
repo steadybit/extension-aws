@@ -6,8 +6,8 @@ package e2e
 import (
 	"fmt"
 	"github.com/steadybit/action-kit/go/action_kit_test/e2e"
-	actDiscover "github.com/steadybit/action-kit/go/action_kit_test/validate"
-	valDiscover "github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
+	actValidate "github.com/steadybit/action-kit/go/action_kit_test/validate"
+	disValidate "github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
 	"github.com/stretchr/testify/assert"
 	"os/exec"
 	"testing"
@@ -42,8 +42,8 @@ func TestWithMinikube(t *testing.T) {
 			Test: validateDiscovery,
 		},
 		{
-			Name: "action discovery",
-			Test: validateAction,
+			Name: "validate actions",
+			Test: validateActions,
 		},
 	})
 }
@@ -67,9 +67,9 @@ func helmInstallLocalStack(minikube *e2e.Minikube) error {
 }
 
 func validateDiscovery(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
-	assert.NoError(t, valDiscover.ValidateEndpointReferences("/", e.Client))
+	assert.NoError(t, disValidate.ValidateEndpointReferences("/", e.Client))
 }
 
-func validateAction(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
-	assert.NoError(t, actDiscover.ValidateEndpointReferences("/", e.Client))
+func validateActions(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
+	assert.NoError(t, actValidate.ValidateEndpointReferences("/", e.Client))
 }
