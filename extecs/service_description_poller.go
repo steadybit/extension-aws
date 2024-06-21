@@ -31,7 +31,11 @@ type PollService struct {
 	service *types.Service
 	failure *types.Failure
 }
-type pollServices map[string]*PollService
+type pollRecord struct {
+	count int
+	value *PollService
+}
+type pollServices map[string]*pollRecord
 type pollClusters map[string]pollServices
 type pollAccounts map[string]pollClusters
 
@@ -87,8 +91,11 @@ func (p EcsServiceDescriptionPoller) Register(account string, cluster string, se
 		clusters[cluster] = services
 	}
 
-	if _, ok = services[service]; !ok {
-		services[service] = nil
+	record, ok := services[service]
+	if ok {
+		record.count = record.count + 1
+	} else {
+		services[service] = &pollRecord{}
 	}
 }
 
@@ -98,9 +105,15 @@ func (p EcsServiceDescriptionPoller) Unregister(account string, cluster string, 
 	log.Debug().Msgf("unregister service %s", service)
 	if clusters, ok := p.polls[account]; ok {
 		if services, ok := clusters[cluster]; ok {
-			delete(services, service)
-			if len(services) == 0 {
-				delete(clusters, cluster)
+			if record, ok := services[service]; ok {
+				if record.count > 0 {
+					record.count = record.count - 1
+				} else {
+					delete(services, service)
+					if len(services) == 0 {
+						delete(clusters, cluster)
+					}
+				}
 			}
 		}
 		if len(clusters) == 0 {
@@ -115,7 +128,9 @@ func (p EcsServiceDescriptionPoller) Latest(account string, cluster string, serv
 	defer p.m.RUnlock()
 	if clusters, ok := p.polls[account]; ok {
 		if services, ok := clusters[cluster]; ok {
-			return services[service]
+			if record, ok := services[service]; ok {
+				return record.value
+			}
 		}
 	}
 	return nil
@@ -133,9 +148,9 @@ func (p EcsServiceDescriptionPoller) AwaitLatest(account string, cluster string,
 		if !ok {
 			return nil
 		}
-		latest := services[service]
-		if latest != nil {
-			return latest
+		record := services[service]
+		if record != nil && record.value != nil {
+			return record.value
 		}
 		p.c.Wait()
 	}
@@ -166,12 +181,12 @@ func (p EcsServiceDescriptionPoller) pollAll(ctx context.Context) {
 				}
 
 				for _, service := range descriptions.Services {
-					services[aws.ToString(service.ServiceArn)] = &PollService{
+					services[aws.ToString(service.ServiceArn)].value = &PollService{
 						service: &service,
 					}
 				}
 				for _, failure := range descriptions.Failures {
-					services[aws.ToString(failure.Arn)] = &PollService{
+					services[aws.ToString(failure.Arn)].value = &PollService{
 						failure: &failure,
 					}
 				}

@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-// TODO: verify that multiply registered services are not removed on first unregister
-
 type ecsDescribeServicesApiMock struct {
 	mock.Mock
 }
@@ -66,12 +64,32 @@ func TestServiceDescriptionPoller_registers_and_unregisters_services(t *testing.
 	assert.Len(t, p.polls, 1)
 	assert.Len(t, p.polls["a"], 1)
 	assert.Len(t, p.polls["a"]["b"], 2)
-	assert.Nil(t, p.polls["a"]["b"]["c"])
-	assert.Nil(t, p.polls["a"]["b"]["d"])
+	assert.NotNil(t, p.polls["a"]["b"]["c"])
+	assert.NotNil(t, p.polls["a"]["b"]["e"])
 
 	p.Unregister("a", "b", "c")
 	assert.Len(t, p.polls["a"]["b"], 1)
 
 	p.Unregister("a", "b", "e")
+	assert.Len(t, p.polls, 0)
+}
+
+func TestServiceDescriptionPoller_registers_and_unregisters_service_multiple_times(t *testing.T) {
+	p := NewServiceDescriptionPoller()
+	p.Register("a", "b", "c")
+	p.Register("a", "b", "c")
+	assert.Len(t, p.polls, 1)
+	assert.Len(t, p.polls["a"], 1)
+	assert.Len(t, p.polls["a"]["b"], 1)
+
+	record := &pollRecord{
+		count: 1,
+	}
+	assert.Equal(t, record, p.polls["a"]["b"]["c"])
+
+	p.Unregister("a", "b", "c")
+	assert.Len(t, p.polls["a"]["b"], 1)
+
+	p.Unregister("a", "b", "c")
 	assert.Len(t, p.polls, 0)
 }
