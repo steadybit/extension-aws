@@ -9,18 +9,18 @@ toolchain go1.22.2
 
 require (
 	github.com/KimMachineGun/automemlimit v0.6.1
-	github.com/aws/aws-sdk-go-v2 v1.28.0
-	github.com/aws/aws-sdk-go-v2/config v1.27.19
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.19
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.6
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.2
-	github.com/aws/aws-sdk-go-v2/service/ecs v1.42.1
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.31.4
-	github.com/aws/aws-sdk-go-v2/service/fis v1.24.9
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.54.7
-	github.com/aws/aws-sdk-go-v2/service/rds v1.79.7
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.50.7
-	github.com/aws/aws-sdk-go-v2/service/sts v1.28.13
+	github.com/aws/aws-sdk-go-v2 v1.30.0
+	github.com/aws/aws-sdk-go-v2/config v1.27.21
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.21
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.8
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.165.1
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.43.1
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.32.1
+	github.com/aws/aws-sdk-go-v2/service/fis v1.25.1
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.55.1
+	github.com/aws/aws-sdk-go-v2/service/rds v1.80.1
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.51.1
+	github.com/aws/aws-sdk-go-v2/service/sts v1.29.1
 	github.com/aws/smithy-go v1.20.2
 	github.com/docker/go-connections v0.5.0
 	github.com/google/uuid v1.6.0
@@ -29,7 +29,7 @@ require (
 	github.com/sosodev/duration v1.3.1
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.0
 	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.9
-	github.com/steadybit/action-kit/go/action_kit_test v1.2.14
+	github.com/steadybit/action-kit/go/action_kit_test v1.2.15
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.5.2
 	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.1.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.0.7
@@ -49,13 +49,13 @@ require (
 	github.com/Microsoft/hcsshim v0.12.0 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.10 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.10 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.12 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.12 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.12 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.20.12 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.24.6 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.14 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.21.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.25.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cilium/ebpf v0.15.0 // indirect
 	github.com/containerd/cgroups/v3 v3.0.3 // indirect
@@ -150,9 +150,9 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	howett.net/plist v1.0.1 // indirect
-	k8s.io/api v0.30.0 // indirect
-	k8s.io/apimachinery v0.30.0 // indirect
-	k8s.io/client-go v0.30.0 // indirect
+	k8s.io/api v0.30.2 // indirect
+	k8s.io/apimachinery v0.30.2 // indirect
+	k8s.io/client-go v0.30.2 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect

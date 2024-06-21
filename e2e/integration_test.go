@@ -6,7 +6,8 @@ package e2e
 import (
 	"fmt"
 	"github.com/steadybit/action-kit/go/action_kit_test/e2e"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
+	actDiscover "github.com/steadybit/action-kit/go/action_kit_test/validate"
+	valDiscover "github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
 	"github.com/stretchr/testify/assert"
 	"os/exec"
 	"testing"
@@ -40,6 +41,10 @@ func TestWithMinikube(t *testing.T) {
 			Name: "validate discovery",
 			Test: validateDiscovery,
 		},
+		{
+			Name: "action discovery",
+			Test: validateAction,
+		},
 	})
 }
 
@@ -62,5 +67,9 @@ func helmInstallLocalStack(minikube *e2e.Minikube) error {
 }
 
 func validateDiscovery(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
-	assert.NoError(t, validate.ValidateEndpointReferences("/", e.Client))
+	assert.NoError(t, valDiscover.ValidateEndpointReferences("/", e.Client))
+}
+
+func validateAction(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
+	assert.NoError(t, actDiscover.ValidateEndpointReferences("/", e.Client))
 }
