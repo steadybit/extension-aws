@@ -29,8 +29,8 @@ func TestWithMinikube(t *testing.T) {
 				"--set", "extraEnv[2].value=test",
 				"--set", "extraEnv[3].name=AWS_SECRET_ACCESS_KEY",
 				"--set", "extraEnv[3].value=test",
-				"--set", "aws.discovery.disabled.ecs=true", //disabled by default
-				"--set", "aws.discovery.disabled.elb=true", //disabled by default
+				"--set", "aws.discovery.disabled.ecs=false", //disabled by default
+				"--set", "aws.discovery.disabled.elb=false", //disabled by default
 			}
 		},
 	}
@@ -73,9 +73,13 @@ func validateDiscovery(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
 
 	isIgnored := func(s string) bool {
 		ignorable := []string{
+			//localstack OSS does not support these services, so we ignore the errors from failed discoveries
 			"GET /com.steadybit.extension_aws.rds.instance/discovery/discovered-targets",
 			"GET /com.steadybit.extension_aws.rds.cluster/discovery/discovered-targets",
 			"GET /com.steadybit.extension_aws.fis-experiment-template/discovery/discovered-targets",
+			"GET /com.steadybit.extension_aws.ecs-service/discovery/discovered-targets",
+			"GET /com.steadybit.extension_aws.alb/discovery/discovered-targets",
+			"GET /com.steadybit.extension_aws.ecs-task/discovery/discovered-targets",
 		}
 		for _, i := range ignorable {
 			if strings.Contains(err.Error(), i) {

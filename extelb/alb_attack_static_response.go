@@ -105,12 +105,12 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 				Required: extutil.Ptr(true),
 			},
 			{
-				Name:  "-",
+				Name:  "-response-separator-",
 				Label: "-",
 				Type:  action_kit_api.Separator,
 			},
 			{
-				Name:  "-",
+				Name:  "-response-header-",
 				Type:  action_kit_api.Header,
 				Label: "Response",
 			},
@@ -147,12 +147,12 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 				Required:    extutil.Ptr(false),
 			},
 			{
-				Name:  "-",
+				Name:  "-conditions-separator-",
 				Label: "-",
 				Type:  action_kit_api.Separator,
 			},
 			{
-				Name:  "-",
+				Name:  "-conditions-header-",
 				Type:  action_kit_api.Header,
 				Label: "Conditions",
 			},
