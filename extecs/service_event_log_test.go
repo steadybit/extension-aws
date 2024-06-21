@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func TestServiceEvents_Lifecycle(t *testing.T) {
+func TestServiceEventLog_Lifecycle(t *testing.T) {
 	const account = "awsAccount"
 	const cluster = "cluster"
 	const service = "service"
@@ -22,10 +22,10 @@ func TestServiceEvents_Lifecycle(t *testing.T) {
 	pollerMock.On("Register", account, cluster, service)
 	pollerMock.On("Unregister", account, cluster, service)
 	pollerMock.On("Latest", account, cluster, service).Return(nil, nil)
-	action := EcsServiceEventsAction{
+	action := EcsServiceEventLogAction{
 		poller: pollerMock,
 	}
-	state := &EcsServiceEventsState{}
+	state := &EcsServiceEventLogState{}
 	request := action_kit_api.PrepareActionRequestBody{
 		Target: &action_kit_api.Target{
 			Attributes: map[string][]string{
@@ -54,7 +54,7 @@ func TestServiceEvents_Lifecycle(t *testing.T) {
 	pollerMock.AssertCalled(t, "Unregister", account, cluster, service)
 }
 
-func TestServiceEvents_Status(t *testing.T) {
+func TestServiceEventLog_Status(t *testing.T) {
 	now := time.Now()
 	before := now.Add(-1 * time.Millisecond)
 	after := now.Add(1 * time.Millisecond)
@@ -63,14 +63,14 @@ func TestServiceEvents_Status(t *testing.T) {
 	tests := []struct {
 		name      string
 		responses []*PollService
-		state     EcsServiceEventsState
+		state     EcsServiceEventLogState
 		mode      string
 		wanted    func(t *testing.T, result *action_kit_api.StatusResult, invocation int)
 	}{
 		{
 			name:      "no event",
 			responses: []*PollService{},
-			state: EcsServiceEventsState{
+			state: EcsServiceEventLogState{
 				LatestEventTimestamp: now,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult, invocation int) {
@@ -90,7 +90,7 @@ func TestServiceEvents_Status(t *testing.T) {
 					},
 				},
 			},
-			state: EcsServiceEventsState{
+			state: EcsServiceEventLogState{
 				LatestEventTimestamp: now,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult, invocation int) {
@@ -112,7 +112,7 @@ func TestServiceEvents_Status(t *testing.T) {
 					},
 				},
 			},
-			state: EcsServiceEventsState{
+			state: EcsServiceEventLogState{
 				LatestEventTimestamp: now,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult, invocation int) {
@@ -154,7 +154,7 @@ func TestServiceEvents_Status(t *testing.T) {
 					},
 				},
 			},
-			state: EcsServiceEventsState{
+			state: EcsServiceEventLogState{
 				LatestEventTimestamp: now,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult, invocation int) {
@@ -200,7 +200,7 @@ func TestServiceEvents_Status(t *testing.T) {
 					},
 				},
 			},
-			state: EcsServiceEventsState{
+			state: EcsServiceEventLogState{
 				LatestEventTimestamp: now,
 			},
 			wanted: func(t *testing.T, result *action_kit_api.StatusResult, invocation int) {
@@ -233,7 +233,7 @@ func TestServiceEvents_Status(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			action := EcsServiceEventsAction{}
+			action := EcsServiceEventLogAction{}
 			if len(test.responses) == 0 {
 				pollerMock := new(ServiceDescriptionPollerMock)
 				pollerMock.On("Latest", test.state.AwsAccount, test.state.ClusterArn, test.state.ServiceArn).Return(nil, nil)
@@ -252,7 +252,7 @@ func TestServiceEvents_Status(t *testing.T) {
 	}
 }
 
-func runWithPoller(t *testing.T, action EcsServiceEventsAction, state EcsServiceEventsState, wanted func(t *testing.T, result *action_kit_api.StatusResult, invocation int), i int) {
+func runWithPoller(t *testing.T, action EcsServiceEventLogAction, state EcsServiceEventLogState, wanted func(t *testing.T, result *action_kit_api.StatusResult, invocation int), i int) {
 	// Given
 	ctx, cancel := context.WithCancel(context.Background())
 

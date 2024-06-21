@@ -17,34 +17,34 @@ import (
 
 const LogType = "ECS_SERVICE_EVENTS"
 
-type EcsServiceEventsAction struct {
+type EcsServiceEventLogAction struct {
 	poller ServiceDescriptionPoller
 }
 
-type EcsServiceEventsState struct {
+type EcsServiceEventLogState struct {
 	LatestEventTimestamp time.Time
 	ServiceArn           string
 	ClusterArn           string
 	AwsAccount           string
 }
 
-func NewEcsServiceEventsAction(poller ServiceDescriptionPoller) action_kit_sdk.Action[EcsServiceEventsState] {
-	return EcsServiceEventsAction{
+func NewEcsServiceEventLogAction(poller ServiceDescriptionPoller) action_kit_sdk.Action[EcsServiceEventLogState] {
+	return EcsServiceEventLogAction{
 		poller: poller,
 	}
 }
 
-var _ action_kit_sdk.Action[EcsServiceEventsState] = (*EcsServiceEventsAction)(nil)
-var _ action_kit_sdk.ActionWithStatus[EcsServiceEventsState] = (*EcsServiceEventsAction)(nil)
-var _ action_kit_sdk.ActionWithStop[EcsServiceEventsState] = (*EcsServiceEventsAction)(nil)
+var _ action_kit_sdk.Action[EcsServiceEventLogState] = (*EcsServiceEventLogAction)(nil)
+var _ action_kit_sdk.ActionWithStatus[EcsServiceEventLogState] = (*EcsServiceEventLogAction)(nil)
+var _ action_kit_sdk.ActionWithStop[EcsServiceEventLogState] = (*EcsServiceEventLogAction)(nil)
 
-func (f EcsServiceEventsAction) NewEmptyState() EcsServiceEventsState {
-	return EcsServiceEventsState{}
+func (f EcsServiceEventLogAction) NewEmptyState() EcsServiceEventLogState {
+	return EcsServiceEventLogState{}
 }
 
-func (f EcsServiceEventsAction) Describe() action_kit_api.ActionDescription {
+func (f EcsServiceEventLogAction) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          ecsServiceEventsActionId,
+		Id:          ecsServiceEventLogActionId,
 		Label:       "Service Event Log",
 		Description: "Collect service events from ECS",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
@@ -90,7 +90,7 @@ func (f EcsServiceEventsAction) Describe() action_kit_api.ActionDescription {
 	}
 }
 
-func (f EcsServiceEventsAction) Prepare(_ context.Context, state *EcsServiceEventsState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (f EcsServiceEventLogAction) Prepare(_ context.Context, state *EcsServiceEventLogState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	awsAccount := extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	clusterArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
 	serviceArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.service.arn")[0]
@@ -104,26 +104,26 @@ func (f EcsServiceEventsAction) Prepare(_ context.Context, state *EcsServiceEven
 	return nil, nil
 }
 
-func (f EcsServiceEventsAction) Start(_ context.Context, state *EcsServiceEventsState) (*action_kit_api.StartResult, error) {
+func (f EcsServiceEventLogAction) Start(_ context.Context, state *EcsServiceEventLogState) (*action_kit_api.StartResult, error) {
 	return &action_kit_api.StartResult{
 		Messages: f.newMessages(state),
 	}, nil
 }
 
-func (f EcsServiceEventsAction) Status(_ context.Context, state *EcsServiceEventsState) (*action_kit_api.StatusResult, error) {
+func (f EcsServiceEventLogAction) Status(_ context.Context, state *EcsServiceEventLogState) (*action_kit_api.StatusResult, error) {
 	return &action_kit_api.StatusResult{
 		Messages: f.newMessages(state),
 	}, nil
 }
 
-func (f EcsServiceEventsAction) Stop(_ context.Context, state *EcsServiceEventsState) (*action_kit_api.StopResult, error) {
+func (f EcsServiceEventLogAction) Stop(_ context.Context, state *EcsServiceEventLogState) (*action_kit_api.StopResult, error) {
 	defer f.poller.Unregister(state.AwsAccount, state.ClusterArn, state.ServiceArn)
 	return &action_kit_api.StopResult{
 		Messages: f.newMessages(state),
 	}, nil
 }
 
-func (f EcsServiceEventsAction) newMessages(state *EcsServiceEventsState) *action_kit_api.Messages {
+func (f EcsServiceEventLogAction) newMessages(state *EcsServiceEventLogState) *action_kit_api.Messages {
 	latest := f.poller.Latest(state.AwsAccount, state.ClusterArn, state.ServiceArn)
 	newEvents, newLatestEventTimestamp := filterEventsAfter(latest, state.LatestEventTimestamp)
 	state.LatestEventTimestamp = newLatestEventTimestamp
