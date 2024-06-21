@@ -482,8 +482,9 @@ func Test_getNewPriorityPairs(t *testing.T) {
 				rules: &elasticloadbalancingv2.DescribeRulesOutput{
 					Rules: []types.Rule{
 						{
-							Priority: extutil.Ptr("2"),
-							RuleArn:  extutil.Ptr("rule-arn-a"),
+							IsDefault: extutil.Ptr(false),
+							Priority:  extutil.Ptr("2"),
+							RuleArn:   extutil.Ptr("rule-arn-a"),
 						},
 						{
 							IsDefault: extutil.Ptr(true),
