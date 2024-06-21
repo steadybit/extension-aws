@@ -105,8 +105,17 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 				Required: extutil.Ptr(true),
 			},
 			{
+				Name: "-",
+				Type: action_kit_api.Separator,
+			},
+			{
+				Name:  "-",
+				Type:  action_kit_api.Header,
+				Label: "Response",
+			},
+			{
 				Name:         "responseStatusCode",
-				Label:        "Response Status Code",
+				Label:        "Status Code",
 				Description:  extutil.Ptr("The status code which should get returned."),
 				Type:         action_kit_api.Integer,
 				MinValue:     extutil.Ptr(100),
@@ -116,7 +125,7 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 			},
 			{
 				Name:        "responseContentType",
-				Label:       "Response Content Type",
+				Label:       "Content Type",
 				Description: extutil.Ptr("The content type of the response."),
 				Type:        action_kit_api.String,
 				Required:    extutil.Ptr(false),
@@ -131,10 +140,19 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 			},
 			{
 				Name:        "responseBody",
-				Label:       "Response Body",
+				Label:       "Body",
 				Description: extutil.Ptr("The body of the response."),
 				Type:        action_kit_api.String,
 				Required:    extutil.Ptr(false),
+			},
+			{
+				Name: "-",
+				Type: action_kit_api.Separator,
+			},
+			{
+				Name:  "-",
+				Type:  action_kit_api.Header,
+				Label: "Conditions",
 			},
 			{
 				Name:        "conditionHostHeader",
