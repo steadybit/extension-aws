@@ -8,6 +8,8 @@ This setup is the same as you would use for [AWS FIS on ECS Tasks](https://docs.
 
 Please note that the SSM agent is not supported on Windows containers or Tasks with the ECS's `execute command` feature enabled.
 
+Also make sure the extension is granted the [necessary permissions](./README.md#ecs-permissions)
+
 ## 1. IAM Role for the SSM Managed Instance
 
 The SSM agent will register in the SSM as a managed instance and needs an IAM role to do so.

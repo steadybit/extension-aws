@@ -167,7 +167,7 @@ If you want to perform the stress CPU/memory/io or fill disk attacks on ECS Task
     ]
 }
 ```
-Installation of the [SSM Agent is redacted here](./README-ecs-ssm-setup.md).
+[Installation guide for the SSM Agent](./README-ecs-ssm-setup.md).
 </details>
 <details>
     <summary>ELB-Discovery & Actions</summary>

@@ -11,6 +11,7 @@
   - Discovery for Tasks and Services
   - Action to stop a Task
   - Action to scale a Service
+  - Actions to inject CPU/IO/memory stress or disk fill for a Task using SSM see ./README-ecs-ssm-setup.md for the necessary setup
   - Check Service Task count
   - Service Event Log
   - Requires new permissions (or needs to be disabled via `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS`)
@@ -23,6 +24,7 @@
     "ecs:StopTask",
     "ecs:UpdateService"
     ```
+
 - Added ELB Support
   - Discovery for Application Load Balancers
   - Action to return a static response for a Load Balancer Listener
