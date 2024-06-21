@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package e2e
 
@@ -10,6 +10,7 @@ import (
 	disValidate "github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
 	"github.com/stretchr/testify/assert"
 	"os/exec"
+	"strings"
 	"testing"
 )
 
@@ -28,10 +29,8 @@ func TestWithMinikube(t *testing.T) {
 				"--set", "extraEnv[2].value=test",
 				"--set", "extraEnv[3].name=AWS_SECRET_ACCESS_KEY",
 				"--set", "extraEnv[3].value=test",
-				"--set", "extraEnv[4].name=STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS", //missing localstack support
-				"--set-string", "extraEnv[4].value=true",
-				"--set", "extraEnv[5].name=STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS", //missing localstack support
-				"--set-string", "extraEnv[5].value=true",
+				"--set", "aws.discovery.disabled.ecs=true", //disabled by default
+				"--set", "aws.discovery.disabled.elb=true", //disabled by default
 			}
 		},
 	}
@@ -67,7 +66,31 @@ func helmInstallLocalStack(minikube *e2e.Minikube) error {
 }
 
 func validateDiscovery(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
-	assert.NoError(t, disValidate.ValidateEndpointReferences("/", e.Client))
+	err := disValidate.ValidateEndpointReferences("/", e.Client)
+	if err == nil {
+		return
+	}
+
+	isIgnored := func(s string) bool {
+		ignorable := []string{
+			"GET /com.steadybit.extension_aws.rds.instance/discovery/discovered-targets",
+			"GET /com.steadybit.extension_aws.rds.cluster/discovery/discovered-targets",
+			"GET /com.steadybit.extension_aws.fis-experiment-template/discovery/discovered-targets",
+		}
+		for _, i := range ignorable {
+			if strings.Contains(err.Error(), i) {
+				return true
+			}
+		}
+		return false
+	}
+
+	errs := err.(interface{ Unwrap() []error }).Unwrap()
+	for _, err = range errs {
+		if !isIgnored(err.Error()) {
+			assert.Fail(t, fmt.Sprintf("Received unexpected error:\n%+v", err))
+		}
+	}
 }
 
 func validateActions(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
