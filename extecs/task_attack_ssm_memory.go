@@ -40,6 +40,10 @@ func getEcsTaskStressMemoryDescription() action_kit_api.ActionDescription {
 		Id:          fmt.Sprintf("%s.stress_mem", ecsTaskTargetId),
 		Label:       "Stress Memory",
 		Description: "Stresses Memory for the given duration.",
+		Hint: &action_kit_api.ActionHint{
+			Type:    action_kit_api.HintInfo,
+			Content: "This action targets the entire task. Not individual containers inside it.",
+		},
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "percent",
