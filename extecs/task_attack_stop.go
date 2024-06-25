@@ -6,6 +6,7 @@ package extecs
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
@@ -77,13 +78,23 @@ func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*a
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
 	}
 
-	_, err = client.StopTask(ctx, &ecs.StopTaskInput{
+	stopTaskResult, err := client.StopTask(ctx, &ecs.StopTaskInput{
 		Cluster: &state.ClusterArn,
 		Task:    &state.TaskArn,
 	})
 
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to stop ecs task '%s'.", state.TaskArn), err)
+	}
+
+	if stopTaskResult.Task != nil && aws.ToString(stopTaskResult.Task.LastStatus) != "RUNNING" {
+		return &action_kit_api.StartResult{
+			Error: &action_kit_api.ActionKitError{
+				Detail: extutil.Ptr(fmt.Sprintf("State of task %s was %s", state.TaskArn, aws.ToString(stopTaskResult.Task.LastStatus))),
+				Status: extutil.Ptr(action_kit_api.Failed),
+				Title:  "Task not running",
+			},
+		}, nil
 	}
 
 	return nil, nil

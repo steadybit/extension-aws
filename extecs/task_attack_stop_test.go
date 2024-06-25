@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
@@ -73,7 +74,7 @@ type ecsClientApiMock struct {
 
 func (m *ecsClientApiMock) StopTask(ctx context.Context, params *ecs.StopTaskInput, optFns ...func(*ecs.Options)) (*ecs.StopTaskOutput, error) {
 	args := m.Called(ctx, params)
-	return nil, args.Error(1)
+	return args.Get(0).(*ecs.StopTaskOutput), args.Error(1)
 }
 
 func TestEcsTaskStopAction_Start(t *testing.T) {
@@ -83,7 +84,7 @@ func TestEcsTaskStopAction_Start(t *testing.T) {
 		require.Equal(t, "my-task-arn", *params.Task)
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
 		return true
-	})).Return(nil, nil)
+	})).Return(&ecs.StopTaskOutput{}, nil)
 
 	action := ecsTaskStopAction{clientProvider: func(account string) (ecsTaskStopApi, error) {
 		return api, nil
@@ -103,6 +104,38 @@ func TestEcsTaskStopAction_Start(t *testing.T) {
 	api.AssertExpectations(t)
 }
 
+func TestEcsTaskStopAction_Start_already_stopped_task(t *testing.T) {
+	// Given
+	api := new(ecsClientApiMock)
+	api.On("StopTask", mock.Anything, mock.MatchedBy(func(params *ecs.StopTaskInput) bool {
+		require.Equal(t, "my-task-arn", *params.Task)
+		require.Equal(t, "my-cluster-arn", *params.Cluster)
+		return true
+	})).Return(&ecs.StopTaskOutput{
+		Task: &types.Task{
+			LastStatus: extutil.Ptr("STOPPED"),
+		},
+	}, nil)
+
+	action := ecsTaskStopAction{clientProvider: func(account string) (ecsTaskStopApi, error) {
+		return api, nil
+	}}
+
+	// When
+	result, err := action.Start(context.Background(), &TaskStopState{
+		Account:    "42",
+		ClusterArn: "my-cluster-arn",
+		TaskArn:    "my-task-arn",
+	})
+
+	// Then
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, "Task not running", result.Error.Title)
+
+	api.AssertExpectations(t)
+}
+
 func TestEcsTaskStopActionForwardsError(t *testing.T) {
 	// Given
 	api := new(ecsClientApiMock)
@@ -110,7 +143,7 @@ func TestEcsTaskStopActionForwardsError(t *testing.T) {
 		require.Equal(t, "my-task-arn", *params.Task)
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
 		return true
-	})).Return(nil, errors.New("expected"))
+	})).Return(&ecs.StopTaskOutput{}, errors.New("expected"))
 	action := ecsTaskStopAction{clientProvider: func(account string) (ecsTaskStopApi, error) {
 		return api, nil
 	}}
