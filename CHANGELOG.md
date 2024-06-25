@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.2.26 (next)
+## v2.3.0
 
 - Update dependencies (go 1.22)
 - Revisited AZ Blackhole attack
@@ -24,7 +24,6 @@
     "ecs:StopTask",
     "ecs:UpdateService"
     ```
-
 - Added ELB Support
   - Discovery for Application Load Balancers
   - Action to return a static response for a Load Balancer Listener
