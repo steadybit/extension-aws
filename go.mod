@@ -14,7 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.21
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.8
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.165.1
-	github.com/aws/aws-sdk-go-v2/service/ecs v1.43.1
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.44.1
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.32.1
 	github.com/aws/aws-sdk-go-v2/service/fis v1.25.1
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.55.1
@@ -49,8 +49,8 @@ require (
 	github.com/Microsoft/hcsshim v0.12.0 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.12 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.12 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.13 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.13 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.14 // indirect
