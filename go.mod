@@ -9,7 +9,7 @@ toolchain go1.22.4
 
 require (
 	github.com/KimMachineGun/automemlimit v0.6.1
-	github.com/aws/aws-sdk-go-v2 v1.30.0
+	github.com/aws/aws-sdk-go-v2 v1.30.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.21
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.21
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.8
@@ -21,7 +21,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/rds v1.80.1
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.51.1
 	github.com/aws/aws-sdk-go-v2/service/sts v1.29.1
-	github.com/aws/smithy-go v1.20.2
+	github.com/aws/smithy-go v1.20.3
 	github.com/docker/go-connections v0.5.0
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
