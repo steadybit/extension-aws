@@ -182,7 +182,7 @@ If you want to perform the stress CPU/memory/io or fill disk attacks on ECS Task
         "elasticloadbalancing:DescribeLoadBalancers",
         "elasticloadbalancing:DescribeListeners",
         "elasticloadbalancing:DescribeTags",
-				"elasticloadbalancing:DescribeRules",
+        "elasticloadbalancing:DescribeRules",
         "elasticloadbalancing:SetRulePriorities",
         "elasticloadbalancing:CreateRule",
         "elasticloadbalancing:DeleteRule",
