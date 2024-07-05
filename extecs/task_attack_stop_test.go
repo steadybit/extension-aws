@@ -79,7 +79,7 @@ func (m *ecsClientApiMock) DescribeTasks(ctx context.Context, params *ecs.Descri
 
 func (m *ecsClientApiMock) StopTask(ctx context.Context, params *ecs.StopTaskInput, optFns ...func(*ecs.Options)) (*ecs.StopTaskOutput, error) {
 	args := m.Called(ctx, params)
-	return args.Get(0).(*ecs.StopTaskOutput), args.Error(1)
+	return nil, args.Error(1)
 }
 
 func TestEcsTaskStopAction_Start(t *testing.T) {
@@ -119,11 +119,6 @@ func TestEcsTaskStopAction_Start(t *testing.T) {
 func TestEcsTaskStopAction_Start_already_stopped_task(t *testing.T) {
 	// Given
 	api := new(ecsClientApiMock)
-	api.On("StopTask", mock.Anything, mock.MatchedBy(func(params *ecs.StopTaskInput) bool {
-		require.Equal(t, "my-task-arn", *params.Task)
-		require.Equal(t, "my-cluster-arn", *params.Cluster)
-		return true
-	})).Return(nil, nil)
 	api.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
 		Tasks: []types.Task{
 			{
@@ -154,6 +149,13 @@ func TestEcsTaskStopAction_Start_already_stopped_task(t *testing.T) {
 func TestEcsTaskStopActionForwardsError(t *testing.T) {
 	// Given
 	api := new(ecsClientApiMock)
+	api.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
+		Tasks: []types.Task{
+			{
+				LastStatus: extutil.Ptr("RUNNING"),
+			},
+		},
+	})
 	api.On("StopTask", mock.Anything, mock.MatchedBy(func(params *ecs.StopTaskInput) bool {
 		require.Equal(t, "my-task-arn", *params.Task)
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
