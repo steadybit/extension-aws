@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.1
+
+- Fix ECS Stop Task Action
+
 ## v2.3.0
 
 - Update dependencies (go 1.22)

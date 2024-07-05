@@ -72,6 +72,11 @@ type ecsClientApiMock struct {
 	mock.Mock
 }
 
+func (m *ecsClientApiMock) DescribeTasks(ctx context.Context, params *ecs.DescribeTasksInput, optFns ...func(*ecs.Options)) (*ecs.DescribeTasksOutput, error) {
+	args := m.Called(ctx, params)
+	return args.Get(0).(*ecs.DescribeTasksOutput), nil
+}
+
 func (m *ecsClientApiMock) StopTask(ctx context.Context, params *ecs.StopTaskInput, optFns ...func(*ecs.Options)) (*ecs.StopTaskOutput, error) {
 	args := m.Called(ctx, params)
 	return args.Get(0).(*ecs.StopTaskOutput), args.Error(1)
@@ -84,7 +89,14 @@ func TestEcsTaskStopAction_Start(t *testing.T) {
 		require.Equal(t, "my-task-arn", *params.Task)
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
 		return true
-	})).Return(&ecs.StopTaskOutput{}, nil)
+	})).Return(nil, nil)
+	api.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
+		Tasks: []types.Task{
+			{
+				LastStatus: extutil.Ptr("RUNNING"),
+			},
+		},
+	})
 
 	action := ecsTaskStopAction{clientProvider: func(account string) (ecsTaskStopApi, error) {
 		return api, nil
@@ -111,11 +123,14 @@ func TestEcsTaskStopAction_Start_already_stopped_task(t *testing.T) {
 		require.Equal(t, "my-task-arn", *params.Task)
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
 		return true
-	})).Return(&ecs.StopTaskOutput{
-		Task: &types.Task{
-			LastStatus: extutil.Ptr("STOPPED"),
+	})).Return(nil, nil)
+	api.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
+		Tasks: []types.Task{
+			{
+				LastStatus: extutil.Ptr("STOPPED"),
+			},
 		},
-	}, nil)
+	})
 
 	action := ecsTaskStopAction{clientProvider: func(account string) (ecsTaskStopApi, error) {
 		return api, nil

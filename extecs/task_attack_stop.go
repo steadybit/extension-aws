@@ -30,6 +30,7 @@ type TaskStopState struct {
 }
 
 type ecsTaskStopApi interface {
+	DescribeTasks(ctx context.Context, params *ecs.DescribeTasksInput, optFns ...func(*ecs.Options)) (*ecs.DescribeTasksOutput, error)
 	StopTask(ctx context.Context, params *ecs.StopTaskInput, optFns ...func(*ecs.Options)) (*ecs.StopTaskOutput, error)
 }
 
@@ -78,23 +79,30 @@ func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*a
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
 	}
 
-	stopTaskResult, err := client.StopTask(ctx, &ecs.StopTaskInput{
+	describeTaskResult, err := client.DescribeTasks(ctx, &ecs.DescribeTasksInput{
 		Cluster: &state.ClusterArn,
-		Task:    &state.TaskArn,
+		Tasks:   []string{state.TaskArn},
 	})
-
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to stop ecs task '%s'.", state.TaskArn), err)
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to describe ecs task '%s'.", state.TaskArn), err)
 	}
 
-	if stopTaskResult.Task != nil && aws.ToString(stopTaskResult.Task.LastStatus) != "RUNNING" {
+	if len(describeTaskResult.Tasks) == 1 && aws.ToString(describeTaskResult.Tasks[0].LastStatus) != "RUNNING" {
 		return &action_kit_api.StartResult{
 			Error: &action_kit_api.ActionKitError{
-				Detail: extutil.Ptr(fmt.Sprintf("State of task %s was %s", state.TaskArn, aws.ToString(stopTaskResult.Task.LastStatus))),
+				Detail: extutil.Ptr(fmt.Sprintf("State of task %s was %s", state.TaskArn, aws.ToString(describeTaskResult.Tasks[0].LastStatus))),
 				Status: extutil.Ptr(action_kit_api.Failed),
 				Title:  "Task not running",
 			},
 		}, nil
+	}
+
+	_, err = client.StopTask(ctx, &ecs.StopTaskInput{
+		Cluster: &state.ClusterArn,
+		Task:    &state.TaskArn,
+	})
+	if err != nil {
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to stop ecs task '%s'.", state.TaskArn), err)
 	}
 
 	return nil, nil
