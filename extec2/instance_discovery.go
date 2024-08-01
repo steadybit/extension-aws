@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2023 Steadybit GmbH
+// SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
 package extec2
 
@@ -82,7 +82,11 @@ func (e *ec2Discovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnric
 		getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_kubernetes.kubernetes-node"),
 	}
 	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
-		rules = append(rules, getEc2InstanceToXEnrichmentRule(targetType))
+		if targetType == "com.steadybit.extension_host.host" || targetType == "com.steadybit.extension_kubernetes.kubernetes-node" {
+			log.Warn().Msgf("Target type %s is already covered by default rules. Omitting.", targetType)
+		} else {
+			rules = append(rules, getEc2InstanceToXEnrichmentRule(targetType))
+		}
 	}
 	return rules
 }
