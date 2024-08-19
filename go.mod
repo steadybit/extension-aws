@@ -16,7 +16,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.174.0
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.34.1
-	github.com/aws/aws-sdk-go-v2/service/fis v1.26.3
+	github.com/aws/aws-sdk-go-v2/service/fis v1.27.1
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.56.3
 	github.com/aws/aws-sdk-go-v2/service/rds v1.82.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.52.5
