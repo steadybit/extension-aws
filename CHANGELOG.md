@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.2 (next release)
+
+- Update docs and parameters for Lamba Attacks to use https://github.com/steadybit/failure-lambda
+
 ## v2.3.1
 
 - Fix ECS Stop Task Action
