@@ -47,9 +47,11 @@ type FailureInjectionConfig struct {
 }
 
 type LambdaActionState struct {
-	Account string                  `json:"account"`
-	Param   string                  `json:"param"`
-	Config  *FailureInjectionConfig `json:"config"`
+	Account       string                  `json:"account"`
+	Param         string                  `json:"param"`
+	Config        *FailureInjectionConfig `json:"config"`
+	ExperimentKey *string                 `json:"experimentKey"`
+	ExecutionId   *int                    `json:"executionId"`
 }
 
 func (a *lambdaAction) Describe() action_kit_api.ActionDescription {
@@ -73,6 +75,8 @@ func (a *lambdaAction) Prepare(_ context.Context, state *LambdaActionState, requ
 
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Param = failureInjectionParam[0]
+	state.ExperimentKey = request.ExecutionContext.ExperimentKey
+	state.ExecutionId = request.ExecutionContext.ExecutionId
 	state.Config = config
 	return nil, nil
 }
@@ -93,8 +97,8 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 		Value:       extutil.Ptr(string(value)),
 		Type:        types.ParameterTypeString,
 		DataType:    extutil.Ptr("text"),
-		Description: extutil.Ptr("lambda failure injection config - set by steadybit"),
-		Overwrite:   extutil.Ptr(true),
+		Description: extutil.Ptr(fmt.Sprintf("lambda failure injection config - set by steadybit experiment %s / execution %d", *state.ExperimentKey, *state.ExecutionId)),
+		Overwrite:   extutil.Ptr(false),
 	})
 	if err != nil {
 		return nil, extension_kit.ToError("Failed to put ssm parameter", err)

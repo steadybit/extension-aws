@@ -57,6 +57,10 @@ func TestLambdaAction_Prepare(t *testing.T) {
 				Target: &action_kit_api.Target{
 					Attributes: tt.attributes,
 				},
+				ExecutionContext: &action_kit_api.ExecutionContext{
+					ExperimentKey: extutil.Ptr("TEST-1"),
+					ExecutionId:   extutil.Ptr(42),
+				},
 			})
 
 			//When
@@ -83,8 +87,8 @@ func TestLambdaAction_Start(t *testing.T) {
 		Value:       extutil.Ptr("{\"failureMode\":\"test\",\"rate\":0.5,\"isEnabled\":true}"),
 		Type:        types.ParameterTypeString,
 		DataType:    extutil.Ptr("text"),
-		Description: extutil.Ptr("lambda failure injection config - set by steadybit"),
-		Overwrite:   extutil.Ptr(true),
+		Description: extutil.Ptr("lambda failure injection config - set by steadybit experiment TEST-1 / execution 42"),
+		Overwrite:   extutil.Ptr(false),
 	}, mock.Anything).Return(&ssm.PutParameterOutput{}, nil)
 	api.On("AddTagsToResource", mock.Anything, &ssm.AddTagsToResourceInput{
 		ResourceId:   extutil.Ptr("PARAM"),
@@ -100,6 +104,8 @@ func TestLambdaAction_Start(t *testing.T) {
 	state := action.NewEmptyState()
 	state.Account = "123456789012"
 	state.Param = "PARAM"
+	state.ExperimentKey = extutil.Ptr("TEST-1")
+	state.ExecutionId = extutil.Ptr(42)
 	state.Config = &FailureInjectionConfig{
 		IsEnabled:   true,
 		FailureMode: "test",
