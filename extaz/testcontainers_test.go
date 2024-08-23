@@ -61,8 +61,9 @@ func setupTestContainers(t *testing.T, ctx context.Context) *TestContainers {
 	require.Nil(t, err)
 	networkName := networkCreated.Name
 
-	container, err := localstack.RunContainer(
+	container, err := localstack.Run(
 		ctx,
+		"localstack/localstack:1.4.0",
 		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 			ContainerRequest: testcontainers.ContainerRequest{
 				Image:          localstackImage,
