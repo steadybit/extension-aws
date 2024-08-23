@@ -63,7 +63,7 @@ func (a *lambdaAction) NewEmptyState() LambdaActionState {
 func (a *lambdaAction) Prepare(_ context.Context, state *LambdaActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	failureInjectionParam := request.Target.Attributes["aws.lambda.failure-injection-param"]
 	if len(failureInjectionParam) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'aws.lambda.failure-injection-param' attribute. Did you wrap the lambda with https://github.com/gunnargrosch/failure-lambda ?", nil)
+		return nil, extension_kit.ToError("Target is missing the 'aws.lambda.failure-injection-param' attribute. Did you wrap the lambda with https://github.com/steadybit/failure-lambda ?", nil)
 	}
 
 	config, err := a.configProvider(request)

@@ -45,7 +45,7 @@ func TestLambdaAction_Prepare(t *testing.T) {
 			attributes: map[string][]string{
 				"aws.account": {"123456789012"},
 			},
-			wantedError: extension_kit.ToError("Target is missing the 'aws.lambda.failure-injection-param' attribute. Did you wrap the lambda with https://github.com/gunnargrosch/failure-lambda ?", nil),
+			wantedError: extension_kit.ToError("Target is missing the 'aws.lambda.failure-injection-param' attribute. Did you wrap the lambda with https://github.com/steadybit/failure-lambda ?", nil),
 		},
 	}
 
