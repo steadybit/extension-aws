@@ -1,7 +1,8 @@
 # Changelog
 
-## v2.3.2 (next release)
+## v2.3.2
 
+- Update dependencies
 - Update docs and parameters for Lamba Attacks to use https://github.com/steadybit/failure-lambda
 - Prevent concurrent executions of Lambda Attacks with the same Failure-SSM-Parameter
 
