@@ -101,6 +101,10 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 		Overwrite:   extutil.Ptr(false),
 	})
 	if err != nil {
+		var pae *types.ParameterAlreadyExists
+		if errors.As(err, &pae) {
+			return nil, extension_kit.ToError("Failed to put ssm parameter. This might be caused by trying to run multiple parallel failure injections on the same lambda function, which is not supported.", err)
+		}
 		return nil, extension_kit.ToError("Failed to put ssm parameter", err)
 	}
 
