@@ -51,7 +51,7 @@ func getDenylistDescription() action_kit_api.ActionDescription {
 				Name:         "denylist",
 				Label:        "Hostname Deny Regex",
 				Description:  extutil.Ptr("Regular expression to match the hostname to deny traffic."),
-				Type:         action_kit_api.String,
+				Type:         action_kit_api.Regex,
 				DefaultValue: extutil.Ptr(".*"),
 				Required:     extutil.Ptr(false),
 				Order:        extutil.Ptr(2),
