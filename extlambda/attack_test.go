@@ -232,7 +232,7 @@ func toGenericArray(arr ...interface{}) []interface{} {
 func Test_denyConnection(t *testing.T) {
 	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 		Config: map[string]interface{}{
-			"denylist": toGenericArray(".*.google.com", ".*"),
+			"denylist": ".*.google.com",
 			"rate":     25.0,
 		},
 	})
@@ -240,7 +240,7 @@ func Test_denyConnection(t *testing.T) {
 	config, err := denyConnection(request)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "denylist", config.FailureMode)
-	assert.EqualValues(t, []string{".*.google.com", ".*"}, *config.Denylist)
+	assert.EqualValues(t, []string{".*.google.com"}, *config.Denylist)
 	assert.EqualValues(t, 0.25, config.Rate)
 	assert.EqualValues(t, true, config.IsEnabled)
 }

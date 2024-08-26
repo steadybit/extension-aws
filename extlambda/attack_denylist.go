@@ -49,11 +49,11 @@ func getDenylistDescription() action_kit_api.ActionDescription {
 			},
 			{
 				Name:         "denylist",
-				Label:        "Deny list",
-				Description:  extutil.Ptr("List of regular expressions to match the hosts against"),
-				Type:         action_kit_api.String1,
-				DefaultValue: nil,
-				Required:     extutil.Ptr(true),
+				Label:        "Hostname Deny Regex",
+				Description:  extutil.Ptr("Regular expression to match the hostname to deny traffic."),
+				Type:         action_kit_api.String,
+				DefaultValue: extutil.Ptr(".*"),
+				Required:     extutil.Ptr(false),
 				Order:        extutil.Ptr(2),
 			},
 		},
@@ -62,9 +62,11 @@ func getDenylistDescription() action_kit_api.ActionDescription {
 }
 
 func denyConnection(request action_kit_api.PrepareActionRequestBody) (*FailureInjectionConfig, error) {
-	denylist := make([]string, len(request.Config["denylist"].([]interface{})))
-	for i, v := range request.Config["denylist"].([]interface{}) {
-		denylist[i] = v.(string)
+	denylist := make([]string, 1)
+	if request.Config["denylist"] == nil {
+		denylist[0] = ""
+	} else {
+		denylist[0] = request.Config["denylist"].(string)
 	}
 
 	return &FailureInjectionConfig{
