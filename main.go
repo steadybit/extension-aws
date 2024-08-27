@@ -44,11 +44,13 @@ func main() {
 	utils.InitializeAwsZones()
 
 	ctx, cancel := SignalCanceledContext()
-	defer cancel()
 
 	registerHandlers(ctx)
 
-	action_kit_sdk.InstallSignalHandler()
+	action_kit_sdk.InstallSignalHandler(func(o os.Signal) {
+		cancel()
+	})
+
 	action_kit_sdk.RegisterCoverageEndpoints()
 	exthealth.SetReady(true)
 
