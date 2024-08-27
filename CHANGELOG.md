@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.3.3 (next release)
+- fix graceful shutdown
+-
 ## v2.3.2
 
 - Update dependencies
