@@ -276,8 +276,8 @@ github.com/sosodev/duration v1.3.1/go.mod h1:RQIBBX0+fMLc/D9+Jb/fwvVmo0eZvDDEERA
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
 github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/spkg/bom v0.0.0-20160624110644-59b7046e48ad/go.mod h1:qLr4V1qq6nMqFKkMo8ZTx3f+BZEkzsRUY10Xsm2mwU0=
-github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.2-0.20240826095812-958dbcedaabb h1:Q0UV4c0DFww8urltdJEMmKEVKIfOj+vX1REuKSXWxpE=
-github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.2-0.20240826095812-958dbcedaabb/go.mod h1:PMhimKAlixCZOIwzPsNvIOrVuII876CuWMGeiEwGN34=
+github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.2 h1:z7DoVMFIhkKii+3SNFKDoHzYidOxCOkWohvqqPld/aw=
+github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.2/go.mod h1:PMhimKAlixCZOIwzPsNvIOrVuII876CuWMGeiEwGN34=
 github.com/steadybit/action-kit/go/action_kit_sdk v1.1.9 h1:EZCQA7FWxyWpA6du9Kt/5PMAZ2JXn9s1twWHuh8DMQo=
 github.com/steadybit/action-kit/go/action_kit_sdk v1.1.9/go.mod h1:doeEvG/3OQSd3Xvb4UvWpnwmY3VT+Pf9f6NfxV5i2rU=
 github.com/steadybit/action-kit/go/action_kit_test v1.2.15 h1:A9FrK5jthzjhPzBRDeAZbCfgoFkEO3q654kFvyjD07o=
