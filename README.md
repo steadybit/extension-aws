@@ -496,6 +496,8 @@ tries to get the account id from:
 
 ### Kubernetes
 
+Detailed information about agent and extension installation in kubernetes can also be found in our [documentation](https://docs.steadybit.com/install-and-configure/install-agent/install-on-kubernetes).
+
 #### Recommended (via agent helm chart)
 
 All extensions are providing a helm chart that is also integrated in the
