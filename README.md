@@ -494,10 +494,28 @@ tries to get the account id from:
 
 ## Installation
 
-We recommend that you install the extension with
-our [official Helm chart](https://github.com/steadybit/extension-aws/tree/main/charts/steadybit-extension-aws).
+### Kubernetes
 
-### Helm
+#### Recommended (via agent helm chart)
+
+All extensions are providing a helm chart that is also integrated in the
+[helm-chart](https://github.com/steadybit/helm-charts/tree/main/charts/steadybit-agent) of the agent.
+
+You need to provide some additional values to activate this extension.
+
+```
+--set extension-aws.enabled=true \
+--set extension-aws.serviceAccount.eksRoleArn={{YOUR_SERVICE_ACCOUNT_ARN_IF_RUNNING_IN_EKS}} \
+```
+
+Additional configuration options can be found in
+the [helm-chart](https://github.com/steadybit/extension-aws/blob/main/charts/steadybit-extension-aws/values.yaml) of the
+extension.
+
+#### Alternative (via own helm chart)
+
+If you need more control, you may want to install the extension via its
+own [helm-chart](https://github.com/steadybit/extension-aws/blob/main/charts/steadybit-extension-aws).
 
 ```bash
 helm repo add steadybit-extension-aws https://steadybit.github.io/extension-aws
@@ -508,7 +526,7 @@ helm upgrade steadybit-extension-aws \
     --timeout 5m0s \
     --create-namespace \
     --namespace steadybit-agent \
-    --serviceAccount.eksRoleArn={{YOUR_SERVICE_ACCOUNT_ARN_IF_RUNNING_IN_EKS}} \
+    --set serviceAccount.eksRoleArn={{YOUR_SERVICE_ACCOUNT_ARN_IF_RUNNING_IN_EKS}} \
     steadybit-extension-aws/steadybit-extension-aws
 ```
 
@@ -516,15 +534,14 @@ helm upgrade steadybit-extension-aws \
 
 Please use
 our [agent-linux.sh script](https://docs.steadybit.com/install-and-configure/install-agent/install-on-linux-hosts)
-to install the
-extension on your Linux machine.
-The script will download the latest version of the extension and install it using the package manager.
+to install the extension on your Linux machine. The script will download the latest version of the extension and install
+it using the package manager.
 
 After installing configure the extension by editing `/etc/steadybit/extension-aws` and then restart the service.
 
-## Register the extension
+## Extension registration
 
-Make sure to register the extension at the steadybit platform. Please refer to
-the [documentation](https://docs.steadybit.com/integrate-with-steadybit/extensions/extension-installation) for more
+Make sure that the extension is registered with the agent. In most cases this is done automatically. Please refer to
+the [documentation](https://docs.steadybit.com/install-and-configure/install-agent/extension-discovery) for more
 information.
 
