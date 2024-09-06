@@ -16,7 +16,8 @@ const (
 )
 
 type ElasticacheClusterAttackState struct {
-	ReplicationGroupId string
+	ReplicationGroupID string
+	NodeGroupID        string
 	Account            string
 }
 
@@ -27,7 +28,8 @@ type ElasticacheApi interface {
 
 func convertClusterAttackState(request action_kit_api.PrepareActionRequestBody, state *ElasticacheClusterAttackState) error {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
-	state.ReplicationGroupId = extutil.MustHaveValue(request.Target.Attributes, "aws.elasticache.replication-group.id")[0]
+	state.ReplicationGroupID = extutil.MustHaveValue(request.Target.Attributes, "aws.elasticache.replication-group.id")[0]
+	state.NodeGroupID = extutil.MustHaveValue(request.Target.Attributes, "aws.elasticache.replication-group.node-group.id")[0]
 	return nil
 }
 
