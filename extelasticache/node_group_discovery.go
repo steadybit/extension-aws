@@ -34,7 +34,7 @@ func NewElasticacheReplicationGroupDiscovery(ctx context.Context) discovery_kit_
 	discovery := &elasticacheReplicationGroupDiscovery{}
 	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
 		discovery_kit_sdk.WithRefreshTargetsNow(),
-		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalRds)*time.Second),
+		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalElasticacheReplicationGroup)*time.Second),
 	)
 }
 
@@ -42,7 +42,7 @@ func (r *elasticacheReplicationGroupDiscovery) Describe() discovery_kit_api.Disc
 	return discovery_kit_api.DiscoveryDescription{
 		Id: elasticacheNodeGroupTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalRds)),
+			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalElasticacheReplicationGroup)),
 		},
 	}
 }

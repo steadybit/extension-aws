@@ -15,6 +15,7 @@ import (
 	"github.com/steadybit/extension-aws/extaz"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extecs"
+	"github.com/steadybit/extension-aws/extelasticache"
 	"github.com/steadybit/extension-aws/extelb"
 	"github.com/steadybit/extension-aws/extfis"
 	"github.com/steadybit/extension-aws/extlambda"
@@ -129,6 +130,11 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskFillDiskAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsServiceEventLogAction(serviceDiscoveryPoller))
 		action_kit_sdk.RegisterAction(extecs.NewEcsServiceTaskCountCheckAction(serviceDiscoveryPoller))
+	}
+
+	if !cfg.DiscoveryDisabledElasticache {
+		discovery_kit_sdk.Register(extelasticache.NewElasticacheReplicationGroupDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extelasticache.NewElasticacheNodeGroupFailoverAttack())
 	}
 
 	if !cfg.DiscoveryDisabledElb {
