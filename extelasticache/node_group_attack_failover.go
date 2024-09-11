@@ -31,16 +31,17 @@ func (f elasticacheNodeGroupFailoverAttack) NewEmptyState() ElasticacheClusterAt
 func (f elasticacheNodeGroupFailoverAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.failover", elasticacheNodeGroupTargetId),
-		Label:       "Trigger Failover DB Cluster",
-		Description: "Triggers DB cluster failover by promoting a standby instance to primary",
+		Label:       "Trigger Failover for the node group",
+		Description: "Triggers nodegroup failover by promoting a replica node to primary",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(elasticacheIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			TargetType: elasticacheNodeGroupTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label: "by elasticache nodegroup id",
-					Query: "aws.elasticache.replication-group.node-group.id=\"\"",
+					Label:       "by elasticache nodegroup id",
+					Description: extutil.Ptr("Find node groups by replication group id and node group id"),
+					Query:       "aws.elasticache.replication-group.id=\"\" and aws.elasticache.replication-group.node-group.id=\"\"",
 				},
 			}),
 		}),
@@ -52,13 +53,16 @@ func (f elasticacheNodeGroupFailoverAttack) Describe() action_kit_api.ActionDesc
 }
 
 func (f elasticacheNodeGroupFailoverAttack) Prepare(_ context.Context, state *ElasticacheClusterAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	return nil, convertClusterAttackState(request, state)
+	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.ReplicationGroupID = extutil.MustHaveValue(request.Target.Attributes, "aws.elasticache.replication-group.id")[0]
+	state.NodeGroupID = extutil.MustHaveValue(request.Target.Attributes, "aws.elasticache.replication-group.node-group.id")[0]
+	return nil, nil
 }
 
 func (f elasticacheNodeGroupFailoverAttack) Start(ctx context.Context, state *ElasticacheClusterAttackState) (*action_kit_api.StartResult, error) {
 	client, err := f.clientProvider(state.Account)
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err)
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize Elasticache client for AWS account %s", state.Account), err)
 	}
 
 	input := elasticache.TestFailoverInput{
