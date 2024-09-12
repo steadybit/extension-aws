@@ -80,6 +80,7 @@ func validateDiscovery(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
 			"GET /com.steadybit.extension_aws.ecs-service/discovery/discovered-targets",
 			"GET /com.steadybit.extension_aws.alb/discovery/discovered-targets",
 			"GET /com.steadybit.extension_aws.ecs-task/discovery/discovered-targets",
+			"GET /com.steadybit.extension_aws.elasticache.node-group/discovery/discovered-targets",
 		}
 		for _, i := range ignorable {
 			if strings.Contains(err.Error(), i) {

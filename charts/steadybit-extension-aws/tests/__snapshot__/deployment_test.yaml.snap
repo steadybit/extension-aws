@@ -36,6 +36,8 @@ manifest should add aws env vars:
                   value: example.ec2.1,example.ec2.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ECS
                   value: example.ecs.1,example.ecs.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELASTICACHE
+                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELB
                   value: example.elb.1,example.elb.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ZONE
@@ -50,6 +52,8 @@ manifest should add aws env vars:
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS
@@ -140,6 +144,8 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
@@ -223,6 +229,8 @@ manifest should match snapshot with TLS:
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
@@ -313,6 +321,8 @@ manifest should match snapshot with extra env vars:
                   value: bar
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
               envFrom:
@@ -400,6 +410,8 @@ manifest should match snapshot with extra labels:
                   value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
@@ -485,6 +497,8 @@ manifest should match snapshot with mutual TLS:
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
@@ -586,6 +600,8 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
@@ -665,6 +681,8 @@ manifest should match snapshot with podSecurityContext:
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
@@ -748,6 +766,8 @@ manifest should match snapshot with priority class:
                   value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
@@ -828,6 +848,8 @@ manifest should match snapshot without TLS:
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
