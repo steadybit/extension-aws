@@ -31,7 +31,7 @@ func (f elasticacheNodeGroupFailoverAttack) NewEmptyState() ElasticacheClusterAt
 func (f elasticacheNodeGroupFailoverAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.failover", elasticacheNodeGroupTargetId),
-		Label:       "Trigger Failover for the node group",
+		Label:       "Test Failover",
 		Description: "Triggers nodegroup failover by promoting a replica node to primary",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(elasticacheIcon),

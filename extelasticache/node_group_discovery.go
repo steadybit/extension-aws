@@ -50,7 +50,7 @@ func (r *elasticacheReplicationGroupDiscovery) Describe() discovery_kit_api.Disc
 func (r *elasticacheReplicationGroupDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       elasticacheNodeGroupTargetId,
-		Label:    discovery_kit_api.PluralLabel{One: "Elasticache replication group", Other: "Elasticache replication groups"},
+		Label:    discovery_kit_api.PluralLabel{One: "Elasticache", Other: "Elasticaches"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(elasticacheIcon),
