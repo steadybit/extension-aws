@@ -15,10 +15,11 @@ const (
 )
 
 type KafkaAttackState struct {
-	BrokerID   string
-	BrokerARN  string
-	ClusterARN string
-	Account    string
+	BrokerID    string
+	BrokerARN   string
+	ClusterARN  string
+	ClusterName string
+	Account     string
 }
 
 type MskApi interface {
