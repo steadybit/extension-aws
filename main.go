@@ -19,6 +19,7 @@ import (
 	"github.com/steadybit/extension-aws/extelb"
 	"github.com/steadybit/extension-aws/extfis"
 	"github.com/steadybit/extension-aws/extlambda"
+	"github.com/steadybit/extension-aws/extmsk"
 	"github.com/steadybit/extension-aws/extrds"
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
@@ -105,6 +106,11 @@ func registerHandlers(ctx context.Context) {
 	if !cfg.DiscoveryDisabledFis {
 		discovery_kit_sdk.Register(extfis.NewFisTemplateDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extfis.NewFisExperimentAction())
+	}
+
+	if !cfg.DiscoveryDisabledMsk {
+		discovery_kit_sdk.Register(extmsk.NewMskClusterDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extmsk.NewMskRebootBrokerAttack())
 	}
 
 	if !cfg.DiscoveryDisabledLambda {

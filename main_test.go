@@ -13,7 +13,7 @@ import (
 	"testing"
 )
 
-func createConfig(ec2 bool, ecs bool, elasticache bool, elb bool, fis bool, lambda bool, rds bool, zone bool) config.Specification {
+func createConfig(ec2 bool, ecs bool, elasticache bool, elb bool, fis bool, msk bool, lambda bool, rds bool, zone bool) config.Specification {
 	return config.Specification{
 		EnrichEc2DataForTargetTypes:                  []string{"com.steadybit.extension_aws.test"},
 		DiscoveryDisabledEc2:                         ec2,
@@ -27,6 +27,8 @@ func createConfig(ec2 bool, ecs bool, elasticache bool, elb bool, fis bool, lamb
 		DiscoveryIntervalElbAlb:                      10,
 		DiscoveryDisabledFis:                         fis,
 		DiscoveryIntervalFis:                         10,
+		DiscoveryDisabledMsk:                         msk,
+		DiscoveryIntervalMsk:                         10,
 		DiscoveryDisabledLambda:                      lambda,
 		DiscoveryIntervalLambda:                      10,
 		DiscoveryDisabledRds:                         rds,
@@ -44,7 +46,7 @@ func Test_getExtensionList(t *testing.T) {
 	}{
 		{
 			name:   "disabled all but ec2",
-			config: createConfig(false, true, true, true, true, true, true, true),
+			config: createConfig(false, true, true, true, true, true, true, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.ec2_instance.state",
 				"/com.steadybit.extension_aws.ec2-instance/discovery",
@@ -57,7 +59,7 @@ func Test_getExtensionList(t *testing.T) {
 		},
 		{
 			name:   "disabled all but ecs",
-			config: createConfig(true, false, true, true, true, true, true, true),
+			config: createConfig(true, false, true, true, true, true, true, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.ecs-task.stop",
 				"/com.steadybit.extension_aws.ecs-service.event_log",
@@ -76,7 +78,7 @@ func Test_getExtensionList(t *testing.T) {
 		},
 		{
 			name:   "disabled all but elb",
-			config: createConfig(true, true, true, false, true, true, true, true),
+			config: createConfig(true, true, true, false, true, true, true, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.alb.static_response",
 				"/com.steadybit.extension_aws.alb/discovery",
@@ -86,7 +88,7 @@ func Test_getExtensionList(t *testing.T) {
 		},
 		{
 			name:   "disabled all but elasticache",
-			config: createConfig(true, true, false, true, true, true, true, true),
+			config: createConfig(true, true, false, true, true, true, true, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.elasticache.node-group.failover",
 				"/com.steadybit.extension_aws.elasticache.node-group/discovery",
@@ -96,7 +98,7 @@ func Test_getExtensionList(t *testing.T) {
 		},
 		{
 			name:   "disabled all but fis",
-			config: createConfig(true, true, true, true, false, true, true, true),
+			config: createConfig(true, true, true, true, false, true, true, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.fis.start_experiment",
 				"/com.steadybit.extension_aws.fis-experiment-template/discovery",
@@ -105,8 +107,18 @@ func Test_getExtensionList(t *testing.T) {
 			},
 		},
 		{
+			name:   "disabled all but msk",
+			config: createConfig(true, true, true, true, true, false, true, true, true),
+			wantedRoutes: []string{
+				"/com.steadybit.extension_aws.msk.cluster.broker.reboot-broker",
+				"/com.steadybit.extension_aws.msk.cluster.broker/discovery",
+				"/com.steadybit.extension_aws.msk.cluster.broker/discovery/target-description",
+				"/discovery/attributes",
+			},
+		},
+		{
 			name:   "disabled all but lambda",
-			config: createConfig(true, true, true, true, true, false, true, true),
+			config: createConfig(true, true, true, true, true, true, false, true, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.lambda.denylist",
 				"/com.steadybit.extension_aws.lambda.diskspace",
@@ -120,7 +132,7 @@ func Test_getExtensionList(t *testing.T) {
 		},
 		{
 			name:   "disabled all but rds",
-			config: createConfig(true, true, true, true, true, true, false, true),
+			config: createConfig(true, true, true, true, true, true, true, false, true),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.rds.cluster.failover",
 				"/com.steadybit.extension_aws.rds.instance.reboot",
@@ -134,7 +146,7 @@ func Test_getExtensionList(t *testing.T) {
 		},
 		{
 			name:   "disabled all but zone",
-			config: createConfig(true, true, true, true, true, true, true, false),
+			config: createConfig(true, true, true, true, true, true, true, true, false),
 			wantedRoutes: []string{
 				"/com.steadybit.extension_aws.az.blackhole",
 				"/com.steadybit.extension_aws.zone/discovery",
