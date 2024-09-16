@@ -256,6 +256,30 @@ start the very first fis experiment via the steadybit agent, you will need to ad
 
 </details>
 <details>
+    <summary>MSK-Discovery & Actions</summary>
+
+```yaml
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Allow",
+			"Action": [
+				"kafka:ListClustersV2",
+				"kafka:TagResource",
+				"kafka:ListNodes",
+				"kafka:UntagResource",
+				"kafka:RebootBroker"
+			],
+			"Resource": "*"
+		}
+	]
+}
+```
+
+</details>
+<details>
     <summary>Lambda Functions-Discovery & Attacks</summary>
 
 > ❗️These attacks need the [failure-lambda library to be included in your lambdas](https://github.com/steadybit/failure-lambda?tab=readme-ov-file#how-to-install-with-parameter-in-ssm-parameter-store).
