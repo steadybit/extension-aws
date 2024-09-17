@@ -10,16 +10,16 @@ toolchain go1.22.4
 require (
 	github.com/KimMachineGun/automemlimit v0.6.1
 	github.com/aws/aws-sdk-go-v2 v1.30.5
-	github.com/aws/aws-sdk-go-v2/config v1.27.31
+	github.com/aws/aws-sdk-go-v2/config v1.27.33
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.32
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.13
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.177.0
-	github.com/aws/aws-sdk-go-v2/service/ecs v1.45.2
-	github.com/aws/aws-sdk-go-v2/service/elasticache v1.40.7
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.177.3
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.45.4
+	github.com/aws/aws-sdk-go-v2/service/elasticache v1.40.9
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.34.2
 	github.com/aws/aws-sdk-go-v2/service/fis v1.28.0
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.36.0
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.58.1
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.58.3
 	github.com/aws/aws-sdk-go-v2/service/rds v1.82.2
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.52.6
 	github.com/aws/aws-sdk-go-v2/service/sts v1.30.7
