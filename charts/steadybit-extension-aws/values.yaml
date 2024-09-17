@@ -17,6 +17,8 @@ aws:
       elb: true
       # aws.discovery.disabled.fis -- Disables FIS discovery and the related actions.
       fis: false
+      # aws.discovery.disabled.msk -- Disables MSK discovery and the related actions.
+      msk: false
       # aws.discovery.disabled.lambda -- Disables Lambda discovery and the related actions.
       lambda: false
       # aws.discovery.disabled.rds -- Disables RDS discovery and the related actions.
@@ -35,6 +37,8 @@ aws:
         elb: []
         # aws.discovery.attributes.excludes.fis -- List of attributes to exclude from FIS discovery.
         fis: []
+        # aws.discovery.attributes.excludes.msk -- List of attributes to exclude from MSK discovery.
+        msk: []
         # aws.discovery.attributes.excludes.lambda -- List of attributes to exclude from Lambda discovery.
         lambda: []
         # aws.discovery.attributes.excludes.rds -- List of attributes to exclude from RDS discovery.

@@ -12,6 +12,7 @@ type Specification struct {
 	DiscoveryDisabledElasticache                 bool     `json:"discoveryDisabledElasticache" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledElb                         bool     `json:"discoveryDisabledElb" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledFis                         bool     `json:"discoveryDisabledFis" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledMsk                         bool     `json:"discoveryDisabledMsk" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledLambda                      bool     `json:"discoveryDisabledLambda" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledRds                         bool     `json:"discoveryDisabledRds" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledZone                        bool     `json:"discoveryDisabledZone" split_words:"true" required:"false" default:"false"`
@@ -20,6 +21,7 @@ type Specification struct {
 	DiscoveryIntervalEcsTask                     int      `json:"discoveryIntervalEcsTask" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalElasticacheReplicationGroup int      `json:"discoveryIntervalElasticacheReplicationGroup" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalElbAlb                      int      `json:"discoveryIntervalElbAlb" split_words:"true" required:"false" default:"30"`
+	DiscoveryIntervalMsk                         int      `json:"discoveryIntervalMsk" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalFis                         int      `json:"discoveryIntervalFis" split_words:"true" required:"false" default:"300"`
 	DiscoveryIntervalLambda                      int      `json:"discoveryIntervalLambda" split_words:"true" required:"false" default:"60"`
 	DiscoveryIntervalRds                         int      `json:"discoveryIntervalRds" split_words:"true" required:"false" default:"30"`
@@ -31,6 +33,7 @@ type Specification struct {
 	DiscoveryAttributesExcludesEcs               []string `json:"discoveryAttributesExcludesEcs" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesElasticache       []string `json:"discoveryAttributesExcludesElasticache" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesFis               []string `json:"discoveryAttributesExcludesFis" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesMsk               []string `json:"discoveryAttributesExcludesMsk" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesLambda            []string `json:"discoveryAttributesExcludesLambda" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesRds               []string `json:"discoveryAttributesExcludesRds" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesZone              []string `json:"discoveryAttributesExcludesZone" split_words:"true" required:"false"`

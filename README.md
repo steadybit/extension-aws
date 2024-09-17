@@ -25,6 +25,8 @@ our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extensio
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ELB_ALB`                |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS`                    | `aws.discovery.disabled.fis`                    | Disable FIS-Discovery and all FIS related definitions                                                                                                         | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_FIS`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 300                                                                                                                                           |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_MSK`                    | `aws.discovery.disabled.msk`                    | Disable MSK-Discovery and all MSK related definitions                                                                                                         | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_MSK`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA`                 | `aws.discovery.disabled.lambda`                 | Disable Lambda-Discovery and all Lambda related definitions                                                                                                   | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_LAMBDA`                 |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS`                    | `aws.discovery.disabled.rds`                    | Disable RDS-Discovery and all RDS related definitions                                                                                                         | no       | false                                                                                                                                         |
@@ -37,10 +39,11 @@ our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extensio
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ECS`         | `aws.discovery.attributes.excludes.ecs`         | List of ECS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELASTICACHE` | `aws.discovery.attributes.excludes.elasticache` | List of Elasticache Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                            | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELB`         | `aws.discovery.attributes.excludes.elb`         | List of ELB Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
-| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS`         | `aws.discovery.attributes.excludes.zone`        | List of FIS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
-| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA`      | `aws.discovery.attributes.excludes.fis`         | List of Lambda Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                 | no       |                                                                                                                                               |
-| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS`         | `aws.discovery.attributes.excludes.lambda`      | List of RDS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
-| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ZONE`        | `aws.discovery.attributes.excludes.rds`         | List of Availibilty Zone Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                       | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS`         | `aws.discovery.attributes.excludes.fis`         | List of FIS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_MSK`         | `aws.discovery.attributes.excludes.msk`         | List of MSK Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA`      | `aws.discovery.attributes.excludes.lambda`      | List of Lambda Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                 | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS`         | `aws.discovery.attributes.excludes.rds`         | List of RDS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ZONE`        | `aws.discovery.attributes.excludes.zone`        | List of Availibilty Zone Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                       | no       |                                                                                                                                               |
 
 The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
 
@@ -251,6 +254,30 @@ start the very first fis experiment via the steadybit agent, you will need to ad
       "Resource": "arn:aws:iam::<YOUR-ACCOUNT>:role/aws-service-role/fis.amazonaws.com/AWSServiceRoleForFIS"
     }
   ]
+}
+```
+
+</details>
+<details>
+    <summary>MSK-Discovery & Actions</summary>
+
+```yaml
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Allow",
+			"Action": [
+				"kafka:ListClustersV2",
+				"kafka:TagResource",
+				"kafka:ListNodes",
+				"kafka:UntagResource",
+				"kafka:RebootBroker"
+			],
+			"Resource": "*"
+		}
+	]
 }
 ```
 
