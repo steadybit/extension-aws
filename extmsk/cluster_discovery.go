@@ -51,14 +51,16 @@ func (r *mskClusterDiscovery) Describe() discovery_kit_api.DiscoveryDescription 
 func (r *mskClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       mskBrokerTargetId,
-		Label:    discovery_kit_api.PluralLabel{One: "MSK cluster", Other: "MSK clusters"},
+		Label:    discovery_kit_api.PluralLabel{One: "MSK broker", Other: "MSK brokers"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(mskIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
-				{Attribute: "aws.msk.cluster.status"},
+				{Attribute: "aws.msk.cluster.state"},
+				{Attribute: "aws.msk.cluster.version"},
+				{Attribute: "aws.msk.broker.kafka-version"},
 				{Attribute: "aws.account"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{
@@ -89,7 +91,7 @@ func (r *mskClusterDiscovery) DescribeAttributes() []discovery_kit_api.Attribute
 		}, {
 			Attribute: "aws.msk.cluster.name",
 			Label: discovery_kit_api.PluralLabel{
-				One:   "AWS MSK cluster Name",
+				One:   "AWS MSK cluster name",
 				Other: "AWS MSK cluster names",
 			},
 		},
