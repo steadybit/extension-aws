@@ -43,7 +43,7 @@ func (r *mskClusterDiscovery) Describe() discovery_kit_api.DiscoveryDescription 
 	return discovery_kit_api.DiscoveryDescription{
 		Id: mskBrokerTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryDisabledMsk)),
+			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalMsk)),
 		},
 	}
 }
@@ -74,7 +74,14 @@ func (r *mskClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescripti
 func (r *mskClusterDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
 	return []discovery_kit_api.AttributeDescription{
 		{
-			Attribute: "aws.arn",
+			Attribute: "aws.msk.broker.arn",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "AWS MSK broker arn",
+				Other: "AWS MSK broker arns",
+			},
+		},
+		{
+			Attribute: "aws.msk.cluster.arn",
 			Label: discovery_kit_api.PluralLabel{
 				One:   "AWS MSK cluster arn",
 				Other: "AWS MSK cluster arns",
@@ -170,14 +177,19 @@ func getAllMskClusters(ctx context.Context, mskApi MskApi, awsAccountNumber stri
 		}
 
 		for _, mskCluster := range output.ClusterInfoList {
-			paginatorNodes := kafka.NewListNodesPaginator(mskApi, &kafka.ListNodesInput{ClusterArn: mskCluster.ClusterArn})
-			for paginatorNodes.HasMorePages() {
-				outputNode, err := paginatorNodes.NextPage(ctx)
-				if err != nil {
-					return result, err
-				}
-				for _, node := range outputNode.NodeInfoList {
-					result = append(result, toClusterTarget(mskCluster, node, awsAccountNumber, awsRegion))
+			//You can't list the nodes for a cluster that is in the CREATING state.
+			if mskCluster.State == types.ClusterStateCreating {
+				log.Warn().Msg("You can't list the nodes for a cluster that is in the CREATING state")
+			} else {
+				paginatorNodes := kafka.NewListNodesPaginator(mskApi, &kafka.ListNodesInput{ClusterArn: mskCluster.ClusterArn})
+				for paginatorNodes.HasMorePages() {
+					outputNode, err := paginatorNodes.NextPage(ctx)
+					if err != nil {
+						return result, err
+					}
+					for _, node := range outputNode.NodeInfoList {
+						result = append(result, toClusterTarget(mskCluster, node, awsAccountNumber, awsRegion))
+					}
 				}
 			}
 		}
@@ -192,7 +204,7 @@ func toClusterTarget(cluster types.Cluster, node types.NodeInfo, awsAccountNumbe
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}
-	attributes["aws.arn"] = []string{arn}
+	attributes["aws.msk.cluster.broker.arn"] = []string{arn}
 	attributes["aws.region"] = []string{awsRegion}
 	attributes["aws.msk.cluster.arn"] = []string{*cluster.ClusterArn}
 	attributes["aws.msk.cluster.name"] = []string{label}
