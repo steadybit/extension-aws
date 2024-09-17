@@ -60,7 +60,7 @@ func (r *mskClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescripti
 				{Attribute: "steadybit.label"},
 				{Attribute: "aws.msk.cluster.state"},
 				{Attribute: "aws.msk.cluster.version"},
-				{Attribute: "aws.msk.broker.kafka-version"},
+				{Attribute: "aws.msk.cluster.broker.kafka-version"},
 				{Attribute: "aws.account"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{
