@@ -111,6 +111,10 @@ spec:
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS
               value: {{ join "," .Values.aws.discovery.attributes.excludes.fis | quote }}
             {{- end }}
+            {{- if .Values.aws.discovery.attributes.excludes.msk }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_MSK
+              value: {{ join "," .Values.aws.discovery.attributes.excludes.msk | quote }}
+            {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.lambda }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA
               value: {{ join "," .Values.aws.discovery.attributes.excludes.lambda | quote }}
@@ -128,12 +132,18 @@ spec:
             {{- end }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
               value: "{{.Values.aws.discovery.disabled.ecs}}"
+            {{- if .Values.aws.discovery.disabled.elasticache }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-              value: "{{.Values.aws.discovery.disabled.elasticache}}"
+              value: "true"
+            {{- end }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
               value: "{{.Values.aws.discovery.disabled.elb}}"
             {{- if .Values.aws.discovery.disabled.fis }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS
+              value: "true"
+            {{- end }}
+            {{- if .Values.aws.discovery.disabled.msk }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_MSK
               value: "true"
             {{- end }}
             {{- if .Values.aws.discovery.disabled.lambda }}
