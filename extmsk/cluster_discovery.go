@@ -74,7 +74,7 @@ func (r *mskClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescripti
 func (r *mskClusterDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
 	return []discovery_kit_api.AttributeDescription{
 		{
-			Attribute: "aws.msk.broker.arn",
+			Attribute: "aws.msk.cluster.broker.arn",
 			Label: discovery_kit_api.PluralLabel{
 				One:   "AWS MSK broker arn",
 				Other: "AWS MSK broker arns",

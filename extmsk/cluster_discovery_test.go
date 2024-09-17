@@ -116,7 +116,7 @@ func TestGetAllMskClusters(t *testing.T) {
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"5.5.3"}, target.Attributes["aws.msk.cluster.broker.kafka-version"])
 	assert.Equal(t, []string{"5.5"}, target.Attributes["aws.msk.cluster.broker.zookeeper-version"])
-	assert.Equal(t, []string{"node-arn"}, target.Attributes["aws.arn"])
+	assert.Equal(t, []string{"node-arn"}, target.Attributes["aws.msk.cluster.broker.arn"])
 	assert.Equal(t, []string{"cluster-arn"}, target.Attributes["aws.msk.cluster.arn"])
 }
 
