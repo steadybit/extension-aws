@@ -22,7 +22,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.61.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.84.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.52.6
-	github.com/aws/aws-sdk-go-v2/service/sts v1.30.7
+	github.com/aws/aws-sdk-go-v2/service/sts v1.31.3
 	github.com/aws/smithy-go v1.21.0
 	github.com/docker/go-connections v0.5.0
 	github.com/google/uuid v1.6.0
