@@ -85,7 +85,8 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 					Query:       "aws.zone.id=\"\"",
 				},
 			})}),
-		Category:    extutil.Ptr("network"),
+		Technology:  extutil.Ptr("AWS"),
+		Category:    extutil.Ptr("Network"),
 		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{

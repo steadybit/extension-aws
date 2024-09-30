@@ -50,6 +50,8 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 		Description: "Start an AWS FIS experiment",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(fisIcon),
+		Technology:  extutil.Ptr("AWS"),
+		Category:    extutil.Ptr("FIS"),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			TargetType:          fisTargetId,
 			QuantityRestriction: extutil.Ptr(action_kit_api.ExactlyOne),

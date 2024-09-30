@@ -50,7 +50,8 @@ func (e *ecsServiceScaleAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Scale Service",
 		Description: "Up-/ or downscale an ECS service",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Category:    extutil.Ptr("state"),
+		Technology:  extutil.Ptr("AWS"),
+		Category:    extutil.Ptr("ECS"),
 		Icon:        extutil.Ptr(ecsServiceIcon),
 		Kind:        action_kit_api.Attack,
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{

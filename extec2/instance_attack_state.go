@@ -64,7 +64,8 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 				},
 			}),
 		}),
-		Category:    extutil.Ptr("state"),
+		Technology:  extutil.Ptr("AWS"),
+		Category:    extutil.Ptr("EC2"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{

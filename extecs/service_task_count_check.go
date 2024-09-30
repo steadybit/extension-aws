@@ -68,7 +68,8 @@ func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescript
 		Description: "Verify service task counts.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(ecsServiceIcon),
-		Category:    extutil.Ptr("AWS ECS"),
+		Technology:  extutil.Ptr("AWS"),
+		Category:    extutil.Ptr("ECS"),
 		Kind:        action_kit_api.Check,
 		TimeControl: action_kit_api.TimeControlInternal,
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{

@@ -24,7 +24,8 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 		Description:     "Injects exception into the function.",
 		Icon:            extutil.Ptr(lambdaTargetIcon),
 		TargetSelection: &lambdaTargetSelection,
-		Category:        extutil.Ptr("application"),
+		Technology:      extutil.Ptr("AWS"),
+		Category:        extutil.Ptr("Lambda"),
 		Kind:            action_kit_api.Attack,
 		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{

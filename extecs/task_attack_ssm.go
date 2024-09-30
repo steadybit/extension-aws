@@ -78,7 +78,8 @@ func newEcsTaskSsmAction(makeDescription func() action_kit_api.ActionDescription
 			},
 		}),
 	}
-	description.Category = extutil.Ptr("resource")
+	description.Technology = extutil.Ptr("AWS")
+	description.Category = extutil.Ptr("ECS")
 	description.Kind = action_kit_api.Attack
 	description.TimeControl = action_kit_api.TimeControlInternal
 	description.Status = &action_kit_api.MutatingEndpointReferenceWithCallInterval{

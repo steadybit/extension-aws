@@ -49,7 +49,8 @@ func (f EcsServiceEventLogAction) Describe() action_kit_api.ActionDescription {
 		Description: "Collect service events from ECS",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(ecsServiceIcon),
-		Category:    extutil.Ptr("AWS ECS"),
+		Technology:  extutil.Ptr("AWS"),
+		Category:    extutil.Ptr("ECS"),
 		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Other,
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{

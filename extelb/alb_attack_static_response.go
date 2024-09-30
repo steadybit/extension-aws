@@ -69,6 +69,8 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 		Id:          fmt.Sprintf("%s.static_response", albTargetId),
 		Label:       "Return static response",
 		Description: "Define a static Response for a given Listener of an Application Load Balancer.",
+		Technology:  extutil.Ptr("AWS"),
+		Category:    extutil.Ptr("Load Balancer"),
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(albIcon),
 		Kind:        action_kit_api.Attack,
