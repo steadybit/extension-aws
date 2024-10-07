@@ -9,13 +9,13 @@ toolchain go1.22.4
 
 require (
 	github.com/KimMachineGun/automemlimit v0.6.1
-	github.com/aws/aws-sdk-go-v2 v1.31.0
+	github.com/aws/aws-sdk-go-v2 v1.32.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.33
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.37
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.14
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.179.2
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.46.3
-	github.com/aws/aws-sdk-go-v2/service/elasticache v1.41.3
+	github.com/aws/aws-sdk-go-v2/service/elasticache v1.42.0
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.38.3
 	github.com/aws/aws-sdk-go-v2/service/fis v1.29.3
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.37.0
@@ -23,7 +23,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/rds v1.84.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.54.3
 	github.com/aws/aws-sdk-go-v2/service/sts v1.31.3
-	github.com/aws/smithy-go v1.21.0
+	github.com/aws/smithy-go v1.22.0
 	github.com/docker/go-connections v0.5.0
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -50,8 +50,8 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.5 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.18 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.18 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.19 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.19 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.20 // indirect
