@@ -3,7 +3,7 @@
 ##
 ## Build
 ##
-FROM --platform=$BUILDPLATFORM goreleaser/goreleaser:v2.2.0 AS build
+FROM --platform=$BUILDPLATFORM goreleaser/goreleaser:v2.3.2 AS build
 
 ARG TARGETOS TARGETARCH
 ARG BUILD_WITH_COVERAGE
