@@ -28,7 +28,7 @@ require (
 	github.com/rs/zerolog v1.33.0
 	github.com/sosodev/duration v1.3.1
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.3
-	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.11
+	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.12
 	github.com/steadybit/action-kit/go/action_kit_test v1.3.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.6.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.2.0
