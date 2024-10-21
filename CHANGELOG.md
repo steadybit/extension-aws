@@ -1,8 +1,13 @@
 # Changelog
 
 ## v2.3.3 (next release)
-- fix graceful shutdown
--
+- Fix graceful shutdown
+- Added MSK Support
+	- Discovery of MSK Brokers
+ 	- Action to trigger a reboot of a broker
+- Added Elasticache support
+	- Discovery of Elasticache Nodegroups
+	- Action to trigger a failover of a nodegroup 
 ## v2.3.2
 
 - Update dependencies
