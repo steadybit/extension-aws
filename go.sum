@@ -282,8 +282,8 @@ github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/spkg/bom v0.0.0-20160624110644-59b7046e48ad/go.mod h1:qLr4V1qq6nMqFKkMo8ZTx3f+BZEkzsRUY10Xsm2mwU0=
 github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.3 h1:NUFdSLNJ0WiO8azy0KdiFZgSARzaNL0g4ek6cN2lATs=
 github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.3/go.mod h1:ycF2RLgRsB8I/jD52aE+dKZKVru1GIEtmkcRcIR3vXk=
-github.com/steadybit/action-kit/go/action_kit_sdk v1.1.11 h1:0Ov9B0KXIdw/o12x4BxxNL24BH1CVN1SgoLOJG1ZEC8=
-github.com/steadybit/action-kit/go/action_kit_sdk v1.1.11/go.mod h1:dFsAwVULEjA1s8iE6FfEc8YdzKRQ2rggSNdHcsSpLXk=
+github.com/steadybit/action-kit/go/action_kit_sdk v1.1.12 h1:qHgEHBbp83QxVoS9UuBc9EDbBkAyF8UWhDG0/VwoYYQ=
+github.com/steadybit/action-kit/go/action_kit_sdk v1.1.12/go.mod h1:D8eHLbT+C797myIwacybsz0bqDfS1ShpIzjr+eSweX0=
 github.com/steadybit/action-kit/go/action_kit_test v1.3.0 h1:PZ8BfKQyFlFmbOcrp0PKHjHFT3S8y3mOBTGo/mGQcAE=
 github.com/steadybit/action-kit/go/action_kit_test v1.3.0/go.mod h1:R4L0LaZ60cE/pUOOrl3FoFgXNF1jT1tfQOWqJRdszbg=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.6.0 h1:q24S067wJ7uUZsi9LcccDJIEdsk9Ikss15hbqAt/OuE=
