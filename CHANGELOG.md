@@ -1,13 +1,19 @@
 # Changelog
 
-## v2.3.3 (next release)
-- Fix graceful shutdown
+## v2.3.4 (next release)
+
+## v2.3.3
+
 - Added MSK Support
 	- Discovery of MSK Brokers
  	- Action to trigger a reboot of a broker
 - Added Elasticache support
 	- Discovery of Elasticache Nodegroups
-	- Action to trigger a failover of a nodegroup 
+	- Action to trigger a failover of a nodegroup
+- Fix graceful shutdown
+- Fix `categroy` and `technology` of ECS Stop Task attack
+- Update dependencies (go 1.23)
+
 ## v2.3.2
 
 - Update dependencies
