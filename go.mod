@@ -3,7 +3,7 @@
 
 module github.com/steadybit/extension-aws
 
-go 1.23
+go 1.23.2
 
 require (
 	github.com/KimMachineGun/automemlimit v0.6.1
