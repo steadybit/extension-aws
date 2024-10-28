@@ -18,6 +18,7 @@ import (
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
+	"golang.org/x/exp/slices"
 	"strings"
 )
 
@@ -114,12 +115,12 @@ func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, 
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS targetAccount %s", targetAccount), err)
 	}
 	//Get Extension Account
-	extensionAwsAccount := e.getExtensionAWSAccount(ctx, clientImds)
-	if extensionAwsAccount == "" {
+	protectedAccounts := e.getProtectedAWSAccounts(ctx, clientImds)
+	if len(protectedAccounts) == 0 {
 		return nil, extension_kit.ToError("Could not get AWS Account of the extension. Attack is disabled to prevent an extension lockout.", nil)
 	}
-	if targetAccount == extensionAwsAccount {
-		return nil, extension_kit.ToError(fmt.Sprintf("The extension is running in the same AWS account (%s) as the target. Attack is disabled to prevent an extension lockout.", extensionAwsAccount), nil)
+	if slices.Contains(protectedAccounts, targetAccount) {
+		return nil, extension_kit.ToError(fmt.Sprintf("The extension is running in a protected AWS account (%s). Attack is disabled to prevent an extension lockout.", protectedAccounts), nil)
 	}
 
 	agentAwsAccountId := ""
@@ -132,7 +133,7 @@ func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, 
 	}
 
 	if targetAccount == agentAwsAccountId {
-		return nil, extension_kit.ToError(fmt.Sprintf("The agent is running in the same AWS account (%s) as the target. Attack is disabled to prevent an agent lockout.", extensionAwsAccount), nil)
+		return nil, extension_kit.ToError(fmt.Sprintf("The agent is running in the same AWS account (%s) as the target. Attack is disabled to prevent an agent lockout.", agentAwsAccountId), nil)
 	}
 
 	// Get Target Subnets
@@ -219,20 +220,21 @@ func getTargetSubnets(clientEc2 azBlackholeEC2Api, ctx context.Context, targetZo
 	return subnetResults, nil
 }
 
-func (e *azBlackholeAction) getExtensionAWSAccount(ctx context.Context, clientImds azBlackholeImdsApi) string {
+func (e *azBlackholeAction) getProtectedAWSAccounts(ctx context.Context, clientImds azBlackholeImdsApi) []string {
 	ec2MetadataAccountId := getAccountNumberByEC2Metadata(ctx, clientImds)
-	resultAccountNumber := ec2MetadataAccountId
-
 	if ec2MetadataAccountId == "" && e.extensionRootAccountNumber != "" {
-		resultAccountNumber = e.extensionRootAccountNumber
+		return []string{e.extensionRootAccountNumber}
 		log.Info().Msgf("Agent AWS Account %s provided by STS get-caller-identity", e.extensionRootAccountNumber)
 	}
-
 	if ec2MetadataAccountId != "" && e.extensionRootAccountNumber != "" && e.extensionRootAccountNumber != ec2MetadataAccountId {
-		log.Error().Msgf("Agent AWS Account %s provided by EC2-Metadata-Service differs from the one provided by STS get-caller-identity %s", ec2MetadataAccountId, e.extensionRootAccountNumber)
-		return ""
+		log.Info().Msgf("Agent AWS Account %s provided by EC2-Metadata-Service differs from the one provided by STS get-caller-identity %s", ec2MetadataAccountId, e.extensionRootAccountNumber)
+		return []string{ec2MetadataAccountId, e.extensionRootAccountNumber}
 	}
-	return resultAccountNumber
+	if ec2MetadataAccountId != "" {
+		log.Info().Msgf("Agent AWS Account %s provided by EC2", e.extensionRootAccountNumber)
+		return []string{ec2MetadataAccountId}
+	}
+	return []string{}
 }
 
 func getAccountNumberByEC2Metadata(ctx context.Context, clientImds azBlackholeImdsApi) string {
