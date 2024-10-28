@@ -223,8 +223,8 @@ func getTargetSubnets(clientEc2 azBlackholeEC2Api, ctx context.Context, targetZo
 func (e *azBlackholeAction) getProtectedAWSAccounts(ctx context.Context, clientImds azBlackholeImdsApi) []string {
 	ec2MetadataAccountId := getAccountNumberByEC2Metadata(ctx, clientImds)
 	if ec2MetadataAccountId == "" && e.extensionRootAccountNumber != "" {
-		return []string{e.extensionRootAccountNumber}
 		log.Info().Msgf("Agent AWS Account %s provided by STS get-caller-identity", e.extensionRootAccountNumber)
+		return []string{e.extensionRootAccountNumber}
 	}
 	if ec2MetadataAccountId != "" && e.extensionRootAccountNumber != "" && e.extensionRootAccountNumber != ec2MetadataAccountId {
 		log.Info().Msgf("Agent AWS Account %s provided by EC2-Metadata-Service differs from the one provided by STS get-caller-identity %s", ec2MetadataAccountId, e.extensionRootAccountNumber)
