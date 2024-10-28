@@ -1,6 +1,8 @@
 # Changelog
 
 ## v2.3.4 (next release)
+- Don't fail AWS Blackhole if account != service owner
+- Update dependencies
 
 ## v2.3.3
 
