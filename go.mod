@@ -18,7 +18,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/fis v1.30.2
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.38.2
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.63.2
-	github.com/aws/aws-sdk-go-v2/service/rds v1.88.0
+	github.com/aws/aws-sdk-go-v2/service/rds v1.89.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.55.2
 	github.com/aws/aws-sdk-go-v2/service/sts v1.32.2
 	github.com/aws/smithy-go v1.22.0
@@ -52,7 +52,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.22 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.24.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
