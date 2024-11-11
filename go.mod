@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.28.3
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.44
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.19
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.187.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.187.1
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.49.0
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.43.2
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.40.0
