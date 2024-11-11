@@ -43,8 +43,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.0 h1:TToQNkv
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.0/go.mod h1:0jp+ltwkf+SwG2fm/PKo8t4y8pJSgOCO4D8Lz3k0aHQ=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.4 h1:tHxQi/XHPK0ctd/wdOw0t7Xrc2OxcRCnVzv8lwWPu0c=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.4/go.mod h1:4GQbF1vJzG60poZqWatZlhP31y8PGCCVTvIGPdaaYJ0=
-github.com/aws/aws-sdk-go-v2/service/kafka v1.38.2 h1:aQu8bo/j06nO7d8PBtKz65q77Ux4XLyxhIAlAJ7x0Vg=
-github.com/aws/aws-sdk-go-v2/service/kafka v1.38.2/go.mod h1:CaEa29DZaOw9sqz/QZ6DB4GODLSTOF4A+kDTzV6eNs4=
+github.com/aws/aws-sdk-go-v2/service/kafka v1.38.5 h1:bKFEi5OkRVuO66i5YAtqbZDnzb3gEywBRC4Co1ViK0U=
+github.com/aws/aws-sdk-go-v2/service/kafka v1.38.5/go.mod h1:aXQ/kIoUOZ5KM9tIOtT/KksMcwQJvaAB584BF3elOqM=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.63.2 h1:D80A6kILpbqo0TgZyhr5FPzBGOT0nAU7aLCtk9kQT+4=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.63.2/go.mod h1:qHTP1Ag4En7u0h9MFxUtNZqx/k0HYW7GjuGkzR0nUC8=
 github.com/aws/aws-sdk-go-v2/service/rds v1.89.0 h1:4x0WbBa+i/AS0AFlj7yvx3n+GuK3XR58J6t61pW6h8U=
