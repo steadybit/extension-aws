@@ -27,6 +27,7 @@ import (
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extlogging"
 	"github.com/steadybit/extension-kit/extruntime"
+	"github.com/steadybit/extension-kit/extsignals"
 	_ "go.uber.org/automaxprocs" // Importing automaxprocs automatically adjusts GOMAXPROCS.
 	_ "net/http/pprof"           //allow pprof
 	"os"
@@ -49,9 +50,14 @@ func main() {
 
 	registerHandlers(ctx)
 
-	action_kit_sdk.InstallSignalHandler(func(o os.Signal) {
-		cancel()
+	extsignals.AddSignalHandler(extsignals.SignalHandler{
+		Handler: func(signal os.Signal) {
+			cancel()
+		},
+		Order: extsignals.OrderStopCustom,
+		Name:  "custom-extension-aws",
 	})
+	extsignals.ActivateSignalHandlers()
 
 	action_kit_sdk.RegisterCoverageEndpoints()
 	exthealth.SetReady(true)
