@@ -21,6 +21,7 @@ jobs:
       go_version: '1.23'
       build_linux_packages: true
       VERSION_BUMPER_APPID: ${{ vars.GH_APP_STEADYBIT_APP_ID }}
+      force_push_docker_image: true
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       PAT_TOKEN_EXTENSION_DEPLOYER: ${{ secrets.PAT_TOKEN_EXTENSION_DEPLOYER }}
