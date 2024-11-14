@@ -32,7 +32,6 @@ RUN if [ "$TARGETARCH" = "arm64" ] ; then \
     fi
 RUN unzip awscliv2.zip
 RUN ./aws/install
-RUN aws --version
 
 ARG USERNAME=steadybit
 ARG USER_UID=10000
