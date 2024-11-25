@@ -15,6 +15,7 @@ WORKDIR /app
 
 COPY . .
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH goreleaser build --snapshot="${BUILD_SNAPSHOT}" --single-target -o extension
+
 ##
 ## Runtime
 ##
@@ -22,16 +23,7 @@ FROM alpine:3.20
 
 LABEL "steadybit.com.discovery-disabled"="true"
 
-RUN apk --no-cache add curl
-RUN if [ "$TARGETARCH" = "arm64" ] ; then \
-       echo "Downloading awscli for arm64"; \
-       curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"; \
-    else \
-       echo "Downloading awscli for amd64"; \
-       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
-    fi
-RUN unzip awscliv2.zip
-RUN ./aws/install
+RUN apk --no-cache add aws-cli
 
 ARG USERNAME=steadybit
 ARG USER_UID=10000
