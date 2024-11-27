@@ -38,9 +38,9 @@ func convertInstanceAttackState(request action_kit_api.PrepareActionRequestBody,
 }
 
 func defaultInstanceClientProvider(account string, region string) (rdsDBInstanceApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return rds.NewFromConfig(awsAccount.AwsConfig), nil
+	return rds.NewFromConfig(awsAccess.AwsConfig), nil
 }

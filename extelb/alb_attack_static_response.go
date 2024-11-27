@@ -596,9 +596,9 @@ func restoreOldPriorities(ctx context.Context, client *albStaticResponseApi, sta
 }
 
 func defaultClientProviderService(account string, region string) (albStaticResponseApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return elasticloadbalancingv2.NewFromConfig(awsAccount.AwsConfig), nil
+	return elasticloadbalancingv2.NewFromConfig(awsAccess.AwsConfig), nil
 }

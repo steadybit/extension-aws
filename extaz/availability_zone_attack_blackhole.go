@@ -58,7 +58,7 @@ type azBlackholeImdsApi interface {
 func NewAzBlackholeAction() action_kit_sdk.Action[BlackholeState] {
 	return &azBlackholeAction{
 		clientProvider:             defaultClientProvider,
-		extensionRootAccountNumber: utils.Accounts.GetRootAccountNumber(),
+		extensionRootAccountNumber: utils.GetRootAccountNumber(),
 	}
 }
 
@@ -469,12 +469,12 @@ func getAllNACLsCreatedBySteadybit(clientEc2 azBlackholeEC2Api, ctx context.Cont
 }
 
 func defaultClientProvider(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, nil, err
 	}
-	clientEc2 := ec2.NewFromConfig(awsAccount.AwsConfig)
-	clientImds := imds.NewFromConfig(awsAccount.AwsConfig)
+	clientEc2 := ec2.NewFromConfig(awsAccess.AwsConfig)
+	clientImds := imds.NewFromConfig(awsAccess.AwsConfig)
 	if err != nil {
 		return nil, nil, err
 	}

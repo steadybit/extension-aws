@@ -320,9 +320,9 @@ func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, client ecsTa
 }
 
 func defaultTaskSsmClientProvider(account string, region string) (ecsTaskSsmApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return ssm.NewFromConfig(awsAccount.AwsConfig), nil
+	return ssm.NewFromConfig(awsAccess.AwsConfig), nil
 }

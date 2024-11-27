@@ -214,9 +214,9 @@ func (p EcsServiceDescriptionPoller) pollAll(ctx context.Context) {
 }
 
 func defaultDescribeServiceProvider(account string, region string) (ecsDescribeServicesApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return ecs.NewFromConfig(awsAccount.AwsConfig), nil
+	return ecs.NewFromConfig(awsAccess.AwsConfig), nil
 }

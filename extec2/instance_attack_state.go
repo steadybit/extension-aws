@@ -152,9 +152,9 @@ func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceState
 }
 
 func defaultClientProvider(account string, region string) (ec2InstanceStateChangeApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return ec2.NewFromConfig(awsAccount.AwsConfig), nil
+	return ec2.NewFromConfig(awsAccess.AwsConfig), nil
 }

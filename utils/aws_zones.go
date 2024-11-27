@@ -24,7 +24,7 @@ func InitializeAwsZones() {
 	Zones = &AwsZones{
 		zones: sync.Map{},
 	}
-	_, _ = ForEveryAccount(Accounts, initAwsZonesForAccount, context.Background(), "availability zone")
+	_, _ = ForEveryConfiguredAwsAccess(initAwsZonesForAccount, context.Background(), "availability zone")
 }
 
 func initAwsZonesForAccount(account *AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {

@@ -43,7 +43,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
 	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -91,7 +91,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
 	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -118,7 +118,7 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	withMarker := mock.MatchedBy(func(arg *rds.DescribeDBInstancesInput) bool {
 		return arg.Marker != nil
@@ -171,7 +171,7 @@ func TestGetAllRdsInstancesError(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 

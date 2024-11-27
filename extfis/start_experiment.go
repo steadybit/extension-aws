@@ -100,11 +100,11 @@ func (f FisExperimentAction) Prepare(_ context.Context, state *FisExperimentStat
 
 func (f FisExperimentAction) Start(ctx context.Context, state *FisExperimentState) (*action_kit_api.StartResult, error) {
 	return startExperiment(ctx, state, func(account string, region string) (FisStartExperimentClient, error) {
-		awsAccount, err := utils.Accounts.GetAccount(account, region)
+		awsAccess, err := utils.GetAwsAccess(account, region)
 		if err != nil {
 			return nil, err
 		}
-		return fis.NewFromConfig(awsAccount.AwsConfig), nil
+		return fis.NewFromConfig(awsAccess.AwsConfig), nil
 	})
 }
 
@@ -139,11 +139,11 @@ func startExperiment(ctx context.Context, state *FisExperimentState, clientProvi
 
 func (f FisExperimentAction) Status(ctx context.Context, state *FisExperimentState) (*action_kit_api.StatusResult, error) {
 	return statusExperiment(ctx, state, func(account string, region string) (FisStatusExperimentClient, error) {
-		awsAccount, err := utils.Accounts.GetAccount(account, region)
+		awsAccess, err := utils.GetAwsAccess(account, region)
 		if err != nil {
 			return nil, err
 		}
-		return fis.NewFromConfig(awsAccount.AwsConfig), nil
+		return fis.NewFromConfig(awsAccess.AwsConfig), nil
 	})
 }
 
@@ -218,11 +218,11 @@ type FisStopExperimentClient interface {
 
 func (f FisExperimentAction) Stop(ctx context.Context, state *FisExperimentState) (*action_kit_api.StopResult, error) {
 	return stopExperiment(ctx, state, func(account string, region string) (FisStopExperimentClient, error) {
-		awsAccount, err := utils.Accounts.GetAccount(account, region)
+		awsAccess, err := utils.GetAwsAccess(account, region)
 		if err != nil {
 			return nil, err
 		}
-		return fis.NewFromConfig(awsAccount.AwsConfig), nil
+		return fis.NewFromConfig(awsAccess.AwsConfig), nil
 	})
 }
 

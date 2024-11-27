@@ -126,7 +126,7 @@ func (r *elasticacheReplicationGroupDiscovery) DescribeAttributes() []discovery_
 }
 
 func (r *elasticacheReplicationGroupDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getClusterTargetsForAccount, ctx, "replication-group")
+	return utils.ForEveryConfiguredAwsAccess(getClusterTargetsForAccount, ctx, "replication-group")
 }
 
 func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {

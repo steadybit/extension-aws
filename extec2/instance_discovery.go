@@ -249,7 +249,7 @@ func (e *ec2Discovery) DescribeAttributes() []discovery_kit_api.AttributeDescrip
 }
 
 func (e *ec2Discovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "ec2-instance")
+	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "ec2-instance")
 }
 
 func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {

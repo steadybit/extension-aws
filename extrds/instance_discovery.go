@@ -94,7 +94,7 @@ func (r *rdsInstanceDiscovery) DescribeAttributes() []discovery_kit_api.Attribut
 }
 
 func (r *rdsInstanceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getInstanceTargetsForAccount, ctx, "rds-instance")
+	return utils.ForEveryConfiguredAwsAccess(getInstanceTargetsForAccount, ctx, "rds-instance")
 }
 
 func getInstanceTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {

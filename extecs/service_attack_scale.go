@@ -145,9 +145,9 @@ func (e *ecsServiceScaleAction) Stop(ctx context.Context, state *ServiceScaleSta
 }
 
 func defaultClientProviderService(account string, region string) (ecsServiceScaleApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return ecs.NewFromConfig(awsAccount.AwsConfig), nil
+	return ecs.NewFromConfig(awsAccess.AwsConfig), nil
 }

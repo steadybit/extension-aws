@@ -33,9 +33,9 @@ func convertClusterAttackState(request action_kit_api.PrepareActionRequestBody, 
 	return nil
 }
 func defaultClusterClientProvider(account string, region string) (rdsDBClusterApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return rds.NewFromConfig(awsAccount.AwsConfig), nil
+	return rds.NewFromConfig(awsAccess.AwsConfig), nil
 }

@@ -47,8 +47,8 @@ type zoneMock struct {
 	mock.Mock
 }
 
-func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string) *ec2types.AvailabilityZone {
-	args := m.Called(awsAccountNumber, awsZone)
+func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string, region string) *ec2types.AvailabilityZone {
+	args := m.Called(awsAccountNumber, awsZone, region)
 	return args.Get(0).(*ec2types.AvailabilityZone)
 }
 
@@ -104,7 +104,7 @@ func TestGetAllEcsTasks(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
 	targets, err := GetAllEcsTasks(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")

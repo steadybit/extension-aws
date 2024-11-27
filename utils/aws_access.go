@@ -5,20 +5,28 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	middleware2 "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/aws/smithy-go/logging"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/rs/zerolog/log"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	extConfig "github.com/steadybit/extension-aws/config"
-	"strings"
 )
 
+type AwsAccess struct {
+	AccountNumber string
+	Region        string
+	AwsConfig     aws.Config
+}
+
+type Regions map[string]AwsAccess
+
 var (
-	Accounts *AwsAccounts
+	rootAccountNumber string
+	accounts          map[string]Regions
 )
 
 func InitializeAwsAccess(specification extConfig.Specification) {
@@ -46,10 +54,8 @@ func InitializeAwsAccess(specification extConfig.Specification) {
 		log.Fatal().Err(err).Msgf("Failed to identify AWS account number")
 	}
 
-	Accounts = &AwsAccounts{
-		RootAccountNumber: aws.ToString(identityOutputRoot.Account),
-		Accounts:          make(map[string]Regions),
-	}
+	rootAccountNumber = aws.ToString(identityOutputRoot.Account)
+	accounts = make(map[string]Regions)
 
 	regions := []string{awsConfigForRootAccount.Region}
 	if len(specification.Regions) > 0 {
@@ -60,7 +66,9 @@ func InitializeAwsAccess(specification extConfig.Specification) {
 		log.Debug().Msgf("Executing role assumption in other AWS Accounts.")
 		for _, roleArn := range specification.AssumeRoles {
 			awsConfig := awsConfigForRootAccount.Copy()
-			awsConfig.Credentials = aws.NewCredentialsCache(stscreds.NewAssumeRoleProvider(stsClientForRootAccount, roleArn, setSessionName))
+			awsConfig.Credentials = aws.NewCredentialsCache(stscreds.NewAssumeRoleProvider(stsClientForRootAccount, roleArn, func(o *stscreds.AssumeRoleOptions) {
+				o.RoleSessionName = "steadybit-extension-aws"
+			}))
 
 			stsClient := sts.NewFromConfig(awsConfig)
 			identityOutput, err := stsClient.GetCallerIdentity(context.Background(), nil)
@@ -78,13 +86,13 @@ func InitializeAwsAccess(specification extConfig.Specification) {
 }
 
 func prepareRegionConfigs(regions []string, awsConfig aws.Config, account string) {
-	if _, ok := Accounts.Accounts[account]; !ok {
-		Accounts.Accounts[account] = make(map[string]AwsAccess)
+	if _, ok := accounts[account]; !ok {
+		accounts[account] = make(map[string]AwsAccess)
 	}
 	for _, region := range regions {
 		regionalConfig := awsConfig.Copy()
 		regionalConfig.Region = region
-		Accounts.Accounts[account][region] = AwsAccess{
+		accounts[account][region] = AwsAccess{
 			AccountNumber: account,
 			AwsConfig:     regionalConfig,
 			Region:        region,
@@ -92,32 +100,56 @@ func prepareRegionConfigs(regions []string, awsConfig aws.Config, account string
 	}
 }
 
-type logForwarder struct {
+func GetRootAccountNumber() string {
+	return rootAccountNumber
 }
 
-func (logger logForwarder) Logf(classification logging.Classification, format string, v ...interface{}) {
-	switch classification {
-	case logging.Debug:
-		log.Trace().Msgf(format, v...)
-	case logging.Warn:
-		log.Warn().Msgf(format, v...)
-	}
-}
-
-var customLoggerMiddleware = middleware.InitializeMiddlewareFunc("customLoggerMiddleware",
-	func(ctx context.Context, in middleware.InitializeInput, next middleware.InitializeHandler) (out middleware.InitializeOutput, metadata middleware.Metadata, err error) {
-		operationName := middleware2.GetOperationName(ctx)
-		if strings.HasPrefix(operationName, "List") ||
-			strings.HasPrefix(operationName, "Describe") ||
-			//strings.HasPrefix(operationName, "Assume") ||
-			strings.HasPrefix(operationName, "Get") {
-			log.Trace().Msgf("AWS-Call: %s - %s - %s", middleware2.GetRegion(ctx), middleware2.GetServiceID(ctx), operationName)
-		} else {
-			log.Info().Msgf("AWS-Call: %s - %s - %s", middleware2.GetRegion(ctx), middleware2.GetServiceID(ctx), operationName)
+func GetAwsAccess(accountNumber string, region string) (*AwsAccess, error) {
+	account, ok := accounts[accountNumber]
+	if ok {
+		if regionAccount, ok := account[region]; ok {
+			return &regionAccount, nil
 		}
-		return next.HandleInitialize(ctx, in)
-	})
+	}
+	return nil, fmt.Errorf("AWS Config for account '%s' and region '%s' not found", accountNumber, region)
+}
 
-func setSessionName(o *stscreds.AssumeRoleOptions) {
-	o.RoleSessionName = "steadybit-extension-aws"
+func ForEveryConfiguredAwsAccess(supplier func(account *AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error), ctx context.Context, discovery string) ([]discovery_kit_api.Target, error) {
+	count := 0
+	for _, regions := range accounts {
+		for range regions {
+			count++
+		}
+	}
+	if count > 0 {
+		accountsChannel := make(chan AwsAccess, count)
+		resultsChannel := make(chan []discovery_kit_api.Target, count)
+		for w := 1; w <= extConfig.Config.WorkerThreads; w++ {
+			go func(w int, accounts <-chan AwsAccess, result <-chan []discovery_kit_api.Target) {
+				for account := range accounts {
+					log.Trace().Int("worker", w).Msgf("Collecting %s for account %s in region %s", discovery, account.AccountNumber, account.Region)
+					eachResult, eachErr := supplier(&account, ctx)
+					if eachErr != nil {
+						log.Err(eachErr).Msgf("Failed to collect %s for account %s in region %s", discovery, account.AccountNumber, account.Region)
+					}
+					resultsChannel <- eachResult
+				}
+			}(w, accountsChannel, resultsChannel)
+		}
+		for _, regions := range accounts {
+			for _, account := range regions {
+				accountsChannel <- account
+			}
+		}
+		close(accountsChannel)
+		resultTargets := make([]discovery_kit_api.Target, 0)
+		for a := 1; a <= count; a++ {
+			targets := <-resultsChannel
+			if targets != nil {
+				resultTargets = append(resultTargets, targets...)
+			}
+		}
+		return resultTargets, nil
+	}
+	return []discovery_kit_api.Target{}, nil
 }

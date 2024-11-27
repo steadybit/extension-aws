@@ -30,9 +30,9 @@ type MskApi interface {
 }
 
 func defaultMskClientProvider(account string, region string) (MskApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return kafka.NewFromConfig(awsAccount.AwsConfig), nil
+	return kafka.NewFromConfig(awsAccess.AwsConfig), nil
 }

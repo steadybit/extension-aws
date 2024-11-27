@@ -112,9 +112,9 @@ func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*a
 }
 
 func defaultTaskStopClientProvider(account string, region string) (ecsTaskStopApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return ecs.NewFromConfig(awsAccount.AwsConfig), nil
+	return ecs.NewFromConfig(awsAccess.AwsConfig), nil
 }

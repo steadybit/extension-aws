@@ -138,10 +138,10 @@ func (a *lambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*act
 }
 
 func defaultClientProvider(account string, region string) (ssmApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	client := ssm.NewFromConfig(awsAccount.AwsConfig)
+	client := ssm.NewFromConfig(awsAccess.AwsConfig)
 	return client, nil
 }

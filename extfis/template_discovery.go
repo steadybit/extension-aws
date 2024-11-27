@@ -97,7 +97,7 @@ func (f *fisTemplateDiscovery) DescribeAttributes() []discovery_kit_api.Attribut
 	}
 }
 func (f *fisTemplateDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "fis-template")
+	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "fis-template")
 }
 func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := fis.NewFromConfig(account.AwsConfig)

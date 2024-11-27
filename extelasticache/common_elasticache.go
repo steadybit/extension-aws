@@ -30,9 +30,9 @@ type ElasticacheApi interface {
 }
 
 func defaultElasticacheClientProvider(account string, region string) (ElasticacheApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account, region)
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return elasticache.NewFromConfig(awsAccount.AwsConfig), nil
+	return elasticache.NewFromConfig(awsAccess.AwsConfig), nil
 }

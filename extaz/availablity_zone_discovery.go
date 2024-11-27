@@ -66,7 +66,7 @@ func (a *azDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 }
 
 func (a *azDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "availability zone")
+	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "availability zone")
 }
 
 func getTargetsForAccount(account *utils.AwsAccess, _ context.Context) ([]discovery_kit_api.Target, error) {

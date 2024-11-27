@@ -32,8 +32,8 @@ type zoneMock struct {
 	mock.Mock
 }
 
-func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string) *types.AvailabilityZone {
-	args := m.Called(awsAccountNumber, awsZone)
+func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string, region string) *types.AvailabilityZone {
+	args := m.Called(awsAccountNumber, awsZone, region)
 	return args.Get(0).(*types.AvailabilityZone)
 }
 
@@ -76,7 +76,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -126,7 +126,7 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -179,7 +179,7 @@ func TestNameNotSet(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -204,7 +204,7 @@ func TestGetAllEc2InstancesError(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
 	_, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
