@@ -65,7 +65,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 			}},
 	}, nil)
 
-	action := albStaticResponseAction{clientProvider: func(account string) (albStaticResponseApi, error) {
+	action := albStaticResponseAction{clientProvider: func(account string, region string) (albStaticResponseApi, error) {
 		return api, nil
 	}}
 
@@ -97,6 +97,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
+						"aws.region":      {"us-west-1"},
 					},
 				}),
 				ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
@@ -108,6 +109,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 
 			wantedState: &AlbStaticResponseState{
 				Account:              "42",
+				Region:               "us-west-1",
 				ListenerArn:          "my-listener-arn",
 				LoadbalancerArn:      "my-loadbalancer-arn",
 				ResponseBody:         "Steadybit killed your request",
@@ -141,6 +143,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
+						"aws.region":      {"us-west-1"},
 					},
 				}),
 			}),
@@ -158,6 +161,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
+						"aws.region":      {"us-west-1"},
 					},
 				}),
 			}),
@@ -175,6 +179,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
+						"aws.region":      {"us-west-1"},
 					},
 				}),
 			}),
@@ -199,6 +204,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
+						"aws.region":      {"us-west-1"},
 					},
 				}),
 			}),
@@ -216,6 +222,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
+						"aws.region":      {"us-west-1"},
 					},
 				}),
 			}),
@@ -236,6 +243,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
+						"aws.region":      {"us-west-1"},
 					},
 				}),
 			}),
@@ -314,13 +322,14 @@ func TestAlbStaticResponseAction_Start(t *testing.T) {
 		},
 	}, nil)
 
-	action := albStaticResponseAction{clientProvider: func(account string) (albStaticResponseApi, error) {
+	action := albStaticResponseAction{clientProvider: func(account string, region string) (albStaticResponseApi, error) {
 		return api, nil
 	}}
 
 	// When
 	state := &AlbStaticResponseState{
 		Account:              "42",
+		Region:               "us-west-1",
 		ListenerArn:          "my-listener-arn",
 		LoadbalancerArn:      "my-loadbalancer-arn",
 		ResponseBody:         "Steadybit killed your request",
@@ -440,13 +449,14 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 		return true
 	})).Return(&elasticloadbalancingv2.SetRulePrioritiesOutput{}, nil)
 
-	action := albStaticResponseAction{clientProvider: func(account string) (albStaticResponseApi, error) {
+	action := albStaticResponseAction{clientProvider: func(account string, region string) (albStaticResponseApi, error) {
 		return api, nil
 	}}
 
 	// When
 	state := &AlbStaticResponseState{
 		Account:           "42",
+		Region:            "us-west-1",
 		ListenerArn:       "my-listener-arn",
 		LoadbalancerArn:   "my-loadbalancer-arn",
 		TargetExecutionId: targetExecutionId,

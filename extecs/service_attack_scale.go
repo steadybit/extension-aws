@@ -16,7 +16,7 @@ import (
 )
 
 type ecsServiceScaleAction struct {
-	clientProvider func(account string) (ecsServiceScaleApi, error)
+	clientProvider func(account string, region string) (ecsServiceScaleApi, error)
 }
 
 // Make sure action implements all required interfaces
@@ -25,6 +25,7 @@ var _ action_kit_sdk.ActionWithStop[ServiceScaleState] = (*ecsServiceScaleAction
 
 type ServiceScaleState struct {
 	Account             string
+	Region              string
 	ServiceName         string
 	ClusterArn          string
 	DesiredCount        int32
@@ -88,11 +89,12 @@ func (e *ecsServiceScaleAction) Describe() action_kit_api.ActionDescription {
 
 func (e *ecsServiceScaleAction) Prepare(ctx context.Context, state *ServiceScaleState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.ClusterArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
 	state.ServiceName = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.service.name")[0]
 	state.DesiredCount = extutil.ToInt32(request.Config["desiredCount"])
 
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
 	}
@@ -109,7 +111,7 @@ func (e *ecsServiceScaleAction) Prepare(ctx context.Context, state *ServiceScale
 }
 
 func (e *ecsServiceScaleAction) Start(ctx context.Context, state *ServiceScaleState) (*action_kit_api.StartResult, error) {
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
 	}
@@ -127,7 +129,7 @@ func (e *ecsServiceScaleAction) Start(ctx context.Context, state *ServiceScaleSt
 }
 
 func (e *ecsServiceScaleAction) Stop(ctx context.Context, state *ServiceScaleState) (*action_kit_api.StopResult, error) {
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
 	}
@@ -142,8 +144,8 @@ func (e *ecsServiceScaleAction) Stop(ctx context.Context, state *ServiceScaleSta
 	return nil, nil
 }
 
-func defaultClientProviderService(account string) (ecsServiceScaleApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultClientProviderService(account string, region string) (ecsServiceScaleApi, error) {
+	awsAccount, err := utils.Accounts.GetAccount(account, region)
 	if err != nil {
 		return nil, err
 	}

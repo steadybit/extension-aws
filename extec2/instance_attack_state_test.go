@@ -35,6 +35,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-ec2.instance.id": {"my-instance"},
 						"aws.account":         {"42"},
+						"aws.region":          {"us-west-1"},
 					},
 				}),
 			}),
@@ -42,6 +43,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 			wantedState: &InstanceStateChangeState{
 				Account:    "42",
 				Action:     "stop",
+				Region:     "us-west-1",
 				InstanceId: "my-instance",
 			},
 		},
@@ -53,6 +55,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 					Attributes: map[string][]string{
 						"aws-ec2.instance.id": {"my-instance"},
 						"aws.account":         {"42"},
+						"aws.region":          {"us-west-1"},
 					},
 				}),
 			}),
@@ -75,6 +78,7 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 			if tt.wantedState != nil {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.wantedState.Account, state.Account)
+				assert.Equal(t, tt.wantedState.Region, state.Region)
 				assert.Equal(t, tt.wantedState.InstanceId, state.InstanceId)
 				assert.EqualValues(t, tt.wantedState.Action, state.Action)
 			}
@@ -110,13 +114,14 @@ func TestEc2InstanceStateAction_Start(t *testing.T) {
 		return true
 	})).Return(nil, nil)
 
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
 	// When
 	result, err := action.Start(context.Background(), &InstanceStateChangeState{
 		Account:    "42",
+		Region:     "us-west-1",
 		InstanceId: "dev-worker-1",
 		Action:     "stop",
 	})
@@ -136,13 +141,14 @@ func TestEc2InstanceStateAction_Hibernate(t *testing.T) {
 		require.Equal(t, true, *params.Hibernate)
 		return true
 	})).Return(nil, nil)
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
 	// When
 	result, err := action.Start(context.Background(), &InstanceStateChangeState{
 		Account:    "42",
+		Region:     "us-west-1",
 		InstanceId: "dev-worker-1",
 		Action:     "hibernate",
 	})
@@ -161,13 +167,14 @@ func TestEc2InstanceStateAction_Terminate(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, nil)
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
 	// When
 	result, err := action.Start(context.Background(), &InstanceStateChangeState{
 		Account:    "42",
+		Region:     "us-west-1",
 		InstanceId: "dev-worker-1",
 		Action:     "terminate",
 	})
@@ -186,13 +193,14 @@ func TestEc2InstanceStateAction_Reboot(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, nil)
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
 	// When
 	result, err := action.Start(context.Background(), &InstanceStateChangeState{
 		Account:    "42",
+		Region:     "us-west-1",
 		InstanceId: "dev-worker-1",
 		Action:     "reboot",
 	})
@@ -211,13 +219,14 @@ func TestStartInstanceStateChangeForwardsError(t *testing.T) {
 		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
 		return true
 	})).Return(nil, errors.New("expected"))
-	action := ec2InstanceStateAction{clientProvider: func(account string) (ec2InstanceStateChangeApi, error) {
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
 		return api, nil
 	}}
 
 	// When
 	result, err := action.Start(context.Background(), &InstanceStateChangeState{
 		Account:    "42",
+		Region:     "us-west-1",
 		InstanceId: "dev-worker-1",
 		Action:     "reboot",
 	})

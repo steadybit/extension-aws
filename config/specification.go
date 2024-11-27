@@ -5,6 +5,7 @@ package config
 
 type Specification struct {
 	AssumeRoles                                  []string `json:"assumeRoles" split_words:"true" required:"false"`
+	Regions                                      []string `json:"regions" split_words:"true" required:"false"`
 	WorkerThreads                                int      `json:"workerThreads" split_words:"true" required:"false" default:"1"`
 	AwsEndpointOverride                          string   `json:"awsEndpointOverride" split_words:"true" required:"false"`
 	DiscoveryDisabledEc2                         bool     `json:"discoveryDisabledEc2" split_words:"true" required:"false" default:"false"`

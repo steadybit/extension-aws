@@ -21,7 +21,7 @@ import (
 type lambdaAction struct {
 	description    action_kit_api.ActionDescription
 	configProvider func(request action_kit_api.PrepareActionRequestBody) (*FailureInjectionConfig, error)
-	clientProvider func(account string) (ssmApi, error)
+	clientProvider func(account string, region string) (ssmApi, error)
 }
 
 type ssmApi interface {
@@ -48,6 +48,7 @@ type FailureInjectionConfig struct {
 
 type LambdaActionState struct {
 	Account       string                  `json:"account"`
+	Region        string                  `json:"region"`
 	Param         string                  `json:"param"`
 	Config        *FailureInjectionConfig `json:"config"`
 	ExperimentKey *string                 `json:"experimentKey"`
@@ -74,6 +75,7 @@ func (a *lambdaAction) Prepare(_ context.Context, state *LambdaActionState, requ
 	}
 
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.Param = failureInjectionParam[0]
 	state.ExperimentKey = request.ExecutionContext.ExperimentKey
 	state.ExecutionId = request.ExecutionContext.ExecutionId
@@ -87,7 +89,7 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 		return nil, extension_kit.ToError("Failed to convert ssm parameter", err)
 	}
 
-	client, err := a.clientProvider(state.Account)
+	client, err := a.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize lambda client for AWS account %s", state.Account), err)
 	}
@@ -117,7 +119,7 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 }
 
 func (a *lambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*action_kit_api.StopResult, error) {
-	client, err := a.clientProvider(state.Account)
+	client, err := a.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, extension_kit.ToError("Failed to create ssm client", err)
 	}
@@ -135,8 +137,8 @@ func (a *lambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*act
 	return nil, nil
 }
 
-func defaultClientProvider(account string) (ssmApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultClientProvider(account string, region string) (ssmApi, error) {
+	awsAccount, err := utils.Accounts.GetAccount(account, region)
 	if err != nil {
 		return nil, err
 	}

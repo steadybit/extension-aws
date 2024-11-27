@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
@@ -156,11 +155,8 @@ func Test_getExtensionList(t *testing.T) {
 		},
 	}
 	utils.Accounts = &utils.AwsAccounts{
-		RootAccount: utils.AwsAccount{
-			AccountNumber: "123456789012",
-			AwsConfig:     aws.Config{},
-		},
-		Accounts: make(map[string]utils.AwsAccount),
+		RootAccountNumber: "123456789012",
+		Accounts:          make(map[string]utils.Regions),
 	}
 
 	for _, tt := range tests {

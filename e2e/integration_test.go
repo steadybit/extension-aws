@@ -20,10 +20,10 @@ func TestWithMinikube(t *testing.T) {
 		Port: 8085,
 		ExtraArgs: func(m *e2e.Minikube) []string {
 			return []string{
-				"--set", "logging.level=INFO",
+				"--set", "logging.level=TRACE",
 				"--set", "extraEnv[0].name=STEADYBIT_EXTENSION_AWS_ENDPOINT_OVERRIDE",
 				"--set", "extraEnv[0].value=http://localstack.default.svc.cluster.local:4566",
-				"--set", "extraEnv[1].name=AWS_DEFAULT_REGION",
+				"--set", "extraEnv[1].name=AWS_REGION",
 				"--set", "extraEnv[1].value=us-east-1",
 				"--set", "extraEnv[2].name=AWS_ACCESS_KEY_ID",
 				"--set", "extraEnv[2].value=test",

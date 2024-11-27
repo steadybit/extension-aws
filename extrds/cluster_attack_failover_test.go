@@ -22,6 +22,7 @@ func TestPrepareClusterFailover(t *testing.T) {
 			Attributes: map[string][]string{
 				"aws.rds.cluster.id": {"my-cluster"},
 				"aws.account":        {"42"},
+				"aws.region":         {"us-west-1"},
 			},
 		}),
 	})
@@ -35,6 +36,8 @@ func TestPrepareClusterFailover(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 	assert.Equal(t, "my-cluster", state.DBClusterIdentifier)
+	assert.Equal(t, "42", state.Account)
+	assert.Equal(t, "us-west-1", state.Region)
 }
 
 func TestStartClusterFailover(t *testing.T) {
@@ -47,8 +50,9 @@ func TestStartClusterFailover(t *testing.T) {
 	state := RdsClusterAttackState{
 		DBClusterIdentifier: "dev-db",
 		Account:             "42",
+		Region:              "us-west-1",
 	}
-	action := rdsClusterFailoverAttack{clientProvider: func(account string) (rdsDBClusterApi, error) {
+	action := rdsClusterFailoverAttack{clientProvider: func(account string, region string) (rdsDBClusterApi, error) {
 		return api, nil
 	}}
 
@@ -67,7 +71,7 @@ func TestStartClusterFailoverForwardFailoverError(t *testing.T) {
 	state := RdsClusterAttackState{
 		DBClusterIdentifier: "dev-db",
 	}
-	action := rdsClusterFailoverAttack{clientProvider: func(account string) (rdsDBClusterApi, error) {
+	action := rdsClusterFailoverAttack{clientProvider: func(account string, region string) (rdsDBClusterApi, error) {
 		return api, nil
 	}}
 

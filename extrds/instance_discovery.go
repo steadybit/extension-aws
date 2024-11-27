@@ -97,7 +97,7 @@ func (r *rdsInstanceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery
 	return utils.ForEveryAccount(utils.Accounts, getInstanceTargetsForAccount, ctx, "rds-instance")
 }
 
-func getInstanceTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getInstanceTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
 	result, err := getAllRdsInstances(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
@@ -133,7 +133,7 @@ func toInstanceTarget(dbInstance types.DBInstance, zoneUtil utils.GetZoneUtil, a
 	arn := aws.ToString(dbInstance.DBInstanceArn)
 	label := aws.ToString(dbInstance.DBInstanceIdentifier)
 	availabilityZoneName := aws.ToString(dbInstance.AvailabilityZone)
-	availabilityZoneApi := zoneUtil.GetZone(awsAccountNumber, availabilityZoneName)
+	availabilityZoneApi := zoneUtil.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}

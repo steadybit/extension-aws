@@ -6,7 +6,6 @@ package utils
 import (
 	"context"
 	"errors"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-kit/extutil"
@@ -17,55 +16,36 @@ import (
 )
 
 func TestGetAccountSupportsRootAccount(t *testing.T) {
-	accounts := getTestAccountsWithRoleAssumption()
+	accounts := getTestAccountsWithoutRoleAssumption()
 
-	account, err := accounts.GetAccount("root")
+	account, err := accounts.GetAccount("root", "us-east-1")
 
 	require.NoError(t, err)
 	require.Equal(t, "root", account.AccountNumber)
+	require.Equal(t, "us-east-1", account.Region)
 }
 
 func TestGetAccountSupportsAssumedAccount(t *testing.T) {
 	accounts := getTestAccountsWithRoleAssumption()
 
-	account, err := accounts.GetAccount("assumed2")
+	account, err := accounts.GetAccount("assumed2", "eu-central-1")
 
 	require.NoError(t, err)
 	require.Equal(t, "assumed2", account.AccountNumber)
-}
-
-func TestMustPreferAssumedAccount(t *testing.T) {
-	accounts := AwsAccounts{
-		RootAccount: AwsAccount{
-			AccountNumber: "root",
-		},
-		Accounts: map[string]AwsAccount{
-			"assumed1": {
-				AccountNumber: "assumed1",
-			},
-			"root": {
-				AccountNumber: "root",
-				AwsConfig:     aws.Config{},
-			},
-		},
-	}
-
-	account, err := accounts.GetAccount("root")
-
-	require.NoError(t, err)
-	require.NotNil(t, account.AwsConfig)
+	require.Equal(t, "eu-central-1", account.Region)
 }
 
 func TestGetAccountReportsErrorWhenMissing(t *testing.T) {
 	accounts := getTestAccountsWithRoleAssumption()
 
-	account, err := accounts.GetAccount("unknown-account")
+	account, err := accounts.GetAccount("unknown-account", "eu-central-1")
 
 	require.ErrorContains(t, err, "unknown-account")
 	require.Nil(t, account)
 }
 
 func TestForEachAccountWithoutRoleAssumption(t *testing.T) {
+	config.Config.WorkerThreads = 1
 	accounts := getTestAccountsWithoutRoleAssumption()
 
 	result, err := ForEveryAccount(&accounts, getTestFunction(nil, nil), context.Background(), "discovery")
@@ -73,9 +53,9 @@ func TestForEachAccountWithoutRoleAssumption(t *testing.T) {
 	require.NoError(t, err)
 	var values []string
 	for _, target := range result {
-		values = append(values, target.Attributes["aws.account"][0])
+		values = append(values, target.Attributes["aws.account"][0]+"@"+target.Attributes["aws.region"][0])
 	}
-	require.Equal(t, []string{"root"}, values)
+	require.Equal(t, []string{"root@us-east-1"}, values)
 }
 
 func TestForEachAccountWithRoleAssumptionAndSingleWorker(t *testing.T) {
@@ -88,10 +68,10 @@ func TestForEachAccountWithRoleAssumptionAndSingleWorker(t *testing.T) {
 	// for stable test execution
 	var values []string
 	for _, target := range result {
-		values = append(values, target.Attributes["aws.account"][0])
+		values = append(values, target.Attributes["aws.account"][0]+"@"+target.Attributes["aws.region"][0])
 	}
 	sort.Strings(values)
-	require.Equal(t, []string{"assumed1", "assumed2", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
+	require.Equal(t, []string{"assumed1@eu-central-1", "assumed1@us-east-1", "assumed2@eu-central-1", "assumed2@us-east-1", "assumed3@eu-central-1", "assumed3@us-east-1", "assumed4@eu-central-1", "assumed4@us-east-1"}, values)
 }
 
 func TestForEachAccountWithRoleAssumptionAndMultipleWorkers(t *testing.T) {
@@ -104,10 +84,10 @@ func TestForEachAccountWithRoleAssumptionAndMultipleWorkers(t *testing.T) {
 	// for stable test execution
 	var values []string
 	for _, target := range result {
-		values = append(values, target.Attributes["aws.account"][0])
+		values = append(values, target.Attributes["aws.account"][0]+"@"+target.Attributes["aws.region"][0])
 	}
 	sort.Strings(values)
-	require.Equal(t, []string{"assumed1", "assumed2", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
+	require.Equal(t, []string{"assumed1@eu-central-1", "assumed1@us-east-1", "assumed2@eu-central-1", "assumed2@us-east-1", "assumed3@eu-central-1", "assumed3@us-east-1", "assumed4@eu-central-1", "assumed4@us-east-1"}, values)
 }
 
 func TestForEachAccountWithRoleAssumptionAndError(t *testing.T) {
@@ -120,10 +100,10 @@ func TestForEachAccountWithRoleAssumptionAndError(t *testing.T) {
 	// for stable test execution
 	var values []string
 	for _, target := range result {
-		values = append(values, target.Attributes["aws.account"][0])
+		values = append(values, target.Attributes["aws.account"][0]+"@"+target.Attributes["aws.region"][0])
 	}
 	sort.Strings(values)
-	require.Equal(t, []string{"assumed1", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
+	require.Equal(t, []string{"assumed1@eu-central-1", "assumed1@us-east-1", "assumed3@eu-central-1", "assumed3@us-east-1", "assumed4@eu-central-1", "assumed4@us-east-1"}, values)
 }
 
 func TestForEachAccountWithRoleAssumptionAndEmptyLists(t *testing.T) {
@@ -136,14 +116,14 @@ func TestForEachAccountWithRoleAssumptionAndEmptyLists(t *testing.T) {
 	// for stable test execution
 	var values []string
 	for _, target := range result {
-		values = append(values, target.Attributes["aws.account"][0])
+		values = append(values, target.Attributes["aws.account"][0]+"@"+target.Attributes["aws.region"][0])
 	}
 	sort.Strings(values)
-	require.Equal(t, []string{"assumed1", "assumed3", "assumed4", "assumed5", "assumed6", "assumed7", "assumed8", "assumed9"}, values)
+	require.Equal(t, []string{"assumed1@eu-central-1", "assumed1@us-east-1", "assumed3@eu-central-1", "assumed3@us-east-1", "assumed4@eu-central-1", "assumed4@us-east-1"}, values)
 }
 
-func getTestFunction(errorForAccount *string, emptyForAccount *string) func(account *AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return func(account *AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getTestFunction(errorForAccount *string, emptyForAccount *string) func(account *AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return func(account *AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 		if (errorForAccount != nil) && (*errorForAccount == account.AccountNumber) {
 			return nil, errors.New("damn broken discovery")
 		}
@@ -156,6 +136,7 @@ func getTestFunction(errorForAccount *string, emptyForAccount *string) func(acco
 			Label:      "label",
 			Attributes: map[string][]string{
 				"aws.account": {account.AccountNumber},
+				"aws.region":  {account.Region},
 			},
 		})
 		time.Sleep(100 * time.Millisecond)
@@ -165,36 +146,47 @@ func getTestFunction(errorForAccount *string, emptyForAccount *string) func(acco
 
 func getTestAccountsWithRoleAssumption() AwsAccounts {
 	return AwsAccounts{
-		RootAccount: AwsAccount{
-			AccountNumber: "root",
-		},
-		Accounts: map[string]AwsAccount{
+		RootAccountNumber: "root",
+		Accounts: map[string]Regions{
 			"assumed1": {
-				AccountNumber: "assumed1",
+				"us-east-1": {
+					AccountNumber: "assumed1",
+					Region:        "us-east-1",
+				},
+				"eu-central-1": {
+					AccountNumber: "assumed1",
+					Region:        "eu-central-1",
+				},
 			},
 			"assumed2": {
-				AccountNumber: "assumed2",
+				"us-east-1": {
+					AccountNumber: "assumed2",
+					Region:        "us-east-1",
+				},
+				"eu-central-1": {
+					AccountNumber: "assumed2",
+					Region:        "eu-central-1",
+				},
 			},
 			"assumed3": {
-				AccountNumber: "assumed3",
+				"us-east-1": {
+					AccountNumber: "assumed3",
+					Region:        "us-east-1",
+				},
+				"eu-central-1": {
+					AccountNumber: "assumed3",
+					Region:        "eu-central-1",
+				},
 			},
 			"assumed4": {
-				AccountNumber: "assumed4",
-			},
-			"assumed5": {
-				AccountNumber: "assumed5",
-			},
-			"assumed6": {
-				AccountNumber: "assumed6",
-			},
-			"assumed7": {
-				AccountNumber: "assumed7",
-			},
-			"assumed8": {
-				AccountNumber: "assumed8",
-			},
-			"assumed9": {
-				AccountNumber: "assumed9",
+				"us-east-1": {
+					AccountNumber: "assumed4",
+					Region:        "us-east-1",
+				},
+				"eu-central-1": {
+					AccountNumber: "assumed4",
+					Region:        "eu-central-1",
+				},
 			},
 		},
 	}
@@ -202,9 +194,14 @@ func getTestAccountsWithRoleAssumption() AwsAccounts {
 
 func getTestAccountsWithoutRoleAssumption() AwsAccounts {
 	return AwsAccounts{
-		RootAccount: AwsAccount{
-			AccountNumber: "root",
+		RootAccountNumber: "root",
+		Accounts: map[string]Regions{
+			"root": {
+				"us-east-1": {
+					AccountNumber: "root",
+					Region:        "us-east-1",
+				},
+			},
 		},
-		Accounts: map[string]AwsAccount{},
 	}
 }

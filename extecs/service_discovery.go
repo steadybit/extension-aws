@@ -107,7 +107,7 @@ func (e *ecsServiceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_
 	return utils.ForEveryAccount(utils.Accounts, getEcsServicesForAccount, ctx, "ecs-service")
 }
 
-func getEcsServicesForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getEcsServicesForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ecs.NewFromConfig(account.AwsConfig)
 	result, err := GetAllEcsServices(account.AwsConfig.Region, account.AccountNumber, client, ctx)
 	if err != nil {

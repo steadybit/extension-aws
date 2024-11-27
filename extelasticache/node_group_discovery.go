@@ -129,7 +129,7 @@ func (r *elasticacheReplicationGroupDiscovery) DiscoverTargets(ctx context.Conte
 	return utils.ForEveryAccount(utils.Accounts, getClusterTargetsForAccount, ctx, "replication-group")
 }
 
-func getClusterTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := elasticache.NewFromConfig(account.AwsConfig)
 	result, err := getAllElasticacheReplicationGroups(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {

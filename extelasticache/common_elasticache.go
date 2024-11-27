@@ -21,6 +21,7 @@ type ElasticacheClusterAttackState struct {
 	ReplicationGroupID string
 	NodeGroupID        string
 	Account            string
+	Region             string
 }
 
 type ElasticacheApi interface {
@@ -28,8 +29,8 @@ type ElasticacheApi interface {
 	DescribeReplicationGroups(ctx context.Context, params *elasticache.DescribeReplicationGroupsInput, optFns ...func(*elasticache.Options)) (*elasticache.DescribeReplicationGroupsOutput, error)
 }
 
-func defaultElasticacheClientProvider(account string) (ElasticacheApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultElasticacheClientProvider(account string, region string) (ElasticacheApi, error) {
+	awsAccount, err := utils.Accounts.GetAccount(account, region)
 	if err != nil {
 		return nil, err
 	}

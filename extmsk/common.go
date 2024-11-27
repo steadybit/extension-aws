@@ -20,6 +20,7 @@ type KafkaAttackState struct {
 	ClusterARN  string
 	ClusterName string
 	Account     string
+	Region      string
 }
 
 type MskApi interface {
@@ -28,8 +29,8 @@ type MskApi interface {
 	ListNodes(ctx context.Context, params *kafka.ListNodesInput, optFns ...func(*kafka.Options)) (*kafka.ListNodesOutput, error)
 }
 
-func defaultMskClientProvider(account string) (MskApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultMskClientProvider(account string, region string) (MskApi, error) {
+	awsAccount, err := utils.Accounts.GetAccount(account, region)
 	if err != nil {
 		return nil, err
 	}

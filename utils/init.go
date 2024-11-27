@@ -21,7 +21,7 @@ var (
 	Accounts *AwsAccounts
 )
 
-func InitializeAwsAccountAccess(specification extConfig.Specification) {
+func InitializeAwsAccess(specification extConfig.Specification) {
 	ctx := context.Background()
 	awsConfigForRootAccount, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
@@ -41,27 +41,53 @@ func InitializeAwsAccountAccess(specification extConfig.Specification) {
 	}
 
 	stsClientForRootAccount := sts.NewFromConfig(awsConfigForRootAccount)
-	identityOutput, err := stsClientForRootAccount.GetCallerIdentity(ctx, nil)
+	identityOutputRoot, err := stsClientForRootAccount.GetCallerIdentity(ctx, nil)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to identify AWS account number")
 	}
 
 	Accounts = &AwsAccounts{
-		RootAccount: AwsAccount{
-			AccountNumber: aws.ToString(identityOutput.Account),
-			AwsConfig:     awsConfigForRootAccount,
-		},
-		Accounts: make(map[string]AwsAccount),
+		RootAccountNumber: aws.ToString(identityOutputRoot.Account),
+		Accounts:          make(map[string]Regions),
+	}
+
+	regions := []string{awsConfigForRootAccount.Region}
+	if len(specification.Regions) > 0 {
+		regions = specification.Regions
 	}
 
 	if len(specification.AssumeRoles) > 0 {
 		log.Debug().Msgf("Executing role assumption in other AWS Accounts.")
-
 		for _, roleArn := range specification.AssumeRoles {
-			assumedAccount := initializeRoleAssumption(stsClientForRootAccount, roleArn, Accounts.RootAccount)
-			if assumedAccount != nil {
-				Accounts.Accounts[assumedAccount.AccountNumber] = *assumedAccount
+			awsConfig := awsConfigForRootAccount.Copy()
+			awsConfig.Credentials = aws.NewCredentialsCache(stscreds.NewAssumeRoleProvider(stsClientForRootAccount, roleArn, setSessionName))
+
+			stsClient := sts.NewFromConfig(awsConfig)
+			identityOutput, err := stsClient.GetCallerIdentity(context.Background(), nil)
+			if err != nil {
+				log.Error().Err(err).Msgf("Failed to identify AWS account number for account assumed via role '%s'. The roleArn will be ignored until the next restart of the extension.", roleArn)
+				continue
 			}
+			assumedAccount := aws.ToString(identityOutput.Account)
+			log.Info().Msgf("Successfully assumed role '%s' in account '%s'", roleArn, assumedAccount)
+			prepareRegionConfigs(regions, awsConfig, assumedAccount)
+		}
+	} else {
+		prepareRegionConfigs(regions, awsConfigForRootAccount, aws.ToString(identityOutputRoot.Account))
+	}
+}
+
+func prepareRegionConfigs(regions []string, awsConfig aws.Config, account string) {
+	if _, ok := Accounts.Accounts[account]; !ok {
+		Accounts.Accounts[account] = make(map[string]AwsAccess)
+	}
+	for _, region := range regions {
+		regionalConfig := awsConfig.Copy()
+		regionalConfig.Region = region
+		Accounts.Accounts[account][region] = AwsAccess{
+			AccountNumber: account,
+			AwsConfig:     regionalConfig,
+			Region:        region,
 		}
 	}
 }
@@ -83,33 +109,14 @@ var customLoggerMiddleware = middleware.InitializeMiddlewareFunc("customLoggerMi
 		operationName := middleware2.GetOperationName(ctx)
 		if strings.HasPrefix(operationName, "List") ||
 			strings.HasPrefix(operationName, "Describe") ||
-			strings.HasPrefix(operationName, "Get") ||
-			strings.HasPrefix(operationName, "Assume") {
-			log.Trace().Msgf("AWS-Call: %s - %s", middleware2.GetServiceID(ctx), operationName)
+			//strings.HasPrefix(operationName, "Assume") ||
+			strings.HasPrefix(operationName, "Get") {
+			log.Trace().Msgf("AWS-Call: %s - %s - %s", middleware2.GetRegion(ctx), middleware2.GetServiceID(ctx), operationName)
 		} else {
-			log.Info().Msgf("AWS-Call: %s - %s", middleware2.GetServiceID(ctx), operationName)
+			log.Info().Msgf("AWS-Call: %s - %s - %s", middleware2.GetRegion(ctx), middleware2.GetServiceID(ctx), operationName)
 		}
 		return next.HandleInitialize(ctx, in)
 	})
-
-func initializeRoleAssumption(stsServiceForRootAccount *sts.Client, roleArn string, rootAccount AwsAccount) *AwsAccount {
-	awsConfig := rootAccount.AwsConfig.Copy()
-	awsConfig.Credentials = aws.NewCredentialsCache(stscreds.NewAssumeRoleProvider(stsServiceForRootAccount, roleArn, setSessionName))
-
-	stsClient := sts.NewFromConfig(awsConfig)
-	identityOutput, err := stsClient.GetCallerIdentity(context.Background(), nil)
-	if err != nil {
-		log.Error().Err(err).Msgf("Failed to identify AWS account number for account assumed via role '%s'. The roleArn will be ignored until the next restart of the extension.", roleArn)
-		return nil
-	}
-
-	log.Info().Msgf("Successfully assumed role '%s' in account '%s' (region '%s')", roleArn, aws.ToString(identityOutput.Account), awsConfig.Region)
-
-	return &AwsAccount{
-		AccountNumber: aws.ToString(identityOutput.Account),
-		AwsConfig:     awsConfig,
-	}
-}
 
 func setSessionName(o *stscreds.AssumeRoleOptions) {
 	o.RoleSessionName = "steadybit-extension-aws"

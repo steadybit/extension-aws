@@ -15,7 +15,7 @@ import (
 )
 
 type mskRebootBrokerAttack struct {
-	clientProvider func(account string) (MskApi, error)
+	clientProvider func(account string, region string) (MskApi, error)
 }
 
 var _ action_kit_sdk.Action[KafkaAttackState] = (*mskRebootBrokerAttack)(nil)
@@ -55,6 +55,7 @@ func (f mskRebootBrokerAttack) Describe() action_kit_api.ActionDescription {
 
 func (f mskRebootBrokerAttack) Prepare(_ context.Context, state *KafkaAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.ClusterARN = extutil.MustHaveValue(request.Target.Attributes, "aws.msk.cluster.arn")[0]
 	state.ClusterName = extutil.MustHaveValue(request.Target.Attributes, "aws.msk.cluster.name")[0]
 	state.BrokerID = extutil.MustHaveValue(request.Target.Attributes, "aws.msk.cluster.broker.id")[0]
@@ -62,7 +63,7 @@ func (f mskRebootBrokerAttack) Prepare(_ context.Context, state *KafkaAttackStat
 }
 
 func (f mskRebootBrokerAttack) Start(ctx context.Context, state *KafkaAttackState) (*action_kit_api.StartResult, error) {
-	client, err := f.clientProvider(state.Account)
+	client, err := f.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize Msk client for AWS account %s", state.Account), err)
 	}

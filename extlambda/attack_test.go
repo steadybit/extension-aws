@@ -32,10 +32,12 @@ func TestLambdaAction_Prepare(t *testing.T) {
 			name: "Should return config",
 			attributes: map[string][]string{
 				"aws.account":                        {"123456789012"},
+				"aws.region":                         {"us-west-1"},
 				"aws.lambda.failure-injection-param": {"PARAM"},
 			},
 			wantedState: &LambdaActionState{
 				Account: "123456789012",
+				Region:  "us-west-1",
 				Param:   "PARAM",
 				Config:  &config,
 			},
@@ -44,6 +46,7 @@ func TestLambdaAction_Prepare(t *testing.T) {
 			name: "Should return error if failure-injection-param is missing",
 			attributes: map[string][]string{
 				"aws.account": {"123456789012"},
+				"aws.region":  {"us-west-1"},
 			},
 			wantedError: extension_kit.ToError("Target is missing the 'aws.lambda.failure-injection-param' attribute. Did you wrap the lambda with https://github.com/steadybit/failure-lambda ?", nil),
 		},
@@ -73,6 +76,7 @@ func TestLambdaAction_Prepare(t *testing.T) {
 			if tt.wantedState != nil {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.wantedState.Account, state.Account)
+				assert.Equal(t, tt.wantedState.Region, state.Region)
 				assert.Equal(t, tt.wantedState.Param, state.Param)
 				assert.EqualValues(t, tt.wantedState.Config, state.Config)
 			}
@@ -97,12 +101,13 @@ func TestLambdaAction_Start(t *testing.T) {
 	}, mock.Anything).Return(&ssm.AddTagsToResourceOutput{}, nil)
 
 	action := lambdaAction{
-		clientProvider: func(account string) (ssmApi, error) {
+		clientProvider: func(account string, region string) (ssmApi, error) {
 			return api, nil
 		},
 	}
 	state := action.NewEmptyState()
 	state.Account = "123456789012"
+	state.Region = "us-west-1"
 	state.Param = "PARAM"
 	state.ExperimentKey = extutil.Ptr("TEST-1")
 	state.ExecutionId = extutil.Ptr(42)
@@ -126,12 +131,13 @@ func TestLambdaAction_Stop(t *testing.T) {
 	}, mock.Anything).Return(&ssm.DeleteParameterOutput{}, nil)
 
 	action := lambdaAction{
-		clientProvider: func(account string) (ssmApi, error) {
+		clientProvider: func(account string, region string) (ssmApi, error) {
 			return api, nil
 		},
 	}
 	state := action.NewEmptyState()
 	state.Account = "123456789012"
+	state.Region = "us-west-1"
 	state.Param = "PARAM"
 
 	result, err := action.Stop(context.Background(), &state)

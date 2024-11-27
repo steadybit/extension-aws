@@ -22,7 +22,7 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 	poller.ticker = time.NewTicker(1 * time.Millisecond)
 
 	// Mock the api calls in ServiceDescriptionPoller to check the interactions of ServiceTaskCountCheck with it.
-	poller.apiClientProvider = func(account string) (ecsDescribeServicesApi, error) {
+	poller.apiClientProvider = func(account string, region string) (ecsDescribeServicesApi, error) {
 		mockedApi := new(ecsDescribeServicesApiMock)
 		mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
 			Services: []types.Service{{
@@ -43,6 +43,7 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.account":         {"42"},
+				"aws.region":          {"eu-west-1"},
 				"aws-ecs.service.arn": {"service-arn"},
 				"aws-ecs.cluster.arn": {"cluster-arn"},
 			},
@@ -62,6 +63,7 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 	assert.NoError(t, err)
 	assert.LessOrEqual(t, state.Timeout, time.Now().Add(time.Second*100))
 	assert.Equal(t, state.AwsAccount, "42")
+	assert.Equal(t, state.Region, "eu-west-1")
 	assert.Equal(t, state.ClusterArn, "cluster-arn")
 	assert.Equal(t, state.ServiceArn, "service-arn")
 	assert.Equal(t, state.InitialRunningCount, 2)
@@ -211,7 +213,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 
 			pollerMock := new(ServiceDescriptionPollerMock)
-			pollerMock.On("Latest", test.state.AwsAccount, test.state.ClusterArn, test.state.ServiceArn).Return(&test.response, nil)
+			pollerMock.On("Latest", test.state.AwsAccount, test.state.Region, test.state.ClusterArn, test.state.ServiceArn).Return(&test.response, nil)
 
 			action := EcsServiceTaskCountCheckAction{
 				poller: pollerMock,

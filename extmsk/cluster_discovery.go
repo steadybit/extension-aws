@@ -154,7 +154,7 @@ func (r *mskClusterDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_
 	return utils.ForEveryAccount(utils.Accounts, getClusterTargetsForAccount, ctx, "msk-cluster")
 }
 
-func getClusterTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := kafka.NewFromConfig(account.AwsConfig)
 	result, err := getAllMskClusters(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {

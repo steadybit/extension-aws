@@ -23,7 +23,7 @@ func TestEcsServiceScaleAction_Prepare(t *testing.T) {
 		Services: []types.Service{{DesiredCount: 2}},
 	}, nil)
 
-	action := ecsServiceScaleAction{clientProvider: func(account string) (ecsServiceScaleApi, error) {
+	action := ecsServiceScaleAction{clientProvider: func(account string, region string) (ecsServiceScaleApi, error) {
 		return api, nil
 	}}
 
@@ -46,12 +46,14 @@ func TestEcsServiceScaleAction_Prepare(t *testing.T) {
 						"aws-ecs.service.arn":  {"my-service-arn"},
 						"aws-ecs.service.name": {"my-service-name"},
 						"aws.account":          {"42"},
+						"aws.region":           {"us-east-1"},
 					},
 				}),
 			}),
 
 			wantedState: &ServiceScaleState{
 				Account:             "42",
+				Region:              "us-east-1",
 				ClusterArn:          "my-cluster-arn",
 				ServiceName:         "my-service-name",
 				DesiredCount:        5,
@@ -75,6 +77,7 @@ func TestEcsServiceScaleAction_Prepare(t *testing.T) {
 			if tt.wantedState != nil {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.wantedState.Account, state.Account)
+				assert.Equal(t, tt.wantedState.Region, state.Region)
 				assert.Equal(t, tt.wantedState.ClusterArn, state.ClusterArn)
 				assert.EqualValues(t, tt.wantedState.ServiceName, state.ServiceName)
 				assert.EqualValues(t, tt.wantedState.DesiredCount, state.DesiredCount)
@@ -107,13 +110,14 @@ func TestEcsServiceScaleAction_Start(t *testing.T) {
 		return true
 	})).Return(nil, nil)
 
-	action := ecsServiceScaleAction{clientProvider: func(account string) (ecsServiceScaleApi, error) {
+	action := ecsServiceScaleAction{clientProvider: func(account string, region string) (ecsServiceScaleApi, error) {
 		return api, nil
 	}}
 
 	// When
 	state := &ServiceScaleState{
 		Account:             "42",
+		Region:              "us-east-1",
 		ClusterArn:          "my-cluster-arn",
 		ServiceName:         "my-service-name",
 		InitialDesiredCount: int32(2),
@@ -138,13 +142,14 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 		return true
 	})).Return(nil, nil)
 
-	action := ecsServiceScaleAction{clientProvider: func(account string) (ecsServiceScaleApi, error) {
+	action := ecsServiceScaleAction{clientProvider: func(account string, region string) (ecsServiceScaleApi, error) {
 		return api, nil
 	}}
 
 	// When
 	state := &ServiceScaleState{
 		Account:             "42",
+		Region:              "us-east-1",
 		ClusterArn:          "my-cluster-arn",
 		ServiceName:         "my-service-name",
 		DesiredCount:        int32(5),
@@ -169,13 +174,14 @@ func TestEcsServiceScaleActionForwardsError(t *testing.T) {
 		require.Equal(t, int32(5), *params.DesiredCount)
 		return true
 	})).Return(nil, errors.New("expected"))
-	action := ecsServiceScaleAction{clientProvider: func(account string) (ecsServiceScaleApi, error) {
+	action := ecsServiceScaleAction{clientProvider: func(account string, region string) (ecsServiceScaleApi, error) {
 		return api, nil
 	}}
 
 	// When
 	result, err := action.Start(context.Background(), &ServiceScaleState{
 		Account:      "42",
+		Region:       "us-east-1",
 		ClusterArn:   "my-cluster-arn",
 		ServiceName:  "my-service-name",
 		DesiredCount: int32(5),

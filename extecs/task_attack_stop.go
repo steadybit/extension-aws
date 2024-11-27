@@ -17,7 +17,7 @@ import (
 )
 
 type ecsTaskStopAction struct {
-	clientProvider func(account string) (ecsTaskStopApi, error)
+	clientProvider func(account string, region string) (ecsTaskStopApi, error)
 }
 
 // Make sure lambdaAction implements all required interfaces
@@ -25,6 +25,7 @@ var _ action_kit_sdk.Action[TaskStopState] = (*ecsTaskStopAction)(nil)
 
 type TaskStopState struct {
 	Account    string
+	Region     string
 	TaskArn    string
 	ClusterArn string
 }
@@ -69,13 +70,14 @@ func (e *ecsTaskStopAction) Describe() action_kit_api.ActionDescription {
 
 func (e *ecsTaskStopAction) Prepare(_ context.Context, state *TaskStopState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.ClusterArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
 	state.TaskArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.task.arn")[0]
 	return nil, nil
 }
 
 func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*action_kit_api.StartResult, error) {
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
 	}
@@ -109,8 +111,8 @@ func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*a
 	return nil, nil
 }
 
-func defaultTaskStopClientProvider(account string) (ecsTaskStopApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultTaskStopClientProvider(account string, region string) (ecsTaskStopApi, error) {
+	awsAccount, err := utils.Accounts.GetAccount(account, region)
 	if err != nil {
 		return nil, err
 	}
