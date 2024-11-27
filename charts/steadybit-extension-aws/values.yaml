@@ -100,12 +100,12 @@ probes:
 resources:
   requests:
     # resources.requests.memory -- The minimal amount of memory needed
-    memory: "32Mi"
+    memory: "16Mi"
     # resources.requests.cpu -- The minimal amount of cpu shares needed
     cpu: "50m"
   limits:
     # resources.limits.memory -- The limit of memory to be used
-    memory: "128Mi"
+    memory: "32Mi"
     # resources.limits.cpu -- The limit of cpu share to be used during its interval
     cpu: "200m"
 
