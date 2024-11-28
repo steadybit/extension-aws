@@ -26,7 +26,7 @@ var customLoggerMiddleware = middleware.InitializeMiddlewareFunc("customLoggerMi
 		operationName := middleware2.GetOperationName(ctx)
 		if strings.HasPrefix(operationName, "List") ||
 			strings.HasPrefix(operationName, "Describe") ||
-			//strings.HasPrefix(operationName, "Assume") ||
+			strings.HasPrefix(operationName, "Assume") ||
 			strings.HasPrefix(operationName, "Get") {
 			log.Trace().Msgf("AWS-Call: %s - %s - %s", middleware2.GetRegion(ctx), middleware2.GetServiceID(ctx), operationName)
 		} else {
