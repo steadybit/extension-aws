@@ -105,7 +105,12 @@ func (m *ec2ClientApiMock) RebootInstances(ctx context.Context, params *ec2.Rebo
 	return nil, args.Error(1)
 }
 
-func TestEc2InstanceStateAction_Start(t *testing.T) {
+func (m *ec2ClientApiMock) StartInstances(ctx context.Context, params *ec2.StartInstancesInput, optFns ...func(*ec2.Options)) (*ec2.StartInstancesOutput, error) {
+	args := m.Called(ctx, params)
+	return nil, args.Error(1)
+}
+
+func TestEc2InstanceStateAction_Stop(t *testing.T) {
 	// Given
 	api := new(ec2ClientApiMock)
 	api.On("StopInstances", mock.Anything, mock.MatchedBy(func(params *ec2.StopInstancesInput) bool {
@@ -203,6 +208,32 @@ func TestEc2InstanceStateAction_Reboot(t *testing.T) {
 		Region:     "us-west-1",
 		InstanceId: "dev-worker-1",
 		Action:     "reboot",
+	})
+
+	// Then
+	assert.NoError(t, err)
+	assert.Nil(t, result)
+
+	api.AssertExpectations(t)
+}
+
+func TestEc2InstanceStateAction_Start(t *testing.T) {
+	// Given
+	api := new(ec2ClientApiMock)
+	api.On("StartInstances", mock.Anything, mock.MatchedBy(func(params *ec2.StartInstancesInput) bool {
+		require.Equal(t, "dev-worker-1", params.InstanceIds[0])
+		return true
+	})).Return(nil, nil)
+	action := ec2InstanceStateAction{clientProvider: func(account string, region string) (ec2InstanceStateChangeApi, error) {
+		return api, nil
+	}}
+
+	// When
+	result, err := action.Start(context.Background(), &InstanceStateChangeState{
+		Account:    "42",
+		Region:     "us-west-1",
+		InstanceId: "dev-worker-1",
+		Action:     "start",
 	})
 
 	// Then

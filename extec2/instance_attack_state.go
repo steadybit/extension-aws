@@ -33,6 +33,7 @@ type ec2InstanceStateChangeApi interface {
 	StopInstances(ctx context.Context, params *ec2.StopInstancesInput, optFns ...func(*ec2.Options)) (*ec2.StopInstancesOutput, error)
 	TerminateInstances(ctx context.Context, params *ec2.TerminateInstancesInput, optFns ...func(*ec2.Options)) (*ec2.TerminateInstancesOutput, error)
 	RebootInstances(ctx context.Context, params *ec2.RebootInstancesInput, optFns ...func(*ec2.Options)) (*ec2.RebootInstancesOutput, error)
+	StartInstances(ctx context.Context, params *ec2.StartInstancesInput, optFns ...func(*ec2.Options)) (*ec2.StartInstancesOutput, error)
 }
 
 func NewEc2InstanceStateAction() action_kit_sdk.Action[InstanceStateChangeState] {
@@ -93,6 +94,10 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 						Label: "Terminate",
 						Value: "terminate",
 					},
+					action_kit_api.ExplicitParameterOption{
+						Label: "Start",
+						Value: "start",
+					},
 				}),
 			},
 		},
@@ -142,6 +147,11 @@ func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceState
 			InstanceIds: instanceIds,
 		}
 		_, err = client.TerminateInstances(ctx, &in)
+	} else if state.Action == "start" {
+		in := ec2.StartInstancesInput{
+			InstanceIds: instanceIds,
+		}
+		_, err = client.StartInstances(ctx, &in)
 	}
 
 	if err != nil {
