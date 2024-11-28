@@ -100,7 +100,8 @@ by tweaking the `Resource` clause.
         "ec2:DescribeTags",
         "ec2:StopInstances",
         "ec2:RebootInstances",
-        "ec2:TerminateInstances"
+        "ec2:TerminateInstances",
+				"ec2:StartInstances",
       ],
       "Resource": "*"
     }
