@@ -14,6 +14,7 @@ our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extensio
 |-----------------------------------------------------------------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | `STEADYBIT_EXTENSION_WORKER_THREADS`                            |                                                 | How many parallel workers should call aws apis (only used if `STEADYBIT_EXTENSION_ASSUME_ROLES` is used)                                                      | no       | 1                                                                                                                                             |
 | `STEADYBIT_EXTENSION_ASSUME_ROLES`                              | `aws.assumeRoles`                               | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_REGIONS`                                   |                                                 | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2`                    | `aws.discovery.disabled.ec2`                    | Disable EC2-Discovery and all EC2 related definitions                                                                                                         | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_EC2`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS`                    | `aws.discovery.disabled.ecs`                    | Disable ECS-Discovery and all ECS related definitions                                                                                                         | no       | false                                                                                                                                         |
@@ -518,6 +519,17 @@ steps:
        ]
    }
    ```
+
+### Multi Region Support
+
+By default, the extension will discover targets only in the AWS Region that is provided by the current authentication (environment variable `AWS_REGION`).
+
+If you want to discover targets in multiple regions, you can set the `STEADYBIT_EXTENSION_REGIONS` environment variable to a comma-separated list of regions. Example:
+
+```sh
+STEADYBIT_EXTENSION_REGIONS='us-east-1,us-west-2'
+```
+
 
 ### Agent Lockout - Requirements
 
