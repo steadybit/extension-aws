@@ -34,12 +34,14 @@ func TestEcsTaskStopAction_Prepare(t *testing.T) {
 						"aws-ecs.cluster.arn": {"my-cluster-arn"},
 						"aws-ecs.task.arn":    {"my-task-arn"},
 						"aws.account":         {"42"},
+						"aws.region":          {"us-west-1"},
 					},
 				}),
 			}),
 
 			wantedState: &TaskStopState{
 				Account:    "42",
+				Region:     "us-west-1",
 				ClusterArn: "my-cluster-arn",
 				TaskArn:    "my-task-arn",
 			},
@@ -61,6 +63,7 @@ func TestEcsTaskStopAction_Prepare(t *testing.T) {
 			if tt.wantedState != nil {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.wantedState.Account, state.Account)
+				assert.Equal(t, tt.wantedState.Region, state.Region)
 				assert.Equal(t, tt.wantedState.ClusterArn, state.ClusterArn)
 				assert.EqualValues(t, tt.wantedState.TaskArn, state.TaskArn)
 			}
@@ -98,7 +101,7 @@ func TestEcsTaskStopAction_Start(t *testing.T) {
 		},
 	})
 
-	action := ecsTaskStopAction{clientProvider: func(account string) (ecsTaskStopApi, error) {
+	action := ecsTaskStopAction{clientProvider: func(account string, region string) (ecsTaskStopApi, error) {
 		return api, nil
 	}}
 
@@ -127,7 +130,7 @@ func TestEcsTaskStopAction_Start_already_stopped_task(t *testing.T) {
 		},
 	})
 
-	action := ecsTaskStopAction{clientProvider: func(account string) (ecsTaskStopApi, error) {
+	action := ecsTaskStopAction{clientProvider: func(account string, region string) (ecsTaskStopApi, error) {
 		return api, nil
 	}}
 
@@ -161,7 +164,7 @@ func TestEcsTaskStopActionForwardsError(t *testing.T) {
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
 		return true
 	})).Return(&ecs.StopTaskOutput{}, errors.New("expected"))
-	action := ecsTaskStopAction{clientProvider: func(account string) (ecsTaskStopApi, error) {
+	action := ecsTaskStopAction{clientProvider: func(account string, region string) (ecsTaskStopApi, error) {
 		return api, nil
 	}}
 

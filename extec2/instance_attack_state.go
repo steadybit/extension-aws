@@ -16,7 +16,7 @@ import (
 )
 
 type ec2InstanceStateAction struct {
-	clientProvider func(account string) (ec2InstanceStateChangeApi, error)
+	clientProvider func(account string, region string) (ec2InstanceStateChangeApi, error)
 }
 
 // Make sure lambdaAction implements all required interfaces
@@ -24,6 +24,7 @@ var _ action_kit_sdk.Action[InstanceStateChangeState] = (*ec2InstanceStateAction
 
 type InstanceStateChangeState struct {
 	Account    string
+	Region     string
 	InstanceId string
 	Action     string
 }
@@ -32,6 +33,7 @@ type ec2InstanceStateChangeApi interface {
 	StopInstances(ctx context.Context, params *ec2.StopInstancesInput, optFns ...func(*ec2.Options)) (*ec2.StopInstancesOutput, error)
 	TerminateInstances(ctx context.Context, params *ec2.TerminateInstancesInput, optFns ...func(*ec2.Options)) (*ec2.TerminateInstancesOutput, error)
 	RebootInstances(ctx context.Context, params *ec2.RebootInstancesInput, optFns ...func(*ec2.Options)) (*ec2.RebootInstancesOutput, error)
+	StartInstances(ctx context.Context, params *ec2.StartInstancesInput, optFns ...func(*ec2.Options)) (*ec2.StartInstancesOutput, error)
 }
 
 func NewEc2InstanceStateAction() action_kit_sdk.Action[InstanceStateChangeState] {
@@ -92,6 +94,10 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 						Label: "Terminate",
 						Value: "terminate",
 					},
+					action_kit_api.ExplicitParameterOption{
+						Label: "Start",
+						Value: "start",
+					},
 				}),
 			},
 		},
@@ -105,13 +111,14 @@ func (e *ec2InstanceStateAction) Prepare(_ context.Context, state *InstanceState
 	}
 
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.InstanceId = extutil.MustHaveValue(request.Target.Attributes, "aws-ec2.instance.id")[0]
 	state.Action = action.(string)
 	return nil, nil
 }
 
 func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceStateChangeState) (*action_kit_api.StartResult, error) {
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.Account), err)
 	}
@@ -140,6 +147,11 @@ func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceState
 			InstanceIds: instanceIds,
 		}
 		_, err = client.TerminateInstances(ctx, &in)
+	} else if state.Action == "start" {
+		in := ec2.StartInstancesInput{
+			InstanceIds: instanceIds,
+		}
+		_, err = client.StartInstances(ctx, &in)
 	}
 
 	if err != nil {
@@ -149,10 +161,10 @@ func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceState
 	return nil, nil
 }
 
-func defaultClientProvider(account string) (ec2InstanceStateChangeApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultClientProvider(account string, region string) (ec2InstanceStateChangeApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return ec2.NewFromConfig(awsAccount.AwsConfig), nil
+	return ec2.NewFromConfig(awsAccess.AwsConfig), nil
 }

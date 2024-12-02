@@ -22,7 +22,7 @@ var (
 	mockApi = mockEcsTaskSsmApi{}
 
 	testSsmAction = &ecsTaskSsmAction{
-		clientProvider: func(account string) (ecsTaskSsmApi, error) {
+		clientProvider: func(account string, region string) (ecsTaskSsmApi, error) {
 			return &mockApi, nil
 		},
 		ssmCommandInvocation: ssmCommandInvocation{
@@ -36,6 +36,7 @@ var (
 	testTarget = &action_kit_api.Target{
 		Attributes: map[string][]string{
 			"aws.account":      {"account"},
+			"aws.region":       {"region"},
 			"aws-ecs.task.arn": {"task"},
 		},
 	}
@@ -72,6 +73,7 @@ func Test_ecsTaskSsmAction_Prepare(t *testing.T) {
 			wantErr: assert.NoError,
 			wantState: TaskSsmActionState{
 				Account:           "account",
+				Region:            "region",
 				TaskArn:           "task",
 				ManagedInstanceId: "mi-0",
 				Parameters: map[string][]string{

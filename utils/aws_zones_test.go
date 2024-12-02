@@ -52,19 +52,19 @@ func TestAwsZones(t *testing.T) {
 	mockedApi4711.On("DescribeAvailabilityZones", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue4711, nil)
 
 	// When
-	result, err := initAwsZonesForAccountWithClient(mockedApi42, "42", context.Background())
+	result, err := initAwsZonesForAccountWithClient(mockedApi42, "42", "eu-central-1", context.Background())
 	assert.Nil(t, result)
 	assert.Nil(t, err)
-	result, err = initAwsZonesForAccountWithClient(mockedApi4711, "4711", context.Background())
+	result, err = initAwsZonesForAccountWithClient(mockedApi4711, "4711", "eu-central-1", context.Background())
 	assert.Nil(t, result)
 	assert.Nil(t, err)
 
 	// Then
-	assert.Equal(t, &mockedReturnValue42.AvailabilityZones[0], Zones.GetZone("42", "eu-central-1a"))
-	assert.Nil(t, Zones.GetZone("42", "eu-central-1c"))
-	assert.Nil(t, Zones.GetZone("4711", "eu-central-1a"))
+	assert.Equal(t, &mockedReturnValue42.AvailabilityZones[0], Zones.GetZone("42", "eu-central-1", "eu-central-1a"))
+	assert.Nil(t, Zones.GetZone("42", "eu-central-1", "eu-central-1c"))
+	assert.Nil(t, Zones.GetZone("4711", "eu-central-1", "eu-central-1a"))
 
-	assert.Equal(t, mockedReturnValue42.AvailabilityZones, Zones.GetZones("42"))
-	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones("4711"))
-	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones("0815"))
+	assert.Equal(t, mockedReturnValue42.AvailabilityZones, Zones.GetZones("42", "eu-central-1"))
+	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones("4711", "eu-central-1"))
+	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones("0815", "eu-central-1"))
 }

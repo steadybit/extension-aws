@@ -55,6 +55,7 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 *ec2.
 	assert.Equal(t, "41", state.AgentAWSAccount)
 	assert.Equal(t, "42", state.ExtensionAwsAccount)
 	assert.Equal(t, "eu-west-1a", state.TargetZone)
+	assert.Equal(t, "eu-west-1", state.TargetRegion)
 	assert.Len(t, state.TargetSubnets, 2)               //default vpc and the one we created
 	assert.Len(t, state.TargetSubnets[defaultVpcId], 1) //default vpc has 1 subnet
 	assert.Len(t, state.TargetSubnets[createdVpcId], 2) //our vpc with 2 subnets
@@ -75,6 +76,7 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 *ec2.
 	assert.Equal(t, "41", state.AgentAWSAccount)
 	assert.Equal(t, "42", state.ExtensionAwsAccount)
 	assert.Equal(t, "eu-west-1a", state.TargetZone)
+	assert.Equal(t, "eu-west-1", state.TargetRegion)
 	assert.Len(t, state.NetworkAclIds, 2) //one per vpc
 	newAssociationIds := reflect.ValueOf(state.OldNetworkAclIds).MapKeys()
 	assert.NotEqual(t, "", state.OldNetworkAclIds[newAssociationIds[0].String()])
@@ -261,7 +263,7 @@ func testApiThrottlingDuringStopWhileDeletingNACLs(t *testing.T, clientEc2 *ec2.
 func prepareActionCall(clientEc2 *ec2.Client, clientImds *imds.Client) (azBlackholeAction, BlackholeState, action_kit_api.PrepareActionRequestBody) {
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "41",
-		clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+		clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 			return clientEc2, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -273,6 +275,7 @@ func prepareActionCall(clientEc2 *ec2.Client, clientImds *imds.Client) (azBlackh
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
+				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),

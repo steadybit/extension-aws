@@ -40,7 +40,7 @@ type zoneMock struct {
 	mock.Mock
 }
 
-func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string) *types.AvailabilityZone {
-	args := m.Called(awsAccountNumber, awsZone)
+func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string, region string) *types.AvailabilityZone {
+	args := m.Called(awsAccountNumber, awsZone, region)
 	return args.Get(0).(*types.AvailabilityZone)
 }

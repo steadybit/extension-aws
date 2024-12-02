@@ -23,7 +23,7 @@ import (
 )
 
 type azBlackholeAction struct {
-	clientProvider             func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error)
+	clientProvider             func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error)
 	extensionRootAccountNumber string
 }
 
@@ -35,6 +35,7 @@ type BlackholeState struct {
 	AgentAWSAccount     string
 	ExtensionAwsAccount string
 	TargetZone          string
+	TargetRegion        string
 	NetworkAclIds       []string
 	OldNetworkAclIds    map[string]string   // map[NewAssociationId] = oldNetworkAclId
 	TargetSubnets       map[string][]string // map[vpcId] = [subnetIds]
@@ -57,7 +58,7 @@ type azBlackholeImdsApi interface {
 func NewAzBlackholeAction() action_kit_sdk.Action[BlackholeState] {
 	return &azBlackholeAction{
 		clientProvider:             defaultClientProvider,
-		extensionRootAccountNumber: utils.Accounts.GetRootAccount().AccountNumber,
+		extensionRootAccountNumber: utils.GetRootAccountNumber(),
 	}
 }
 
@@ -108,9 +109,10 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	targetAccount := extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	targetZone := extutil.MustHaveValue(request.Target.Attributes, "aws.zone")[0]
+	targetRegion := extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 
 	// Get AWS Clients
-	clientEc2, clientImds, err := e.clientProvider(targetAccount)
+	clientEc2, clientImds, err := e.clientProvider(targetAccount, targetRegion)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS targetAccount %s", targetAccount), err)
 	}
@@ -145,17 +147,18 @@ func (e *azBlackholeAction) Prepare(ctx context.Context, state *BlackholeState, 
 	state.AgentAWSAccount = agentAwsAccountId
 	state.ExtensionAwsAccount = targetAccount
 	state.TargetZone = targetZone
+	state.TargetRegion = targetRegion
 	state.TargetSubnets = targetSubnets
 	state.AttackExecutionId = request.ExecutionId
 	return nil, nil
 }
 
 func (e *azBlackholeAction) Start(ctx context.Context, state *BlackholeState) (*action_kit_api.StartResult, error) {
-	clientEc2, _, err := e.clientProvider(state.ExtensionAwsAccount)
+	clientEc2, _, err := e.clientProvider(state.ExtensionAwsAccount, state.TargetRegion)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.ExtensionAwsAccount), err)
 	}
-	log.Info().Msgf("Starting AZ Blackhole attack against AWS account %s", state.ExtensionAwsAccount)
+	log.Info().Msgf("Starting AZ Blackhole attack against AWS account %s and region %s", state.ExtensionAwsAccount, state.TargetRegion)
 	log.Debug().Msgf("Attack state: %+v", state)
 
 	state.OldNetworkAclIds = make(map[string]string)
@@ -371,9 +374,9 @@ func getNetworkAclAssociations(ctx context.Context, clientEc2 azBlackholeEC2Api,
 }
 
 func (e *azBlackholeAction) Stop(ctx context.Context, state *BlackholeState) (*action_kit_api.StopResult, error) {
-	clientEc2, _, err := e.clientProvider(state.ExtensionAwsAccount)
+	clientEc2, _, err := e.clientProvider(state.ExtensionAwsAccount, state.TargetRegion)
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.ExtensionAwsAccount), err)
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s and region %s", state.ExtensionAwsAccount, state.TargetRegion), err)
 	}
 
 	return nil, rollbackBlackholeViaTags(ctx, state, clientEc2)
@@ -465,13 +468,13 @@ func getAllNACLsCreatedBySteadybit(clientEc2 azBlackholeEC2Api, ctx context.Cont
 	return &result, nil
 }
 
-func defaultClientProvider(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultClientProvider(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, nil, err
 	}
-	clientEc2 := ec2.NewFromConfig(awsAccount.AwsConfig)
-	clientImds := imds.NewFromConfig(awsAccount.AwsConfig)
+	clientEc2 := ec2.NewFromConfig(awsAccess.AwsConfig)
+	clientImds := imds.NewFromConfig(awsAccess.AwsConfig)
 	if err != nil {
 		return nil, nil, err
 	}

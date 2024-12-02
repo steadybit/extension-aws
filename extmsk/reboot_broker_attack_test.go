@@ -24,6 +24,7 @@ func TestRebootBroker(t *testing.T) {
 				"aws.msk.cluster.broker.id": {"1"},
 				"aws.msk.cluster.name":      {"test"},
 				"aws.account":               {"42"},
+				"aws.region":                {"us-west-1"},
 			},
 		}),
 	})
@@ -39,6 +40,7 @@ func TestRebootBroker(t *testing.T) {
 	assert.Equal(t, "arn", state.ClusterARN)
 	assert.Equal(t, "test", state.ClusterName)
 	assert.Equal(t, "42", state.Account)
+	assert.Equal(t, "us-west-1", state.Region)
 	assert.Equal(t, "1", state.BrokerID)
 }
 
@@ -56,8 +58,9 @@ func TestStartRebootBroker(t *testing.T) {
 		BrokerID:    "1",
 		BrokerARN:   "broker-arn",
 		Account:     "42",
+		Region:      "us-west-1",
 	}
-	action := mskRebootBrokerAttack{clientProvider: func(account string) (MskApi, error) {
+	action := mskRebootBrokerAttack{clientProvider: func(account string, region string) (MskApi, error) {
 		return api, nil
 	}}
 
@@ -76,7 +79,7 @@ func TestStartClusterFailoverForwardFailoverError(t *testing.T) {
 	state := KafkaAttackState{
 		ClusterARN: "arn",
 	}
-	action := mskRebootBrokerAttack{clientProvider: func(account string) (MskApi, error) {
+	action := mskRebootBrokerAttack{clientProvider: func(account string, region string) (MskApi, error) {
 		return api, nil
 	}}
 

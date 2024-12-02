@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
-	"github.com/steadybit/extension-aws/utils"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 	"net/http"
@@ -154,13 +152,6 @@ func Test_getExtensionList(t *testing.T) {
 				"/discovery/attributes",
 			},
 		},
-	}
-	utils.Accounts = &utils.AwsAccounts{
-		RootAccount: utils.AwsAccount{
-			AccountNumber: "123456789012",
-			AwsConfig:     aws.Config{},
-		},
-		Accounts: make(map[string]utils.AwsAccount),
 	}
 
 	for _, tt := range tests {

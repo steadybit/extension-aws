@@ -173,10 +173,10 @@ func (*lambdaDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescri
 }
 
 func (l *lambdaDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "lambda")
+	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "lambda")
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := lambda.NewFromConfig(account.AwsConfig)
 	result, err := getAllAwsLambdaFunctions(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {

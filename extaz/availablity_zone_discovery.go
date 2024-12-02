@@ -66,16 +66,16 @@ func (a *azDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 }
 
 func (a *azDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "availability zone")
+	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "availability zone")
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, _ context.Context) ([]discovery_kit_api.Target, error) {
-	return getAllAvailabilityZones(utils.Zones, account.AccountNumber), nil
+func getTargetsForAccount(account *utils.AwsAccess, _ context.Context) ([]discovery_kit_api.Target, error) {
+	return getAllAvailabilityZones(utils.Zones, account.AccountNumber, account.Region), nil
 }
 
-func getAllAvailabilityZones(zones utils.GetZonesUtil, awsAccountNumber string) []discovery_kit_api.Target {
+func getAllAvailabilityZones(zones utils.GetZonesUtil, awsAccountNumber string, region string) []discovery_kit_api.Target {
 	result := make([]discovery_kit_api.Target, 0, 20)
-	for _, availabilityZone := range zones.GetZones(awsAccountNumber) {
+	for _, availabilityZone := range zones.GetZones(awsAccountNumber, region) {
 		result = append(result, toTarget(availabilityZone, awsAccountNumber))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesZone)

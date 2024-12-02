@@ -25,7 +25,7 @@ import (
 )
 
 type ecsTaskSsmAction struct {
-	clientProvider       func(account string) (ecsTaskSsmApi, error)
+	clientProvider       func(account string, region string) (ecsTaskSsmApi, error)
 	description          action_kit_api.ActionDescription
 	ssmCommandInvocation ssmCommandInvocation
 }
@@ -42,6 +42,7 @@ var (
 
 type TaskSsmActionState struct {
 	Account           string
+	Region            string
 	TaskArn           string
 	ManagedInstanceId string
 	CommandId         string
@@ -102,6 +103,7 @@ func (e *ecsTaskSsmAction) Describe() action_kit_api.ActionDescription {
 
 func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.TaskArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.task.arn")[0]
 
 	if parameters, err := e.ssmCommandInvocation.getParameters(request); err == nil {
@@ -116,7 +118,7 @@ func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionStat
 		state.Comment = "Steadybit Experiment"
 	}
 
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +142,7 @@ func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionStat
 }
 
 func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState) (*action_kit_api.StartResult, error) {
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +178,7 @@ func shorten(s string, i int) string {
 }
 
 func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState) (*action_kit_api.StatusResult, error) {
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +215,7 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 		return nil, nil
 	}
 
-	client, err := e.clientProvider(state.Account)
+	client, err := e.clientProvider(state.Account, state.Region)
 	if err != nil {
 		return nil, err
 	}
@@ -317,10 +319,10 @@ func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, client ecsTa
 	}
 }
 
-func defaultTaskSsmClientProvider(account string) (ecsTaskSsmApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultTaskSsmClientProvider(account string, region string) (ecsTaskSsmApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return ssm.NewFromConfig(awsAccount.AwsConfig), nil
+	return ssm.NewFromConfig(awsAccess.AwsConfig), nil
 }

@@ -121,10 +121,10 @@ func (r *rdsClusterDiscovery) DescribeAttributes() []discovery_kit_api.Attribute
 }
 
 func (r *rdsClusterDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getClusterTargetsForAccount, ctx, "rds-cluster")
+	return utils.ForEveryConfiguredAwsAccess(getClusterTargetsForAccount, ctx, "rds-cluster")
 }
 
-func getClusterTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
 	result, err := getAllRdsClusters(ctx, client, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {

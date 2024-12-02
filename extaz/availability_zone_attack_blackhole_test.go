@@ -110,7 +110,7 @@ func TestPrepareBlackhole(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "",
-		clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+		clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 			return clientEc2, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -122,6 +122,7 @@ func TestPrepareBlackhole(t *testing.T) {
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
+				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
@@ -138,6 +139,7 @@ func TestPrepareBlackhole(t *testing.T) {
 	assert.Equal(t, "41", state.AgentAWSAccount)
 	assert.Equal(t, "42", state.ExtensionAwsAccount)
 	assert.Equal(t, "eu-west-1a", state.TargetZone)
+	assert.Equal(t, "eu-west-1", state.TargetRegion)
 	assert.Equal(t, []string{"subnet-1", "subnet-2"}, state.TargetSubnets["vpcId-1"])
 	assert.NotNil(t, state.AttackExecutionId)
 	clientEc2.AssertExpectations(t)
@@ -156,7 +158,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "42",
-		clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+		clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -168,6 +170,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
+				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
@@ -191,7 +194,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "42",
-		clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+		clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -203,6 +206,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
+				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
@@ -226,7 +230,7 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "",
-		clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+		clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -238,6 +242,7 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
+				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
@@ -261,7 +266,7 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "",
-		clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+		clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -273,6 +278,7 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
+				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
@@ -300,7 +306,7 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "",
-		clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+		clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -312,6 +318,7 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
+				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
@@ -395,7 +402,7 @@ func TestStartBlackhole(t *testing.T) {
 	}), nil)
 
 	ctx := context.Background()
-	action := azBlackholeAction{clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+	action := azBlackholeAction{clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 		return clientEc2, nil, nil
 	}}
 
@@ -403,6 +410,7 @@ func TestStartBlackhole(t *testing.T) {
 		AgentAWSAccount:     "41",
 		ExtensionAwsAccount: "43",
 		TargetZone:          "eu-west-1a",
+		TargetRegion:        "eu-west-1",
 		TargetSubnets: map[string][]string{
 			"vpcId-1": {"subnet-1", "subnet-2"},
 		},
@@ -482,7 +490,7 @@ func TestStopBlackhole(t *testing.T) {
 	}), mock.Anything).Return(extutil.Ptr(ec2.DeleteNetworkAclOutput{}), nil)
 
 	ctx := context.Background()
-	action := azBlackholeAction{clientProvider: func(account string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+	action := azBlackholeAction{clientProvider: func(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 		return clientEc2, nil, nil
 	}}
 
@@ -490,6 +498,7 @@ func TestStopBlackhole(t *testing.T) {
 		AgentAWSAccount:     "41",
 		ExtensionAwsAccount: "43",
 		TargetZone:          "eu-west-1a",
+		TargetRegion:        "eu-west-1",
 		TargetSubnets: map[string][]string{
 			"vpcId-1": {"subnet-1", "subnet-2"},
 		},

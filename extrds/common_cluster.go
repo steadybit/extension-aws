@@ -18,6 +18,7 @@ const (
 type RdsClusterAttackState struct {
 	DBClusterIdentifier string
 	Account             string
+	Region              string
 }
 
 type rdsDBClusterApi interface {
@@ -27,13 +28,14 @@ type rdsDBClusterApi interface {
 
 func convertClusterAttackState(request action_kit_api.PrepareActionRequestBody, state *RdsClusterAttackState) error {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
+	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.DBClusterIdentifier = extutil.MustHaveValue(request.Target.Attributes, "aws.rds.cluster.id")[0]
 	return nil
 }
-func defaultClusterClientProvider(account string) (rdsDBClusterApi, error) {
-	awsAccount, err := utils.Accounts.GetAccount(account)
+func defaultClusterClientProvider(account string, region string) (rdsDBClusterApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err
 	}
-	return rds.NewFromConfig(awsAccount.AwsConfig), nil
+	return rds.NewFromConfig(awsAccess.AwsConfig), nil
 }

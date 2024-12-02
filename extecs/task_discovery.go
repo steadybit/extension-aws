@@ -107,10 +107,10 @@ func (e *ecsTaskDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDes
 }
 
 func (e *ecsTaskDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "ecs-task")
+	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "ecs-task")
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ecs.NewFromConfig(account.AwsConfig)
 	result, err := GetAllEcsTasks(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
@@ -183,7 +183,7 @@ func toTarget(task types.Task, zoneUtil utils.GetZoneUtil, awsAccountNumber stri
 
 	arn := aws.ToString(task.TaskArn)
 	availabilityZoneName := aws.ToString(task.AvailabilityZone)
-	availabilityZoneApi := zoneUtil.GetZone(awsAccountNumber, availabilityZoneName)
+	availabilityZoneApi := zoneUtil.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}

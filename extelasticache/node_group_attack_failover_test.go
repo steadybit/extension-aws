@@ -23,6 +23,7 @@ func TestTestFailover(t *testing.T) {
 				"aws.elasticache.replication-group.node-group.id": {"0001"},
 				"aws.elasticache.replication-group.id":            {"redis-steadybit-dev"},
 				"aws.account":                                     {"42"},
+				"aws.region":                                      {"us-west-1"},
 			},
 		}),
 	})
@@ -37,6 +38,7 @@ func TestTestFailover(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "0001", state.NodeGroupID)
 	assert.Equal(t, "42", state.Account)
+	assert.Equal(t, "us-west-1", state.Region)
 	assert.Equal(t, "redis-steadybit-dev", state.ReplicationGroupID)
 }
 
@@ -53,7 +55,7 @@ func TestStartClusterFailover(t *testing.T) {
 		NodeGroupID:        "0001",
 		Account:            "42",
 	}
-	action := elasticacheNodeGroupFailoverAttack{clientProvider: func(account string) (ElasticacheApi, error) {
+	action := elasticacheNodeGroupFailoverAttack{clientProvider: func(account string, region string) (ElasticacheApi, error) {
 		return api, nil
 	}}
 
@@ -72,7 +74,7 @@ func TestStartClusterFailoverForwardFailoverError(t *testing.T) {
 	state := ElasticacheClusterAttackState{
 		ReplicationGroupID: "redis-steadybit-dev",
 	}
-	action := elasticacheNodeGroupFailoverAttack{clientProvider: func(account string) (ElasticacheApi, error) {
+	action := elasticacheNodeGroupFailoverAttack{clientProvider: func(account string, region string) (ElasticacheApi, error) {
 		return api, nil
 	}}
 

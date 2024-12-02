@@ -99,10 +99,10 @@ func (e *albDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescrip
 }
 
 func (e *albDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryAccount(utils.Accounts, getTargetsForAccount, ctx, "ecs-task")
+	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "ecs-task")
 }
 
-func getTargetsForAccount(account *utils.AwsAccount, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := elasticloadbalancingv2.NewFromConfig(account.AwsConfig)
 	result, err := GetAlbs(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
@@ -179,7 +179,7 @@ func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listen
 	zoneIds := make([]string, 0, len(lb.AvailabilityZones))
 	for _, zone := range lb.AvailabilityZones {
 		zones = append(zones, aws.ToString(zone.ZoneName))
-		zoneApi := zoneUtil.GetZone(awsAccountNumber, aws.ToString(zone.ZoneName))
+		zoneApi := zoneUtil.GetZone(awsAccountNumber, aws.ToString(zone.ZoneName), awsRegion)
 		if zoneApi != nil {
 			zoneIds = append(zoneIds, *zoneApi.ZoneId)
 		}

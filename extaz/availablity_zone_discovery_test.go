@@ -16,8 +16,8 @@ type zoneMock struct {
 	mock.Mock
 }
 
-func (m *zoneMock) GetZones(awsAccountNumber string) []types.AvailabilityZone {
-	args := m.Called(awsAccountNumber)
+func (m *zoneMock) GetZones(awsAccountNumber string, region string) []types.AvailabilityZone {
+	args := m.Called(awsAccountNumber, region)
 	return args.Get(0).([]types.AvailabilityZone)
 }
 
@@ -31,10 +31,10 @@ func TestGetAllAvailabilityZones(t *testing.T) {
 			ZoneId:     discovery_kit_api.Ptr("euc1-az3"),
 		},
 	}
-	mockedApi.On("GetZones", mock.Anything).Return(mockedReturnValue)
+	mockedApi.On("GetZones", mock.Anything, mock.Anything).Return(mockedReturnValue)
 
 	// When
-	targets := getAllAvailabilityZones(mockedApi, "42")
+	targets := getAllAvailabilityZones(mockedApi, "42", "eu-central-1")
 
 	// Then
 	assert.Equal(t, 1, len(targets))

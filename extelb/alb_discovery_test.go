@@ -48,8 +48,8 @@ type zoneMock struct {
 	mock.Mock
 }
 
-func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string) *ec2types.AvailabilityZone {
-	args := m.Called(awsAccountNumber, awsZone)
+func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string, region string) *ec2types.AvailabilityZone {
+	args := m.Called(awsAccountNumber, awsZone, region)
 	return args.Get(0).(*ec2types.AvailabilityZone)
 }
 
@@ -146,10 +146,10 @@ func TestGetAllAlbTargets(t *testing.T) {
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.MatchedBy(func(params string) bool {
 		return params == "us-east-1a"
-	})).Return(&mockedZone1a)
+	}), mock.Anything).Return(&mockedZone1a)
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.MatchedBy(func(params string) bool {
 		return params == "us-east-1b"
-	})).Return(&mockedZone1b)
+	}), mock.Anything).Return(&mockedZone1b)
 
 	// When
 	targets, err := GetAlbs(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")

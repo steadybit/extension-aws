@@ -43,7 +43,7 @@ func main() {
 	exthealth.SetReady(false)
 
 	config.ParseConfiguration()
-	utils.InitializeAwsAccountAccess(config.Config)
+	utils.InitializeAwsAccess(config.Config)
 	utils.InitializeAwsZones()
 
 	ctx, cancel := SignalCanceledContext()

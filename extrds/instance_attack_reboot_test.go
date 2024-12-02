@@ -25,6 +25,7 @@ func TestPrepareInstanceReboot(t *testing.T) {
 			Attributes: map[string][]string{
 				"aws.rds.instance.id": {"my-instance"},
 				"aws.account":         {"42"},
+				"aws.region":          {"us-west-1"},
 			},
 		}),
 	})
@@ -38,47 +39,9 @@ func TestPrepareInstanceReboot(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 	assert.Equal(t, "my-instance", state.DBInstanceIdentifier)
+	assert.Equal(t, "42", state.Account)
+	assert.Equal(t, "us-west-1", state.Region)
 	assert.Equal(t, true, state.ForceFailover)
-}
-
-func TestPrepareInstanceRebootMustRequireAnInstanceId(t *testing.T) {
-	// Given
-	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{
-				"aws.account": {"42"},
-			},
-		}),
-	})
-
-	attack := rdsInstanceRebootAttack{}
-	state := attack.NewEmptyState()
-
-	// When
-	_, err := attack.Prepare(context.Background(), &state, requestBody)
-
-	// Then
-	assert.ErrorContains(t, err, "aws.rds.instance.id")
-}
-
-func TestPrepareInstanceRebootMustRequireAnAccountId(t *testing.T) {
-	// Given
-	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
-			Attributes: map[string][]string{
-				"aws.rds.instance.id": {"my-instance"},
-			},
-		}),
-	})
-
-	attack := rdsInstanceRebootAttack{}
-	state := attack.NewEmptyState()
-
-	// When
-	_, err := attack.Prepare(context.Background(), &state, requestBody)
-
-	// Then
-	assert.ErrorContains(t, err, "aws.account")
 }
 
 func TestStartInstanceReboot(t *testing.T) {
@@ -92,9 +55,10 @@ func TestStartInstanceReboot(t *testing.T) {
 	state := RdsInstanceAttackState{
 		DBInstanceIdentifier: "dev-db",
 		Account:              "42",
+		Region:               "us-west-1",
 		ForceFailover:        true,
 	}
-	action := rdsInstanceRebootAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
+	action := rdsInstanceRebootAttack{clientProvider: func(account string, region string) (rdsDBInstanceApi, error) {
 		return api, nil
 	}}
 
@@ -113,7 +77,7 @@ func TestStartInstanceRebootForwardRebootError(t *testing.T) {
 	state := RdsInstanceAttackState{
 		DBInstanceIdentifier: "dev-db",
 	}
-	action := rdsInstanceRebootAttack{clientProvider: func(account string) (rdsDBInstanceApi, error) {
+	action := rdsInstanceRebootAttack{clientProvider: func(account string, region string) (rdsDBInstanceApi, error) {
 		return api, nil
 	}}
 
