@@ -85,8 +85,14 @@ spec:
                 - ALL
           env:
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
+            {{- if .Values.aws.assumeRoles }}
             - name: STEADYBIT_EXTENSION_ASSUME_ROLES
               value: {{ join "," .Values.aws.assumeRoles | quote }}
+            {{- end }}
+            {{- if .Values.aws.regions }}
+            - name: STEADYBIT_EXTENSION_REGIONS
+              value: {{ join "," .Values.aws.regions | quote }}
+            {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.ec2 }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EC2
               value: {{ join "," .Values.aws.discovery.attributes.excludes.ec2 | quote }}

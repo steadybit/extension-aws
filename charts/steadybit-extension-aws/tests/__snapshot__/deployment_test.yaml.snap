@@ -32,6 +32,8 @@ manifest should add aws env vars:
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES
                   value: arn:aws:iam::123456789012:role/role1,arn:aws:iam::123456789012:role/role2
+                - name: STEADYBIT_EXTENSION_REGIONS
+                  value: eu-central-1,us-east-1
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EC2
                   value: example.ec2.1,example.ec2.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ECS
@@ -140,8 +142,6 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
@@ -226,8 +226,6 @@ manifest should match snapshot with TLS:
                   value: /etc/extension/certificates/server-cert/tls.crt
                 - name: STEADYBIT_EXTENSION_TLS_SERVER_KEY
                   value: /etc/extension/certificates/server-cert/tls.key
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
@@ -315,8 +313,6 @@ manifest should match snapshot with extra env vars:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: FOO
                   value: bar
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
@@ -406,8 +402,6 @@ manifest should match snapshot with extra labels:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
@@ -494,8 +488,6 @@ manifest should match snapshot with mutual TLS:
                   value: /etc/extension/certificates/server-cert/tls.key
                 - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
                   value: /etc/extension/certificates/client-cert-a/tls.crt,/etc/extension/certificates/client-cert-a/tls.crt
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
@@ -596,8 +588,6 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: /etc/tls/server.key
                 - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
                   value: /etc/tls/ca.crt,/etc/tls/ca2.crt
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
@@ -678,8 +668,6 @@ manifest should match snapshot with podSecurityContext:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
@@ -762,8 +750,6 @@ manifest should match snapshot with priority class:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
@@ -845,8 +831,6 @@ manifest should match snapshot without TLS:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_ASSUME_ROLES
-                  value: ""
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE

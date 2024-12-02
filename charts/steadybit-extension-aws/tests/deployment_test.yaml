@@ -12,6 +12,9 @@ tests:
         assumeRoles:
           - "arn:aws:iam::123456789012:role/role1"
           - "arn:aws:iam::123456789012:role/role2"
+        regions:
+          - "eu-central-1"
+          - "us-east-1"
         discovery:
           disabled:
             ec2: true

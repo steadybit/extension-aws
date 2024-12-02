@@ -5,6 +5,8 @@
 aws:
   # aws.assumeRoles -- List of AWS IAM roles the extension should assume. You can use `--set aws.assumeRoles="{ARN1,ARN2}"` to set this value via the Helm CLI.
   assumeRoles: []
+  # aws.regions -- Optional list of AWS regions to use. If not set, the extension will use the region provided by the authentication. (https://github.com/steadybit/extension-aws?tab=readme-ov-file#multi-region-support)
+  regions: []
   discovery:
     disabled:
       # aws.discovery.disabled.ec2 -- Disables EC2 discovery and the related actions.
