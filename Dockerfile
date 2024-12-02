@@ -23,8 +23,6 @@ FROM alpine:3.20
 
 LABEL "steadybit.com.discovery-disabled"="true"
 
-RUN apk --no-cache add aws-cli
-
 ARG USERNAME=steadybit
 ARG USER_UID=10000
 

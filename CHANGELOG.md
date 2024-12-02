@@ -1,6 +1,12 @@
 # Changelog
 
-## v2.3.4 (next release)
+## v2.3.5
+
+- Multi region support
+- EC2 Instance State Attack allows to start a stopped instance
+
+## v2.3.4
+
 - Don't fail AWS Blackhole if account != service owner
 - Update dependencies
 
