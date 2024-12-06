@@ -74,15 +74,10 @@ spec:
             httpGet:
               port: 8086
               path: /health/readiness
+          {{- with .Values.containerSecurityContext }}
           securityContext:
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            runAsUser: 10000
-            runAsGroup: 10000
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             {{- if .Values.aws.assumeRoles }}
