@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.6
+
+- Use uid instead of name for user statement in Dockerfile
+
 ## v2.3.5
 
 - Multi region support
