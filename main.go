@@ -43,6 +43,8 @@ func main() {
 	exthealth.SetReady(false)
 
 	config.ParseConfiguration()
+	config.ValidateConfiguration()
+
 	utils.InitializeAwsAccess(config.Config)
 	utils.InitializeAwsZones()
 

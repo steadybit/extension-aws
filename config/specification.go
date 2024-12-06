@@ -38,4 +38,5 @@ type Specification struct {
 	DiscoveryAttributesExcludesLambda            []string `json:"discoveryAttributesExcludesLambda" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesRds               []string `json:"discoveryAttributesExcludesRds" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesZone              []string `json:"discoveryAttributesExcludesZone" split_words:"true" required:"false"`
+	DisableDiscoveryExcludes                     bool     `required:"false" split_words:"true" default:"false"`
 }

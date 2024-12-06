@@ -159,7 +159,7 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 				}
 
 				for _, task := range describeTasksOutput.Tasks {
-					if task.LastStatus != nil && *task.LastStatus == "RUNNING" {
+					if task.LastStatus != nil && *task.LastStatus == "RUNNING" && !ignoreTask(task) {
 						result = append(result, toTarget(task, zoneUtil, awsAccountNumber, awsRegion))
 					}
 				}
@@ -168,6 +168,18 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 	}
 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEcs), nil
+}
+
+func ignoreTask(service types.Task) bool {
+	if config.Config.DisableDiscoveryExcludes {
+		return false
+	}
+	for _, tag := range service.Tags {
+		if aws.ToString(tag.Key) == "steadybit.com/discovery-disabled" && aws.ToString(tag.Value) == "true" {
+			return true
+		}
+	}
+	return false
 }
 
 func toTarget(task types.Task, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {

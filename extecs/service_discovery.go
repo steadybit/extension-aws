@@ -164,11 +164,25 @@ func getAllServicesInCluster(clusterArn string, awsRegion string, awsAccountNumb
 			}
 
 			for _, service := range describeServicesOutput.Services {
-				result = append(result, toServiceTarget(service, awsAccountNumber, awsRegion))
+				if !ignoreService(service) {
+					result = append(result, toServiceTarget(service, awsAccountNumber, awsRegion))
+				}
 			}
 		}
 	}
 	return result, nil
+}
+
+func ignoreService(service types.Service) bool {
+	if config.Config.DisableDiscoveryExcludes {
+		return false
+	}
+	for _, tag := range service.Tags {
+		if aws.ToString(tag.Key) == "steadybit.com/discovery-disabled" && aws.ToString(tag.Value) == "true" {
+			return true
+		}
+	}
+	return false
 }
 
 func toServiceTarget(service types.Service, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {

@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.7 (next release)
+
+- ignore ecs services and tasks with a tag `steadybit.com/discovery-disabled` set to `true`
+
 ## v2.3.6
 
 - Use uid instead of name for user statement in Dockerfile
