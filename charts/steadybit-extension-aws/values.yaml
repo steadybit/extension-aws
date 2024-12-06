@@ -148,7 +148,18 @@ affinity: {}
 priorityClassName: null
 
 # podSecurityContext -- SecurityContext to apply to the pod.
-podSecurityContext: {}
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
+  runAsNonRoot: true
+
+# containerSecurityContext -- SecurityContext to apply to the container.
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
 
 # extraEnv -- Array with extra environment variables to add to the container
 # e.g:
