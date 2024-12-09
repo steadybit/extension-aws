@@ -19,7 +19,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH goreleaser build --snapshot="${BUILD_SNAPS
 ##
 ## Runtime
 ##
-FROM alpine:3.20
+FROM alpine:3.21
 
 LABEL "steadybit.com.discovery-disabled"="true"
 
