@@ -39,7 +39,7 @@ func (f elasticacheNodeGroupFailoverAttack) Describe() action_kit_api.ActionDesc
 			TargetType: elasticacheNodeGroupTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by elasticache nodegroup id",
+					Label:       "elasticache nodegroup id",
 					Description: extutil.Ptr("Find node groups by replication group id and node group id"),
 					Query:       "aws.elasticache.replication-group.id=\"\" and aws.elasticache.replication-group.node-group.id=\"\"",
 				},

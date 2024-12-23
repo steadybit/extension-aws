@@ -15,7 +15,7 @@ var (
 		TargetType: lambdaTargetID,
 		SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 			{
-				Label: "by function name",
+				Label: "function name",
 				Query: "aws.lambda.function-name=\"\"",
 			},
 		}),

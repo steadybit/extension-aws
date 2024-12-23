@@ -79,7 +79,7 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 			TargetType: albTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by name",
+					Label:       "name",
 					Description: extutil.Ptr("Find load balancer by name"),
 					Query:       "aws-elb.alb.name=\"\"",
 				},

@@ -39,7 +39,7 @@ func (f mskRebootBrokerAttack) Describe() action_kit_api.ActionDescription {
 			TargetType: mskBrokerTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by msk cluster id and broker id",
+					Label:       "msk cluster id and broker id",
 					Description: extutil.Ptr("Find broker by id and cluster id"),
 					Query:       "aws.msk.cluster.id=\"\" and aws.msk.cluster.broker.id=\"\"",
 				},

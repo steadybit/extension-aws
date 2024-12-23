@@ -55,12 +55,12 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 			TargetType: ec2TargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by instance-id",
+					Label:       "instance-id",
 					Description: extutil.Ptr("Find ec2-instance by instance-id"),
 					Query:       "aws-ec2.instance.id=\"\"",
 				},
 				{
-					Label:       "by instance-name",
+					Label:       "instance-name",
 					Description: extutil.Ptr("Find ec2-instance by instance-name"),
 					Query:       "aws-ec2.instance.name=\"\"",
 				},

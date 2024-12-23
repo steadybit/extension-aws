@@ -78,7 +78,7 @@ func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescript
 			QuantityRestriction: extutil.Ptr(action_kit_api.All),
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "default",
+					Label:       "cluster and service",
 					Description: extutil.Ptr("Find service by cluster and service name"),
 					Query:       "aws-ecs.cluster.name=\"\" AND aws-ecs.service.name=\"\"",
 				},

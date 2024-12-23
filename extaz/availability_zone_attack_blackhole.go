@@ -77,12 +77,12 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 			TargetType: azTargetType,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by zone",
+					Label:       "zone",
 					Description: extutil.Ptr("Find zone by name"),
 					Query:       "aws.zone=\"\"",
 				},
 				{
-					Label:       "by zone-id",
+					Label:       "zone-id",
 					Description: extutil.Ptr("Find zone by zone id"),
 					Query:       "aws.zone.id=\"\"",
 				},

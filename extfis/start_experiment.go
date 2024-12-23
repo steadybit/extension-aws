@@ -58,12 +58,12 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 			QuantityRestriction: extutil.Ptr(action_kit_api.ExactlyOne),
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by template-id",
+					Label:       "template-id",
 					Description: extutil.Ptr("Find fis-template by template-id"),
 					Query:       "aws.fis.experiment.template.id=\"\"",
 				},
 				{
-					Label:       "by template-name",
+					Label:       "template-name",
 					Description: extutil.Ptr("Find fis-template by template-name"),
 					Query:       "aws.fis.experiment.template.name=\"\"",
 				},

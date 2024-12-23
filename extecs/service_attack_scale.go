@@ -59,7 +59,7 @@ func (e *ecsServiceScaleAction) Describe() action_kit_api.ActionDescription {
 			TargetType: ecsServiceTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by service and cluster",
+					Label:       "cluster and service",
 					Description: extutil.Ptr("Find ecs service by cluster and service name"),
 					Query:       "aws-ecs.cluster.name=\"\" and aws-ecs.service.name=\"\"",
 				},

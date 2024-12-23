@@ -39,7 +39,7 @@ func (f rdsClusterFailoverAttack) Describe() action_kit_api.ActionDescription {
 			TargetType: rdsClusterTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label: "by rds cluster id",
+					Label: "rds cluster id",
 					Query: "aws.rds.cluster.id=\"\"",
 				},
 			}),

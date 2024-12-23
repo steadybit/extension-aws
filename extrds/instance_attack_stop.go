@@ -41,7 +41,7 @@ func (f rdsInstanceStopAttack) Describe() action_kit_api.ActionDescription {
 			TargetType: rdsInstanceTargetId,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label: "by rds instance id",
+					Label: "rds instance id",
 					Query: "aws.rds.instance.id=\"\"",
 				},
 			}),
