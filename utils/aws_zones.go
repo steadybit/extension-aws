@@ -61,10 +61,16 @@ type GetZoneUtil interface {
 	GetZone(awsAccountNumber string, region string, awsZone string) *types.AvailabilityZone
 }
 type GetZonesUtil interface {
-	GetZones(awsAccountNumber string, region string) []types.AvailabilityZone
+	GetZones(account *AwsAccess, ctx context.Context, updateCache bool) []types.AvailabilityZone
 }
 
-func (zones *AwsZones) GetZones(awsAccountNumber string, region string) []types.AvailabilityZone {
+func (zones *AwsZones) GetZones(account *AwsAccess, ctx context.Context, updateCache bool) []types.AvailabilityZone {
+	awsAccountNumber := account.AccountNumber
+	region := account.Region
+	if updateCache {
+		_, _ = initAwsZonesForAccountWithClient(ec2.NewFromConfig(account.AwsConfig), awsAccountNumber, region, ctx)
+	}
+
 	value, ok := zones.zones.Load(awsAccountNumber + "-" + region)
 	if !ok {
 		return []types.AvailabilityZone{}

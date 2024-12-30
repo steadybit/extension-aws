@@ -4,8 +4,10 @@
 package extaz
 
 import (
+	"context"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -16,8 +18,8 @@ type zoneMock struct {
 	mock.Mock
 }
 
-func (m *zoneMock) GetZones(awsAccountNumber string, region string) []types.AvailabilityZone {
-	args := m.Called(awsAccountNumber, region)
+func (m *zoneMock) GetZones(account *utils.AwsAccess, ctx context.Context, updateCache bool) []types.AvailabilityZone {
+	args := m.Called(account, ctx, updateCache)
 	return args.Get(0).([]types.AvailabilityZone)
 }
 
@@ -31,10 +33,12 @@ func TestGetAllAvailabilityZones(t *testing.T) {
 			ZoneId:     discovery_kit_api.Ptr("euc1-az3"),
 		},
 	}
-	mockedApi.On("GetZones", mock.Anything, mock.Anything).Return(mockedReturnValue)
+	mockedApi.On("GetZones", mock.Anything, mock.Anything, mock.Anything).Return(mockedReturnValue)
 
 	// When
-	targets := getAllAvailabilityZones(mockedApi, "42", "eu-central-1")
+	targets := getAllAvailabilityZones(mockedApi, &utils.AwsAccess{
+		AccountNumber: "42",
+	}, context.Background())
 
 	// Then
 	assert.Equal(t, 1, len(targets))

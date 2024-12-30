@@ -3,6 +3,7 @@
 ## v2.3.7 (next release)
 
 - ignore ecs services and tasks with a tag `steadybit.com/discovery-disabled` set to `true`
+- don't cache zones forever (for example removed permissions should lead to removed targets in the platform)
 
 ## v2.3.6
 

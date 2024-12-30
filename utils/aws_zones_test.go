@@ -64,7 +64,7 @@ func TestAwsZones(t *testing.T) {
 	assert.Nil(t, Zones.GetZone("42", "eu-central-1", "eu-central-1c"))
 	assert.Nil(t, Zones.GetZone("4711", "eu-central-1", "eu-central-1a"))
 
-	assert.Equal(t, mockedReturnValue42.AvailabilityZones, Zones.GetZones("42", "eu-central-1"))
-	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones("4711", "eu-central-1"))
-	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones("0815", "eu-central-1"))
+	assert.Equal(t, mockedReturnValue42.AvailabilityZones, Zones.GetZones(&AwsAccess{AccountNumber: "42", Region: "eu-central-1"}, context.Background(), false))
+	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones(&AwsAccess{AccountNumber: "4711", Region: "eu-central-1"}, context.Background(), false))
+	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones(&AwsAccess{AccountNumber: "0815", Region: "eu-central-1"}, context.Background(), false))
 }
