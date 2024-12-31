@@ -47,8 +47,8 @@ github.com/aws/aws-sdk-go-v2/service/kafka v1.38.5 h1:bKFEi5OkRVuO66i5YAtqbZDnzb
 github.com/aws/aws-sdk-go-v2/service/kafka v1.38.5/go.mod h1:aXQ/kIoUOZ5KM9tIOtT/KksMcwQJvaAB584BF3elOqM=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.69.0 h1:BXt75frE/FYtAmEDBJRBa2HexOw+oAZWZl6QknZEFgg=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.69.0/go.mod h1:guz2K3x4FKSdDaoeB+TPVgJNU9oj2gftbp5cR8ela1A=
-github.com/aws/aws-sdk-go-v2/service/rds v1.92.0 h1:W0gUYAjO24u/M6tpR041wMHJWGzleOhxtCnNLImdrZs=
-github.com/aws/aws-sdk-go-v2/service/rds v1.92.0/go.mod h1:ADD2uROOoEIXjbjDPEvDDZWnGmfKFYMddgKwG5RlBGw=
+github.com/aws/aws-sdk-go-v2/service/rds v1.93.2 h1:Fv2//DyCH9n6LqEOvpeIFYYRfIhvjhrLk5qhrYMjDGE=
+github.com/aws/aws-sdk-go-v2/service/rds v1.93.2/go.mod h1:QEpwiX4BS6nos2d/ele6gRGalNW0Hzc1TZMmhkywQb0=
 github.com/aws/aws-sdk-go-v2/service/ssm v1.56.1 h1:cfVjoEwOMOJOI6VoRQua0nI0KjZV9EAnR8bKaMeSppE=
 github.com/aws/aws-sdk-go-v2/service/ssm v1.56.1/go.mod h1:fGHwAnTdNrLKhgl+UEeq9uEL4n3Ng4MJucA+7Xi3sC4=
 github.com/aws/aws-sdk-go-v2/service/sso v1.24.8 h1:CvuUmnXI7ebaUAhbJcDy9YQx8wHR69eZ9I7q5hszt/g=
