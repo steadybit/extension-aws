@@ -4,6 +4,7 @@
 
 - ignore ecs services and tasks with a tag `steadybit.com/discovery-disabled` set to `true`
 - don't cache zones forever (for example removed permissions should lead to removed targets in the platform)
+- include tags in the discovery of Lambda functions (requires new permission `tag:GetResources`)
 
 ## v2.3.6
 

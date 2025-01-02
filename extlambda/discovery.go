@@ -12,6 +12,8 @@ import (
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
+	tagTypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -21,14 +23,16 @@ import (
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type lambdaDiscovery struct{}
 
 var (
-	_ discovery_kit_sdk.TargetDescriber    = (*lambdaDiscovery)(nil)
-	_ discovery_kit_sdk.AttributeDescriber = (*lambdaDiscovery)(nil)
+	_                                  discovery_kit_sdk.TargetDescriber    = (*lambdaDiscovery)(nil)
+	_                                  discovery_kit_sdk.AttributeDescriber = (*lambdaDiscovery)(nil)
+	missingPermissionTagsAlreadyLogged                                      = false
 )
 
 func NewLambdaDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
@@ -177,8 +181,10 @@ func (l *lambdaDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_
 }
 
 func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
-	client := lambda.NewFromConfig(account.AwsConfig)
-	result, err := getAllAwsLambdaFunctions(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	lambdaClient := lambda.NewFromConfig(account.AwsConfig)
+	tagsClient := resourcegroupstaggingapi.NewFromConfig(account.AwsConfig)
+
+	result, err := getAllAwsLambdaFunctions(ctx, lambdaClient, tagsClient, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -190,19 +196,26 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 	return result, nil
 }
 
-func getAllAwsLambdaFunctions(ctx context.Context, client lambda.ListFunctionsAPIClient, awsAccountNumber string, awsAccountRegion string) ([]discovery_kit_api.Target, error) {
+func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunctionsAPIClient, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, awsAccountNumber string, awsAccountRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 100)
 	var marker *string = nil
 	for {
-		output, err := client.ListFunctions(ctx, &lambda.ListFunctionsInput{
+		output, err := lambdaClient.ListFunctions(ctx, &lambda.ListFunctionsInput{
 			Marker: marker,
 		})
 		if err != nil {
 			return nil, err
 		}
 
+		tagsResponses := getTags(ctx, output, tagsClient)
 		for _, function := range output.Functions {
-			result = append(result, toTarget(function, awsAccountNumber, awsAccountRegion))
+			var tags []tagTypes.Tag
+			for _, tagsResponse := range tagsResponses {
+				if *function.FunctionArn == *tagsResponse.ResourceARN {
+					tags = tagsResponse.Tags
+				}
+			}
+			result = append(result, toTarget(function, awsAccountNumber, awsAccountRegion, tags))
 		}
 
 		if output.NextMarker == nil {
@@ -214,7 +227,26 @@ func getAllAwsLambdaFunctions(ctx context.Context, client lambda.ListFunctionsAP
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesLambda), nil
 }
 
-func toTarget(function types.FunctionConfiguration, awsAccountNumber string, awsAccountRegion string) discovery_kit_api.Target {
+func getTags(ctx context.Context, output *lambda.ListFunctionsOutput, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient) []tagTypes.ResourceTagMapping {
+	arns := make([]string, 0, len(output.Functions))
+	for _, function := range output.Functions {
+		arns = append(arns, *function.FunctionArn)
+	}
+	tagsResult, tagsErr := tagsClient.GetResources(ctx, &resourcegroupstaggingapi.GetResourcesInput{
+		ResourceARNList: arns,
+	})
+	if tagsErr != nil && !missingPermissionTagsAlreadyLogged {
+		log.Warn().Err(tagsErr).Msg("Error fetching tags for lambda functions. Tags will be missing in the discovery.")
+		missingPermissionTagsAlreadyLogged = true
+	}
+	var tags []tagTypes.ResourceTagMapping
+	if tagsResult != nil && tagsResult.ResourceTagMappingList != nil {
+		tags = tagsResult.ResourceTagMappingList
+	}
+	return tags
+}
+
+func toTarget(function types.FunctionConfiguration, awsAccountNumber string, awsAccountRegion string, tags []tagTypes.Tag) discovery_kit_api.Target {
 	arn := aws.ToString(function.FunctionArn)
 	name := aws.ToString(function.FunctionName)
 
@@ -249,6 +281,10 @@ func toTarget(function types.FunctionConfiguration, awsAccountNumber string, aws
 	attributes["aws.lambda.architecture"] = architectures
 	if function.MasterArn != nil {
 		attributes["aws.lambda.master-arn"] = []string{aws.ToString(function.MasterArn)}
+	}
+
+	for _, tag := range tags {
+		attributes[fmt.Sprintf("aws.lambda.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
 	}
 
 	return discovery_kit_api.Target{

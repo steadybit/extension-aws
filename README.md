@@ -298,7 +298,8 @@ start the very first fis experiment via the steadybit agent, you will need to ad
         "ssm:AddTagsToResource",
         "ssm:PutParameter",
         "ssm:DeleteParameter",
-        "lambda:ListFunctions"
+        "lambda:ListFunctions",
+        "tag:GetResources"
       ],
       "Effect": "Allow",
       "Resource": "*"

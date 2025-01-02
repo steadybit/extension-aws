@@ -9,6 +9,8 @@ import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
+	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
@@ -28,8 +30,21 @@ func (m *lambdaClientMock) ListFunctions(ctx context.Context, params *lambda.Lis
 	return args.Get(0).(*lambda.ListFunctionsOutput), args.Error(1)
 }
 
+type tagClientMock struct {
+	mock.Mock
+}
+
+func (m *tagClientMock) GetResources(ctx context.Context, params *resourcegroupstaggingapi.GetResourcesInput, optFns ...func(*resourcegroupstaggingapi.Options)) (*resourcegroupstaggingapi.GetResourcesOutput, error) {
+	args := m.Called(ctx, params, optFns)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*resourcegroupstaggingapi.GetResourcesOutput), args.Error(1)
+}
+
 func Test_getAllAwsLambdaFunctions(t *testing.T) {
-	api := new(lambdaClientMock)
+	lambdaApi := new(lambdaClientMock)
+	tagApi := new(tagClientMock)
 	listedFunction := lambda.ListFunctionsOutput{
 		Functions: []types.FunctionConfiguration{
 			{
@@ -55,10 +70,25 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 			},
 		},
 	}
-	api.On("ListFunctions", mock.Anything, mock.Anything, mock.Anything).Return(&listedFunction, nil)
+	lambdaApi.On("ListFunctions", mock.Anything, mock.Anything, mock.Anything).Return(&listedFunction, nil)
+
+	tags := resourcegroupstaggingapi.GetResourcesOutput{
+		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
+			{
+				ResourceARN: extutil.Ptr("arn"),
+				Tags: []tagtypes.Tag{
+					{
+						Key:   extutil.Ptr("Example"),
+						Value: extutil.Ptr("Tag123"),
+					},
+				},
+			},
+		},
+	}
+	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
 
 	// When
-	targets, err := getAllAwsLambdaFunctions(context.Background(), api, "42", "us-east-1")
+	targets, err := getAllAwsLambdaFunctions(context.Background(), lambdaApi, tagApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -68,16 +98,18 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	assert.Equal(t, lambdaTargetID, target.TargetType)
 	assert.Equal(t, "name", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 18, len(target.Attributes))
+	assert.Equal(t, 19, len(target.Attributes))
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"name"}, target.Attributes["aws.lambda.function-name"])
 	assert.Equal(t, []string{"env-fip"}, target.Attributes["aws.lambda.failure-injection-param"])
+	assert.Equal(t, []string{"Tag123"}, target.Attributes["aws.lambda.label.example"])
 }
 
 func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 	// Given
 	mockedApi := new(lambdaClientMock)
+	tagApi := new(tagClientMock)
 
 	withMarker := mock.MatchedBy(func(arg *lambda.ListFunctionsInput) bool {
 		return arg.Marker != nil
@@ -100,9 +132,23 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 			},
 		},
 	}, nil)
+	tags := resourcegroupstaggingapi.GetResourcesOutput{
+		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
+			{
+				ResourceARN: extutil.Ptr("arn"),
+				Tags: []tagtypes.Tag{
+					{
+						Key:   extutil.Ptr("Example"),
+						Value: extutil.Ptr("Tag123"),
+					},
+				},
+			},
+		},
+	}
+	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
 
 	// When
-	targets, err := getAllAwsLambdaFunctions(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllAwsLambdaFunctions(context.Background(), mockedApi, tagApi, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -113,10 +159,11 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 
 func Test_getAllAwsLambdaFunctions_withError(t *testing.T) {
 	// Given
-	api := new(lambdaClientMock)
-	api.On("ListFunctions", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
+	clientApi := new(lambdaClientMock)
+	tagApi := new(tagClientMock)
+	clientApi.On("ListFunctions", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
 	// When
-	_, err := getAllAwsLambdaFunctions(context.Background(), api, "42", "us-east-1")
+	_, err := getAllAwsLambdaFunctions(context.Background(), clientApi, tagApi, "42", "us-east-1")
 	assert.Equal(t, "error", err.Error())
 }
