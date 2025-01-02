@@ -26,7 +26,7 @@ type ElasticacheClusterAttackState struct {
 
 type ElasticacheApi interface {
 	TestFailover(ctx context.Context, params *elasticache.TestFailoverInput, optFns ...func(*elasticache.Options)) (*elasticache.TestFailoverOutput, error)
-	DescribeReplicationGroups(ctx context.Context, params *elasticache.DescribeReplicationGroupsInput, optFns ...func(*elasticache.Options)) (*elasticache.DescribeReplicationGroupsOutput, error)
+	elasticache.DescribeReplicationGroupsAPIClient
 }
 
 func defaultElasticacheClientProvider(account string, region string) (ElasticacheApi, error) {

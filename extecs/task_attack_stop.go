@@ -31,7 +31,7 @@ type TaskStopState struct {
 }
 
 type ecsTaskStopApi interface {
-	DescribeTasks(ctx context.Context, params *ecs.DescribeTasksInput, optFns ...func(*ecs.Options)) (*ecs.DescribeTasksOutput, error)
+	ecs.DescribeTasksAPIClient
 	StopTask(ctx context.Context, params *ecs.StopTaskInput, optFns ...func(*ecs.Options)) (*ecs.StopTaskOutput, error)
 }
 

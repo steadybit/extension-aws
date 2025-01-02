@@ -34,7 +34,7 @@ func TestServiceDescriptionPoller_awaits_first_response(t *testing.T) {
 
 	poller := NewServiceDescriptionPoller()
 	poller.ticker = time.NewTicker(1 * time.Millisecond)
-	poller.apiClientProvider = func(account string, region string) (ecsDescribeServicesApi, error) {
+	poller.apiClientProvider = func(account string, region string) (ecs.DescribeServicesAPIClient, error) {
 		mockedApi := new(ecsDescribeServicesApiMock)
 		mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
 			Services: []types.Service{{

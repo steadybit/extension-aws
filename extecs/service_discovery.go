@@ -37,7 +37,7 @@ var (
 type ecsServiceDiscoveryApi interface {
 	ListClusters(ctx context.Context, params *ecs.ListClustersInput, optFns ...func(*ecs.Options)) (*ecs.ListClustersOutput, error)
 	ListServices(ctx context.Context, params *ecs.ListServicesInput, optFns ...func(*ecs.Options)) (*ecs.ListServicesOutput, error)
-	DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, optFns ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error)
+	ecs.DescribeServicesAPIClient
 }
 
 func NewEcsServiceDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {

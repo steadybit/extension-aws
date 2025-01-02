@@ -22,7 +22,7 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 	poller.ticker = time.NewTicker(1 * time.Millisecond)
 
 	// Mock the api calls in ServiceDescriptionPoller to check the interactions of ServiceTaskCountCheck with it.
-	poller.apiClientProvider = func(account string, region string) (ecsDescribeServicesApi, error) {
+	poller.apiClientProvider = func(account string, region string) (ecs.DescribeServicesAPIClient, error) {
 		mockedApi := new(ecsDescribeServicesApiMock)
 		mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
 			Services: []types.Service{{

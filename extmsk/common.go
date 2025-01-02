@@ -25,8 +25,8 @@ type KafkaAttackState struct {
 
 type MskApi interface {
 	RebootBroker(ctx context.Context, params *kafka.RebootBrokerInput, optFns ...func(*kafka.Options)) (*kafka.RebootBrokerOutput, error)
-	ListClustersV2(ctx context.Context, params *kafka.ListClustersV2Input, optFns ...func(*kafka.Options)) (*kafka.ListClustersV2Output, error)
-	ListNodes(ctx context.Context, params *kafka.ListNodesInput, optFns ...func(*kafka.Options)) (*kafka.ListNodesOutput, error)
+	kafka.ListClustersV2APIClient
+	kafka.ListNodesAPIClient
 }
 
 func defaultMskClientProvider(account string, region string) (MskApi, error) {

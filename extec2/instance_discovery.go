@@ -266,11 +266,7 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 	return result, nil
 }
 
-type Ec2DescribeInstancesApi interface {
-	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
-}
-
-func GetAllEc2Instances(ctx context.Context, ec2Api Ec2DescribeInstancesApi, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func GetAllEc2Instances(ctx context.Context, ec2Api ec2.DescribeInstancesAPIClient, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := ec2.NewDescribeInstancesPaginator(ec2Api, &ec2.DescribeInstancesInput{})

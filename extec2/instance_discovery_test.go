@@ -20,7 +20,7 @@ type ec2ClientMock struct {
 	mock.Mock
 }
 
-func (m *ec2ClientMock) DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
+func (m *ec2ClientMock) DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, _ ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -210,5 +210,5 @@ func TestGetAllEc2InstancesError(t *testing.T) {
 	_, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
 	// Then
-	assert.Equal(t, err.Error(), "expected")
+	assert.EqualError(t, err, "expected")
 }

@@ -15,10 +15,6 @@ import (
 
 const maxServicePageSize = 10
 
-type ecsDescribeServicesApi interface {
-	DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, optFns ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error)
-}
-
 type ServiceDescriptionPoller interface {
 	Start(ctx context.Context)
 	Register(account string, region string, cluster string, service string)
@@ -41,7 +37,7 @@ type pollRegions map[string]pollClusters
 type pollAccounts map[string]pollRegions
 
 type EcsServiceDescriptionPoller struct {
-	apiClientProvider func(account string, region string) (ecsDescribeServicesApi, error)
+	apiClientProvider func(account string, region string) (ecs.DescribeServicesAPIClient, error)
 	ticker            *time.Ticker
 	m                 *sync.RWMutex
 	c                 *sync.Cond
@@ -213,7 +209,7 @@ func (p EcsServiceDescriptionPoller) pollAll(ctx context.Context) {
 	p.c.Broadcast()
 }
 
-func defaultDescribeServiceProvider(account string, region string) (ecsDescribeServicesApi, error) {
+func defaultDescribeServiceProvider(account string, region string) (ecs.DescribeServicesAPIClient, error) {
 	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err

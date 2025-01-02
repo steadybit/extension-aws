@@ -114,7 +114,7 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 }
 
 type FisApi interface {
-	ListExperimentTemplates(ctx context.Context, params *fis.ListExperimentTemplatesInput, optFns ...func(*fis.Options)) (*fis.ListExperimentTemplatesOutput, error)
+	fis.ListExperimentTemplatesAPIClient
 	GetExperimentTemplate(ctx context.Context, params *fis.GetExperimentTemplateInput, optFns ...func(*fis.Options)) (*fis.GetExperimentTemplateOutput, error)
 }
 

@@ -34,7 +34,7 @@ type ServiceScaleState struct {
 
 type ecsServiceScaleApi interface {
 	UpdateService(ctx context.Context, params *ecs.UpdateServiceInput, optFns ...func(*ecs.Options)) (*ecs.UpdateServiceOutput, error)
-	DescribeServices(ctx context.Context, params *ecs.DescribeServicesInput, optFns ...func(*ecs.Options)) (*ecs.DescribeServicesOutput, error)
+	ecs.DescribeServicesAPIClient
 }
 
 func NewEcsServiceScaleAction() action_kit_sdk.Action[ServiceScaleState] {

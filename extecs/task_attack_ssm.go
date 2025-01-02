@@ -54,7 +54,7 @@ type TaskSsmActionState struct {
 type ecsTaskSsmApi interface {
 	SendCommand(ctx context.Context, params *ssm.SendCommandInput, optFns ...func(*ssm.Options)) (*ssm.SendCommandOutput, error)
 	CancelCommand(ctx context.Context, params *ssm.CancelCommandInput, optFns ...func(*ssm.Options)) (*ssm.CancelCommandOutput, error)
-	DescribeInstanceInformation(ctx context.Context, params *ssm.DescribeInstanceInformationInput, optFns ...func(*ssm.Options)) (*ssm.DescribeInstanceInformationOutput, error)
+	ssm.DescribeInstanceInformationAPIClient
 	ssm.GetCommandInvocationAPIClient
 }
 

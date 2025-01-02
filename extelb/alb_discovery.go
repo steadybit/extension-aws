@@ -117,9 +117,9 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 }
 
 type AlbDiscoveryApi interface {
-	DescribeLoadBalancers(ctx context.Context, params *elasticloadbalancingv2.DescribeLoadBalancersInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DescribeLoadBalancersOutput, error)
+	elasticloadbalancingv2.DescribeLoadBalancersAPIClient
+	elasticloadbalancingv2.DescribeListenersAPIClient
 	DescribeTags(ctx context.Context, params *elasticloadbalancingv2.DescribeTagsInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DescribeTagsOutput, error)
-	DescribeListeners(ctx context.Context, params *elasticloadbalancingv2.DescribeListenersInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DescribeListenersOutput, error)
 }
 
 func GetAlbs(ctx context.Context, albDiscoveryApi AlbDiscoveryApi, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {

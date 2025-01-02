@@ -47,8 +47,8 @@ type AlbStaticResponseState struct {
 }
 
 type albStaticResponseApi interface {
-	DescribeListeners(ctx context.Context, params *elasticloadbalancingv2.DescribeListenersInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DescribeListenersOutput, error)
-	DescribeRules(ctx context.Context, params *elasticloadbalancingv2.DescribeRulesInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DescribeRulesOutput, error)
+	elasticloadbalancingv2.DescribeListenersAPIClient
+	elasticloadbalancingv2.DescribeRulesAPIClient
 	SetRulePriorities(ctx context.Context, params *elasticloadbalancingv2.SetRulePrioritiesInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.SetRulePrioritiesOutput, error)
 	CreateRule(ctx context.Context, params *elasticloadbalancingv2.CreateRuleInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.CreateRuleOutput, error)
 	DeleteRule(ctx context.Context, params *elasticloadbalancingv2.DeleteRuleInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DeleteRuleOutput, error)

@@ -125,9 +125,9 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 }
 
 type EcsTasksApi interface {
-	ListTasks(ctx context.Context, params *ecs.ListTasksInput, optFns ...func(*ecs.Options)) (*ecs.ListTasksOutput, error)
-	DescribeTasks(ctx context.Context, params *ecs.DescribeTasksInput, optFns ...func(*ecs.Options)) (*ecs.DescribeTasksOutput, error)
-	ListClusters(ctx context.Context, params *ecs.ListClustersInput, optFns ...func(*ecs.Options)) (*ecs.ListClustersOutput, error)
+	ecs.ListTasksAPIClient
+	ecs.DescribeTasksAPIClient
+	ecs.ListClustersAPIClient
 }
 
 func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
