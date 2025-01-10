@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
-package extaz
+package extec2
 
 import (
 	"context"
@@ -66,22 +66,22 @@ func (a *azDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 }
 
 func (a *azDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "availability zone")
+	return utils.ForEveryConfiguredAwsAccess(getAllAvailabilityZonesForAccount, ctx, "availability zone")
 }
 
-func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getAllAvailabilityZonesForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	return getAllAvailabilityZones(utils.Zones, account, ctx), nil
 }
 
 func getAllAvailabilityZones(zones utils.GetZonesUtil, account *utils.AwsAccess, ctx context.Context) []discovery_kit_api.Target {
 	result := make([]discovery_kit_api.Target, 0, 20)
 	for _, availabilityZone := range zones.GetZones(account, ctx, true) {
-		result = append(result, toTarget(availabilityZone, account.AccountNumber))
+		result = append(result, toAvailabilityZoneTarget(availabilityZone, account.AccountNumber))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesZone)
 }
 
-func toTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string) discovery_kit_api.Target {
+func toAvailabilityZoneTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string) discovery_kit_api.Target {
 	label := aws.ToString(availabilityZone.ZoneName)
 	id := aws.ToString(availabilityZone.ZoneName) + "@" + awsAccountNumber
 

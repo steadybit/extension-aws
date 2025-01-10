@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2023 Steadybit GmbH
 
-package extaz
+package extec2
 
 import (
 	"context"
@@ -13,15 +13,6 @@ import (
 
 	"testing"
 )
-
-type zoneMock struct {
-	mock.Mock
-}
-
-func (m *zoneMock) GetZones(account *utils.AwsAccess, ctx context.Context, updateCache bool) []types.AvailabilityZone {
-	args := m.Called(account, ctx, updateCache)
-	return args.Get(0).([]types.AvailabilityZone)
-}
 
 func TestGetAllAvailabilityZones(t *testing.T) {
 	// Given

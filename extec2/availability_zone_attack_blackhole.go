@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2024 Steadybit GmbH
 
-package extaz
+package extec2
 
 import (
 	"context"
@@ -57,7 +57,7 @@ type azBlackholeImdsApi interface {
 
 func NewAzBlackholeAction() action_kit_sdk.Action[BlackholeState] {
 	return &azBlackholeAction{
-		clientProvider:             defaultClientProvider,
+		clientProvider:             defaultClientProviderAzBlackhole,
 		extensionRootAccountNumber: utils.GetRootAccountNumber(),
 	}
 }
@@ -468,7 +468,7 @@ func getAllNACLsCreatedBySteadybit(clientEc2 azBlackholeEC2Api, ctx context.Cont
 	return &result, nil
 }
 
-func defaultClientProvider(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
+func defaultClientProviderAzBlackhole(account string, region string) (azBlackholeEC2Api, azBlackholeImdsApi, error) {
 	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, nil, err

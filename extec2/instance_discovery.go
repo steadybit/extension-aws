@@ -249,10 +249,10 @@ func (e *ec2Discovery) DescribeAttributes() []discovery_kit_api.AttributeDescrip
 }
 
 func (e *ec2Discovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryConfiguredAwsAccess(getTargetsForAccount, ctx, "ec2-instance")
+	return utils.ForEveryConfiguredAwsAccess(getEc2InstancesForAccount, ctx, "ec2-instance")
 }
 
-func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getEc2InstancesForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ec2.NewFromConfig(account.AwsConfig)
 	result, err := GetAllEc2Instances(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
@@ -277,7 +277,7 @@ func GetAllEc2Instances(ctx context.Context, ec2Api ec2.DescribeInstancesAPIClie
 		}
 		for _, reservation := range output.Reservations {
 			for _, ec2Instance := range reservation.Instances {
-				result = append(result, toTarget(ec2Instance, zoneUtil, awsAccountNumber, awsRegion))
+				result = append(result, toEc2InstanceTarget(ec2Instance, zoneUtil, awsAccountNumber, awsRegion))
 			}
 		}
 	}
@@ -285,7 +285,7 @@ func GetAllEc2Instances(ctx context.Context, ec2Api ec2.DescribeInstancesAPIClie
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEc2), nil
 }
 
-func toTarget(ec2Instance types.Instance, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toEc2InstanceTarget(ec2Instance types.Instance, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
 	var name *string
 	for _, tag := range ec2Instance.Tags {
 		if *tag.Key == "Name" {

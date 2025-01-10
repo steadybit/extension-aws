@@ -28,15 +28,6 @@ func (m *ec2ClientMock) DescribeInstances(ctx context.Context, params *ec2.Descr
 	return args.Get(0).(*ec2.DescribeInstancesOutput), args.Error(1)
 }
 
-type zoneMock struct {
-	mock.Mock
-}
-
-func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string, region string) *types.AvailabilityZone {
-	args := m.Called(awsAccountNumber, awsZone, region)
-	return args.Get(0).(*types.AvailabilityZone)
-}
-
 var instance = types.Instance{
 	InstanceId: extutil.Ptr("i-0ef9adc9fbd3b19c5"),
 	ImageId:    extutil.Ptr("ami-02fc9c535f43bbc91"),

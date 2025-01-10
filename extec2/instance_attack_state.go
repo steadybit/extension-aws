@@ -37,7 +37,7 @@ type ec2InstanceStateChangeApi interface {
 }
 
 func NewEc2InstanceStateAction() action_kit_sdk.Action[InstanceStateChangeState] {
-	return &ec2InstanceStateAction{defaultClientProvider}
+	return &ec2InstanceStateAction{defaultClientProviderInstanceState}
 }
 
 func (e *ec2InstanceStateAction) NewEmptyState() InstanceStateChangeState {
@@ -161,7 +161,7 @@ func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceState
 	return nil, nil
 }
 
-func defaultClientProvider(account string, region string) (ec2InstanceStateChangeApi, error) {
+func defaultClientProviderInstanceState(account string, region string) (ec2InstanceStateChangeApi, error) {
 	awsAccess, err := utils.GetAwsAccess(account, region)
 	if err != nil {
 		return nil, err

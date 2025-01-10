@@ -12,7 +12,6 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
-	"github.com/steadybit/extension-aws/extaz"
 	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/extecs"
 	"github.com/steadybit/extension-aws/extelasticache"
@@ -102,8 +101,8 @@ func registerHandlers(ctx context.Context) {
 	}
 
 	if !cfg.DiscoveryDisabledZone {
-		discovery_kit_sdk.Register(extaz.NewAzDiscovery(ctx))
-		action_kit_sdk.RegisterAction(extaz.NewAzBlackholeAction())
+		discovery_kit_sdk.Register(extec2.NewAzDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extec2.NewAzBlackholeAction())
 	}
 
 	if !cfg.DiscoveryDisabledEc2 {
