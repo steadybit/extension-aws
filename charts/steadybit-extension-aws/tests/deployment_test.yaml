@@ -23,7 +23,9 @@ tests:
             fis: true
             lambda: true
             rds: true
+            subnet: true
             zone: true
+            vpc: true
           attributes:
             excludes:
               ec2:
@@ -44,9 +46,15 @@ tests:
               rds:
                 - "example.rds.1"
                 - "example.rds.2"
+              subnet:
+                - "example.subnet.1"
+                - "example.subnet.2"
               zone:
                 - "example.zone.1"
                 - "example.zone.2"
+              vpc:
+                - "example.vpc.1"
+                - "example.vpc.2"
     asserts:
       - matchSnapshot: {}
   - it: manifest should match snapshot using podAnnotations and Labels

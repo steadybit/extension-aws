@@ -16,11 +16,11 @@ import (
 	"testing"
 )
 
-type instanceDiscoveryEc2UtilMock struct {
+type instanceDiscoveryApiMock struct {
 	mock.Mock
 }
 
-func (m *instanceDiscoveryEc2UtilMock) DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, _ ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
+func (m *instanceDiscoveryApiMock) DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, _ ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -49,7 +49,7 @@ var instance = types.Instance{
 
 func TestGetAllEc2Instances(t *testing.T) {
 	// Given
-	mockedApi := new(instanceDiscoveryEc2UtilMock)
+	mockedApi := new(instanceDiscoveryApiMock)
 	mockedReturnValue := ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -99,7 +99,7 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	// Given
 	// set env var to filter out all attributes starting with "aws-ec2"
 	config.Config.DiscoveryAttributesExcludesEc2 = []string{"aws-ec2.label.*", "aws-ec2.image"}
-	mockedApi := new(instanceDiscoveryEc2UtilMock)
+	mockedApi := new(instanceDiscoveryApiMock)
 	mockedReturnValue := ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -150,7 +150,7 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 
 func TestNameNotSet(t *testing.T) {
 	// Given
-	mockedApi := new(instanceDiscoveryEc2UtilMock)
+	mockedApi := new(instanceDiscoveryApiMock)
 	mockedReturnValue := ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -189,7 +189,7 @@ func TestNameNotSet(t *testing.T) {
 
 func TestGetAllEc2InstancesError(t *testing.T) {
 	// Given
-	mockedApi := new(instanceDiscoveryEc2UtilMock)
+	mockedApi := new(instanceDiscoveryApiMock)
 
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 

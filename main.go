@@ -105,6 +105,10 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extec2.NewAzBlackholeAction())
 	}
 
+	if !cfg.DiscoveryDisabledSubnet {
+		discovery_kit_sdk.Register(extec2.NewSubnetDiscovery(ctx))
+	}
+
 	if !cfg.DiscoveryDisabledEc2 {
 		discovery_kit_sdk.Register(extec2.NewEc2InstanceDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extec2.NewEc2InstanceStateAction())

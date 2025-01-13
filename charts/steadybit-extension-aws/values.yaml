@@ -25,6 +25,8 @@ aws:
       lambda: false
       # aws.discovery.disabled.rds -- Disables RDS discovery and the related actions.
       rds: false
+      # aws.discovery.disabled.subnet -- Disables Subnet discovery and the related actions.
+      subnet: false
       # aws.discovery.disabled.vpc -- Disables VPC discovery and the related actions.
       vpc: false
       # aws.discovery.disabled.zone -- Disables AZ discovery and the related actions.
@@ -45,6 +47,8 @@ aws:
         msk: []
         # aws.discovery.attributes.excludes.lambda -- List of attributes to exclude from Lambda discovery.
         lambda: []
+        # aws.discovery.attributes.excludes.subnet -- List of attributes to exclude from Subnet discovery.
+        subnet: []
         # aws.discovery.attributes.excludes.rds -- List of attributes to exclude from RDS discovery.
         rds: []
         # aws.discovery.attributes.excludes.zone -- List of attributes to exclude from AZ discovery.

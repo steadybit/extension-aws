@@ -16,9 +16,10 @@ type Specification struct {
 	DiscoveryDisabledMsk                         bool     `json:"discoveryDisabledMsk" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledLambda                      bool     `json:"discoveryDisabledLambda" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledRds                         bool     `json:"discoveryDisabledRds" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledSubnet                      bool     `json:"discoveryDisabledSubnet" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledZone                        bool     `json:"discoveryDisabledZone" split_words:"true" required:"false" default:"false"`
-	DiscoveryIntervalEc2                         int      `json:"discoveryIntervalEc2" split_words:"true" required:"false" default:"30"`
 	DiscoveryDisabledVpc                         bool     `json:"discoveryDisabledVpc" split_words:"true" required:"false" default:"false"`
+	DiscoveryIntervalEc2                         int      `json:"discoveryIntervalEc2" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalEcsService                  int      `json:"discoveryIntervalEcsService" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalEcsTask                     int      `json:"discoveryIntervalEcsTask" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalElasticacheReplicationGroup int      `json:"discoveryIntervalElasticacheReplicationGroup" split_words:"true" required:"false" default:"30"`
@@ -27,6 +28,7 @@ type Specification struct {
 	DiscoveryIntervalFis                         int      `json:"discoveryIntervalFis" split_words:"true" required:"false" default:"300"`
 	DiscoveryIntervalLambda                      int      `json:"discoveryIntervalLambda" split_words:"true" required:"false" default:"60"`
 	DiscoveryIntervalRds                         int      `json:"discoveryIntervalRds" split_words:"true" required:"false" default:"30"`
+	DiscoveryIntervalSubnet                      int      `json:"discoveryIntervalSubnet" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalZone                        int      `json:"discoveryIntervalZone" split_words:"true" required:"false" default:"300"`
 	EnrichEc2DataForTargetTypes                  []string `json:"EnrichEc2DataForTargetTypes" split_words:"true" default:"com.steadybit.extension_jvm.jvm-instance,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.kubernetes-deployment,com.steadybit.extension_kubernetes.kubernetes-pod,com.steadybit.extension_kubernetes.kubernetes-daemonset,com.steadybit.extension_kubernetes.kubernetes-statefulset,com.steadybit.extension_http.client-location,com.steadybit.extension_jmeter.location,com.steadybit.extension_k6.location,com.steadybit.extension_gatling.location"`
 	EnrichEc2DataMatcherAttribute                string   `json:"EnrichEc2DataMatcherAttribute" split_words:"true" default:"host.hostname"`
@@ -38,6 +40,7 @@ type Specification struct {
 	DiscoveryAttributesExcludesMsk               []string `json:"discoveryAttributesExcludesMsk" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesLambda            []string `json:"discoveryAttributesExcludesLambda" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesRds               []string `json:"discoveryAttributesExcludesRds" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesSubnet            []string `json:"discoveryAttributesExcludesSubnet" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesZone              []string `json:"discoveryAttributesExcludesZone" split_words:"true" required:"false"`
 	DisableDiscoveryExcludes                     bool     `required:"false" split_words:"true" default:"false"`
 }

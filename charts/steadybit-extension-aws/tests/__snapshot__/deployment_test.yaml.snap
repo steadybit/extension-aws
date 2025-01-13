@@ -50,6 +50,10 @@ manifest should add aws env vars:
                   value: example.lambda.1,example.lambda.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS
                   value: example.rds.1,example.rds.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_SUBNET
+                  value: example.subnet.1,example.subnet.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_VPC
+                  value: example.vpc.1,example.vpc.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
@@ -63,6 +67,10 @@ manifest should add aws env vars:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_SUBNET
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_VPC
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ZONE
                   value: "true"

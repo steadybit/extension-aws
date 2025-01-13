@@ -124,6 +124,14 @@ spec:
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS
               value: {{ join "," .Values.aws.discovery.attributes.excludes.rds | quote }}
             {{- end }}
+            {{- if .Values.aws.discovery.attributes.excludes.subnet }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_SUBNET
+              value: {{ join "," .Values.aws.discovery.attributes.excludes.subnet | quote }}
+            {{- end }}
+            {{- if .Values.aws.discovery.attributes.excludes.vpc }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_VPC
+              value: {{ join "," .Values.aws.discovery.attributes.excludes.vpc | quote }}
+            {{- end }}
             {{- with .Values.extraEnv }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -153,6 +161,14 @@ spec:
             {{- end }}
             {{- if .Values.aws.discovery.disabled.rds }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_RDS
+              value: "true"
+            {{- end }}
+            {{- if .Values.aws.discovery.disabled.subnet }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_SUBNET
+              value: "true"
+            {{- end }}
+            {{- if .Values.aws.discovery.disabled.vpc }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_VPC
               value: "true"
             {{- end }}
             {{- if .Values.aws.discovery.disabled.zone }}
