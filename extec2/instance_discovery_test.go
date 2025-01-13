@@ -16,11 +16,11 @@ import (
 	"testing"
 )
 
-type ec2ClientMock struct {
+type instanceDiscoveryEc2UtilMock struct {
 	mock.Mock
 }
 
-func (m *ec2ClientMock) DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, _ ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
+func (m *instanceDiscoveryEc2UtilMock) DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, _ ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -49,7 +49,7 @@ var instance = types.Instance{
 
 func TestGetAllEc2Instances(t *testing.T) {
 	// Given
-	mockedApi := new(ec2ClientMock)
+	mockedApi := new(instanceDiscoveryEc2UtilMock)
 	mockedReturnValue := ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -61,14 +61,14 @@ func TestGetAllEc2Instances(t *testing.T) {
 	}
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
-	mockedZoneUtil := new(zoneMock)
+	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
 		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
-
+	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 	// When
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
 
@@ -99,7 +99,7 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	// Given
 	// set env var to filter out all attributes starting with "aws-ec2"
 	config.Config.DiscoveryAttributesExcludesEc2 = []string{"aws-ec2.label.*", "aws-ec2.image"}
-	mockedApi := new(ec2ClientMock)
+	mockedApi := new(instanceDiscoveryEc2UtilMock)
 	mockedReturnValue := ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -111,13 +111,14 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	}
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
-	mockedZoneUtil := new(zoneMock)
+	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
 		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -138,6 +139,8 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	assert.Equal(t, []string{"ip-10-3-92-28.eu-central-1.compute.internal"}, target.Attributes["aws-ec2.hostname.internal"])
 	assert.Equal(t, []string{"arn:aws:ec2:us-east-1:42:instance/i-0ef9adc9fbd3b19c5"}, target.Attributes["aws-ec2.arn"])
 	assert.Equal(t, []string{"vpc-003cf5dda88c814c6"}, target.Attributes["aws-ec2.vpc"])
+	assert.Equal(t, []string{"vpc-003cf5dda88c814c6"}, target.Attributes["aws.vpc.id"])
+	assert.Equal(t, []string{"vpc-123-name"}, target.Attributes["aws.vpc.name"])
 	assert.Equal(t, []string{"running"}, target.Attributes["aws-ec2.state"])
 	assert.NotContains(t, target.Attributes, "aws-ec2.label.specialtag")
 	assert.NotContains(t, target.Attributes, "aws-ec2.image")
@@ -147,7 +150,7 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 
 func TestNameNotSet(t *testing.T) {
 	// Given
-	mockedApi := new(ec2ClientMock)
+	mockedApi := new(instanceDiscoveryEc2UtilMock)
 	mockedReturnValue := ec2.DescribeInstancesOutput{
 		Reservations: []types.Reservation{
 			{
@@ -164,13 +167,14 @@ func TestNameNotSet(t *testing.T) {
 	}
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
-	mockedZoneUtil := new(zoneMock)
+	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
 		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -185,17 +189,18 @@ func TestNameNotSet(t *testing.T) {
 
 func TestGetAllEc2InstancesError(t *testing.T) {
 	// Given
-	mockedApi := new(ec2ClientMock)
+	mockedApi := new(instanceDiscoveryEc2UtilMock)
 
 	mockedApi.On("DescribeInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
-	mockedZoneUtil := new(zoneMock)
+	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
 		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
 	_, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")

@@ -20,6 +20,7 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
@@ -112,7 +113,7 @@ func (e *ecsTaskDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit
 
 func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ecs.NewFromConfig(account.AwsConfig)
-	result, err := GetAllEcsTasks(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAllEcsTasks(ctx, client, extec2.Util, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -130,7 +131,12 @@ type EcsTasksApi interface {
 	ecs.ListClustersAPIClient
 }
 
-func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+type taskDiscoveryEc2Util interface {
+	extec2.GetZoneUtil
+	extec2.GetVpcNameUtil
+}
+
+func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, ec2Util taskDiscoveryEc2Util, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	listClusterOutput, err := ecsApi.ListClusters(ctx, &ecs.ListClustersInput{})
@@ -160,7 +166,7 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, zoneUtil utils.GetZ
 
 				for _, task := range describeTasksOutput.Tasks {
 					if task.LastStatus != nil && *task.LastStatus == "RUNNING" && !ignoreTask(task) {
-						result = append(result, toTarget(task, zoneUtil, awsAccountNumber, awsRegion))
+						result = append(result, toTarget(task, ec2Util, awsAccountNumber, awsRegion))
 					}
 				}
 			}
@@ -182,7 +188,7 @@ func ignoreTask(service types.Task) bool {
 	return false
 }
 
-func toTarget(task types.Task, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toTarget(task types.Task, ec2Util taskDiscoveryEc2Util, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
 	var service, clusterName *string
 	for _, tag := range task.Tags {
 		if *tag.Key == "aws:ecs:serviceName" {
@@ -195,7 +201,7 @@ func toTarget(task types.Task, zoneUtil utils.GetZoneUtil, awsAccountNumber stri
 
 	arn := aws.ToString(task.TaskArn)
 	availabilityZoneName := aws.ToString(task.AvailabilityZone)
-	availabilityZoneApi := zoneUtil.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
+	availabilityZoneApi := ec2Util.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}

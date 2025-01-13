@@ -45,7 +45,7 @@ func (a *azDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 func (a *azDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       azTargetType,
-		Label:    discovery_kit_api.PluralLabel{One: "Availability Zone", Other: "Availability Zones"},
+		Label:    discovery_kit_api.PluralLabel{One: "Availability Zone", Other: "Availability Util"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(azIcon),
@@ -70,12 +70,13 @@ func (a *azDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.
 }
 
 func getAllAvailabilityZonesForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return getAllAvailabilityZones(utils.Zones, account, ctx), nil
+	_, _ = InitEc2UtilForAccount(account, ctx)
+	return getAllAvailabilityZonesFromCache(Util, account), nil
 }
 
-func getAllAvailabilityZones(zones utils.GetZonesUtil, account *utils.AwsAccess, ctx context.Context) []discovery_kit_api.Target {
+func getAllAvailabilityZonesFromCache(getZonesUtil GetZonesUtil, account *utils.AwsAccess) []discovery_kit_api.Target {
 	result := make([]discovery_kit_api.Target, 0, 20)
-	for _, availabilityZone := range zones.GetZones(account, ctx, true) {
+	for _, availabilityZone := range getZonesUtil.GetZones(account) {
 		result = append(result, toAvailabilityZoneTarget(availabilityZone, account.AccountNumber))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesZone)

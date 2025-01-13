@@ -42,9 +42,19 @@ func (m *tagClientMock) GetResources(ctx context.Context, params *resourcegroups
 	return args.Get(0).(*resourcegroupstaggingapi.GetResourcesOutput), args.Error(1)
 }
 
+type lambdaDiscoveryEc2UtilMock struct {
+	mock.Mock
+}
+
+func (m *lambdaDiscoveryEc2UtilMock) GetVpcName(awsAccountNumber string, region string, vpcId string) string {
+	args := m.Called(awsAccountNumber, region, vpcId)
+	return args.Get(0).(string)
+}
+
 func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	lambdaApi := new(lambdaClientMock)
 	tagApi := new(tagClientMock)
+	ec2util := new(lambdaDiscoveryEc2UtilMock)
 	listedFunction := lambda.ListFunctionsOutput{
 		Functions: []types.FunctionConfiguration{
 			{
@@ -55,6 +65,9 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 					Variables: map[string]string{
 						"FAILURE_INJECTION_PARAM": "env-fip",
 					},
+				}),
+				VpcConfig: extutil.Ptr(types.VpcConfigResponse{
+					VpcId: extutil.Ptr("vpc-123"),
 				}),
 				FunctionArn:  extutil.Ptr("arn"),
 				FunctionName: extutil.Ptr("name"),
@@ -87,8 +100,10 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	}
 	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
 
+	ec2util.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
+
 	// When
-	targets, err := getAllAwsLambdaFunctions(context.Background(), lambdaApi, tagApi, "42", "us-east-1")
+	targets, err := getAllAwsLambdaFunctions(context.Background(), lambdaApi, tagApi, ec2util, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -98,18 +113,21 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	assert.Equal(t, lambdaTargetID, target.TargetType)
 	assert.Equal(t, "name", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 19, len(target.Attributes))
+	assert.Equal(t, 21, len(target.Attributes))
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"name"}, target.Attributes["aws.lambda.function-name"])
 	assert.Equal(t, []string{"env-fip"}, target.Attributes["aws.lambda.failure-injection-param"])
 	assert.Equal(t, []string{"Tag123"}, target.Attributes["aws.lambda.label.example"])
+	assert.Equal(t, []string{"vpc-123"}, target.Attributes["aws.vpc.id"])
+	assert.Equal(t, []string{"vpc-123-name"}, target.Attributes["aws.vpc.name"])
 }
 
 func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 	// Given
 	mockedApi := new(lambdaClientMock)
 	tagApi := new(tagClientMock)
+	ec2util := new(lambdaDiscoveryEc2UtilMock)
 
 	withMarker := mock.MatchedBy(func(arg *lambda.ListFunctionsInput) bool {
 		return arg.Marker != nil
@@ -148,7 +166,7 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
 
 	// When
-	targets, err := getAllAwsLambdaFunctions(context.Background(), mockedApi, tagApi, "42", "us-east-1")
+	targets, err := getAllAwsLambdaFunctions(context.Background(), mockedApi, tagApi, ec2util, "42", "us-east-1")
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -161,9 +179,10 @@ func Test_getAllAwsLambdaFunctions_withError(t *testing.T) {
 	// Given
 	clientApi := new(lambdaClientMock)
 	tagApi := new(tagClientMock)
+	ec2util := new(lambdaDiscoveryEc2UtilMock)
 	clientApi.On("ListFunctions", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
 	// When
-	_, err := getAllAwsLambdaFunctions(context.Background(), clientApi, tagApi, "42", "us-east-1")
+	_, err := getAllAwsLambdaFunctions(context.Background(), clientApi, tagApi, ec2util, "42", "us-east-1")
 	assert.Equal(t, "error", err.Error())
 }

@@ -1,21 +1,22 @@
-package utils
+package extec2
 
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"sync"
 	"testing"
 )
 
-type ec2ClientMock struct {
+type ec2UtilsClientMock struct {
 	mock.Mock
 }
 
-func (m *ec2ClientMock) DescribeAvailabilityZones(ctx context.Context, params *ec2.DescribeAvailabilityZonesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeAvailabilityZonesOutput, error) {
+func (m *ec2UtilsClientMock) DescribeAvailabilityZones(ctx context.Context, params *ec2.DescribeAvailabilityZonesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeAvailabilityZonesOutput, error) {
 	args := m.Called(ctx, params, optFns)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -25,10 +26,10 @@ func (m *ec2ClientMock) DescribeAvailabilityZones(ctx context.Context, params *e
 
 func TestAwsZones(t *testing.T) {
 	// Given
-	Zones = &AwsZones{
+	Util = &util{
 		zones: sync.Map{},
 	}
-	mockedApi42 := new(ec2ClientMock)
+	mockedApi42 := new(ec2UtilsClientMock)
 	mockedReturnValue42 := ec2.DescribeAvailabilityZonesOutput{
 		AvailabilityZones: []types.AvailabilityZone{
 			{
@@ -45,26 +46,22 @@ func TestAwsZones(t *testing.T) {
 	}
 	mockedApi42.On("DescribeAvailabilityZones", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue42, nil)
 
-	mockedApi4711 := new(ec2ClientMock)
+	mockedApi4711 := new(ec2UtilsClientMock)
 	mockedReturnValue4711 := ec2.DescribeAvailabilityZonesOutput{
 		AvailabilityZones: []types.AvailabilityZone{},
 	}
 	mockedApi4711.On("DescribeAvailabilityZones", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue4711, nil)
 
 	// When
-	result, err := initAwsZonesForAccountWithClient(mockedApi42, "42", "eu-central-1", context.Background())
-	assert.Nil(t, result)
-	assert.Nil(t, err)
-	result, err = initAwsZonesForAccountWithClient(mockedApi4711, "4711", "eu-central-1", context.Background())
-	assert.Nil(t, result)
-	assert.Nil(t, err)
+	initZonesCache(mockedApi42, "42", "eu-central-1", context.Background())
+	initZonesCache(mockedApi4711, "4711", "eu-central-1", context.Background())
 
 	// Then
-	assert.Equal(t, &mockedReturnValue42.AvailabilityZones[0], Zones.GetZone("42", "eu-central-1", "eu-central-1a"))
-	assert.Nil(t, Zones.GetZone("42", "eu-central-1", "eu-central-1c"))
-	assert.Nil(t, Zones.GetZone("4711", "eu-central-1", "eu-central-1a"))
+	assert.Equal(t, &mockedReturnValue42.AvailabilityZones[0], Util.GetZone("42", "eu-central-1", "eu-central-1a"))
+	assert.Nil(t, Util.GetZone("42", "eu-central-1", "eu-central-1c"))
+	assert.Nil(t, Util.GetZone("4711", "eu-central-1", "eu-central-1a"))
 
-	assert.Equal(t, mockedReturnValue42.AvailabilityZones, Zones.GetZones(&AwsAccess{AccountNumber: "42", Region: "eu-central-1"}, context.Background(), false))
-	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones(&AwsAccess{AccountNumber: "4711", Region: "eu-central-1"}, context.Background(), false))
-	assert.Equal(t, []types.AvailabilityZone{}, Zones.GetZones(&AwsAccess{AccountNumber: "0815", Region: "eu-central-1"}, context.Background(), false))
+	assert.Equal(t, mockedReturnValue42.AvailabilityZones, Util.GetZones(&utils.AwsAccess{AccountNumber: "42", Region: "eu-central-1"}))
+	assert.Equal(t, []types.AvailabilityZone{}, Util.GetZones(&utils.AwsAccess{AccountNumber: "4711", Region: "eu-central-1"}))
+	assert.Equal(t, []types.AvailabilityZone{}, Util.GetZones(&utils.AwsAccess{AccountNumber: "0815", Region: "eu-central-1"}))
 }

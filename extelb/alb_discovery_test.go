@@ -44,13 +44,18 @@ func (m *albDiscoveryApiMock) DescribeListeners(ctx context.Context, params *ela
 	return args.Get(0).(*elasticloadbalancingv2.DescribeListenersOutput), args.Error(1)
 }
 
-type zoneMock struct {
+type albDiscoveryEc2UtilMock struct {
 	mock.Mock
 }
 
-func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string, region string) *ec2types.AvailabilityZone {
+func (m *albDiscoveryEc2UtilMock) GetZone(awsAccountNumber string, awsZone string, region string) *ec2types.AvailabilityZone {
 	args := m.Called(awsAccountNumber, awsZone, region)
 	return args.Get(0).(*ec2types.AvailabilityZone)
+}
+
+func (m *albDiscoveryEc2UtilMock) GetVpcName(awsAccountNumber string, region string, vpcId string) string {
+	args := m.Called(awsAccountNumber, region, vpcId)
+	return args.Get(0).(string)
 }
 
 var albArn = "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/my-app-balancer/123"
@@ -59,6 +64,7 @@ var alb = types.LoadBalancer{
 	DNSName:          extutil.Ptr("my-app-balancer-1234567890.us-east-1.elb.amazonaws.com"),
 	LoadBalancerName: extutil.Ptr("my-app-balancer"),
 	Type:             types.LoadBalancerTypeEnumApplication,
+	VpcId:            extutil.Ptr("vpc-123"),
 	AvailabilityZones: []types.AvailabilityZone{
 		{
 			ZoneName: extutil.Ptr("us-east-1a"),
@@ -133,7 +139,7 @@ func TestGetAllAlbTargets(t *testing.T) {
 		},
 	}, nil)
 
-	mockedZoneUtil := new(zoneMock)
+	mockedZoneUtil := new(albDiscoveryEc2UtilMock)
 	mockedZone1a := ec2types.AvailabilityZone{
 		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
@@ -150,6 +156,7 @@ func TestGetAllAlbTargets(t *testing.T) {
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.MatchedBy(func(params string) bool {
 		return params == "us-east-1b"
 	}), mock.Anything).Return(&mockedZone1b)
+	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
 	targets, err := GetAlbs(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -166,6 +173,8 @@ func TestGetAllAlbTargets(t *testing.T) {
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"us-east-1a", "us-east-1b"}, target.Attributes["aws.zone"])
 	assert.Equal(t, []string{"us-east-1a-id", "us-east-1b-id"}, target.Attributes["aws.zone.id"])
+	assert.Equal(t, []string{"vpc-123"}, target.Attributes["aws.vpc.id"])
+	assert.Equal(t, []string{"vpc-123-name"}, target.Attributes["aws.vpc.name"])
 	assert.Equal(t, []string{"my-app-balancer"}, target.Attributes["aws-elb.alb.name"])
 	assert.Equal(t, []string{"my-app-balancer-1234567890.us-east-1.elb.amazonaws.com"}, target.Attributes["aws-elb.alb.dns"])
 	assert.Equal(t, []string{albArn}, target.Attributes["aws-elb.alb.arn"])

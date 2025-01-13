@@ -20,6 +20,7 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
@@ -104,7 +105,7 @@ func (e *albDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api
 
 func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := elasticloadbalancingv2.NewFromConfig(account.AwsConfig)
-	result, err := GetAlbs(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAlbs(ctx, client, extec2.Util, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -122,7 +123,12 @@ type AlbDiscoveryApi interface {
 	DescribeTags(ctx context.Context, params *elasticloadbalancingv2.DescribeTagsInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DescribeTagsOutput, error)
 }
 
-func GetAlbs(ctx context.Context, albDiscoveryApi AlbDiscoveryApi, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+type albDiscoveryEc2Util interface {
+	extec2.GetZoneUtil
+	extec2.GetVpcNameUtil
+}
+
+func GetAlbs(ctx context.Context, albDiscoveryApi AlbDiscoveryApi, ec2Util albDiscoveryEc2Util, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := elasticloadbalancingv2.NewDescribeLoadBalancersPaginator(albDiscoveryApi, &elasticloadbalancingv2.DescribeLoadBalancersInput{})
@@ -164,22 +170,21 @@ func GetAlbs(ctx context.Context, albDiscoveryApi AlbDiscoveryApi, zoneUtil util
 					return nil, extension_kit.ToError("Failed to fetch load balancer listeners.", err)
 				}
 
-				result = append(result, toTarget(&loadBalancer, tags, describeListenersResult.Listeners, zoneUtil, awsAccountNumber, awsRegion))
+				result = append(result, toTarget(&loadBalancer, tags, describeListenersResult.Listeners, ec2Util, awsAccountNumber, awsRegion))
 			}
 		}
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEcs), nil
 }
 
-func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listener, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listener, ec2Util albDiscoveryEc2Util, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
 	arn := aws.ToString(lb.LoadBalancerArn)
 	name := aws.ToString(lb.LoadBalancerName)
-
 	zones := make([]string, 0, len(lb.AvailabilityZones))
 	zoneIds := make([]string, 0, len(lb.AvailabilityZones))
 	for _, zone := range lb.AvailabilityZones {
 		zones = append(zones, aws.ToString(zone.ZoneName))
-		zoneApi := zoneUtil.GetZone(awsAccountNumber, aws.ToString(zone.ZoneName), awsRegion)
+		zoneApi := ec2Util.GetZone(awsAccountNumber, aws.ToString(zone.ZoneName), awsRegion)
 		if zoneApi != nil {
 			zoneIds = append(zoneIds, *zoneApi.ZoneId)
 		}
@@ -198,6 +203,10 @@ func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listen
 	attributes["aws-elb.alb.listener.port"] = listenerPorts
 	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws.region"] = []string{awsRegion}
+	if lb.VpcId != nil {
+		attributes["aws.vpc.id"] = []string{aws.ToString(lb.VpcId)}
+		attributes["aws.vpc.name"] = []string{ec2Util.GetVpcName(awsAccountNumber, awsRegion, aws.ToString(lb.VpcId))}
+	}
 	attributes["aws.zone"] = zones
 	attributes["aws.zone.id"] = zoneIds
 

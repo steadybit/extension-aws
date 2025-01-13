@@ -43,13 +43,17 @@ func (m *ecsClientMock) ListClusters(ctx context.Context, params *ecs.ListCluste
 	return args.Get(0).(*ecs.ListClustersOutput), args.Error(1)
 }
 
-type zoneMock struct {
+type taskDiscoveryEc2UtilMock struct {
 	mock.Mock
 }
 
-func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string, region string) *ec2types.AvailabilityZone {
+func (m *taskDiscoveryEc2UtilMock) GetZone(awsAccountNumber string, awsZone string, region string) *ec2types.AvailabilityZone {
 	args := m.Called(awsAccountNumber, awsZone, region)
 	return args.Get(0).(*ec2types.AvailabilityZone)
+}
+func (m *taskDiscoveryEc2UtilMock) GetVpcName(awsAccountNumber string, region string, vpcId string) string {
+	args := m.Called(awsAccountNumber, region, vpcId)
+	return args.Get(0).(string)
 }
 
 var taskArn = "arn:aws:ecs:eu-central-1:42:task/sandbox-demo-ecs-fargate/15ac9bc28dce4a6fb757580ac87eb854"
@@ -98,7 +102,7 @@ func TestGetAllEcsTasks(t *testing.T) {
 		Tasks: []types.Task{task, taskStopped},
 	}, nil)
 
-	mockedZoneUtil := new(zoneMock)
+	mockedZoneUtil := new(taskDiscoveryEc2UtilMock)
 	mockedZone := ec2types.AvailabilityZone{
 		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
 		RegionName: discovery_kit_api.Ptr("us-east-1"),

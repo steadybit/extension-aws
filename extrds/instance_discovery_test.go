@@ -6,6 +6,7 @@ package extrds
 import (
 	"context"
 	"errors"
+	"github.com/steadybit/extension-kit/extutil"
 
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
@@ -23,6 +24,9 @@ func TestGetAllRdsInstances(t *testing.T) {
 	mockedReturnValue := rds.DescribeDBInstancesOutput{
 		DBInstances: []types.DBInstance{
 			{
+				DBSubnetGroup: extutil.Ptr(types.DBSubnetGroup{
+					VpcId: discovery_kit_api.Ptr("vpc-123-id"),
+				}),
 				DBInstanceArn:        discovery_kit_api.Ptr("arn"),
 				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier"),
 				AvailabilityZone:     discovery_kit_api.Ptr("us-east-1a"),
@@ -44,6 +48,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
 	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
@@ -56,13 +61,15 @@ func TestGetAllRdsInstances(t *testing.T) {
 	assert.Equal(t, rdsInstanceTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 10, len(target.Attributes))
+	assert.Equal(t, 12, len(target.Attributes))
 	assert.Equal(t, []string{"cluster"}, target.Attributes["aws.rds.cluster"])
 	assert.Equal(t, []string{"status"}, target.Attributes["aws.rds.instance.status"])
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"us-east-1a"}, target.Attributes["aws.zone"])
 	assert.Equal(t, []string{"us-east-1a-id"}, target.Attributes["aws.zone.id"])
+	assert.Equal(t, []string{"vpc-123-id"}, target.Attributes["aws.vpc.id"])
+	assert.Equal(t, []string{"vpc-123-name"}, target.Attributes["aws.vpc.name"])
 	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws.rds.label.specialtag"])
 }
 

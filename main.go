@@ -45,7 +45,7 @@ func main() {
 	config.ValidateConfiguration()
 
 	utils.InitializeAwsAccess(config.Config)
-	utils.InitializeAwsZones()
+	extec2.InitializeEc2Util()
 
 	ctx, cancel := SignalCanceledContext()
 

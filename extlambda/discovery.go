@@ -19,6 +19,7 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/extec2"
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
@@ -184,7 +185,7 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 	lambdaClient := lambda.NewFromConfig(account.AwsConfig)
 	tagsClient := resourcegroupstaggingapi.NewFromConfig(account.AwsConfig)
 
-	result, err := getAllAwsLambdaFunctions(ctx, lambdaClient, tagsClient, account.AccountNumber, account.AwsConfig.Region)
+	result, err := getAllAwsLambdaFunctions(ctx, lambdaClient, tagsClient, extec2.Util, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -196,7 +197,7 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 	return result, nil
 }
 
-func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunctionsAPIClient, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, awsAccountNumber string, awsAccountRegion string) ([]discovery_kit_api.Target, error) {
+func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunctionsAPIClient, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, ec2Util extec2.GetVpcNameUtil, awsAccountNumber string, awsAccountRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 100)
 	var marker *string = nil
 	for {
@@ -215,7 +216,7 @@ func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunct
 					tags = tagsResponse.Tags
 				}
 			}
-			result = append(result, toTarget(function, awsAccountNumber, awsAccountRegion, tags))
+			result = append(result, toTarget(function, ec2Util, awsAccountNumber, awsAccountRegion, tags))
 		}
 
 		if output.NextMarker == nil {
@@ -246,7 +247,7 @@ func getTags(ctx context.Context, output *lambda.ListFunctionsOutput, tagsClient
 	return tags
 }
 
-func toTarget(function types.FunctionConfiguration, awsAccountNumber string, awsAccountRegion string, tags []tagTypes.Tag) discovery_kit_api.Target {
+func toTarget(function types.FunctionConfiguration, ec2Util extec2.GetVpcNameUtil, awsAccountNumber string, awsAccountRegion string, tags []tagTypes.Tag) discovery_kit_api.Target {
 	arn := aws.ToString(function.FunctionArn)
 	name := aws.ToString(function.FunctionName)
 
@@ -254,6 +255,10 @@ func toTarget(function types.FunctionConfiguration, awsAccountNumber string, aws
 	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws.region"] = []string{awsAccountRegion}
 	attributes["aws.arn"] = []string{arn}
+	if function.VpcConfig != nil && function.VpcConfig.VpcId != nil {
+		attributes["aws.vpc.id"] = []string{aws.ToString(function.VpcConfig.VpcId)}
+		attributes["aws.vpc.name"] = []string{ec2Util.GetVpcName(awsAccountNumber, awsAccountRegion, aws.ToString(function.VpcConfig.VpcId))}
+	}
 	attributes["aws.lambda.function-name"] = []string{name}
 	attributes["aws.lambda.runtime"] = []string{string(function.Runtime)}
 	attributes["aws.role"] = []string{aws.ToString(function.Role)}

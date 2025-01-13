@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/steadybit/extension-aws/extec2"
 	"strings"
 	"time"
 
@@ -99,7 +100,7 @@ func (r *rdsInstanceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery
 
 func getInstanceTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	result, err := getAllRdsInstances(ctx, client, utils.Zones, account.AccountNumber, account.AwsConfig.Region)
+	result, err := getAllRdsInstances(ctx, client, extec2.Util, account.AccountNumber, account.AwsConfig.Region)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -111,7 +112,12 @@ func getInstanceTargetsForAccount(account *utils.AwsAccess, ctx context.Context)
 	return result, nil
 }
 
-func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+type rdsInstanceDiscoveryEc2Util interface {
+	extec2.GetZoneUtil
+	extec2.GetVpcNameUtil
+}
+
+func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, ec2Util rdsInstanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := rds.NewDescribeDBInstancesPaginator(rdsApi, &rds.DescribeDBInstancesInput{})
@@ -122,18 +128,18 @@ func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, zoneUtil u
 		}
 
 		for _, dbInstance := range output.DBInstances {
-			result = append(result, toInstanceTarget(dbInstance, zoneUtil, awsAccountNumber, awsRegion))
+			result = append(result, toInstanceTarget(dbInstance, ec2Util, awsAccountNumber, awsRegion))
 		}
 	}
 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesRds), nil
 }
 
-func toInstanceTarget(dbInstance types.DBInstance, zoneUtil utils.GetZoneUtil, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toInstanceTarget(dbInstance types.DBInstance, ec2util rdsInstanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
 	arn := aws.ToString(dbInstance.DBInstanceArn)
 	label := aws.ToString(dbInstance.DBInstanceIdentifier)
 	availabilityZoneName := aws.ToString(dbInstance.AvailabilityZone)
-	availabilityZoneApi := zoneUtil.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
+	availabilityZoneApi := ec2util.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}
@@ -143,6 +149,10 @@ func toInstanceTarget(dbInstance types.DBInstance, zoneUtil utils.GetZoneUtil, a
 		attributes["aws.zone.id"] = []string{*availabilityZoneApi.ZoneId}
 	}
 	attributes["aws.region"] = []string{awsRegion}
+	if dbInstance.DBSubnetGroup != nil && dbInstance.DBSubnetGroup.VpcId != nil {
+		attributes["aws.vpc.id"] = []string{aws.ToString(dbInstance.DBSubnetGroup.VpcId)}
+		attributes["aws.vpc.name"] = []string{ec2util.GetVpcName(awsAccountNumber, awsRegion, aws.ToString(dbInstance.DBSubnetGroup.VpcId))}
+	}
 	attributes["aws.rds.engine"] = []string{aws.ToString(dbInstance.Engine)}
 	attributes["aws.rds.instance.id"] = []string{label}
 	attributes["aws.rds.instance.status"] = []string{aws.ToString(dbInstance.DBInstanceStatus)}

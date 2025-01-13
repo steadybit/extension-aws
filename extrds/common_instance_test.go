@@ -44,3 +44,8 @@ func (m *zoneMock) GetZone(awsAccountNumber string, awsZone string, region strin
 	args := m.Called(awsAccountNumber, awsZone, region)
 	return args.Get(0).(*types.AvailabilityZone)
 }
+
+func (m *zoneMock) GetVpcName(awsAccountNumber string, region string, vpcId string) string {
+	args := m.Called(awsAccountNumber, region, vpcId)
+	return args.Get(0).(string)
+}
