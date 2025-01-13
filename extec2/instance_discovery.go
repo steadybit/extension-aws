@@ -41,7 +41,7 @@ func NewEc2InstanceDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscov
 
 func (e *ec2Discovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id: ec2TargetId,
+		Id: ec2TargetType,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEc2)),
 		},
@@ -50,7 +50,7 @@ func (e *ec2Discovery) Describe() discovery_kit_api.DiscoveryDescription {
 
 func (e *ec2Discovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
-		Id:       ec2TargetId,
+		Id:       ec2TargetType,
 		Label:    discovery_kit_api.PluralLabel{One: "EC2 instance", Other: "EC2 instances"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
@@ -97,7 +97,7 @@ func getEc2InstanceToHostEnrichmentRule(target string) discovery_kit_api.TargetE
 		Id:      id,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Src: discovery_kit_api.SourceOrDestination{
-			Type: ec2TargetId,
+			Type: ec2TargetType,
 			Selector: map[string]string{
 				"aws-ec2.hostname.internal": fmt.Sprintf("${dest.%s}", config.Config.EnrichEc2DataMatcherAttribute),
 			},
@@ -173,7 +173,7 @@ func getEc2InstanceToXEnrichmentRule(destTargetType string) discovery_kit_api.Ta
 		Id:      id,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Src: discovery_kit_api.SourceOrDestination{
-			Type: ec2TargetId,
+			Type: ec2TargetType,
 			Selector: map[string]string{
 				"aws-ec2.hostname.internal": fmt.Sprintf("${dest.%s}", config.Config.EnrichEc2DataMatcherAttribute),
 			},
@@ -343,7 +343,7 @@ func toEc2InstanceTarget(ec2Instance types.Instance, ec2Util instanceDiscoveryEc
 	return discovery_kit_api.Target{
 		Id:         *ec2Instance.InstanceId,
 		Label:      label,
-		TargetType: ec2TargetId,
+		TargetType: ec2TargetType,
 		Attributes: attributes,
 	}
 }

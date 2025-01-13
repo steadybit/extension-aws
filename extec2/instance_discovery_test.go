@@ -77,7 +77,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 	assert.Equal(t, 1, len(targets))
 
 	target := targets[0]
-	assert.Equal(t, ec2TargetId, target.TargetType)
+	assert.Equal(t, ec2TargetType, target.TargetType)
 	assert.Equal(t, "i-0ef9adc9fbd3b19c5 / dev-demo-ngroup2", target.Label)
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
@@ -128,7 +128,7 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	assert.Equal(t, 1, len(targets))
 
 	target := targets[0]
-	assert.Equal(t, ec2TargetId, target.TargetType)
+	assert.Equal(t, ec2TargetType, target.TargetType)
 	assert.Equal(t, "i-0ef9adc9fbd3b19c5 / dev-demo-ngroup2", target.Label)
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])

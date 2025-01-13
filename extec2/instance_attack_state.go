@@ -52,7 +52,7 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(ec2Icon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
-			TargetType: ec2TargetId,
+			TargetType: ec2TargetType,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "instance-id",
