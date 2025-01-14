@@ -45,7 +45,7 @@ func (a *azDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 func (a *azDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       azTargetType,
-		Label:    discovery_kit_api.PluralLabel{One: "Availability Zone", Other: "Availability Util"},
+		Label:    discovery_kit_api.PluralLabel{One: "Availability Zone", Other: "Availability Zones"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(azIcon),
