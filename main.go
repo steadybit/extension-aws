@@ -107,6 +107,7 @@ func registerHandlers(ctx context.Context) {
 
 	if !cfg.DiscoveryDisabledSubnet {
 		discovery_kit_sdk.Register(extec2.NewSubnetDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extec2.NewSubnetBlackholeAction())
 	}
 
 	if !cfg.DiscoveryDisabledEc2 {
