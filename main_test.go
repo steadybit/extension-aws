@@ -62,6 +62,7 @@ func Test_getExtensionList(t *testing.T) {
 			name:   "disabled all but subnet",
 			config: createConfig(true, true, true, true, true, true, true, true, false, true, true),
 			wantedRoutes: []string{
+				"/com.steadybit.extension_aws.ec2-subnet.blackhole",
 				"/com.steadybit.extension_aws.ec2-subnet/discovery",
 				"/com.steadybit.extension_aws.ec2-subnet/discovery/target-description",
 				"/discovery/attributes",
