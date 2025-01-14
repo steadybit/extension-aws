@@ -34,6 +34,7 @@ var instance = types.Instance{
 	Placement: &types.Placement{
 		AvailabilityZone: extutil.Ptr("us-east-1b"),
 	},
+	SubnetId:         extutil.Ptr("subnet-0e3b6b7b1b7b7b7b7"),
 	PrivateIpAddress: extutil.Ptr("10.3.92.28"),
 	PrivateDnsName:   extutil.Ptr("ip-10-3-92-28.eu-central-1.compute.internal"),
 	VpcId:            extutil.Ptr("vpc-003cf5dda88c814c6"),
@@ -85,6 +86,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 	assert.Equal(t, []string{"us-east-1b"}, target.Attributes["aws.zone"])
 	assert.Equal(t, []string{"us-east-1b-id"}, target.Attributes["aws.zone.id"])
 	assert.Equal(t, []string{"10.3.92.28"}, target.Attributes["aws-ec2.ipv4.private"])
+	assert.Equal(t, []string{"subnet-0e3b6b7b1b7b7b7b7"}, target.Attributes["aws.ec2.subnet.id"])
 	assert.Equal(t, []string{"i-0ef9adc9fbd3b19c5"}, target.Attributes["aws-ec2.instance.id"])
 	assert.Equal(t, []string{"ip-10-3-92-28.eu-central-1.compute.internal"}, target.Attributes["aws-ec2.hostname.internal"])
 	assert.Equal(t, []string{"arn:aws:ec2:us-east-1:42:instance/i-0ef9adc9fbd3b19c5"}, target.Attributes["aws-ec2.arn"])

@@ -333,6 +333,9 @@ func toEc2InstanceTarget(ec2Instance types.Instance, ec2Util instanceDiscoveryEc
 	if ec2Instance.State != nil {
 		attributes["aws-ec2.state"] = []string{string(ec2Instance.State.Name)}
 	}
+	if ec2Instance.SubnetId != nil {
+		attributes["aws.ec2.subnet.id"] = []string{aws.ToString(ec2Instance.SubnetId)}
+	}
 	for _, tag := range ec2Instance.Tags {
 		if aws.ToString(tag.Key) == "Name" {
 			continue
