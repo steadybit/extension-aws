@@ -44,7 +44,7 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 *ec2.
 	// Given
 	PermittedApiCalls = getRequiredApiCallsForSuccessfulStart()
 	PermittedApiCalls["DescribeNetworkAcls"] = PermittedApiCalls["DescribeNetworkAcls"] + 2 //additional calls uses by this test
-	action, state, requestBodyPrepare := prepareActionCall(clientEc2, clientImds)
+	action, state, requestBodyPrepare := prepareActionCallAzBlackhole(clientEc2, clientImds)
 
 	// When
 	ctx := context.Background()
@@ -123,7 +123,7 @@ func testApiThrottlingDuringStartWhileCreatingTheSecondNACL(t *testing.T, client
 	// Simulate an error during CreateNetworkAcl / immediate rollback is also not possible because there are no permitted api calls for the rollback
 	PermittedApiCalls = getRequiredApiCallsForSuccessfulStart()
 	PermittedApiCalls["CreateNetworkAcl"] = PermittedApiCalls["CreateNetworkAcl"] - 1 //Simulate throttling error
-	action, state, requestBodyPrepare := prepareActionCall(clientEc2, clientImds)
+	action, state, requestBodyPrepare := prepareActionCallAzBlackhole(clientEc2, clientImds)
 
 	// When
 	ctx := context.Background()
@@ -167,7 +167,7 @@ func testApiThrottlingDuringStartWhileAssigningTheFirstNACL(t *testing.T, client
 	// Simulate an error during CreateNetworkAcl / immediate rollback is also not possible because there are no permitted api calls for the rollback
 	PermittedApiCalls = getRequiredApiCallsForSuccessfulStart()
 	PermittedApiCalls["ReplaceNetworkAclAssociation"] = 0 //Simulate throttling error
-	action, state, requestBodyPrepare := prepareActionCall(clientEc2, clientImds)
+	action, state, requestBodyPrepare := prepareActionCallAzBlackhole(clientEc2, clientImds)
 
 	// When
 	ctx := context.Background()
@@ -201,7 +201,7 @@ func testApiThrottlingDuringStopWhileReassigningTheOldNACLs(t *testing.T, client
 
 	// Given
 	PermittedApiCalls = getRequiredApiCallsForSuccessfulStart()
-	action, state, requestBodyPrepare := prepareActionCall(clientEc2, clientImds)
+	action, state, requestBodyPrepare := prepareActionCallAzBlackhole(clientEc2, clientImds)
 	ctx := context.Background()
 	_, err := action.Prepare(ctx, &state, requestBodyPrepare)
 	assert.NoError(t, err)
@@ -232,7 +232,7 @@ func testApiThrottlingDuringStopWhileDeletingNACLs(t *testing.T, clientEc2 *ec2.
 
 	// Given
 	PermittedApiCalls = getRequiredApiCallsForSuccessfulStart()
-	action, state, requestBodyPrepare := prepareActionCall(clientEc2, clientImds)
+	action, state, requestBodyPrepare := prepareActionCallAzBlackhole(clientEc2, clientImds)
 	ctx := context.Background()
 	_, err := action.Prepare(ctx, &state, requestBodyPrepare)
 	assert.NoError(t, err)
@@ -258,7 +258,7 @@ func testApiThrottlingDuringStopWhileDeletingNACLs(t *testing.T, clientEc2 *ec2.
 	assert.True(t, isClean(t, clientEc2))
 }
 
-func prepareActionCall(clientEc2 *ec2.Client, clientImds *imds.Client) (azBlackholeAction, BlackholeState, action_kit_api.PrepareActionRequestBody) {
+func prepareActionCallAzBlackhole(clientEc2 *ec2.Client, clientImds *imds.Client) (azBlackholeAction, BlackholeState, action_kit_api.PrepareActionRequestBody) {
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "41",
 		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
@@ -267,9 +267,7 @@ func prepareActionCall(clientEc2 *ec2.Client, clientImds *imds.Client) (azBlackh
 	state := action.NewEmptyState()
 
 	requestBodyPrepare := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
-			"action": "stop",
-		},
+		Config: map[string]interface{}{},
 		Target: extutil.Ptr(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
@@ -308,7 +306,6 @@ func prepareAdditionalVpcWithTwoSubnets(t *testing.T, clientEc2 *ec2.Client) (st
 		// The following calls are made to setup the test environment
 		"CreateVpc":           1,
 		"CreateSubnet":        2,
-		"DescribeSubnets":     1,
 		"DescribeVpcs":        1,
 		"DescribeNetworkAcls": 2,
 	}
