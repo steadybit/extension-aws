@@ -1,12 +1,13 @@
 # Changelog
 
-## v2.3.7 (next release)
+## v2.4.0
 
 - ignore ecs services and tasks with a tag `steadybit.com/discovery-disabled` set to `true`
 - don't cache zones forever (for example removed permissions should lead to removed targets in the platform)
 - include tags in the discovery of Lambda functions (requires new permission `tag:GetResources`)
 - add vpc name to targets (requires new permission `ec2:DescribeVpcs`, can be disabled by `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_VPC`)
 - add subnet target discovery
+- Update dependencies
 
 ## v2.3.6
 
