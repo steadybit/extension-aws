@@ -57,8 +57,8 @@ func (e *subnetDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
-				{Attribute: "aws.ec2.subnet.name"},
 				{Attribute: "aws.ec2.subnet.id"},
+				{Attribute: "aws.ec2.subnet.name"},
 				{Attribute: "aws.ec2.subnet.cidr"},
 				{Attribute: "aws.account"},
 				{Attribute: "aws.zone"},
