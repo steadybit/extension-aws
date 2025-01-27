@@ -8,7 +8,7 @@ go 1.23.0
 toolchain go1.23.4
 
 require (
-	github.com/KimMachineGun/automemlimit v0.6.1
+	github.com/KimMachineGun/automemlimit v0.7.0
 	github.com/aws/aws-sdk-go-v2 v1.33.0
 	github.com/aws/aws-sdk-go-v2/config v1.28.7
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.48
@@ -59,12 +59,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.24.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.7 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
-	github.com/cilium/ebpf v0.16.0 // indirect
-	github.com/containerd/cgroups/v3 v3.0.3 // indirect
 	github.com/containerd/containerd v1.7.18 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
-	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
@@ -83,7 +80,6 @@ require (
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-resty/resty/v2 v2.16.2 // indirect
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.6.9 // indirect
@@ -115,7 +111,6 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
-	github.com/opencontainers/runtime-spec v1.2.0 // indirect
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
