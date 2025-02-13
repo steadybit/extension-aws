@@ -15,12 +15,13 @@ const (
 )
 
 type KafkaAttackState struct {
-	BrokerID    string
-	BrokerARN   string
-	ClusterARN  string
-	ClusterName string
-	Account     string
-	Region      string
+	BrokerID         string
+	BrokerARN        string
+	ClusterARN       string
+	ClusterName      string
+	Account          string
+	Region           string
+	DiscoveredByRole *string
 }
 
 type MskApi interface {
@@ -29,8 +30,8 @@ type MskApi interface {
 	kafka.ListNodesAPIClient
 }
 
-func defaultMskClientProvider(account string, region string) (MskApi, error) {
-	awsAccess, err := utils.GetAwsAccess(account, region)
+func defaultMskClientProvider(account string, region string, role *string) (MskApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
 	if err != nil {
 		return nil, err
 	}

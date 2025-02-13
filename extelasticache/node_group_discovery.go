@@ -7,12 +7,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/elasticache"
 	"github.com/aws/aws-sdk-go-v2/service/elasticache/types"
+	tagTypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
@@ -26,8 +29,9 @@ type elasticacheReplicationGroupDiscovery struct {
 }
 
 var (
-	_ discovery_kit_sdk.TargetDescriber    = (*elasticacheReplicationGroupDiscovery)(nil)
-	_ discovery_kit_sdk.AttributeDescriber = (*elasticacheReplicationGroupDiscovery)(nil)
+	_                                  discovery_kit_sdk.TargetDescriber    = (*elasticacheReplicationGroupDiscovery)(nil)
+	_                                  discovery_kit_sdk.AttributeDescriber = (*elasticacheReplicationGroupDiscovery)(nil)
+	missingPermissionTagsAlreadyLogged                                      = false
 )
 
 func NewElasticacheReplicationGroupDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
@@ -131,7 +135,8 @@ func (r *elasticacheReplicationGroupDiscovery) DiscoverTargets(ctx context.Conte
 
 func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := elasticache.NewFromConfig(account.AwsConfig)
-	result, err := getAllElasticacheReplicationGroups(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	tagClient := resourcegroupstaggingapi.NewFromConfig(account.AwsConfig)
+	result, err := getAllElasticacheReplicationGroups(ctx, client, tagClient, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -143,7 +148,7 @@ func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) 
 	return result, nil
 }
 
-func getAllElasticacheReplicationGroups(ctx context.Context, elasticacheApi ElasticacheApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func getAllElasticacheReplicationGroups(ctx context.Context, elasticacheApi ElasticacheApi, taggingApi resourcegroupstaggingapi.GetResourcesAPIClient, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := elasticache.NewDescribeReplicationGroupsPaginator(elasticacheApi, &elasticache.DescribeReplicationGroupsInput{})
@@ -153,9 +158,26 @@ func getAllElasticacheReplicationGroups(ctx context.Context, elasticacheApi Elas
 			return result, err
 		}
 
+		if len(output.ReplicationGroups) == 0 {
+			return result, nil
+		}
+
+		tagsResponses, err := getTags(ctx, output, taggingApi, len(account.TagFilters) > 0)
+		if err != nil {
+			return nil, err
+		}
+
 		for _, replicationGroup := range output.ReplicationGroups {
-			for _, nodeGroup := range replicationGroup.NodeGroups {
-				result = append(result, toNodeGroupTarget(nodeGroup, replicationGroup, awsAccountNumber, awsRegion))
+			var tags []tagTypes.Tag
+			for _, tagsResponse := range tagsResponses {
+				if *replicationGroup.ARN == *tagsResponse.ResourceARN {
+					tags = tagsResponse.Tags
+				}
+			}
+			if utils.MatchesTagFilter(tags, account.TagFilters) {
+				for _, nodeGroup := range replicationGroup.NodeGroups {
+					result = append(result, toNodeGroupTarget(nodeGroup, replicationGroup, tags, account.AccountNumber, account.Region, account.AssumeRole))
+				}
 			}
 		}
 	}
@@ -163,7 +185,30 @@ func getAllElasticacheReplicationGroups(ctx context.Context, elasticacheApi Elas
 	return result, nil
 }
 
-func toNodeGroupTarget(nodegroup types.NodeGroup, replicationGroup types.ReplicationGroup, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func getTags(ctx context.Context, output *elasticache.DescribeReplicationGroupsOutput, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, tagsRequired bool) ([]tagTypes.ResourceTagMapping, error) {
+	arns := make([]string, 0, len(output.ReplicationGroups))
+	for _, rg := range output.ReplicationGroups {
+		arns = append(arns, *rg.ARN)
+	}
+	tagsResult, tagsErr := tagsClient.GetResources(ctx, &resourcegroupstaggingapi.GetResourcesInput{
+		ResourceARNList: arns,
+	})
+	if tagsErr != nil {
+		if tagsRequired {
+			return nil, tagsErr
+		} else if !missingPermissionTagsAlreadyLogged {
+			log.Warn().Err(tagsErr).Msg("Error fetching tags for replication groups. Tags will be missing in the discovery.")
+			missingPermissionTagsAlreadyLogged = true
+		}
+	}
+	var tags []tagTypes.ResourceTagMapping
+	if tagsResult != nil && tagsResult.ResourceTagMappingList != nil {
+		tags = tagsResult.ResourceTagMappingList
+	}
+	return tags, nil
+}
+
+func toNodeGroupTarget(nodegroup types.NodeGroup, replicationGroup types.ReplicationGroup, tags []tagTypes.Tag, awsAccountNumber string, awsRegion string, role *string) discovery_kit_api.Target {
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws.region"] = []string{awsRegion}
@@ -175,6 +220,12 @@ func toNodeGroupTarget(nodegroup types.NodeGroup, replicationGroup types.Replica
 	attributes["aws.elasticache.replication-group.cache-node-type"] = []string{aws.ToString(replicationGroup.CacheNodeType)}
 	attributes["aws.elasticache.replication-group.node-group.id"] = []string{aws.ToString(nodegroup.NodeGroupId)}
 	attributes["aws.elasticache.replication-group.node-group.status"] = []string{aws.ToString(nodegroup.Status)}
+	for _, tag := range tags {
+		attributes[fmt.Sprintf("aws.elasticache.replication-group.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
+	}
 
 	return discovery_kit_api.Target{
 		Id:         aws.ToString(replicationGroup.ReplicationGroupId) + "-" + aws.ToString(nodegroup.NodeGroupId),

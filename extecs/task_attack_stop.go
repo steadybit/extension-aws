@@ -17,17 +17,18 @@ import (
 )
 
 type ecsTaskStopAction struct {
-	clientProvider func(account string, region string) (ecsTaskStopApi, error)
+	clientProvider func(account string, region string, role *string) (ecsTaskStopApi, error)
 }
 
 // Make sure lambdaAction implements all required interfaces
 var _ action_kit_sdk.Action[TaskStopState] = (*ecsTaskStopAction)(nil)
 
 type TaskStopState struct {
-	Account    string
-	Region     string
-	TaskArn    string
-	ClusterArn string
+	Account          string
+	Region           string
+	DiscoveredByRole *string
+	TaskArn          string
+	ClusterArn       string
 }
 
 type ecsTaskStopApi interface {
@@ -71,13 +72,14 @@ func (e *ecsTaskStopAction) Describe() action_kit_api.ActionDescription {
 func (e *ecsTaskStopAction) Prepare(_ context.Context, state *TaskStopState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	state.ClusterArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
 	state.TaskArn = extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.task.arn")[0]
 	return nil, nil
 }
 
 func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*action_kit_api.StartResult, error) {
-	client, err := e.clientProvider(state.Account, state.Region)
+	client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
 	}
@@ -111,8 +113,8 @@ func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*a
 	return nil, nil
 }
 
-func defaultTaskStopClientProvider(account string, region string) (ecsTaskStopApi, error) {
-	awsAccess, err := utils.GetAwsAccess(account, region)
+func defaultTaskStopClientProvider(account string, region string, role *string) (ecsTaskStopApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
 	if err != nil {
 		return nil, err
 	}

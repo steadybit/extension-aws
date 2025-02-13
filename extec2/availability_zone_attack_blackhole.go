@@ -20,7 +20,7 @@ import (
 )
 
 type azBlackholeAction struct {
-	clientProvider             func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error)
+	clientProvider             func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error)
 	extensionRootAccountNumber string
 }
 
@@ -120,8 +120,8 @@ func (e *azBlackholeAction) Stop(ctx context.Context, state *BlackholeState) (*a
 	return stopBlackhole(ctx, state, e.clientProvider)
 }
 
-func defaultClientProviderAzBlackhole(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
-	awsAccess, err := utils.GetAwsAccess(account, region)
+func defaultClientProviderAzBlackhole(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
 	if err != nil {
 		return nil, nil, err
 	}

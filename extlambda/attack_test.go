@@ -101,7 +101,7 @@ func TestLambdaAction_Start(t *testing.T) {
 	}, mock.Anything).Return(&ssm.AddTagsToResourceOutput{}, nil)
 
 	action := lambdaAction{
-		clientProvider: func(account string, region string) (ssmApi, error) {
+		clientProvider: func(account string, region string, role *string) (ssmApi, error) {
 			return api, nil
 		},
 	}
@@ -131,7 +131,7 @@ func TestLambdaAction_Stop(t *testing.T) {
 	}, mock.Anything).Return(&ssm.DeleteParameterOutput{}, nil)
 
 	action := lambdaAction{
-		clientProvider: func(account string, region string) (ssmApi, error) {
+		clientProvider: func(account string, region string, role *string) (ssmApi, error) {
 			return api, nil
 		},
 	}

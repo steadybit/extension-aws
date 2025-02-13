@@ -6,6 +6,9 @@ package extrds
 import (
 	"context"
 	"errors"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-kit/extutil"
 
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
@@ -37,7 +40,17 @@ func TestGetAllRdsClusters(t *testing.T) {
 	mockedApi.On("DescribeDBClusters", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
 	// When
-	targets, err := getAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsClusters(context.Background(), mockedApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "SpecialTag",
+				Values: []string{"something else", "Great Thing"},
+			},
+		},
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -47,12 +60,13 @@ func TestGetAllRdsClusters(t *testing.T) {
 	assert.Equal(t, rdsClusterTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 9, len(target.Attributes))
+	assert.Equal(t, 10, len(target.Attributes))
 	assert.Equal(t, []string{"status"}, target.Attributes["aws.rds.cluster.status"])
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"true"}, target.Attributes["aws.rds.cluster.multi-az"])
 	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws.rds.cluster.label.specialtag"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 }
 
 func TestGetAllRdsClustersWithPagination(t *testing.T) {
@@ -90,7 +104,11 @@ func TestGetAllRdsClustersWithPagination(t *testing.T) {
 	}), nil)
 
 	// When
-	targets, err := getAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllRdsClusters(context.Background(), mockedApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -106,7 +124,11 @@ func TestGetAllRdsClustersError(t *testing.T) {
 	mockedApi.On("DescribeDBClusters", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := getAllRdsClusters(context.Background(), mockedApi, "42", "us-east-1")
+	_, err := getAllRdsClusters(context.Background(), mockedApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

@@ -60,7 +60,7 @@ func TestStartRebootBroker(t *testing.T) {
 		Account:     "42",
 		Region:      "us-west-1",
 	}
-	action := mskRebootBrokerAttack{clientProvider: func(account string, region string) (MskApi, error) {
+	action := mskRebootBrokerAttack{clientProvider: func(account string, region string, role *string) (MskApi, error) {
 		return api, nil
 	}}
 
@@ -79,7 +79,7 @@ func TestStartClusterFailoverForwardFailoverError(t *testing.T) {
 	state := KafkaAttackState{
 		ClusterARN: "arn",
 	}
-	action := mskRebootBrokerAttack{clientProvider: func(account string, region string) (MskApi, error) {
+	action := mskRebootBrokerAttack{clientProvider: func(account string, region string, role *string) (MskApi, error) {
 		return api, nil
 	}}
 

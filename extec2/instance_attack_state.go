@@ -16,17 +16,18 @@ import (
 )
 
 type ec2InstanceStateAction struct {
-	clientProvider func(account string, region string) (ec2InstanceStateChangeApi, error)
+	clientProvider func(account string, region string, role *string) (ec2InstanceStateChangeApi, error)
 }
 
 // Make sure lambdaAction implements all required interfaces
 var _ action_kit_sdk.Action[InstanceStateChangeState] = (*ec2InstanceStateAction)(nil)
 
 type InstanceStateChangeState struct {
-	Account    string
-	Region     string
-	InstanceId string
-	Action     string
+	Account          string
+	Region           string
+	DiscoveredByRole *string
+	InstanceId       string
+	Action           string
 }
 
 type ec2InstanceStateChangeApi interface {
@@ -112,13 +113,14 @@ func (e *ec2InstanceStateAction) Prepare(_ context.Context, state *InstanceState
 
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	state.InstanceId = extutil.MustHaveValue(request.Target.Attributes, "aws-ec2.instance.id")[0]
 	state.Action = action.(string)
 	return nil, nil
 }
 
 func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceStateChangeState) (*action_kit_api.StartResult, error) {
-	client, err := e.clientProvider(state.Account, state.Region)
+	client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.Account), err)
 	}
@@ -161,8 +163,8 @@ func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceState
 	return nil, nil
 }
 
-func defaultClientProviderInstanceState(account string, region string) (ec2InstanceStateChangeApi, error) {
-	awsAccess, err := utils.GetAwsAccess(account, region)
+func defaultClientProviderInstanceState(account string, region string, role *string) (ec2InstanceStateChangeApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
 	if err != nil {
 		return nil, err
 	}

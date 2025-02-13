@@ -5,8 +5,11 @@ package extec2
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -48,7 +51,11 @@ func TestGetAllSubnets(t *testing.T) {
 	mockedZoneUtil := new(ec2UtilMock)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 	// When
-	targets, err := GetAllSubnets(context.Background(), mockedApi, mockedZoneUtil, "42", "eu-central-1")
+	targets, err := GetAllSubnets(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "eu-central-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -65,6 +72,50 @@ func TestGetAllSubnets(t *testing.T) {
 	assert.Equal(t, []string{"dev-demo-ngroup2"}, target.Attributes["aws.ec2.subnet.name"])
 	assert.Equal(t, []string{"10.10.0.0/21"}, target.Attributes["aws.ec2.subnet.cidr"])
 	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws.ec2.subnet.label.specialtag"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
+}
+
+func TestGetAllSubnetsShouldApplyTagFilters(t *testing.T) {
+	// Given
+	mockedApi := new(subnetDiscoveryApiMock)
+	mockedReturnValue := ec2.DescribeSubnetsOutput{
+		Subnets: []types.Subnet{
+			{
+				SubnetId:  extutil.Ptr("subnet-0ef9adc9fbd3b19c5"),
+				CidrBlock: extutil.Ptr("10.10.0.0/21"),
+				VpcId:     extutil.Ptr("vpc-123"),
+				Tags: []types.Tag{
+					{Key: extutil.Ptr("Name"), Value: extutil.Ptr("dev-demo-ngroup2")},
+					{Key: extutil.Ptr("SpecialTag"), Value: extutil.Ptr("Great Thing")},
+				},
+				AvailabilityZone:   extutil.Ptr("eu-central-1b"),
+				AvailabilityZoneId: extutil.Ptr("euc1-az3"),
+			},
+		},
+	}
+	mockedApi.On("DescribeSubnets", mock.Anything, mock.MatchedBy(func(input *ec2.DescribeSubnetsInput) bool {
+		return aws.ToString(input.Filters[0].Name) == "tag:application" && input.Filters[0].Values[0] == "demo"
+	})).Return(&mockedReturnValue, nil)
+
+	mockedZoneUtil := new(ec2UtilMock)
+	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
+	// When
+	targets, err := GetAllSubnets(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "eu-central-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "application",
+				Values: []string{"demo"},
+			},
+		},
+	})
+
+	// Then
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(targets))
+	mockedApi.AssertExpectations(t)
 }

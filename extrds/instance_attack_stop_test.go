@@ -52,7 +52,7 @@ func TestStartInstanceStop(t *testing.T) {
 		Account:              "42",
 		Region:               "us-west-1",
 	}
-	action := rdsInstanceStopAttack{clientProvider: func(account string, region string) (rdsDBInstanceApi, error) {
+	action := rdsInstanceStopAttack{clientProvider: func(account string, region string, role *string) (rdsDBInstanceApi, error) {
 		return api, nil
 	}}
 
@@ -71,7 +71,7 @@ func TestStartInstanceStopForwardStopError(t *testing.T) {
 	state := RdsInstanceAttackState{
 		DBInstanceIdentifier: "dev-db",
 	}
-	action := rdsInstanceStopAttack{clientProvider: func(account string, region string) (rdsDBInstanceApi, error) {
+	action := rdsInstanceStopAttack{clientProvider: func(account string, region string, role *string) (rdsDBInstanceApi, error) {
 		return api, nil
 	}}
 

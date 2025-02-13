@@ -6,10 +6,13 @@ package extec2
 import (
 	"context"
 	"errors"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/config"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -71,7 +74,11 @@ func TestGetAllEc2Instances(t *testing.T) {
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 	// When
-	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -93,6 +100,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 	assert.Equal(t, []string{"vpc-003cf5dda88c814c6"}, target.Attributes["aws-ec2.vpc"])
 	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws-ec2.label.specialtag"])
 	assert.Equal(t, []string{"running"}, target.Attributes["aws-ec2.state"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
 }
@@ -123,7 +131,11 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
-	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -144,10 +156,55 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	assert.Equal(t, []string{"vpc-003cf5dda88c814c6"}, target.Attributes["aws.vpc.id"])
 	assert.Equal(t, []string{"vpc-123-name"}, target.Attributes["aws.vpc.name"])
 	assert.Equal(t, []string{"running"}, target.Attributes["aws-ec2.state"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 	assert.NotContains(t, target.Attributes, "aws-ec2.label.specialtag")
 	assert.NotContains(t, target.Attributes, "aws-ec2.image")
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
+}
+
+func TestGetAllEc2InstancesShouldApplyTagFilters(t *testing.T) {
+	// Given
+	mockedApi := new(instanceDiscoveryApiMock)
+	mockedReturnValue := ec2.DescribeInstancesOutput{
+		Reservations: []types.Reservation{
+			{
+				Instances: []types.Instance{
+					instance,
+				},
+			},
+		},
+	}
+	mockedApi.On("DescribeInstances", mock.Anything, mock.MatchedBy(func(input *ec2.DescribeInstancesInput) bool {
+		return aws.ToString(input.Filters[0].Name) == "tag:application" && input.Filters[0].Values[0] == "demo"
+	})).Return(&mockedReturnValue, nil)
+
+	mockedZoneUtil := new(ec2UtilMock)
+	mockedZone := types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
+
+	// When
+	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "application",
+				Values: []string{"demo"},
+			},
+		},
+	})
+
+	// Then
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(targets))
+	mockedApi.AssertExpectations(t)
 }
 
 func TestNameNotSet(t *testing.T) {
@@ -179,7 +236,11 @@ func TestNameNotSet(t *testing.T) {
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
-	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -205,7 +266,11 @@ func TestGetAllEc2InstancesError(t *testing.T) {
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
-	_, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	_, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.EqualError(t, err, "expected")

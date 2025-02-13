@@ -7,6 +7,8 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -57,19 +59,14 @@ var service = types.Service{
 
 func TestGetAllEcsServices(t *testing.T) {
 	// Given
-	mockedApi := new(ecsServiceDiscoveryApiMock)
-	mockedApi.On("ListClusters", mock.Anything, mock.Anything).Return(&ecs.ListClustersOutput{
-		ClusterArns: []string{clusterArn},
-	}, nil)
-	mockedApi.On("ListServices", mock.Anything, mock.Anything).Return(&ecs.ListServicesOutput{
-		ServiceArns: []string{serviceArn},
-	}, nil)
-	mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
-		Services: []types.Service{service},
-	}, nil)
+	mockedApi := mockApisServiceDiscovery()
 
 	// When
-	targets, err := GetAllEcsServices("us-east-1", "42", mockedApi, context.Background())
+	targets, err := GetAllEcsServices(&utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	}, mockedApi, context.Background())
 
 	// Then
 	assert.NoError(t, err)
@@ -87,4 +84,58 @@ func TestGetAllEcsServices(t *testing.T) {
 	assert.Equal(t, []string{serviceArn}, target.Attributes["aws-ecs.service.arn"])
 	assert.Equal(t, []string{serviceName}, target.Attributes["aws-ecs.service.name"])
 	assert.Equal(t, []string{"3"}, target.Attributes["aws-ecs.service.desired-count"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
+}
+
+func TestGetAllEcsServicesShouldApplyTagFilters(t *testing.T) {
+	// Given
+	mockedApi := mockApisServiceDiscovery()
+
+	// When
+	targets, err := GetAllEcsServices(&utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "test",
+				Values: []string{"123"},
+			},
+		},
+	}, mockedApi, context.Background())
+
+	// Then
+	assert.NoError(t, err)
+	assert.Len(t, targets, 1)
+
+	// When
+	targets, err = GetAllEcsServices(&utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "test",
+				Values: []string{"xxx"},
+			},
+		},
+	}, mockedApi, context.Background())
+
+	// Then
+	assert.NoError(t, err)
+	assert.Len(t, targets, 0)
+}
+
+func mockApisServiceDiscovery() *ecsServiceDiscoveryApiMock {
+	mockedApi := new(ecsServiceDiscoveryApiMock)
+	mockedApi.On("ListClusters", mock.Anything, mock.Anything).Return(&ecs.ListClustersOutput{
+		ClusterArns: []string{clusterArn},
+	}, nil)
+	mockedApi.On("ListServices", mock.Anything, mock.Anything).Return(&ecs.ListServicesOutput{
+		ServiceArns: []string{serviceArn},
+	}, nil)
+	mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
+		Services: []types.Service{service},
+	}, nil)
+	return mockedApi
 }

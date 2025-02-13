@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/extension-aws/utils"
 	extensionkit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extconversion"
@@ -31,6 +32,7 @@ type EcsServiceTaskCountCheckState struct {
 	ClusterArn            string
 	AwsAccount            string
 	Region                string
+	DiscoveredByRole      *string
 	InitialRunningCount   int
 }
 
@@ -142,11 +144,12 @@ func (f EcsServiceTaskCountCheckAction) Prepare(_ context.Context, state *EcsSer
 
 	awsAccount := extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	region := extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	role := utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	clusterArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
 	serviceArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.service.arn")[0]
 
-	f.poller.Register(awsAccount, region, clusterArn, serviceArn)
-	counts, err := f.initialRunningCount(awsAccount, region, clusterArn, serviceArn)
+	f.poller.Register(awsAccount, region, role, clusterArn, serviceArn)
+	counts, err := f.initialRunningCount(awsAccount, region, role, clusterArn, serviceArn)
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +158,7 @@ func (f EcsServiceTaskCountCheckAction) Prepare(_ context.Context, state *EcsSer
 	state.RunningCountCheckMode = config.RunningCountCheckMode
 	state.AwsAccount = awsAccount
 	state.Region = region
+	state.DiscoveredByRole = role
 	state.ClusterArn = clusterArn
 	state.ServiceArn = serviceArn
 	state.InitialRunningCount = counts.running
@@ -162,8 +166,8 @@ func (f EcsServiceTaskCountCheckAction) Prepare(_ context.Context, state *EcsSer
 	return nil, nil
 }
 
-func (f EcsServiceTaskCountCheckAction) initialRunningCount(awsAccount string, region string, clusterArn string, serviceArn string) (*escServiceTaskCounts, error) {
-	latest := f.poller.AwaitLatest(awsAccount, region, clusterArn, serviceArn)
+func (f EcsServiceTaskCountCheckAction) initialRunningCount(awsAccount string, region string, role *string, clusterArn string, serviceArn string) (*escServiceTaskCounts, error) {
+	latest := f.poller.AwaitLatest(awsAccount, region, role, clusterArn, serviceArn)
 	if latest != nil {
 		if latest.service != nil {
 			return toServiceTaskCounts(latest.service), nil
@@ -181,12 +185,12 @@ func (f EcsServiceTaskCountCheckAction) Start(_ context.Context, _ *EcsServiceTa
 }
 
 func (f EcsServiceTaskCountCheckAction) Stop(_ context.Context, state *EcsServiceTaskCountCheckState) (*action_kit_api.StopResult, error) {
-	f.poller.Unregister(state.AwsAccount, state.Region, state.ClusterArn, state.ServiceArn)
+	f.poller.Unregister(state.AwsAccount, state.Region, state.DiscoveredByRole, state.ClusterArn, state.ServiceArn)
 	return nil, nil
 }
 
 func (f EcsServiceTaskCountCheckAction) Status(_ context.Context, state *EcsServiceTaskCountCheckState) (*action_kit_api.StatusResult, error) {
-	latest := f.poller.Latest(state.AwsAccount, state.Region, state.ClusterArn, state.ServiceArn)
+	latest := f.poller.Latest(state.AwsAccount, state.Region, state.DiscoveredByRole, state.ClusterArn, state.ServiceArn)
 
 	var checkError *action_kit_api.ActionKitError
 	if latest != nil {

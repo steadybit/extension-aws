@@ -17,10 +17,10 @@ const maxServicePageSize = 10
 
 type ServiceDescriptionPoller interface {
 	Start(ctx context.Context)
-	Register(account string, region string, cluster string, service string)
-	Unregister(account string, region string, cluster string, service string)
-	Latest(account string, region string, cluster string, service string) *PollService
-	AwaitLatest(account string, region string, cluster string, service string) *PollService
+	Register(account string, region string, role *string, cluster string, service string)
+	Unregister(account string, region string, role *string, cluster string, service string)
+	Latest(account string, region string, role *string, cluster string, service string) *PollService
+	AwaitLatest(account string, region string, role *string, cluster string, service string) *PollService
 }
 
 type PollService struct {
@@ -33,11 +33,12 @@ type pollRecord struct {
 }
 type pollServices map[string]*pollRecord
 type pollClusters map[string]pollServices
-type pollRegions map[string]pollClusters
+type pollRoles map[string]pollClusters
+type pollRegions map[string]pollRoles
 type pollAccounts map[string]pollRegions
 
 type EcsServiceDescriptionPoller struct {
-	apiClientProvider func(account string, region string) (ecs.DescribeServicesAPIClient, error)
+	apiClientProvider func(account string, region string, role *string) (ecs.DescribeServicesAPIClient, error)
 	ticker            *time.Ticker
 	m                 *sync.RWMutex
 	c                 *sync.Cond
@@ -70,7 +71,7 @@ func (p EcsServiceDescriptionPoller) Start(ctx context.Context) {
 	}()
 }
 
-func (p EcsServiceDescriptionPoller) Register(account string, region string, cluster string, service string) {
+func (p EcsServiceDescriptionPoller) Register(account string, region string, role *string, cluster string, service string) {
 	var ok bool
 	p.m.Lock()
 	defer p.m.Unlock()
@@ -82,10 +83,20 @@ func (p EcsServiceDescriptionPoller) Register(account string, region string, clu
 		p.polls[account] = regions
 	}
 
+	var roles pollRoles
+	if roles, ok = regions[region]; !ok {
+		roles = make(pollRoles)
+		regions[region] = roles
+	}
+
 	var clusters pollClusters
-	if clusters, ok = regions[region]; !ok {
+	roleOrEmpty := ""
+	if role != nil {
+		roleOrEmpty = *role
+	}
+	if clusters, ok = roles[roleOrEmpty]; !ok {
 		clusters = make(pollClusters)
-		regions[region] = clusters
+		roles[roleOrEmpty] = clusters
 	}
 
 	var services pollServices
@@ -102,40 +113,58 @@ func (p EcsServiceDescriptionPoller) Register(account string, region string, clu
 	}
 }
 
-func (p EcsServiceDescriptionPoller) Unregister(account string, region string, cluster string, service string) {
+func (p EcsServiceDescriptionPoller) Unregister(account string, region string, role *string, cluster string, service string) {
 	p.m.Lock()
 	defer p.m.Unlock()
 	log.Debug().Msgf("unregister service %s", service)
+	roleOrEmpty := ""
+	if role != nil {
+		roleOrEmpty = *role
+	}
 	if regions, ok := p.polls[account]; ok {
-		if clusters, ok := regions[region]; ok {
-			if services, ok := clusters[cluster]; ok {
-				if record, ok := services[service]; ok {
-					if record.count > 0 {
-						record.count = record.count - 1
-					} else {
-						delete(services, service)
-						if len(services) == 0 {
-							delete(clusters, cluster)
+		if roles, ok := regions[region]; ok {
+			if clusters, ok := roles[roleOrEmpty]; ok {
+				if services, ok := clusters[cluster]; ok {
+					if record, ok := services[service]; ok {
+						if record.count > 0 {
+							record.count = record.count - 1
+						} else {
+							delete(services, service)
+							if len(services) == 0 {
+								delete(clusters, cluster)
+							}
 						}
 					}
 				}
+				if len(clusters) == 0 {
+					delete(roles, roleOrEmpty)
+				}
 			}
-			if len(clusters) == 0 {
-				delete(p.polls, account)
+			if len(roles) == 0 {
+				delete(regions, region)
 			}
+		}
+		if len(regions) == 0 {
+			delete(p.polls, account)
 		}
 	}
 	p.c.Broadcast()
 }
 
-func (p EcsServiceDescriptionPoller) Latest(account string, region string, cluster string, service string) *PollService {
+func (p EcsServiceDescriptionPoller) Latest(account string, region string, role *string, cluster string, service string) *PollService {
 	p.m.RLock()
 	defer p.m.RUnlock()
+	roleOrEmpty := ""
+	if role != nil {
+		roleOrEmpty = *role
+	}
 	if regions, ok := p.polls[account]; ok {
-		if clusters, ok := regions[region]; ok {
-			if services, ok := clusters[cluster]; ok {
-				if record, ok := services[service]; ok {
-					return record.value
+		if roles, ok := regions[region]; ok {
+			if clusters, ok := roles[roleOrEmpty]; ok {
+				if services, ok := clusters[cluster]; ok {
+					if record, ok := services[service]; ok {
+						return record.value
+					}
 				}
 			}
 		}
@@ -143,15 +172,23 @@ func (p EcsServiceDescriptionPoller) Latest(account string, region string, clust
 	return nil
 }
 
-func (p EcsServiceDescriptionPoller) AwaitLatest(account string, region string, cluster string, service string) *PollService {
+func (p EcsServiceDescriptionPoller) AwaitLatest(account string, region string, role *string, cluster string, service string) *PollService {
 	p.m.Lock()
 	defer p.m.Unlock()
+	roleOrEmpty := ""
+	if role != nil {
+		roleOrEmpty = *role
+	}
 	for {
 		regions, ok := p.polls[account]
 		if !ok {
 			return nil
 		}
-		clusters, ok := regions[region]
+		roles, ok := regions[region]
+		if !ok {
+			return nil
+		}
+		clusters, ok := roles[roleOrEmpty]
 		if !ok {
 			return nil
 		}
@@ -173,33 +210,39 @@ func (p EcsServiceDescriptionPoller) pollAll(ctx context.Context) {
 	startTime := time.Now()
 
 	for account, regions := range p.polls {
-		for region, clusters := range regions {
-			client, err := p.apiClientProvider(account, region)
-			if err != nil {
-				log.Warn().TimeDiff("duration", time.Now(), startTime).Err(err).Msg("could not create api client")
-				continue
-			}
+		for region, roles := range regions {
+			for roleOrEmpty, clusters := range roles {
+				var role *string
+				if roleOrEmpty != "" {
+					role = &roleOrEmpty
+				}
+				client, err := p.apiClientProvider(account, region, role)
+				if err != nil {
+					log.Warn().TimeDiff("duration", time.Now(), startTime).Err(err).Msg("could not create api client")
+					continue
+				}
 
-			for cluster, services := range clusters {
-				servicesPages := utils.SplitIntoPages(maps.Keys(services), maxServicePageSize)
-				for _, servicePage := range servicesPages {
-					descriptions, err := client.DescribeServices(ctx, &ecs.DescribeServicesInput{
-						Services: servicePage,
-						Cluster:  extutil.Ptr(cluster),
-					})
-					if err != nil {
-						log.Warn().TimeDiff("duration", time.Now(), startTime).Err(err).Msg("api call failed")
-						continue
-					}
-
-					for _, service := range descriptions.Services {
-						services[aws.ToString(service.ServiceArn)].value = &PollService{
-							service: &service,
+				for cluster, services := range clusters {
+					servicesPages := utils.SplitIntoPages(maps.Keys(services), maxServicePageSize)
+					for _, servicePage := range servicesPages {
+						descriptions, err := client.DescribeServices(ctx, &ecs.DescribeServicesInput{
+							Services: servicePage,
+							Cluster:  extutil.Ptr(cluster),
+						})
+						if err != nil {
+							log.Warn().TimeDiff("duration", time.Now(), startTime).Err(err).Msg("api call failed")
+							continue
 						}
-					}
-					for _, failure := range descriptions.Failures {
-						services[aws.ToString(failure.Arn)].value = &PollService{
-							failure: &failure,
+
+						for _, service := range descriptions.Services {
+							services[aws.ToString(service.ServiceArn)].value = &PollService{
+								service: &service,
+							}
+						}
+						for _, failure := range descriptions.Failures {
+							services[aws.ToString(failure.Arn)].value = &PollService{
+								failure: &failure,
+							}
 						}
 					}
 				}
@@ -209,8 +252,8 @@ func (p EcsServiceDescriptionPoller) pollAll(ctx context.Context) {
 	p.c.Broadcast()
 }
 
-func defaultDescribeServiceProvider(account string, region string) (ecs.DescribeServicesAPIClient, error) {
-	awsAccess, err := utils.GetAwsAccess(account, region)
+func defaultDescribeServiceProvider(account string, region string, role *string) (ecs.DescribeServicesAPIClient, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
 	if err != nil {
 		return nil, err
 	}

@@ -8,6 +8,8 @@ import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/fis"
 	"github.com/aws/aws-sdk-go-v2/service/fis/types"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -62,7 +64,17 @@ func TestGetAllFisTemplates(t *testing.T) {
 	mockedApi.On("GetExperimentTemplate", mock.Anything, mock.Anything).Return(&mockedReturnValueTemplate, nil)
 
 	// When
-	targets, err := GetAllFisTemplates(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := GetAllFisTemplates(context.Background(), mockedApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "SpecialTag",
+				Values: []string{"Great Thing"},
+			},
+		},
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -79,6 +91,7 @@ func TestGetAllFisTemplates(t *testing.T) {
 	assert.Equal(t, []string{"Lorem Ipsum"}, target.Attributes["aws.fis.experiment.template.description"])
 	assert.Equal(t, []string{"16m0s"}, target.Attributes["aws.fis.experiment.template.duration"])
 	assert.Equal(t, []string{"Great Thing"}, target.Attributes["label.specialtag"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
 }
@@ -90,7 +103,11 @@ func TestGetAllFisTemplatesError(t *testing.T) {
 	mockedApi.On("ListExperimentTemplates", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := GetAllFisTemplates(context.Background(), mockedApi, "42", "us-east-1")
+	_, err := GetAllFisTemplates(context.Background(), mockedApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

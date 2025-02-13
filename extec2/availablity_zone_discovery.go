@@ -76,13 +76,17 @@ func getAllAvailabilityZonesForAccount(account *utils.AwsAccess, ctx context.Con
 
 func getAllAvailabilityZonesFromCache(getZonesUtil GetZonesUtil, account *utils.AwsAccess) []discovery_kit_api.Target {
 	result := make([]discovery_kit_api.Target, 0, 20)
+	if len(account.TagFilters) > 0 {
+		//Zones can not be tagged, return no targets. (Blackhole Zone Attack will not have any targets, which  makes sense because it can't be isolated to resources with a specific tag)
+		return result
+	}
 	for _, availabilityZone := range getZonesUtil.GetZones(account) {
-		result = append(result, toAvailabilityZoneTarget(availabilityZone, account.AccountNumber))
+		result = append(result, toAvailabilityZoneTarget(availabilityZone, account.AccountNumber, account.AssumeRole))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesZone)
 }
 
-func toAvailabilityZoneTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string) discovery_kit_api.Target {
+func toAvailabilityZoneTarget(availabilityZone types2.AvailabilityZone, awsAccountNumber string, role *string) discovery_kit_api.Target {
 	label := aws.ToString(availabilityZone.ZoneName)
 	id := aws.ToString(availabilityZone.ZoneName) + "@" + awsAccountNumber
 
@@ -92,6 +96,9 @@ func toAvailabilityZoneTarget(availabilityZone types2.AvailabilityZone, awsAccou
 	attributes["aws.zone"] = []string{aws.ToString(availabilityZone.ZoneName)}
 	attributes["aws.zone.id"] = []string{aws.ToString(availabilityZone.ZoneId)}
 	attributes["aws.zone@account"] = []string{id}
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
+	}
 
 	return discovery_kit_api.Target{
 		Id:         id,

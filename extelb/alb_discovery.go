@@ -105,7 +105,7 @@ func (e *albDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api
 
 func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := elasticloadbalancingv2.NewFromConfig(account.AwsConfig)
-	result, err := GetAlbs(ctx, client, extec2.Util, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAlbs(ctx, client, extec2.Util, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -128,7 +128,7 @@ type albDiscoveryEc2Util interface {
 	extec2.GetVpcNameUtil
 }
 
-func GetAlbs(ctx context.Context, albDiscoveryApi AlbDiscoveryApi, ec2Util albDiscoveryEc2Util, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func GetAlbs(ctx context.Context, albDiscoveryApi AlbDiscoveryApi, ec2Util albDiscoveryEc2Util, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := elasticloadbalancingv2.NewDescribeLoadBalancersPaginator(albDiscoveryApi, &elasticloadbalancingv2.DescribeLoadBalancersInput{})
@@ -170,14 +170,16 @@ func GetAlbs(ctx context.Context, albDiscoveryApi AlbDiscoveryApi, ec2Util albDi
 					return nil, extension_kit.ToError("Failed to fetch load balancer listeners.", err)
 				}
 
-				result = append(result, toTarget(&loadBalancer, tags, describeListenersResult.Listeners, ec2Util, awsAccountNumber, awsRegion))
+				if matchesTagFilter(tags, account.TagFilters) {
+					result = append(result, toTarget(&loadBalancer, tags, describeListenersResult.Listeners, ec2Util, account.AccountNumber, account.Region, account.AssumeRole))
+				}
 			}
 		}
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEcs), nil
 }
 
-func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listener, ec2Util albDiscoveryEc2Util, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listener, ec2Util albDiscoveryEc2Util, awsAccountNumber string, awsRegion string, role *string) discovery_kit_api.Target {
 	arn := aws.ToString(lb.LoadBalancerArn)
 	name := aws.ToString(lb.LoadBalancerName)
 	zones := make([]string, 0, len(lb.AvailabilityZones))
@@ -215,6 +217,10 @@ func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listen
 			attributes["k8s.cluster-name"] = []string{aws.ToString(tag.Value)}
 		}
 		attributes[fmt.Sprintf("aws-elb.alb.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

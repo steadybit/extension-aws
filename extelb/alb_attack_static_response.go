@@ -20,7 +20,7 @@ import (
 )
 
 type albStaticResponseAction struct {
-	clientProvider func(account string, region string) (albStaticResponseApi, error)
+	clientProvider func(account string, region string, role *string) (albStaticResponseApi, error)
 }
 
 // Make sure action implements all required interfaces
@@ -30,6 +30,7 @@ var _ action_kit_sdk.ActionWithStop[AlbStaticResponseState] = (*albStaticRespons
 type AlbStaticResponseState struct {
 	Account              string
 	Region               string
+	DiscoveredByRole     *string
 	LoadbalancerArn      string
 	ListenerArn          string
 	ResponseStatusCode   int
@@ -208,6 +209,7 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 func (e *albStaticResponseAction) Prepare(ctx context.Context, state *AlbStaticResponseState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	state.LoadbalancerArn = extutil.MustHaveValue(request.Target.Attributes, "aws-elb.alb.arn")[0]
 	state.TargetExecutionId = request.ExecutionId
 	if request.ExecutionContext != nil {
@@ -215,7 +217,7 @@ func (e *albStaticResponseAction) Prepare(ctx context.Context, state *AlbStaticR
 		state.ExperimentKey = *request.ExecutionContext.ExperimentKey
 	}
 
-	client, err := e.clientProvider(state.Account, state.Region)
+	client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize elb client for AWS account %s", state.Account), err)
 	}
@@ -280,7 +282,7 @@ func (e *albStaticResponseAction) Prepare(ctx context.Context, state *AlbStaticR
 }
 
 func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticResponseState) (*action_kit_api.StartResult, error) {
-	client, err := e.clientProvider(state.Account, state.Region)
+	client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize elb client for AWS account %s", state.Account), err)
 	}
@@ -469,7 +471,7 @@ func getNewPriorityPairs(rules *elasticloadbalancingv2.DescribeRulesOutput) []ty
 }
 
 func (e *albStaticResponseAction) Stop(ctx context.Context, state *AlbStaticResponseState) (*action_kit_api.StopResult, error) {
-	client, err := e.clientProvider(state.Account, state.Region)
+	client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize ECS client for AWS account %s", state.Account), err)
 	}
@@ -595,8 +597,8 @@ func restoreOldPriorities(ctx context.Context, client *albStaticResponseApi, sta
 	return nil
 }
 
-func defaultClientProviderService(account string, region string) (albStaticResponseApi, error) {
-	awsAccess, err := utils.GetAwsAccess(account, region)
+func defaultClientProviderService(account string, region string, role *string) (albStaticResponseApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
 	if err != nil {
 		return nil, err
 	}

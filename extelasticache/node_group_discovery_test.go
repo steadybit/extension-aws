@@ -9,8 +9,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/elasticache"
 	types2 "github.com/aws/aws-sdk-go-v2/service/elasticache/types"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
+	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-kit/extutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -25,7 +30,7 @@ func TestGetAllElasticacheReplicationGroups(t *testing.T) {
 		Marker: nil,
 		ReplicationGroups: []types2.ReplicationGroup{
 			{
-				ARN:                     aws.String("arn"),
+				ARN:                     aws.String("arn:123456"),
 				AtRestEncryptionEnabled: aws.Bool(false),
 				AuthTokenEnabled:        aws.Bool(false),
 				AutomaticFailover:       types2.AutomaticFailoverStatusEnabled,
@@ -45,8 +50,28 @@ func TestGetAllElasticacheReplicationGroups(t *testing.T) {
 	}
 	mockedApi.On("DescribeReplicationGroups", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
+	tagApi := new(tagClientMock)
+	tags := resourcegroupstaggingapi.GetResourcesOutput{
+		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
+			{
+				ResourceARN: extutil.Ptr("arn:123456"),
+				Tags: []tagtypes.Tag{
+					{
+						Key:   extutil.Ptr("Example"),
+						Value: extutil.Ptr("Tag123"),
+					},
+				},
+			},
+		},
+	}
+	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
+
 	// When
-	targets, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -56,7 +81,7 @@ func TestGetAllElasticacheReplicationGroups(t *testing.T) {
 	assert.Equal(t, elasticacheNodeGroupTargetId, target.TargetType)
 	assert.Equal(t, "redis-steadybit-dev-0001", target.Label)
 	assert.Equal(t, "redis-steadybit-dev-0001", target.Id)
-	assert.Equal(t, 10, len(target.Attributes))
+	assert.Equal(t, 12, len(target.Attributes))
 	assert.Equal(t, []string{"redis-steadybit-dev"}, target.Attributes["aws.elasticache.replication-group.id"])
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
@@ -67,6 +92,69 @@ func TestGetAllElasticacheReplicationGroups(t *testing.T) {
 	assert.Equal(t, []string{"cache.t4g.micro"}, target.Attributes["aws.elasticache.replication-group.cache-node-type"])
 	assert.Equal(t, []string{"0001"}, target.Attributes["aws.elasticache.replication-group.node-group.id"])
 	assert.Equal(t, []string{"available"}, target.Attributes["aws.elasticache.replication-group.node-group.status"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
+	assert.Equal(t, []string{"Tag123"}, target.Attributes["aws.elasticache.replication-group.label.example"])
+}
+
+func TestGetAllElasticacheReplicationGroupsShouldApplyTagFilter(t *testing.T) {
+	// Given
+	mockedApi := new(elasticacheReplicationGroupApiMock)
+	mockedReturnValue := elasticache.DescribeReplicationGroupsOutput{
+		Marker: nil,
+		ReplicationGroups: []types2.ReplicationGroup{
+			{
+				ARN:                     aws.String("arn:123456"),
+				AtRestEncryptionEnabled: aws.Bool(false),
+				AuthTokenEnabled:        aws.Bool(false),
+				AutomaticFailover:       types2.AutomaticFailoverStatusEnabled,
+				CacheNodeType:           aws.String("cache.t4g.micro"),
+				ClusterEnabled:          aws.Bool(false),
+				ClusterMode:             types2.ClusterModeDisabled,
+				MemberClusters:          []string{"redis-steadybit-dev-001", "redis-steadybit-dev-002"},
+				MultiAZ:                 types2.MultiAZStatusEnabled,
+				NodeGroups: []types2.NodeGroup{
+					{NodeGroupId: aws.String("0001"), NodeGroupMembers: nil, Status: aws.String("available")},
+				},
+				ReplicationGroupId: aws.String("redis-steadybit-dev"),
+				Status:             aws.String("available"),
+			},
+		},
+		ResultMetadata: middleware.Metadata{},
+	}
+	mockedApi.On("DescribeReplicationGroups", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
+
+	tagApi := new(tagClientMock)
+	tags := resourcegroupstaggingapi.GetResourcesOutput{
+		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
+			{
+				ResourceARN: extutil.Ptr("arn:123456"),
+				Tags: []tagtypes.Tag{
+					{
+						Key:   extutil.Ptr("Example"),
+						Value: extutil.Ptr("Tag123"),
+					},
+				},
+			},
+		},
+	}
+	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
+
+	// When
+	targets, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "Example",
+				Values: []string{"Tag123"},
+			},
+		},
+	})
+
+	// Then
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(targets))
 }
 
 func TestGetAllElasticacheReplicationGroupsWithPagination(t *testing.T) {
@@ -124,8 +212,28 @@ func TestGetAllElasticacheReplicationGroupsWithPagination(t *testing.T) {
 		ResultMetadata: middleware.Metadata{},
 	}), nil)
 
+	tagApi := new(tagClientMock)
+	tags := resourcegroupstaggingapi.GetResourcesOutput{
+		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
+			{
+				ResourceARN: extutil.Ptr("arn1"),
+				Tags: []tagtypes.Tag{
+					{
+						Key:   extutil.Ptr("Example"),
+						Value: extutil.Ptr("Tag123"),
+					},
+				},
+			},
+		},
+	}
+	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
+
 	// When
-	targets, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -134,14 +242,20 @@ func TestGetAllElasticacheReplicationGroupsWithPagination(t *testing.T) {
 	assert.Equal(t, "redis-steadybit-stg-0001", targets[1].Id)
 }
 
-func TestGetAllRdsClustersError(t *testing.T) {
+func TestGetAllElasticacheReplicationGroupsError(t *testing.T) {
 	// Given
 	mockedApi := new(elasticacheReplicationGroupApiMock)
 
 	mockedApi.On("DescribeReplicationGroups", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
+	tagApi := new(tagClientMock)
+
 	// When
-	_, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, "42", "us-east-1")
+	_, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

@@ -22,7 +22,7 @@ var (
 	mockApi = mockEcsTaskSsmApi{}
 
 	testSsmAction = &ecsTaskSsmAction{
-		clientProvider: func(account string, region string) (ecsTaskSsmApi, error) {
+		clientProvider: func(account string, region string, role *string) (ecsTaskSsmApi, error) {
 			return &mockApi, nil
 		},
 		ssmCommandInvocation: ssmCommandInvocation{

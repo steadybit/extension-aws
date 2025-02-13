@@ -261,7 +261,7 @@ func testApiThrottlingDuringStopWhileDeletingNACLs(t *testing.T, clientEc2 *ec2.
 func prepareActionCallAzBlackhole(clientEc2 *ec2.Client, clientImds *imds.Client) (azBlackholeAction, BlackholeState, action_kit_api.PrepareActionRequestBody) {
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "41",
-		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+		clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 			return clientEc2, clientImds, nil
 		}}
 	state := action.NewEmptyState()

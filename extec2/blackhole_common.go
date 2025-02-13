@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
+	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extutil"
 	"golang.org/x/exp/slices"
@@ -20,6 +21,7 @@ type BlackholeState struct {
 	AgentAWSAccount     string
 	ExtensionAwsAccount string
 	TargetRegion        string
+	DiscoveredByRole    *string
 	NetworkAclIds       []string
 	OldNetworkAclIds    map[string]string   // map[NewAssociationId] = oldNetworkAclId
 	TargetSubnets       map[string][]string // map[vpcId] = [subnetIds]
@@ -39,12 +41,13 @@ type blackholeImdsApi interface {
 	GetInstanceIdentityDocument(ctx context.Context, params *imds.GetInstanceIdentityDocumentInput, optFns ...func(*imds.Options)) (*imds.GetInstanceIdentityDocumentOutput, error)
 }
 
-func prepareBlackhole(ctx context.Context, state *BlackholeState, request action_kit_api.PrepareActionRequestBody, extensionRootAccountNumber string, clientProvider func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error), subnetProvider func(clientEc2 blackholeEC2Api, ctx context.Context, target *action_kit_api.Target) (map[string][]string, error)) (*action_kit_api.PrepareResult, error) {
+func prepareBlackhole(ctx context.Context, state *BlackholeState, request action_kit_api.PrepareActionRequestBody, extensionRootAccountNumber string, clientProvider func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error), subnetProvider func(clientEc2 blackholeEC2Api, ctx context.Context, target *action_kit_api.Target) (map[string][]string, error)) (*action_kit_api.PrepareResult, error) {
 	targetAccount := extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	targetRegion := extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	discoveredByRole := utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 
 	// Get AWS Clients
-	clientEc2, clientImds, err := clientProvider(targetAccount, targetRegion)
+	clientEc2, clientImds, err := clientProvider(targetAccount, targetRegion, discoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize AWS clients for AWS targetAccount %s", targetAccount), err)
 	}
@@ -81,11 +84,12 @@ func prepareBlackhole(ctx context.Context, state *BlackholeState, request action
 	state.TargetRegion = targetRegion
 	state.TargetSubnets = targetSubnets
 	state.AttackExecutionId = request.ExecutionId
+	state.DiscoveredByRole = discoveredByRole
 	return nil, nil
 }
 
-func startBlackhole(ctx context.Context, state *BlackholeState, clientProvider func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error)) (*action_kit_api.StartResult, error) {
-	clientEc2, _, err := clientProvider(state.ExtensionAwsAccount, state.TargetRegion)
+func startBlackhole(ctx context.Context, state *BlackholeState, clientProvider func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error)) (*action_kit_api.StartResult, error) {
+	clientEc2, _, err := clientProvider(state.ExtensionAwsAccount, state.TargetRegion, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s", state.ExtensionAwsAccount), err)
 	}
@@ -127,8 +131,8 @@ func startBlackhole(ctx context.Context, state *BlackholeState, clientProvider f
 	return nil, err
 }
 
-func stopBlackhole(ctx context.Context, state *BlackholeState, clientProvider func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error)) (*action_kit_api.StopResult, error) {
-	clientEc2, _, err := clientProvider(state.ExtensionAwsAccount, state.TargetRegion)
+func stopBlackhole(ctx context.Context, state *BlackholeState, clientProvider func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error)) (*action_kit_api.StopResult, error) {
+	clientEc2, _, err := clientProvider(state.ExtensionAwsAccount, state.TargetRegion, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize EC2 client for AWS account %s and region %s", state.ExtensionAwsAccount, state.TargetRegion), err)
 	}

@@ -254,7 +254,7 @@ func (e *ec2Discovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api
 
 func getEc2InstancesForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ec2.NewFromConfig(account.AwsConfig)
-	result, err := GetAllEc2Instances(ctx, client, Util, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAllEc2Instances(ctx, client, Util, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -271,10 +271,21 @@ type instanceDiscoveryEc2Util interface {
 	GetVpcNameUtil
 }
 
-func GetAllEc2Instances(ctx context.Context, ec2Api ec2.DescribeInstancesAPIClient, ec2Util instanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func GetAllEc2Instances(ctx context.Context, ec2Api ec2.DescribeInstancesAPIClient, ec2Util instanceDiscoveryEc2Util, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
-	paginator := ec2.NewDescribeInstancesPaginator(ec2Api, &ec2.DescribeInstancesInput{})
+	input := ec2.DescribeInstancesInput{}
+	if len(account.TagFilters) > 0 {
+		input.Filters = make([]types.Filter, 0, len(account.TagFilters))
+		for _, tagFilter := range account.TagFilters {
+			input.Filters = append(input.Filters, types.Filter{
+				Name:   extutil.Ptr("tag:" + tagFilter.Key),
+				Values: tagFilter.Values,
+			})
+		}
+	}
+
+	paginator := ec2.NewDescribeInstancesPaginator(ec2Api, &input)
 	for paginator.HasMorePages() {
 		output, err := paginator.NextPage(ctx)
 		if err != nil {
@@ -282,7 +293,7 @@ func GetAllEc2Instances(ctx context.Context, ec2Api ec2.DescribeInstancesAPIClie
 		}
 		for _, reservation := range output.Reservations {
 			for _, ec2Instance := range reservation.Instances {
-				result = append(result, toEc2InstanceTarget(ec2Instance, ec2Util, awsAccountNumber, awsRegion))
+				result = append(result, toEc2InstanceTarget(ec2Instance, ec2Util, account.AccountNumber, account.Region, account.AssumeRole))
 			}
 		}
 	}
@@ -290,7 +301,7 @@ func GetAllEc2Instances(ctx context.Context, ec2Api ec2.DescribeInstancesAPIClie
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEc2), nil
 }
 
-func toEc2InstanceTarget(ec2Instance types.Instance, ec2Util instanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toEc2InstanceTarget(ec2Instance types.Instance, ec2Util instanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string, role *string) discovery_kit_api.Target {
 	var name *string
 	for _, tag := range ec2Instance.Tags {
 		if *tag.Key == "Name" {
@@ -341,6 +352,9 @@ func toEc2InstanceTarget(ec2Instance types.Instance, ec2Util instanceDiscoveryEc
 			continue
 		}
 		attributes[fmt.Sprintf("aws-ec2.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

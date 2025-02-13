@@ -22,6 +22,7 @@ type ElasticacheClusterAttackState struct {
 	NodeGroupID        string
 	Account            string
 	Region             string
+	DiscoveredByRole   *string
 }
 
 type ElasticacheApi interface {
@@ -29,8 +30,8 @@ type ElasticacheApi interface {
 	elasticache.DescribeReplicationGroupsAPIClient
 }
 
-func defaultElasticacheClientProvider(account string, region string) (ElasticacheApi, error) {
-	awsAccess, err := utils.GetAwsAccess(account, region)
+func defaultElasticacheClientProvider(account string, region string, role *string) (ElasticacheApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
 	if err != nil {
 		return nil, err
 	}

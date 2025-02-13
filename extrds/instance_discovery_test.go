@@ -6,6 +6,8 @@ package extrds
 import (
 	"context"
 	"errors"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
@@ -51,7 +53,17 @@ func TestGetAllRdsInstances(t *testing.T) {
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
-	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "SpecialTag",
+				Values: []string{"Great Thing"},
+			},
+		},
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -61,7 +73,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 	assert.Equal(t, rdsInstanceTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 12, len(target.Attributes))
+	assert.Equal(t, 13, len(target.Attributes))
 	assert.Equal(t, []string{"cluster"}, target.Attributes["aws.rds.cluster"])
 	assert.Equal(t, []string{"status"}, target.Attributes["aws.rds.instance.status"])
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
@@ -71,6 +83,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 	assert.Equal(t, []string{"vpc-123-id"}, target.Attributes["aws.vpc.id"])
 	assert.Equal(t, []string{"vpc-123-name"}, target.Attributes["aws.vpc.name"])
 	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws.rds.label.specialtag"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 }
 
 func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
@@ -101,7 +114,11 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
 	// When
-	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -111,9 +128,10 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	assert.Equal(t, rdsInstanceTargetId, target.TargetType)
 	assert.Equal(t, "identifier", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 9, len(target.Attributes))
+	assert.Equal(t, 10, len(target.Attributes))
 	assert.Equal(t, []string(nil), target.Attributes["aws.rds.cluster"])
 	assert.Equal(t, []string{"Great Thing"}, target.Attributes["aws.rds.label.specialtag"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 }
 
 func TestGetAllRdsInstancesWithPagination(t *testing.T) {
@@ -160,7 +178,11 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	}), nil)
 
 	// When
-	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -183,7 +205,11 @@ func TestGetAllRdsInstancesError(t *testing.T) {
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	_, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

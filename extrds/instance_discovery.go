@@ -100,7 +100,7 @@ func (r *rdsInstanceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery
 
 func getInstanceTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	result, err := getAllRdsInstances(ctx, client, extec2.Util, account.AccountNumber, account.AwsConfig.Region)
+	result, err := getAllRdsInstances(ctx, client, extec2.Util, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -117,7 +117,7 @@ type rdsInstanceDiscoveryEc2Util interface {
 	extec2.GetVpcNameUtil
 }
 
-func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, ec2Util rdsInstanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, ec2Util rdsInstanceDiscoveryEc2Util, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := rds.NewDescribeDBInstancesPaginator(rdsApi, &rds.DescribeDBInstancesInput{})
@@ -128,14 +128,16 @@ func getAllRdsInstances(ctx context.Context, rdsApi rdsDBInstanceApi, ec2Util rd
 		}
 
 		for _, dbInstance := range output.DBInstances {
-			result = append(result, toInstanceTarget(dbInstance, ec2Util, awsAccountNumber, awsRegion))
+			if matchesTagFilter(dbInstance.TagList, account.TagFilters) {
+				result = append(result, toInstanceTarget(dbInstance, ec2Util, account.AccountNumber, account.Region, account.AssumeRole))
+			}
 		}
 	}
 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesRds), nil
 }
 
-func toInstanceTarget(dbInstance types.DBInstance, ec2util rdsInstanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toInstanceTarget(dbInstance types.DBInstance, ec2util rdsInstanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string, role *string) discovery_kit_api.Target {
 	arn := aws.ToString(dbInstance.DBInstanceArn)
 	label := aws.ToString(dbInstance.DBInstanceIdentifier)
 	availabilityZoneName := aws.ToString(dbInstance.AvailabilityZone)
@@ -162,6 +164,9 @@ func toInstanceTarget(dbInstance types.DBInstance, ec2util rdsInstanceDiscoveryE
 	}
 	for _, tag := range dbInstance.TagList {
 		attributes[fmt.Sprintf("aws.rds.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

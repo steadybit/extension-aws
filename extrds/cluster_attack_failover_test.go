@@ -52,7 +52,7 @@ func TestStartClusterFailover(t *testing.T) {
 		Account:             "42",
 		Region:              "us-west-1",
 	}
-	action := rdsClusterFailoverAttack{clientProvider: func(account string, region string) (rdsDBClusterApi, error) {
+	action := rdsClusterFailoverAttack{clientProvider: func(account string, region string, role *string) (rdsDBClusterApi, error) {
 		return api, nil
 	}}
 
@@ -71,7 +71,7 @@ func TestStartClusterFailoverForwardFailoverError(t *testing.T) {
 	state := RdsClusterAttackState{
 		DBClusterIdentifier: "dev-db",
 	}
-	action := rdsClusterFailoverAttack{clientProvider: func(account string, region string) (rdsDBClusterApi, error) {
+	action := rdsClusterFailoverAttack{clientProvider: func(account string, region string, role *string) (rdsDBClusterApi, error) {
 		return api, nil
 	}}
 
