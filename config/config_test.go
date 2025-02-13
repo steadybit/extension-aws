@@ -115,7 +115,7 @@ func TestVerifyAssumeRolesAdvanced(t *testing.T) {
 			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole2", Regions: []string{"us-east-1"}},
 		}
 		err := verifyAssumeRolesAdvanced()
-		assert.EqualError(t, err, "You have configured multiple role-arn for the same account '123456789012'. You need to set up tag filters to separate the discovered targets by each role.")
+		assert.EqualError(t, err, "you have configured multiple role-arn for the same account '123456789012'. you need to set up tag filters to separate the discovered targets by each role")
 	})
 
 	t.Run("duplicate role in same region (should fail)", func(t *testing.T) {
@@ -125,6 +125,6 @@ func TestVerifyAssumeRolesAdvanced(t *testing.T) {
 			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}},
 		}
 		err := verifyAssumeRolesAdvanced()
-		assert.EqualError(t, err, "You have configured the same role-arn for the same region twice. (arn: 'arn:aws:iam::123456789012:role/TestRole1', region: 'us-east-1')")
+		assert.EqualError(t, err, "you have configured the same role-arn for the same region twice. (arn: 'arn:aws:iam::123456789012:role/TestRole1', region: 'us-east-1')")
 	})
 }

@@ -4,7 +4,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
@@ -64,7 +63,7 @@ func verifyAssumeRolesAdvanced() error {
 			for _, region := range role.Regions {
 				_, roleAndRegionAlreadyConfigured := existingRoles[role.AssumeRole+"/"+region]
 				if roleAndRegionAlreadyConfigured {
-					return errors.New(fmt.Sprintf("You have configured the same role-arn for the same region twice. (arn: '%s', region: '%s')", role.AssumeRole, region))
+					return fmt.Errorf("you have configured the same role-arn for the same region twice. (arn: '%s', region: '%s')", role.AssumeRole, region)
 				} else {
 					existingRoles[role.AssumeRole+"/"+region] = true
 				}
@@ -72,7 +71,7 @@ func verifyAssumeRolesAdvanced() error {
 				_, accountAndRegionAlreadyConfigured := existingAccount[account+"/"+region]
 				if accountAndRegionAlreadyConfigured {
 					if role.TagFilters == nil {
-						return errors.New(fmt.Sprintf("You have configured multiple role-arn for the same account '%s'. You need to set up tag filters to separate the discovered targets by each role.", account))
+						return fmt.Errorf("you have configured multiple role-arn for the same account '%s'. you need to set up tag filters to separate the discovered targets by each role", account)
 					}
 				} else {
 					existingAccount[account+"/"+region] = true

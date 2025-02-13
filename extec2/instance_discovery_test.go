@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/config"
-	extConfig "github.com/steadybit/extension-aws/config"
 	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
@@ -193,7 +192,7 @@ func TestGetAllEc2InstancesShouldApplyTagFilters(t *testing.T) {
 		AccountNumber: "42",
 		Region:        "us-east-1",
 		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
-		TagFilters: []extConfig.TagFilter{
+		TagFilters: []config.TagFilter{
 			{
 				Key:    "application",
 				Values: []string{"demo"},

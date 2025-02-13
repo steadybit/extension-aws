@@ -176,8 +176,6 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, ec2Util taskDiscove
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEcs), nil
 }
 
-
-
 func ignoreTask(service types.Task) bool {
 	if config.Config.DisableDiscoveryExcludes {
 		return false
