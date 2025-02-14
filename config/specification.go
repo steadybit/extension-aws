@@ -53,7 +53,7 @@ type Specification struct {
 
 type AssumeRoles []AssumeRole
 type AssumeRole struct {
-	AssumeRole string      `json:"assumeRole"`
+	RoleArn    string      `json:"roleArn"`
 	Regions    []string    `json:"regions"`
 	TagFilters []TagFilter `json:"tagFilters"`
 }

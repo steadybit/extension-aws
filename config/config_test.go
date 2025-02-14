@@ -16,7 +16,7 @@ func TestTranslateToAssumeRolesAdvanced(t *testing.T) {
 			name: "Populate empty TagFilters and Regions in AssumeRolesAdvanced",
 			initialConfig: Specification{
 				AssumeRolesAdvanced: AssumeRoles{
-					{AssumeRole: "arn:aws:iam::123456789012:role/test"},
+					{RoleArn: "arn:aws:iam::123456789012:role/test"},
 				},
 				Regions:    []string{"us-east-1"},
 				TagFilters: TagFilters{{Key: "env", Values: []string{"prod"}}},
@@ -24,7 +24,7 @@ func TestTranslateToAssumeRolesAdvanced(t *testing.T) {
 			expectedConfig: Specification{
 				AssumeRolesAdvanced: AssumeRoles{
 					{
-						AssumeRole: "arn:aws:iam::123456789012:role/test",
+						RoleArn:    "arn:aws:iam::123456789012:role/test",
 						Regions:    []string{"us-east-1"},
 						TagFilters: TagFilters{{Key: "env", Values: []string{"prod"}}},
 					},
@@ -44,7 +44,7 @@ func TestTranslateToAssumeRolesAdvanced(t *testing.T) {
 				AssumeRoles: []string{"arn:aws:iam::123456789012:role/test"},
 				AssumeRolesAdvanced: AssumeRoles{
 					{
-						AssumeRole: "arn:aws:iam::123456789012:role/test",
+						RoleArn:    "arn:aws:iam::123456789012:role/test",
 						Regions:    []string{"us-west-2"},
 						TagFilters: TagFilters{{Key: "team", Values: []string{"dev"}}},
 					},
@@ -58,7 +58,7 @@ func TestTranslateToAssumeRolesAdvanced(t *testing.T) {
 			initialConfig: Specification{
 				AssumeRolesAdvanced: AssumeRoles{
 					{
-						AssumeRole: "arn:aws:iam::123456789012:role/test",
+						RoleArn:    "arn:aws:iam::123456789012:role/test",
 						Regions:    []string{"us-east-2"},
 						TagFilters: TagFilters{{Key: "custom", Values: []string{"yes"}}},
 					},
@@ -69,7 +69,7 @@ func TestTranslateToAssumeRolesAdvanced(t *testing.T) {
 			expectedConfig: Specification{
 				AssumeRolesAdvanced: AssumeRoles{
 					{
-						AssumeRole: "arn:aws:iam::123456789012:role/test",
+						RoleArn:    "arn:aws:iam::123456789012:role/test",
 						Regions:    []string{"us-east-2"},                                // Should not be overridden
 						TagFilters: TagFilters{{Key: "custom", Values: []string{"yes"}}}, // Should not be overridden
 					},
@@ -100,9 +100,9 @@ func TestTranslateToAssumeRolesAdvanced(t *testing.T) {
 func TestVerifyAssumeRolesAdvanced(t *testing.T) {
 	t.Run("valid configuration", func(t *testing.T) {
 		Config.AssumeRolesAdvanced = []AssumeRole{
-			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}, TagFilters: TagFilters{{Key: "team", Values: []string{"foo"}}}},
-			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole2", Regions: []string{"us-east-1"}, TagFilters: TagFilters{{Key: "team", Values: []string{"bar"}}}},
-			{AssumeRole: "arn:aws:iam::234567890123:role/TestRole2", Regions: []string{"us-west-2"}},
+			{RoleArn: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}, TagFilters: TagFilters{{Key: "team", Values: []string{"foo"}}}},
+			{RoleArn: "arn:aws:iam::123456789012:role/TestRole2", Regions: []string{"us-east-1"}, TagFilters: TagFilters{{Key: "team", Values: []string{"bar"}}}},
+			{RoleArn: "arn:aws:iam::234567890123:role/TestRole2", Regions: []string{"us-west-2"}},
 		}
 		err := verifyAssumeRolesAdvanced()
 		assert.Nil(t, err)
@@ -110,9 +110,9 @@ func TestVerifyAssumeRolesAdvanced(t *testing.T) {
 
 	t.Run("duplicate account without tag filters (should fail)", func(t *testing.T) {
 		Config.AssumeRolesAdvanced = []AssumeRole{
-			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}},
-			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"eu-central-1"}},
-			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole2", Regions: []string{"us-east-1"}},
+			{RoleArn: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}},
+			{RoleArn: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"eu-central-1"}},
+			{RoleArn: "arn:aws:iam::123456789012:role/TestRole2", Regions: []string{"us-east-1"}},
 		}
 		err := verifyAssumeRolesAdvanced()
 		assert.EqualError(t, err, "you have configured multiple role-arn for the same account '123456789012'. you need to set up tag filters to separate the discovered targets by each role")
@@ -120,9 +120,9 @@ func TestVerifyAssumeRolesAdvanced(t *testing.T) {
 
 	t.Run("duplicate role in same region (should fail)", func(t *testing.T) {
 		Config.AssumeRolesAdvanced = []AssumeRole{
-			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}},
-			{AssumeRole: "arn:aws:iam::123456789999:role/TestRole1", Regions: []string{"us-east-1"}},
-			{AssumeRole: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}},
+			{RoleArn: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}},
+			{RoleArn: "arn:aws:iam::123456789999:role/TestRole1", Regions: []string{"us-east-1"}},
+			{RoleArn: "arn:aws:iam::123456789012:role/TestRole1", Regions: []string{"us-east-1"}},
 		}
 		err := verifyAssumeRolesAdvanced()
 		assert.EqualError(t, err, "you have configured the same role-arn for the same region twice. (arn: 'arn:aws:iam::123456789012:role/TestRole1', region: 'us-east-1')")

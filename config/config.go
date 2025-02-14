@@ -59,13 +59,13 @@ func verifyAssumeRolesAdvanced() error {
 		existingAccount := make(map[string]bool)
 		existingRoles := make(map[string]bool)
 		for _, role := range Config.AssumeRolesAdvanced {
-			account := getAccountNumberFromArn(role.AssumeRole)
+			account := getAccountNumberFromArn(role.RoleArn)
 			for _, region := range role.Regions {
-				_, roleAndRegionAlreadyConfigured := existingRoles[role.AssumeRole+"/"+region]
+				_, roleAndRegionAlreadyConfigured := existingRoles[role.RoleArn+"/"+region]
 				if roleAndRegionAlreadyConfigured {
-					return fmt.Errorf("you have configured the same role-arn for the same region twice. (arn: '%s', region: '%s')", role.AssumeRole, region)
+					return fmt.Errorf("you have configured the same role-arn for the same region twice. (arn: '%s', region: '%s')", role.RoleArn, region)
 				} else {
-					existingRoles[role.AssumeRole+"/"+region] = true
+					existingRoles[role.RoleArn+"/"+region] = true
 				}
 
 				_, accountAndRegionAlreadyConfigured := existingAccount[account+"/"+region]

@@ -54,19 +54,19 @@ func InitializeAwsAccess(specification extConfig.Specification, awsConfigForRoot
 		log.Debug().Msgf("Executing role assumption in other AWS Accounts.")
 		for _, assumeRoleConfig := range specification.AssumeRolesAdvanced {
 			awsConfig := awsConfigForRootAccount.Copy()
-			awsConfig.Credentials = aws.NewCredentialsCache(stscreds.NewAssumeRoleProvider(stsClientForRootAccount, assumeRoleConfig.AssumeRole, func(o *stscreds.AssumeRoleOptions) {
+			awsConfig.Credentials = aws.NewCredentialsCache(stscreds.NewAssumeRoleProvider(stsClientForRootAccount, assumeRoleConfig.RoleArn, func(o *stscreds.AssumeRoleOptions) {
 				o.RoleSessionName = "steadybit-extension-aws"
 			}))
 
 			stsClient := sts.NewFromConfig(awsConfig)
 			identityOutput, err := stsClient.GetCallerIdentity(context.Background(), nil)
 			if err != nil {
-				log.Error().Err(err).Msgf("Failed to identify AWS account number for account assumed via role '%s'. The roleArn will be ignored until the next restart of the extension.", assumeRoleConfig.AssumeRole)
+				log.Error().Err(err).Msgf("Failed to identify AWS account number for account assumed via role '%s'. The roleArn will be ignored until the next restart of the extension.", assumeRoleConfig.RoleArn)
 				continue
 			}
 			assumedAccount := aws.ToString(identityOutput.Account)
-			log.Info().Msgf("Successfully assumed role '%s' in account '%s'", assumeRoleConfig.AssumeRole, assumedAccount)
-			prepareRegionConfigs(awsConfig, &assumeRoleConfig.AssumeRole, assumedAccount, assumeRoleConfig.Regions, assumeRoleConfig.TagFilters)
+			log.Info().Msgf("Successfully assumed role '%s' in account '%s'", assumeRoleConfig.RoleArn, assumedAccount)
+			prepareRegionConfigs(awsConfig, &assumeRoleConfig.RoleArn, assumedAccount, assumeRoleConfig.Regions, assumeRoleConfig.TagFilters)
 		}
 	} else {
 		prepareRegionConfigs(awsConfigForRootAccount, nil, aws.ToString(identityOutputRoot.Account), specification.Regions, specification.TagFilters)
