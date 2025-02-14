@@ -7,6 +7,30 @@ aws:
   assumeRoles: []
   # aws.regions -- Optional list of AWS regions to use. If not set, the extension will use the region provided by the authentication. (https://github.com/steadybit/extension-aws?tab=readme-ov-file#multi-region-support)
   regions: []
+  # aws.tagFilter -- Optional list of tags to filter resources by. (https://github.com/steadybit/extension-aws?tab=readme-ov-file#tag-filters)
+  # Example CLI:
+  #  --set aws.tagFilters[0].key="application" \
+  #  --set aws.tagFilters[0].value[0]="Demo" \
+  #  --set aws.tagFilters[0].value[1]="Shop" \
+  # Example values.yaml:
+  #  - key: "application"
+  #    value: ["Demo", "Shop"]
+  tagFilters: []
+  # aws.assumeRolesAdvanced -- List of advanced assume role configurations. tagFilters and regions are optional. (https://github.com/steadybit/extension-aws?tab=readme-ov-file#advanced-assume-role-configuration)
+  # Example CLI:
+  #  --set aws.assumeRolesAdvanced[0].roleArn="arn:aws:iam::11111111111111:role/steadybit-extension-aws" \
+  #  --set aws.assumeRolesAdvanced[0].regions[0]="us-east-1" \
+  #  --set aws.assumeRolesAdvanced[0].regions[1]="eu-central-1" \
+  #  --set aws.assumeRolesAdvanced[0].tagFilters[0].key="application" \
+  #  --set aws.assumeRolesAdvanced[0].tagFilters[0].value[0]="Demo" \
+  #  --set aws.assumeRolesAdvanced[0].tagFilters[0].value[1]="Shop" \
+  # Example values.yaml:
+  #  - roleArn: "arn:aws:iam::11111111111111:role/steadybit-extension-aws"
+  #    regions: ["us-east-1", "eu-central-1"]
+  #    tagFilters:
+  #      - key: "application"
+  #        value: ["Demo", "Shop"]
+  assumeRolesAdvanced: []
   discovery:
     disabled:
       # aws.discovery.disabled.ec2 -- Disables EC2 discovery and the related actions.

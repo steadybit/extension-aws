@@ -5,7 +5,7 @@ chart:
 tests:
   - it: manifest should match snapshot without TLS
     asserts:
-      - matchSnapshot: { }
+      - matchSnapshot: {}
   - it: manifest should add aws env vars
     set:
       aws:
@@ -65,6 +65,26 @@ tests:
                 - "example.msk.2"
     asserts:
       - matchSnapshot: {}
+  - it: manifest should match snapshot with tag filters
+    set:
+      aws:
+        tagFilters:
+          - key: "application"
+            value: ["Demo", "Shop"]
+    asserts:
+      - matchSnapshot: {}
+  - it: manifest should match snapshot with advanced assume role config
+    set:
+      aws:
+        assumeRolesAdvanced:
+          - roleArn: "arn:aws:iam::11111111111111:role/steadybit-extension-aws"
+            regions: ["us-east-1", "eu-central-1"]
+            tagFilters:
+              - key: "application"
+                value: ["Demo", "Shop"]
+          - roleArn: "arn:aws:iam::22222222222222:role/steadybit-extension-aws"
+    asserts:
+      - matchSnapshot: {}
   - it: manifest should match snapshot using podAnnotations and Labels
     set:
       podAnnotations:
@@ -72,7 +92,7 @@ tests:
       podLabels:
         some-label: "some-label-value"
     asserts:
-      - matchSnapshot: { }
+      - matchSnapshot: {}
   - it: manifest should match snapshot with TLS
     set:
       tls:
@@ -80,7 +100,7 @@ tests:
           certificate:
             fromSecret: server-cert
     asserts:
-      - matchSnapshot: { }
+      - matchSnapshot: {}
   - it: manifest should match snapshot with mutual TLS
     set:
       tls:
@@ -93,7 +113,7 @@ tests:
               - client-cert-a
               - client-cert-a
     asserts:
-      - matchSnapshot: { }
+      - matchSnapshot: {}
   - it: manifest should match snapshot with mutual TLS using containerPaths
     set:
       tls:
@@ -115,10 +135,10 @@ tests:
         - name: FOO
           value: "bar"
       extraEnvFrom:
-       - configMapRef:
-         name: env-configmap
-       - secretRef:
-         name: env-secrets
+        - configMapRef:
+          name: env-configmap
+        - secretRef:
+          name: env-secrets
     asserts:
       - matchSnapshot: {}
   - it: manifest should match snapshot with extra labels

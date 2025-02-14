@@ -88,6 +88,16 @@ spec:
             - name: STEADYBIT_EXTENSION_REGIONS
               value: {{ join "," .Values.aws.regions | quote }}
             {{- end }}
+            {{- if .Values.aws.tagFilters }}
+            - name: STEADYBIT_EXTENSION_TAG_FILTERS
+              value: |-
+               {{ .Values.aws.tagFilters | toJson }}
+            {{- end }}
+            {{- if .Values.aws.assumeRolesAdvanced }}
+            - name: STEADYBIT_EXTENSION_ASSUME_ROLES_ADVANCED
+              value: |-
+               {{ .Values.aws.assumeRolesAdvanced | toJson }}
+            {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.ec2 }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EC2
               value: {{ join "," .Values.aws.discovery.attributes.excludes.ec2 | quote }}
