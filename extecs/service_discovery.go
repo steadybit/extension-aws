@@ -109,7 +109,7 @@ func (e *ecsServiceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_
 
 func getEcsServicesForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ecs.NewFromConfig(account.AwsConfig)
-	result, err := GetAllEcsServices(account.AwsConfig.Region, account.AccountNumber, client, ctx)
+	result, err := GetAllEcsServices(account, client, ctx)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -121,7 +121,7 @@ func getEcsServicesForAccount(account *utils.AwsAccess, ctx context.Context) ([]
 	return result, nil
 }
 
-func GetAllEcsServices(awsRegion string, awsAccountNumber string, ecsServiceApi ecsServiceDiscoveryApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func GetAllEcsServices(account *utils.AwsAccess, ecsServiceApi ecsServiceDiscoveryApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	listClusterOutput, err := ecsServiceApi.ListClusters(ctx, &ecs.ListClustersInput{})
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func GetAllEcsServices(awsRegion string, awsAccountNumber string, ecsServiceApi 
 
 	result := make([]discovery_kit_api.Target, 0, 20)
 	for _, clusterArn := range listClusterOutput.ClusterArns {
-		targets, err := getAllServicesInCluster(clusterArn, awsRegion, awsAccountNumber, ecsServiceApi, ctx)
+		targets, err := getAllServicesInCluster(clusterArn, account, ecsServiceApi, ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -139,7 +139,7 @@ func GetAllEcsServices(awsRegion string, awsAccountNumber string, ecsServiceApi 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesEcs), nil
 }
 
-func getAllServicesInCluster(clusterArn string, awsRegion string, awsAccountNumber string, ecsServiceApi ecsServiceDiscoveryApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getAllServicesInCluster(clusterArn string, account *utils.AwsAccess, ecsServiceApi ecsServiceDiscoveryApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 	paginator := ecs.NewListServicesPaginator(ecsServiceApi, &ecs.ListServicesInput{
 		Cluster: extutil.Ptr(clusterArn),
@@ -164,8 +164,8 @@ func getAllServicesInCluster(clusterArn string, awsRegion string, awsAccountNumb
 			}
 
 			for _, service := range describeServicesOutput.Services {
-				if !ignoreService(service) {
-					result = append(result, toServiceTarget(service, awsAccountNumber, awsRegion))
+				if !ignoreService(service) && matchesTagFilter(service.Tags, account.TagFilters) {
+					result = append(result, toServiceTarget(service, account.AccountNumber, account.Region, account.AssumeRole))
 				}
 			}
 		}
@@ -185,7 +185,7 @@ func ignoreService(service types.Service) bool {
 	return false
 }
 
-func toServiceTarget(service types.Service, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toServiceTarget(service types.Service, awsAccountNumber string, awsRegion string, role *string) discovery_kit_api.Target {
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}
 	attributes["aws.region"] = []string{awsRegion}
@@ -203,6 +203,9 @@ func toServiceTarget(service types.Service, awsAccountNumber string, awsRegion s
 
 	for _, tag := range service.Tags {
 		attributes[fmt.Sprintf("aws-ecs.service.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

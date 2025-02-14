@@ -58,7 +58,7 @@ func TestStartInstanceReboot(t *testing.T) {
 		Region:               "us-west-1",
 		ForceFailover:        true,
 	}
-	action := rdsInstanceRebootAttack{clientProvider: func(account string, region string) (rdsDBInstanceApi, error) {
+	action := rdsInstanceRebootAttack{clientProvider: func(account string, region string, role *string) (rdsDBInstanceApi, error) {
 		return api, nil
 	}}
 
@@ -77,7 +77,7 @@ func TestStartInstanceRebootForwardRebootError(t *testing.T) {
 	state := RdsInstanceAttackState{
 		DBInstanceIdentifier: "dev-db",
 	}
-	action := rdsInstanceRebootAttack{clientProvider: func(account string, region string) (rdsDBInstanceApi, error) {
+	action := rdsInstanceRebootAttack{clientProvider: func(account string, region string, role *string) (rdsDBInstanceApi, error) {
 		return api, nil
 	}}
 

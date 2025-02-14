@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 	"time"
@@ -27,6 +28,7 @@ type EcsServiceEventLogState struct {
 	ClusterArn           string
 	AwsAccount           string
 	Region               string
+	DiscoveredByRole     *string
 }
 
 func NewEcsServiceEventLogAction(poller ServiceDescriptionPoller) action_kit_sdk.Action[EcsServiceEventLogState] {
@@ -95,16 +97,18 @@ func (f EcsServiceEventLogAction) Describe() action_kit_api.ActionDescription {
 func (f EcsServiceEventLogAction) Prepare(_ context.Context, state *EcsServiceEventLogState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	awsAccount := extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	region := extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	role := utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	clusterArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.cluster.arn")[0]
 	serviceArn := extutil.MustHaveValue(request.Target.Attributes, "aws-ecs.service.arn")[0]
 
-	f.poller.Register(awsAccount, region, clusterArn, serviceArn)
+	f.poller.Register(awsAccount, region, role, clusterArn, serviceArn)
 
 	state.LatestEventTimestamp = time.Now().In(time.UTC)
 	state.AwsAccount = awsAccount
 	state.Region = region
 	state.ClusterArn = clusterArn
 	state.ServiceArn = serviceArn
+	state.DiscoveredByRole = role
 	return nil, nil
 }
 
@@ -121,14 +125,14 @@ func (f EcsServiceEventLogAction) Status(_ context.Context, state *EcsServiceEve
 }
 
 func (f EcsServiceEventLogAction) Stop(_ context.Context, state *EcsServiceEventLogState) (*action_kit_api.StopResult, error) {
-	defer f.poller.Unregister(state.AwsAccount, state.Region, state.ClusterArn, state.ServiceArn)
+	defer f.poller.Unregister(state.AwsAccount, state.Region, state.DiscoveredByRole, state.ClusterArn, state.ServiceArn)
 	return &action_kit_api.StopResult{
 		Messages: f.newMessages(state),
 	}, nil
 }
 
 func (f EcsServiceEventLogAction) newMessages(state *EcsServiceEventLogState) *action_kit_api.Messages {
-	latest := f.poller.Latest(state.AwsAccount, state.Region, state.ClusterArn, state.ServiceArn)
+	latest := f.poller.Latest(state.AwsAccount, state.Region, state.DiscoveredByRole, state.ClusterArn, state.ServiceArn)
 	newEvents, newLatestEventTimestamp := filterEventsAfter(latest, state.LatestEventTimestamp)
 	state.LatestEventTimestamp = newLatestEventTimestamp
 	if len(newEvents) > 0 {

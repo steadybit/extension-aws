@@ -185,7 +185,7 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 	lambdaClient := lambda.NewFromConfig(account.AwsConfig)
 	tagsClient := resourcegroupstaggingapi.NewFromConfig(account.AwsConfig)
 
-	result, err := getAllAwsLambdaFunctions(ctx, lambdaClient, tagsClient, extec2.Util, account.AccountNumber, account.AwsConfig.Region)
+	result, err := getAllAwsLambdaFunctions(ctx, lambdaClient, tagsClient, extec2.Util, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -197,7 +197,7 @@ func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]disc
 	return result, nil
 }
 
-func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunctionsAPIClient, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, ec2Util extec2.GetVpcNameUtil, awsAccountNumber string, awsAccountRegion string) ([]discovery_kit_api.Target, error) {
+func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunctionsAPIClient, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, ec2Util extec2.GetVpcNameUtil, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 100)
 	var marker *string = nil
 	for {
@@ -208,7 +208,15 @@ func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunct
 			return nil, err
 		}
 
-		tagsResponses := getTags(ctx, output, tagsClient)
+		if len(output.Functions) == 0 {
+			return result, nil
+		}
+
+		tagsResponses, err := getTags(ctx, output, tagsClient, len(account.TagFilters) > 0)
+		if err != nil {
+			return nil, err
+		}
+
 		for _, function := range output.Functions {
 			var tags []tagTypes.Tag
 			for _, tagsResponse := range tagsResponses {
@@ -216,7 +224,9 @@ func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunct
 					tags = tagsResponse.Tags
 				}
 			}
-			result = append(result, toTarget(function, ec2Util, awsAccountNumber, awsAccountRegion, tags))
+			if utils.MatchesTagFilter(tags, account.TagFilters) {
+				result = append(result, toTarget(function, ec2Util, account.AccountNumber, account.Region, account.AssumeRole, tags))
+			}
 		}
 
 		if output.NextMarker == nil {
@@ -228,7 +238,7 @@ func getAllAwsLambdaFunctions(ctx context.Context, lambdaClient lambda.ListFunct
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesLambda), nil
 }
 
-func getTags(ctx context.Context, output *lambda.ListFunctionsOutput, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient) []tagTypes.ResourceTagMapping {
+func getTags(ctx context.Context, output *lambda.ListFunctionsOutput, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, tagsRequired bool) ([]tagTypes.ResourceTagMapping, error) {
 	arns := make([]string, 0, len(output.Functions))
 	for _, function := range output.Functions {
 		arns = append(arns, *function.FunctionArn)
@@ -236,18 +246,22 @@ func getTags(ctx context.Context, output *lambda.ListFunctionsOutput, tagsClient
 	tagsResult, tagsErr := tagsClient.GetResources(ctx, &resourcegroupstaggingapi.GetResourcesInput{
 		ResourceARNList: arns,
 	})
-	if tagsErr != nil && !missingPermissionTagsAlreadyLogged {
-		log.Warn().Err(tagsErr).Msg("Error fetching tags for lambda functions. Tags will be missing in the discovery.")
-		missingPermissionTagsAlreadyLogged = true
+	if tagsErr != nil {
+		if tagsRequired {
+			return nil, tagsErr
+		} else if !missingPermissionTagsAlreadyLogged {
+			log.Warn().Err(tagsErr).Msg("Error fetching tags for lambda functions. Tags will be missing in the discovery.")
+			missingPermissionTagsAlreadyLogged = true
+		}
 	}
 	var tags []tagTypes.ResourceTagMapping
 	if tagsResult != nil && tagsResult.ResourceTagMappingList != nil {
 		tags = tagsResult.ResourceTagMappingList
 	}
-	return tags
+	return tags, nil
 }
 
-func toTarget(function types.FunctionConfiguration, ec2Util extec2.GetVpcNameUtil, awsAccountNumber string, awsAccountRegion string, tags []tagTypes.Tag) discovery_kit_api.Target {
+func toTarget(function types.FunctionConfiguration, ec2Util extec2.GetVpcNameUtil, awsAccountNumber string, awsAccountRegion string, role *string, tags []tagTypes.Tag) discovery_kit_api.Target {
 	arn := aws.ToString(function.FunctionArn)
 	name := aws.ToString(function.FunctionName)
 
@@ -290,6 +304,10 @@ func toTarget(function types.FunctionConfiguration, ec2Util extec2.GetVpcNameUti
 
 	for _, tag := range tags {
 		attributes[fmt.Sprintf("aws.lambda.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

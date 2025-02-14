@@ -55,7 +55,7 @@ func TestStartClusterFailover(t *testing.T) {
 		NodeGroupID:        "0001",
 		Account:            "42",
 	}
-	action := elasticacheNodeGroupFailoverAttack{clientProvider: func(account string, region string) (ElasticacheApi, error) {
+	action := elasticacheNodeGroupFailoverAttack{clientProvider: func(account string, region string, role *string) (ElasticacheApi, error) {
 		return api, nil
 	}}
 
@@ -74,7 +74,7 @@ func TestStartClusterFailoverForwardFailoverError(t *testing.T) {
 	state := ElasticacheClusterAttackState{
 		ReplicationGroupID: "redis-steadybit-dev",
 	}
-	action := elasticacheNodeGroupFailoverAttack{clientProvider: func(account string, region string) (ElasticacheApi, error) {
+	action := elasticacheNodeGroupFailoverAttack{clientProvider: func(account string, region string, role *string) (ElasticacheApi, error) {
 		return api, nil
 	}}
 

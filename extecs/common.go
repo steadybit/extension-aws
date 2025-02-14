@@ -3,6 +3,11 @@
 
 package extecs
 
+import (
+	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	"github.com/steadybit/extension-aws/config"
+)
+
 const (
 	ecsTaskTargetId                  = "com.steadybit.extension_aws.ecs-task"
 	ecsTaskIcon                      = "data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2048%2048%22%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%3E%0A%20%20%20%20%3Cg%20id%3D%221%22%20stroke%3D%22none%22%20stroke-width%3D%221%22%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M20.25%2C36.375%20L36%2C36.375%20L36%2C34.375%20L20.25%2C34.375%20L20.25%2C36.375%20Z%20M20.25%2C24.125%20L36%2C24.125%20L36%2C22.125%20L20.25%2C22.125%20L20.25%2C24.125%20Z%20M20.25%2C11.875%20L36%2C11.875%20L36%2C9.875%20L20.25%2C9.875%20L20.25%2C11.875%20Z%20M13.375%2C37%20L16.625%2C37%20L16.625%2C33.75%20L13.375%2C33.75%20L13.375%2C37%20Z%20M12.375%2C39%20L17.625%2C39%20C18.178%2C39%2018.625%2C38.553%2018.625%2C38%20L18.625%2C32.75%20C18.625%2C32.198%2018.178%2C31.75%2017.625%2C31.75%20L12.375%2C31.75%20C11.822%2C31.75%2011.375%2C32.198%2011.375%2C32.75%20L11.375%2C38%20C11.375%2C38.553%2011.822%2C39%2012.375%2C39%20L12.375%2C39%20Z%20M13.375%2C24.75%20L16.625%2C24.75%20L16.625%2C21.5%20L13.375%2C21.5%20L13.375%2C24.75%20Z%20M12.375%2C26.75%20L17.625%2C26.75%20C18.178%2C26.75%2018.625%2C26.303%2018.625%2C25.75%20L18.625%2C20.5%20C18.625%2C19.948%2018.178%2C19.5%2017.625%2C19.5%20L12.375%2C19.5%20C11.822%2C19.5%2011.375%2C19.948%2011.375%2C20.5%20L11.375%2C25.75%20C11.375%2C26.303%2011.822%2C26.75%2012.375%2C26.75%20L12.375%2C26.75%20Z%20M13.375%2C12.5%20L16.625%2C12.5%20L16.625%2C9.25%20L13.375%2C9.25%20L13.375%2C12.5%20Z%20M12.375%2C14.5%20L17.625%2C14.5%20C18.178%2C14.5%2018.625%2C14.053%2018.625%2C13.5%20L18.625%2C8.25%20C18.625%2C7.698%2018.178%2C7.25%2017.625%2C7.25%20L12.375%2C7.25%20C11.822%2C7.25%2011.375%2C7.698%2011.375%2C8.25%20L11.375%2C13.5%20C11.375%2C14.053%2011.822%2C14.5%2012.375%2C14.5%20L12.375%2C14.5%20Z%20M9%2C44%20L38.5%2C44%20L38.5%2C4%20L9%2C4%20L9%2C44%20Z%20M39.5%2C2%20L8%2C2%20C7.447%2C2%207%2C2.448%207%2C3%20L7%2C45%20C7%2C45.553%207.447%2C46%208%2C46%20L39.5%2C46%20C40.053%2C46%2040.5%2C45.553%2040.5%2C45%20L40.5%2C3%20C40.5%2C2.448%2040.053%2C2%2039.5%2C2%20L39.5%2C2%20Z%22%20id%3D%222%22%20fill%3D%22currentColor%22%3E%3C%2Fpath%3E%0A%20%20%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E"
@@ -11,3 +16,35 @@ const (
 	ecsServiceTaskCountCheckActionId = "com.steadybit.extension_aws.ecs-service.task_count_check"
 	ecsServiceEventLogActionId       = "com.steadybit.extension_aws.ecs-service.event_log"
 )
+
+func matchesTagFilter(tags []types.Tag, filters []config.TagFilter) bool {
+	if len(filters) == 0 {
+		return true
+	}
+
+	for _, filter := range filters {
+		matched := false
+
+		for _, tag := range tags {
+			if tag.Key != nil && *tag.Key == filter.Key {
+				// Check if at least one value matches
+				for _, filterValue := range filter.Values {
+					if tag.Value != nil && *tag.Value == filterValue {
+						matched = true
+						break
+					}
+				}
+			}
+			if matched {
+				break
+			}
+		}
+
+		// If a filter didn't match any tags, return false
+		if !matched {
+			return false
+		}
+	}
+
+	return true
+}

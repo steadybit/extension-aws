@@ -23,12 +23,13 @@ type FisExperimentAction struct {
 }
 
 type FisExperimentState struct {
-	Account      string
-	Region       string
-	ExperimentId string
-	TemplateId   string
-	LastSummary  string
-	ExecutionId  uuid.UUID
+	Account          string
+	Region           string
+	DiscoveredByRole *string
+	ExperimentId     string
+	TemplateId       string
+	LastSummary      string
+	ExecutionId      uuid.UUID
 }
 
 func NewFisExperimentAction() action_kit_sdk.Action[FisExperimentState] {
@@ -94,13 +95,14 @@ func (f FisExperimentAction) Prepare(_ context.Context, state *FisExperimentStat
 	state.TemplateId = extutil.MustHaveValue(request.Target.Attributes, "aws.fis.experiment.template.id")[0]
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	state.ExecutionId = request.ExecutionId
 	return nil, nil
 }
 
 func (f FisExperimentAction) Start(ctx context.Context, state *FisExperimentState) (*action_kit_api.StartResult, error) {
-	return startExperiment(ctx, state, func(account string, region string) (FisStartExperimentClient, error) {
-		awsAccess, err := utils.GetAwsAccess(account, region)
+	return startExperiment(ctx, state, func(account string, region string, role *string) (FisStartExperimentClient, error) {
+		awsAccess, err := utils.GetAwsAccess(account, region, role)
 		if err != nil {
 			return nil, err
 		}
@@ -112,8 +114,8 @@ type FisStartExperimentClient interface {
 	StartExperiment(ctx context.Context, params *fis.StartExperimentInput, optFns ...func(*fis.Options)) (*fis.StartExperimentOutput, error)
 }
 
-func startExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string, region string) (FisStartExperimentClient, error)) (*action_kit_api.StartResult, error) {
-	client, err := clientProvider(state.Account, state.Region)
+func startExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string, region string, role *string) (FisStartExperimentClient, error)) (*action_kit_api.StartResult, error) {
+	client, err := clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize FIS client for AWS account %s", state.Account), err)
 	}
@@ -138,8 +140,8 @@ func startExperiment(ctx context.Context, state *FisExperimentState, clientProvi
 }
 
 func (f FisExperimentAction) Status(ctx context.Context, state *FisExperimentState) (*action_kit_api.StatusResult, error) {
-	return statusExperiment(ctx, state, func(account string, region string) (FisStatusExperimentClient, error) {
-		awsAccess, err := utils.GetAwsAccess(account, region)
+	return statusExperiment(ctx, state, func(account string, region string, role *string) (FisStatusExperimentClient, error) {
+		awsAccess, err := utils.GetAwsAccess(account, region, role)
 		if err != nil {
 			return nil, err
 		}
@@ -151,8 +153,8 @@ type FisStatusExperimentClient interface {
 	GetExperiment(ctx context.Context, params *fis.GetExperimentInput, optFns ...func(*fis.Options)) (*fis.GetExperimentOutput, error)
 }
 
-func statusExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string, region string) (FisStatusExperimentClient, error)) (*action_kit_api.StatusResult, error) {
-	client, err := clientProvider(state.Account, state.Region)
+func statusExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string, region string, role *string) (FisStatusExperimentClient, error)) (*action_kit_api.StatusResult, error) {
+	client, err := clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err)
 	}
@@ -217,8 +219,8 @@ type FisStopExperimentClient interface {
 }
 
 func (f FisExperimentAction) Stop(ctx context.Context, state *FisExperimentState) (*action_kit_api.StopResult, error) {
-	return stopExperiment(ctx, state, func(account string, region string) (FisStopExperimentClient, error) {
-		awsAccess, err := utils.GetAwsAccess(account, region)
+	return stopExperiment(ctx, state, func(account string, region string, role *string) (FisStopExperimentClient, error) {
+		awsAccess, err := utils.GetAwsAccess(account, region, role)
 		if err != nil {
 			return nil, err
 		}
@@ -226,8 +228,8 @@ func (f FisExperimentAction) Stop(ctx context.Context, state *FisExperimentState
 	})
 }
 
-func stopExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string, region string) (FisStopExperimentClient, error)) (*action_kit_api.StopResult, error) {
-	client, err := clientProvider(state.Account, state.Region)
+func stopExperiment(ctx context.Context, state *FisExperimentState, clientProvider func(account string, region string, role *string) (FisStopExperimentClient, error)) (*action_kit_api.StopResult, error) {
+	client, err := clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err)
 	}

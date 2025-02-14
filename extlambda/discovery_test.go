@@ -12,6 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -103,7 +105,17 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	ec2util.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
-	targets, err := getAllAwsLambdaFunctions(context.Background(), lambdaApi, tagApi, ec2util, "42", "us-east-1")
+	targets, err := getAllAwsLambdaFunctions(context.Background(), lambdaApi, tagApi, ec2util, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "Example",
+				Values: []string{"Tag123"},
+			},
+		},
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -113,7 +125,7 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	assert.Equal(t, lambdaTargetID, target.TargetType)
 	assert.Equal(t, "name", target.Label)
 	assert.Equal(t, "arn", target.Id)
-	assert.Equal(t, 21, len(target.Attributes))
+	assert.Equal(t, 22, len(target.Attributes))
 	assert.Equal(t, []string{"42"}, target.Attributes["aws.account"])
 	assert.Equal(t, []string{"us-east-1"}, target.Attributes["aws.region"])
 	assert.Equal(t, []string{"name"}, target.Attributes["aws.lambda.function-name"])
@@ -121,6 +133,7 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	assert.Equal(t, []string{"Tag123"}, target.Attributes["aws.lambda.label.example"])
 	assert.Equal(t, []string{"vpc-123"}, target.Attributes["aws.vpc.id"])
 	assert.Equal(t, []string{"vpc-123-name"}, target.Attributes["aws.vpc.name"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 }
 
 func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
@@ -166,7 +179,11 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
 
 	// When
-	targets, err := getAllAwsLambdaFunctions(context.Background(), mockedApi, tagApi, ec2util, "42", "us-east-1")
+	targets, err := getAllAwsLambdaFunctions(context.Background(), mockedApi, tagApi, ec2util, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -183,6 +200,10 @@ func Test_getAllAwsLambdaFunctions_withError(t *testing.T) {
 	clientApi.On("ListFunctions", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
 
 	// When
-	_, err := getAllAwsLambdaFunctions(context.Background(), clientApi, tagApi, ec2util, "42", "us-east-1")
+	_, err := getAllAwsLambdaFunctions(context.Background(), clientApi, tagApi, ec2util, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 	assert.Equal(t, "error", err.Error())
 }

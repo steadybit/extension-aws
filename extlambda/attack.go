@@ -21,7 +21,7 @@ import (
 type lambdaAction struct {
 	description    action_kit_api.ActionDescription
 	configProvider func(request action_kit_api.PrepareActionRequestBody) (*FailureInjectionConfig, error)
-	clientProvider func(account string, region string) (ssmApi, error)
+	clientProvider func(account string, region string, role *string) (ssmApi, error)
 }
 
 type ssmApi interface {
@@ -47,12 +47,13 @@ type FailureInjectionConfig struct {
 }
 
 type LambdaActionState struct {
-	Account       string                  `json:"account"`
-	Region        string                  `json:"region"`
-	Param         string                  `json:"param"`
-	Config        *FailureInjectionConfig `json:"config"`
-	ExperimentKey *string                 `json:"experimentKey"`
-	ExecutionId   *int                    `json:"executionId"`
+	Account          string                  `json:"account"`
+	Region           string                  `json:"region"`
+	DiscoveredByRole *string                 `json:"discoveredByRole"`
+	Param            string                  `json:"param"`
+	Config           *FailureInjectionConfig `json:"config"`
+	ExperimentKey    *string                 `json:"experimentKey"`
+	ExecutionId      *int                    `json:"executionId"`
 }
 
 func (a *lambdaAction) Describe() action_kit_api.ActionDescription {
@@ -76,6 +77,7 @@ func (a *lambdaAction) Prepare(_ context.Context, state *LambdaActionState, requ
 
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	state.Param = failureInjectionParam[0]
 	state.ExperimentKey = request.ExecutionContext.ExperimentKey
 	state.ExecutionId = request.ExecutionContext.ExecutionId
@@ -89,7 +91,7 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 		return nil, extension_kit.ToError("Failed to convert ssm parameter", err)
 	}
 
-	client, err := a.clientProvider(state.Account, state.Region)
+	client, err := a.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize lambda client for AWS account %s", state.Account), err)
 	}
@@ -119,7 +121,7 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 }
 
 func (a *lambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*action_kit_api.StopResult, error) {
-	client, err := a.clientProvider(state.Account, state.Region)
+	client, err := a.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError("Failed to create ssm client", err)
 	}
@@ -137,8 +139,8 @@ func (a *lambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*act
 	return nil, nil
 }
 
-func defaultClientProvider(account string, region string) (ssmApi, error) {
-	awsAccess, err := utils.GetAwsAccess(account, region)
+func defaultClientProvider(account string, region string, role *string) (ssmApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
 	if err != nil {
 		return nil, err
 	}

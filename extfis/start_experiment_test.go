@@ -84,7 +84,7 @@ func TestStartExperiment(t *testing.T) {
 	state.ExecutionId = executionId
 
 	// When
-	result, err := startExperiment(context.Background(), &state, func(account string, region string) (FisStartExperimentClient, error) {
+	result, err := startExperiment(context.Background(), &state, func(account string, region string, role *string) (FisStartExperimentClient, error) {
 		assert.Equal(t, "42", account)
 		assert.Equal(t, "us-west-1", region)
 		return mockedApi, nil
@@ -140,7 +140,7 @@ func TestStatusExperiment(t *testing.T) {
 	state.ExperimentId = "EXP-123"
 
 	// When
-	result, err := statusExperiment(context.Background(), &state, func(account string, region string) (FisStatusExperimentClient, error) {
+	result, err := statusExperiment(context.Background(), &state, func(account string, region string, role *string) (FisStatusExperimentClient, error) {
 		assert.Equal(t, "42", account)
 		assert.Equal(t, "us-west-1", region)
 		return mockedApi, nil
@@ -187,7 +187,7 @@ func TestStopExperiment(t *testing.T) {
 	state.ExperimentId = "EXP-123"
 
 	// When
-	_, extKitErr := stopExperiment(context.Background(), &state, func(account string, region string) (FisStopExperimentClient, error) {
+	_, extKitErr := stopExperiment(context.Background(), &state, func(account string, region string, role *string) (FisStopExperimentClient, error) {
 		assert.Equal(t, "42", account)
 		assert.Equal(t, "us-west-1", region)
 		return mockedApi, nil

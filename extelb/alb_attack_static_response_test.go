@@ -65,7 +65,7 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 			}},
 	}, nil)
 
-	action := albStaticResponseAction{clientProvider: func(account string, region string) (albStaticResponseApi, error) {
+	action := albStaticResponseAction{clientProvider: func(account string, region string, role *string) (albStaticResponseApi, error) {
 		return api, nil
 	}}
 
@@ -322,7 +322,7 @@ func TestAlbStaticResponseAction_Start(t *testing.T) {
 		},
 	}, nil)
 
-	action := albStaticResponseAction{clientProvider: func(account string, region string) (albStaticResponseApi, error) {
+	action := albStaticResponseAction{clientProvider: func(account string, region string, role *string) (albStaticResponseApi, error) {
 		return api, nil
 	}}
 
@@ -449,7 +449,7 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 		return true
 	})).Return(&elasticloadbalancingv2.SetRulePrioritiesOutput{}, nil)
 
-	action := albStaticResponseAction{clientProvider: func(account string, region string) (albStaticResponseApi, error) {
+	action := albStaticResponseAction{clientProvider: func(account string, region string, role *string) (albStaticResponseApi, error) {
 		return api, nil
 	}}
 

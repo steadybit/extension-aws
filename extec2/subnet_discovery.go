@@ -103,7 +103,7 @@ func (e *subnetDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_
 
 func getEc2SubnetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := ec2.NewFromConfig(account.AwsConfig)
-	result, err := GetAllSubnets(ctx, client, Util, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAllSubnets(ctx, client, Util, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -120,24 +120,35 @@ type subnetDiscoveryEc2Util interface {
 	GetVpcNameUtil
 }
 
-func GetAllSubnets(ctx context.Context, ec2Api ec2.DescribeSubnetsAPIClient, ec2Util instanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func GetAllSubnets(ctx context.Context, ec2Api ec2.DescribeSubnetsAPIClient, ec2Util instanceDiscoveryEc2Util, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
-	paginator := ec2.NewDescribeSubnetsPaginator(ec2Api, &ec2.DescribeSubnetsInput{})
+	input := ec2.DescribeSubnetsInput{}
+	if len(account.TagFilters) > 0 {
+		input.Filters = make([]types.Filter, 0, len(account.TagFilters))
+		for _, tagFilter := range account.TagFilters {
+			input.Filters = append(input.Filters, types.Filter{
+				Name:   extutil.Ptr("tag:" + tagFilter.Key),
+				Values: tagFilter.Values,
+			})
+		}
+	}
+
+	paginator := ec2.NewDescribeSubnetsPaginator(ec2Api, &input)
 	for paginator.HasMorePages() {
 		output, err := paginator.NextPage(ctx)
 		if err != nil {
 			return result, err
 		}
 		for _, subnet := range output.Subnets {
-			result = append(result, toSubnetTarget(subnet, ec2Util, awsAccountNumber, awsRegion))
+			result = append(result, toSubnetTarget(subnet, ec2Util, account.AccountNumber, account.Region, account.AssumeRole))
 		}
 	}
 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesSubnet), nil
 }
 
-func toSubnetTarget(subnet types.Subnet, ec2Util instanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toSubnetTarget(subnet types.Subnet, ec2Util instanceDiscoveryEc2Util, awsAccountNumber string, awsRegion string, role *string) discovery_kit_api.Target {
 	var name *string
 	for _, tag := range subnet.Tags {
 		if *tag.Key == "Name" {
@@ -169,6 +180,9 @@ func toSubnetTarget(subnet types.Subnet, ec2Util instanceDiscoveryEc2Util, awsAc
 			continue
 		}
 		attributes[fmt.Sprintf("aws.ec2.subnet.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

@@ -9,6 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -91,27 +93,14 @@ var taskStopped = types.Task{
 
 func TestGetAllEcsTasks(t *testing.T) {
 	// Given
-	mockedApi := new(ecsClientMock)
-	mockedApi.On("ListClusters", mock.Anything, mock.Anything).Return(&ecs.ListClustersOutput{
-		ClusterArns: []string{clusterArn},
-	}, nil)
-	mockedApi.On("ListTasks", mock.Anything, mock.Anything).Return(&ecs.ListTasksOutput{
-		TaskArns: []string{taskArn, taskArn2},
-	}, nil)
-	mockedApi.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
-		Tasks: []types.Task{task, taskStopped},
-	}, nil)
-
-	mockedZoneUtil := new(taskDiscoveryEc2UtilMock)
-	mockedZone := ec2types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
-	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
+	mockedApi, mockedZoneUtil := mockApisTaskDiscovery()
 
 	// When
-	targets, err := GetAllEcsTasks(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	targets, err := GetAllEcsTasks(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -130,4 +119,66 @@ func TestGetAllEcsTasks(t *testing.T) {
 	assert.Equal(t, []string{"sandbox-demo-ecs-fargate"}, target.Attributes["aws-ecs.cluster.name"])
 	assert.Equal(t, []string{"FARGATE"}, target.Attributes["aws-ecs.task.launch-type"])
 	assert.Equal(t, []string{"true"}, target.Attributes["aws-ecs.task.amazon-ssm-agent"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
+}
+
+func TestGetAllEcsTasksShouldApplyTagFilters(t *testing.T) {
+	// Given
+	mockedApi, mockedZoneUtil := mockApisTaskDiscovery()
+
+	// When
+	targets, err := GetAllEcsTasks(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "test",
+				Values: []string{"123"},
+			},
+		},
+	})
+
+	// Then
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(targets))
+
+	// When
+	targets, err = GetAllEcsTasks(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "test",
+				Values: []string{"xxx"},
+			},
+		},
+	})
+
+	// Then
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 0, len(targets))
+}
+
+func mockApisTaskDiscovery() (*ecsClientMock, *taskDiscoveryEc2UtilMock) {
+	mockedApi := new(ecsClientMock)
+	mockedApi.On("ListClusters", mock.Anything, mock.Anything).Return(&ecs.ListClustersOutput{
+		ClusterArns: []string{clusterArn},
+	}, nil)
+	mockedApi.On("ListTasks", mock.Anything, mock.Anything).Return(&ecs.ListTasksOutput{
+		TaskArns: []string{taskArn, taskArn2},
+	}, nil)
+	mockedApi.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
+		Tasks: []types.Task{task, taskStopped},
+	}, nil)
+
+	mockedZoneUtil := new(taskDiscoveryEc2UtilMock)
+	mockedZone := ec2types.AvailabilityZone{
+		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
+		RegionName: discovery_kit_api.Ptr("us-east-1"),
+		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+	}
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
+	return mockedApi, mockedZoneUtil
 }

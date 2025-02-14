@@ -6,7 +6,9 @@ package main
 import (
 	"context"
 	_ "github.com/KimMachineGun/automemlimit" // By default, it sets `GOMEMLIMIT` to 90% of cgroup's memory limit.
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
@@ -41,10 +43,15 @@ func main() {
 	exthealth.StartProbes(8086)
 	exthealth.SetReady(false)
 
-	config.ParseConfiguration()
-	config.ValidateConfiguration()
+	ctx := context.Background()
+	awsConfigForRootAccount, err := awsconfig.LoadDefaultConfig(ctx)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to load AWS configuration")
+	}
 
-	utils.InitializeAwsAccess(config.Config)
+	config.ParseConfiguration(awsConfigForRootAccount.Region)
+
+	utils.InitializeAwsAccess(config.Config, awsConfigForRootAccount)
 	extec2.InitializeEc2Util()
 
 	ctx, cancel := SignalCanceledContext()

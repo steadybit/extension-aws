@@ -9,6 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -159,7 +161,17 @@ func TestGetAllAlbTargets(t *testing.T) {
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
-	targets, err := GetAlbs(context.Background(), mockedApi, mockedZoneUtil, "42", "us-east-1")
+	targets, err := GetAlbs(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "service.k8s.aws/stack",
+				Values: []string{"steadybit-demo/gateway"},
+			},
+		},
+	})
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -181,5 +193,6 @@ func TestGetAllAlbTargets(t *testing.T) {
 	assert.Equal(t, []string{"80", "443"}, target.Attributes["aws-elb.alb.listener.port"])
 	assert.Equal(t, []string{"LoadBalancer"}, target.Attributes["aws-elb.alb.label.service.k8s.aws/resource"])
 	assert.Equal(t, []string{"test-cluster"}, target.Attributes["k8s.cluster-name"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 	mockedApi.AssertExpectations(t)
 }

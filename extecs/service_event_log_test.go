@@ -13,6 +13,7 @@ import (
 func TestServiceEventLog_Lifecycle(t *testing.T) {
 	const account = "awsAccount"
 	const region = "region"
+	role := extutil.Ptr("role")
 	const cluster = "cluster"
 	const service = "service"
 
@@ -20,9 +21,9 @@ func TestServiceEventLog_Lifecycle(t *testing.T) {
 	defer cancel()
 
 	pollerMock := new(ServiceDescriptionPollerMock)
-	pollerMock.On("Register", account, region, cluster, service)
-	pollerMock.On("Unregister", account, region, cluster, service)
-	pollerMock.On("Latest", account, region, cluster, service).Return(nil, nil)
+	pollerMock.On("Register", account, region, role, cluster, service)
+	pollerMock.On("Unregister", account, region, role, cluster, service)
+	pollerMock.On("Latest", account, region, role, cluster, service).Return(nil, nil)
 	action := EcsServiceEventLogAction{
 		poller: pollerMock,
 	}
@@ -30,10 +31,11 @@ func TestServiceEventLog_Lifecycle(t *testing.T) {
 	request := action_kit_api.PrepareActionRequestBody{
 		Target: &action_kit_api.Target{
 			Attributes: map[string][]string{
-				"aws.account":         {account},
-				"aws.region":          {region},
-				"aws-ecs.cluster.arn": {cluster},
-				"aws-ecs.service.arn": {service},
+				"aws.account":                      {account},
+				"aws.region":                       {region},
+				"aws-ecs.cluster.arn":              {cluster},
+				"aws-ecs.service.arn":              {service},
+				"extension-aws.discovered-by-role": {*role},
 			},
 		},
 	}
@@ -43,9 +45,10 @@ func TestServiceEventLog_Lifecycle(t *testing.T) {
 	assert.Nil(t, prepare)
 	assert.Equal(t, state.AwsAccount, account)
 	assert.Equal(t, state.Region, region)
+	assert.Equal(t, state.DiscoveredByRole, role)
 	assert.Equal(t, state.ClusterArn, cluster)
 	assert.Equal(t, state.ServiceArn, service)
-	pollerMock.AssertCalled(t, "Register", account, region, cluster, service)
+	pollerMock.AssertCalled(t, "Register", account, region, role, cluster, service)
 
 	start, err := action.Start(ctx, state)
 	assert.NoError(t, err)
@@ -54,7 +57,7 @@ func TestServiceEventLog_Lifecycle(t *testing.T) {
 	stop, err := action.Stop(ctx, state)
 	assert.NoError(t, err)
 	assert.NotNil(t, stop)
-	pollerMock.AssertCalled(t, "Unregister", account, region, cluster, service)
+	pollerMock.AssertCalled(t, "Unregister", account, region, role, cluster, service)
 }
 
 func TestServiceEventLog_Status(t *testing.T) {
@@ -239,7 +242,7 @@ func TestServiceEventLog_Status(t *testing.T) {
 			action := EcsServiceEventLogAction{}
 			if len(test.responses) == 0 {
 				pollerMock := new(ServiceDescriptionPollerMock)
-				pollerMock.On("Latest", test.state.AwsAccount, test.state.Region, test.state.ClusterArn, test.state.ServiceArn).Return(nil, nil)
+				pollerMock.On("Latest", test.state.AwsAccount, test.state.Region, test.state.DiscoveredByRole, test.state.ClusterArn, test.state.ServiceArn).Return(nil, nil)
 				action.poller = pollerMock
 				runWithPoller(t, action, test.state, test.wanted, 0)
 			}
@@ -247,7 +250,7 @@ func TestServiceEventLog_Status(t *testing.T) {
 				// Setting different return values for multiple calls with the same parameters does not seem to work.
 				// This little workaround sets a new poller mock for every response, resulting in the same behavior.
 				pollerMock := new(ServiceDescriptionPollerMock)
-				pollerMock.On("Latest", test.state.AwsAccount, test.state.Region, test.state.ClusterArn, test.state.ServiceArn).Return(test.responses[i], nil)
+				pollerMock.On("Latest", test.state.AwsAccount, test.state.Region, test.state.DiscoveredByRole, test.state.ClusterArn, test.state.ServiceArn).Return(test.responses[i], nil)
 				action.poller = pollerMock
 				runWithPoller(t, action, test.state, test.wanted, i)
 			}

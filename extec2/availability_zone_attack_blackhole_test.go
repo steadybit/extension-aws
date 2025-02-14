@@ -110,7 +110,7 @@ func TestPrepareBlackhole(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "",
-		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+		clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 			return clientEc2, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -157,7 +157,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "42",
-		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+		clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -193,7 +193,7 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "42",
-		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+		clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -229,7 +229,7 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "",
-		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+		clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -265,7 +265,7 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "",
-		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+		clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -305,7 +305,7 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 	ctx := context.Background()
 	action := azBlackholeAction{
 		extensionRootAccountNumber: "",
-		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+		clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 			return nil, clientImds, nil
 		}}
 	state := action.NewEmptyState()
@@ -401,7 +401,7 @@ func TestStartBlackhole(t *testing.T) {
 	}), nil)
 
 	ctx := context.Background()
-	action := azBlackholeAction{clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+	action := azBlackholeAction{clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 		return clientEc2, nil, nil
 	}}
 
@@ -487,7 +487,7 @@ func TestStopBlackhole(t *testing.T) {
 	}), mock.Anything).Return(extutil.Ptr(ec2.DeleteNetworkAclOutput{}), nil)
 
 	ctx := context.Background()
-	action := azBlackholeAction{clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+	action := azBlackholeAction{clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 		return clientEc2, nil, nil
 	}}
 

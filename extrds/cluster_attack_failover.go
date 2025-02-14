@@ -15,7 +15,7 @@ import (
 )
 
 type rdsClusterFailoverAttack struct {
-	clientProvider func(account string, region string) (rdsDBClusterApi, error)
+	clientProvider func(account string, region string, role *string) (rdsDBClusterApi, error)
 }
 
 var _ action_kit_sdk.Action[RdsClusterAttackState] = (*rdsClusterFailoverAttack)(nil)
@@ -57,7 +57,7 @@ func (f rdsClusterFailoverAttack) Prepare(_ context.Context, state *RdsClusterAt
 }
 
 func (f rdsClusterFailoverAttack) Start(ctx context.Context, state *RdsClusterAttackState) (*action_kit_api.StartResult, error) {
-	client, err := f.clientProvider(state.Account, state.Region)
+	client, err := f.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize RDS client for AWS account %s", state.Account), err)
 	}

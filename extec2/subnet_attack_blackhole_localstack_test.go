@@ -123,7 +123,7 @@ func testPrepareAndStartAndStopBlackholeSubnetLocalStack(t *testing.T, clientEc2
 func prepareActionCallSubnetBlackhole(vpcId string, subnetId string, clientEc2 *ec2.Client, clientImds *imds.Client) (subnetBlackholeAction, BlackholeState, action_kit_api.PrepareActionRequestBody) {
 	action := subnetBlackholeAction{
 		extensionRootAccountNumber: "41",
-		clientProvider: func(account string, region string) (blackholeEC2Api, blackholeImdsApi, error) {
+		clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {
 			return clientEc2, clientImds, nil
 		}}
 	state := action.NewEmptyState()

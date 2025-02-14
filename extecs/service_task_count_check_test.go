@@ -22,7 +22,7 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 	poller.ticker = time.NewTicker(1 * time.Millisecond)
 
 	// Mock the api calls in ServiceDescriptionPoller to check the interactions of ServiceTaskCountCheck with it.
-	poller.apiClientProvider = func(account string, region string) (ecs.DescribeServicesAPIClient, error) {
+	poller.apiClientProvider = func(account string, region string, role *string) (ecs.DescribeServicesAPIClient, error) {
 		mockedApi := new(ecsDescribeServicesApiMock)
 		mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
 			Services: []types.Service{{
@@ -213,7 +213,7 @@ func TestServiceTaskCountCheck_status_checks_running_count(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 
 			pollerMock := new(ServiceDescriptionPollerMock)
-			pollerMock.On("Latest", test.state.AwsAccount, test.state.Region, test.state.ClusterArn, test.state.ServiceArn).Return(&test.response, nil)
+			pollerMock.On("Latest", test.state.AwsAccount, test.state.Region, test.state.DiscoveredByRole, test.state.ClusterArn, test.state.ServiceArn).Return(&test.response, nil)
 
 			action := EcsServiceTaskCountCheckAction{
 				poller: pollerMock,

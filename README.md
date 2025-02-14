@@ -12,9 +12,10 @@ our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extensio
 
 | Environment Variable                                            | Helm value                                      | Meaning                                                                                                                                                       | Required | Default                                                                                                                                       |
 |-----------------------------------------------------------------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `STEADYBIT_EXTENSION_WORKER_THREADS`                            |                                                 | How many parallel workers should call aws apis (only used if `STEADYBIT_EXTENSION_ASSUME_ROLES` is used)                                                      | no       | 1                                                                                                                                             |
 | `STEADYBIT_EXTENSION_ASSUME_ROLES`                              | `aws.assumeRoles`                               | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_REGIONS`                                   | `aws.regions`                                   | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_TAG_FILTERS`                               |                                                 | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_WORKER_THREADS`                            |                                                 | How many parallel workers should call aws apis (only used if `STEADYBIT_EXTENSION_ASSUME_ROLES` is used)                                                      | no       | 1                                                                                                                                             |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2`                    | `aws.discovery.disabled.ec2`                    | Disable EC2-Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_EC2`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS`                    | `aws.discovery.disabled.ecs`                    | Disable ECS-Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
@@ -490,6 +491,11 @@ STEADYBIT_EXTENSION_ASSUME_ROLES='arn:aws:iam::1111111111:role/steadybit-extensi
 
 If you are using our helm-chart, you can use the parameter `aws.assumeRoles`.
 
+> [!IMPORTANT]
+> If you use multiple roles to access the SAME account, make sure to use the
+> [Advanced Assume Role configuration](#advanced-assume-role-configuration) and set up appropriate
+> [tag filters](#tag-filters) per role. Any target need to be reported by exactly one role.
+
 #### Necessary AWS Configuration
 
 IAM policies need to be correctly configured for cross-account role assumption. In a nutshell, these are the necessary
@@ -536,6 +542,30 @@ If you want to discover targets in multiple regions, you can set the `STEADYBIT_
 STEADYBIT_EXTENSION_REGIONS='us-east-1,us-west-2'
 ```
 
+### Tag Filters
+
+You can filter the discovered targets by tags. The `STEADYBIT_EXTENSION_TAG_FILTERS` environment variable can be set to a json containing tag filters. Example:
+
+You can find details about how tag filters are applied in the [AWS SDK documentation](https://docs.aws.amazon.com/cli/latest/reference/resourcegroupstaggingapi/get-resources.html#options).
+
+```sh
+STEADYBIT_EXTENSION_TAG_FILTERS='[{"key":"application", "values":["Demo","Shop"]}]'
+```
+
+If you want to use Tag-Filters, make sure to provide the permissions `tag:GetResources`. We are using the [Resource Groups Tagging API](https://docs.aws.amazon.com/resourcegroupstagging/latest/APIReference/overview.html) to filter resources that don't have a filter option included in their own APIs.
+
+### Advanced Assume Role configuration
+
+If you are using `STEADYBIT_EXTENSION_REGIONS` or `STEADYBIT_EXTENSION_TAG_FILTERS`, each entry will be applied for each
+role specified in `STEADYBIT_EXTENSION_ASSUME_ROLES`. If you want to apply different regions or tag filters for each
+role, you can provide a JSON array with the role-ARNs and the corresponding region and tag filters in the environment
+variable `STEADYBIT_EXTENSION_ASSUME_ROLES_ADVANCED`.
+
+Example:
+
+```sh
+STEADYBIT_EXTENSION_ASSUME_ROLES_ADVANCED='[{"assumeRole":"arn:aws:iam::1111111111:role/steadybit-extension-aws","tagFilters":[{"key":"application", "values":["Demo-EU"]}], "region":"eu-central-1"},{"assumeRole":"arn:aws:iam::2222222222:role/steadybit-extension-aws","tagFilters":[{"key":"application", "values":["Demo-US"]}], "region":"us-east-1"}]'
+```
 
 ### Agent Lockout - Requirements
 

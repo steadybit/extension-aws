@@ -101,7 +101,7 @@ func TestEcsTaskStopAction_Start(t *testing.T) {
 		},
 	})
 
-	action := ecsTaskStopAction{clientProvider: func(account string, region string) (ecsTaskStopApi, error) {
+	action := ecsTaskStopAction{clientProvider: func(account string, region string, role *string) (ecsTaskStopApi, error) {
 		return api, nil
 	}}
 
@@ -130,7 +130,7 @@ func TestEcsTaskStopAction_Start_already_stopped_task(t *testing.T) {
 		},
 	})
 
-	action := ecsTaskStopAction{clientProvider: func(account string, region string) (ecsTaskStopApi, error) {
+	action := ecsTaskStopAction{clientProvider: func(account string, region string, role *string) (ecsTaskStopApi, error) {
 		return api, nil
 	}}
 
@@ -164,7 +164,7 @@ func TestEcsTaskStopActionForwardsError(t *testing.T) {
 		require.Equal(t, "my-cluster-arn", *params.Cluster)
 		return true
 	})).Return(&ecs.StopTaskOutput{}, errors.New("expected"))
-	action := ecsTaskStopAction{clientProvider: func(account string, region string) (ecsTaskStopApi, error) {
+	action := ecsTaskStopAction{clientProvider: func(account string, region string, role *string) (ecsTaskStopApi, error) {
 		return api, nil
 	}}
 

@@ -9,13 +9,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/kafka"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 )
 
 type mskRebootBrokerAttack struct {
-	clientProvider func(account string, region string) (MskApi, error)
+	clientProvider func(account string, region string, role *string) (MskApi, error)
 }
 
 var _ action_kit_sdk.Action[KafkaAttackState] = (*mskRebootBrokerAttack)(nil)
@@ -56,6 +57,7 @@ func (f mskRebootBrokerAttack) Describe() action_kit_api.ActionDescription {
 func (f mskRebootBrokerAttack) Prepare(_ context.Context, state *KafkaAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	state.ClusterARN = extutil.MustHaveValue(request.Target.Attributes, "aws.msk.cluster.arn")[0]
 	state.ClusterName = extutil.MustHaveValue(request.Target.Attributes, "aws.msk.cluster.name")[0]
 	state.BrokerID = extutil.MustHaveValue(request.Target.Attributes, "aws.msk.cluster.broker.id")[0]
@@ -63,7 +65,7 @@ func (f mskRebootBrokerAttack) Prepare(_ context.Context, state *KafkaAttackStat
 }
 
 func (f mskRebootBrokerAttack) Start(ctx context.Context, state *KafkaAttackState) (*action_kit_api.StartResult, error) {
-	client, err := f.clientProvider(state.Account, state.Region)
+	client, err := f.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize Msk client for AWS account %s", state.Account), err)
 	}

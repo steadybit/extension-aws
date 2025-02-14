@@ -10,8 +10,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/kafka"
 	"github.com/aws/aws-sdk-go-v2/service/kafka/types"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
+	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	extConfig "github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-kit/extutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -45,6 +50,18 @@ func (m *mskClusterApiMock) ListNodes(ctx context.Context, params *kafka.ListNod
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*kafka.ListNodesOutput), args.Error(1)
+}
+
+type tagClientMock struct {
+	mock.Mock
+}
+
+func (m *tagClientMock) GetResources(ctx context.Context, params *resourcegroupstaggingapi.GetResourcesInput, optFns ...func(*resourcegroupstaggingapi.Options)) (*resourcegroupstaggingapi.GetResourcesOutput, error) {
+	args := m.Called(ctx, params, optFns)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*resourcegroupstaggingapi.GetResourcesOutput), args.Error(1)
 }
 
 func TestGetAllMskClusters(t *testing.T) {
@@ -95,8 +112,34 @@ func TestGetAllMskClusters(t *testing.T) {
 	mockedApi.On("ListClustersV2", mock.Anything, mock.Anything).Return(&mockedClusterReturnValue, nil)
 	mockedApi.On("ListNodes", mock.Anything, mock.Anything).Return(&mockedNodeReturnValue, nil)
 
+	tagApi := new(tagClientMock)
+	tags := resourcegroupstaggingapi.GetResourcesOutput{
+		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
+			{
+				ResourceARN: extutil.Ptr("node-arn"),
+				Tags: []tagtypes.Tag{
+					{
+						Key:   extutil.Ptr("Example"),
+						Value: extutil.Ptr("Tag123"),
+					},
+				},
+			},
+		},
+	}
+	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
+
 	// When
-	targets, err := getAllMskClusters(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllMskClusters(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		TagFilters: []extConfig.TagFilter{
+			{
+				Key:    "Example",
+				Values: []string{"Tag123"},
+			},
+		},
+	})
 
 	// Then
 	fmt.Println(targets[0].Attributes)
@@ -106,7 +149,7 @@ func TestGetAllMskClusters(t *testing.T) {
 	assert.Equal(t, mskBrokerTargetId, target.TargetType)
 	assert.Equal(t, "dev-test-1", target.Label)
 	assert.Equal(t, "node-arn", target.Id)
-	assert.Equal(t, 13, len(target.Attributes))
+	assert.Equal(t, 15, len(target.Attributes))
 	assert.Equal(t, []string{"ACTIVE"}, target.Attributes["aws.msk.cluster.state"])
 	assert.Equal(t, []string{"300"}, target.Attributes["aws.msk.cluster.broker.ebs-throughput"])
 	assert.Equal(t, []string{"1"}, target.Attributes["aws.msk.cluster.broker.id"])
@@ -118,6 +161,8 @@ func TestGetAllMskClusters(t *testing.T) {
 	assert.Equal(t, []string{"5.5"}, target.Attributes["aws.msk.cluster.broker.zookeeper-version"])
 	assert.Equal(t, []string{"node-arn"}, target.Attributes["aws.msk.cluster.broker.arn"])
 	assert.Equal(t, []string{"cluster-arn"}, target.Attributes["aws.msk.cluster.arn"])
+	assert.Equal(t, []string{"Tag123"}, target.Attributes["aws.msk.cluster.broker.label.example"])
+	assert.Equal(t, []string{"arn:aws:iam::42:role/extension-aws-role"}, target.Attributes["extension-aws.discovered-by-role"])
 }
 
 func TestGetAllMskClustersWithPagination(t *testing.T) {
@@ -209,8 +254,28 @@ func TestGetAllMskClustersWithPagination(t *testing.T) {
 		},
 	}), nil)
 
+	tagApi := new(tagClientMock)
+	tags := resourcegroupstaggingapi.GetResourcesOutput{
+		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
+			{
+				ResourceARN: extutil.Ptr("node-arn1"),
+				Tags: []tagtypes.Tag{
+					{
+						Key:   extutil.Ptr("Example"),
+						Value: extutil.Ptr("Tag123"),
+					},
+				},
+			},
+		},
+	}
+	tagApi.On("GetResources", mock.Anything, mock.Anything, mock.Anything).Return(&tags, nil)
+
 	// When
-	targets, err := getAllMskClusters(context.Background(), mockedApi, "42", "us-east-1")
+	targets, err := getAllMskClusters(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	fmt.Println(targets)
@@ -226,8 +291,14 @@ func TestGetAllMskClustersError(t *testing.T) {
 
 	mockedApi.On("ListClustersV2", mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
+	tagApi := new(tagClientMock)
+
 	// When
-	_, err := getAllMskClusters(context.Background(), mockedApi, "42", "us-east-1")
+	_, err := getAllMskClusters(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+	})
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")

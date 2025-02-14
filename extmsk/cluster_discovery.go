@@ -8,7 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/kafka"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
+	tagTypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -27,8 +30,9 @@ type mskClusterDiscovery struct {
 }
 
 var (
-	_ discovery_kit_sdk.TargetDescriber    = (*mskClusterDiscovery)(nil)
-	_ discovery_kit_sdk.AttributeDescriber = (*mskClusterDiscovery)(nil)
+	_                                  discovery_kit_sdk.TargetDescriber    = (*mskClusterDiscovery)(nil)
+	_                                  discovery_kit_sdk.AttributeDescriber = (*mskClusterDiscovery)(nil)
+	missingPermissionTagsAlreadyLogged                                      = false
 )
 
 func NewMskClusterDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
@@ -156,7 +160,8 @@ func (r *mskClusterDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_
 
 func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := kafka.NewFromConfig(account.AwsConfig)
-	result, err := getAllMskClusters(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	tagsClient := resourcegroupstaggingapi.NewFromConfig(account.AwsConfig)
+	result, err := getAllMskClusters(ctx, client, tagsClient, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -168,7 +173,7 @@ func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) 
 	return result, nil
 }
 
-func getAllMskClusters(ctx context.Context, mskApi MskApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func getAllMskClusters(ctx context.Context, mskApi MskApi, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := kafka.NewListClustersV2Paginator(mskApi, &kafka.ListClustersV2Input{})
@@ -189,8 +194,26 @@ func getAllMskClusters(ctx context.Context, mskApi MskApi, awsAccountNumber stri
 					if err != nil {
 						return result, err
 					}
+
+					if len(outputNode.NodeInfoList) == 0 {
+						continue
+					}
+
+					tagsResponses, err := getTags(ctx, outputNode, tagsClient, len(account.TagFilters) > 0)
+					if err != nil {
+						return nil, err
+					}
+
 					for _, node := range outputNode.NodeInfoList {
-						result = append(result, toClusterTarget(mskCluster, node, awsAccountNumber, awsRegion))
+						var tags []tagTypes.Tag
+						for _, tagsResponse := range tagsResponses {
+							if *node.NodeARN == *tagsResponse.ResourceARN {
+								tags = tagsResponse.Tags
+							}
+						}
+						if utils.MatchesTagFilter(tags, account.TagFilters) {
+							result = append(result, toClusterTarget(mskCluster, node, tags, account.AccountNumber, account.Region, account.AssumeRole))
+						}
 					}
 				}
 			}
@@ -200,7 +223,30 @@ func getAllMskClusters(ctx context.Context, mskApi MskApi, awsAccountNumber stri
 	return result, nil
 }
 
-func toClusterTarget(cluster types.Cluster, node types.NodeInfo, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func getTags(ctx context.Context, output *kafka.ListNodesOutput, tagsClient resourcegroupstaggingapi.GetResourcesAPIClient, tagsRequired bool) ([]tagTypes.ResourceTagMapping, error) {
+	arns := make([]string, 0, len(output.NodeInfoList))
+	for _, node := range output.NodeInfoList {
+		arns = append(arns, *node.NodeARN)
+	}
+	tagsResult, tagsErr := tagsClient.GetResources(ctx, &resourcegroupstaggingapi.GetResourcesInput{
+		ResourceARNList: arns,
+	})
+	if tagsErr != nil {
+		if tagsRequired {
+			return nil, tagsErr
+		} else if !missingPermissionTagsAlreadyLogged {
+			log.Warn().Err(tagsErr).Msg("Error fetching tags for msk nodes. Tags will be missing in the discovery.")
+			missingPermissionTagsAlreadyLogged = true
+		}
+	}
+	var tags []tagTypes.ResourceTagMapping
+	if tagsResult != nil && tagsResult.ResourceTagMappingList != nil {
+		tags = tagsResult.ResourceTagMappingList
+	}
+	return tags, nil
+}
+
+func toClusterTarget(cluster types.Cluster, node types.NodeInfo, tags []tagTypes.Tag, awsAccountNumber string, awsRegion string, role *string) discovery_kit_api.Target {
 	arn := aws.ToString(node.NodeARN)
 	label := *cluster.ClusterName + "-" + fmt.Sprintf("%v", *node.BrokerNodeInfo.BrokerId)
 
@@ -233,6 +279,14 @@ func toClusterTarget(cluster types.Cluster, node types.NodeInfo, awsAccountNumbe
 
 	if node.ZookeeperNodeInfo != nil && node.ZookeeperNodeInfo.ZookeeperVersion != nil {
 		attributes["aws.msk.cluster.broker.zookeeper-version"] = []string{*node.ZookeeperNodeInfo.ZookeeperVersion}
+	}
+
+	for _, tag := range tags {
+		attributes[fmt.Sprintf("aws.msk.cluster.broker.label.%s", strings.ToLower(aws.ToString(tag.Key)))] = []string{aws.ToString(tag.Value)}
+	}
+
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

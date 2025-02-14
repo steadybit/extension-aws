@@ -101,7 +101,7 @@ func (f *fisTemplateDiscovery) DiscoverTargets(ctx context.Context) ([]discovery
 }
 func getTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := fis.NewFromConfig(account.AwsConfig)
-	result, err := GetAllFisTemplates(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := GetAllFisTemplates(ctx, client, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -118,7 +118,7 @@ type FisApi interface {
 	GetExperimentTemplate(ctx context.Context, params *fis.GetExperimentTemplateInput, optFns ...func(*fis.Options)) (*fis.GetExperimentTemplateOutput, error)
 }
 
-func GetAllFisTemplates(ctx context.Context, fisApi FisApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func GetAllFisTemplates(ctx context.Context, fisApi FisApi, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := fis.NewListExperimentTemplatesPaginator(fisApi, &fis.ListExperimentTemplatesInput{})
@@ -133,14 +133,38 @@ func GetAllFisTemplates(ctx context.Context, fisApi FisApi, awsAccountNumber str
 			if err != nil {
 				return result, err
 			}
-			result = append(result, toTarget(template, awsAccountNumber, awsRegion, totalDuration))
+			if matchesTagFilter(template.Tags, account.TagFilters) {
+				result = append(result, toTarget(template, account.AccountNumber, account.Region, account.AssumeRole, totalDuration))
+			}
 		}
 	}
 
 	return discovery_kit_commons.ApplyAttributeExcludes(result, config.Config.DiscoveryAttributesExcludesFis), nil
 }
 
-func toTarget(template types.ExperimentTemplateSummary, awsAccountNumber string, awsRegion string, totalDuration *time.Duration) discovery_kit_api.Target {
+func matchesTagFilter(tags map[string]string, filters []config.TagFilter) bool {
+	if len(filters) == 0 {
+		return true
+	}
+
+	for _, filter := range filters {
+		matched := false
+		if value, exists := tags[filter.Key]; exists {
+			for _, filterValue := range filter.Values {
+				if value == filterValue {
+					matched = true
+					break
+				}
+			}
+		}
+		if !matched {
+			return false
+		}
+	}
+	return true
+}
+
+func toTarget(template types.ExperimentTemplateSummary, awsAccountNumber string, awsRegion string, role *string, totalDuration *time.Duration) discovery_kit_api.Target {
 
 	name := template.Id
 	nameTag, nameTagPresent := template.Tags["Name"]
@@ -160,6 +184,9 @@ func toTarget(template types.ExperimentTemplateSummary, awsAccountNumber string,
 			continue
 		}
 		attributes[fmt.Sprintf("label.%s", strings.ToLower(key))] = []string{value}
+	}
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

@@ -126,7 +126,7 @@ func (r *rdsClusterDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_
 
 func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client := rds.NewFromConfig(account.AwsConfig)
-	result, err := getAllRdsClusters(ctx, client, account.AccountNumber, account.AwsConfig.Region)
+	result, err := getAllRdsClusters(ctx, client, account)
 	if err != nil {
 		var re *awshttp.ResponseError
 		if errors.As(err, &re) && re.HTTPStatusCode() == 403 {
@@ -138,7 +138,7 @@ func getClusterTargetsForAccount(account *utils.AwsAccess, ctx context.Context) 
 	return result, nil
 }
 
-func getAllRdsClusters(ctx context.Context, rdsApi rdsDBClusterApi, awsAccountNumber string, awsRegion string) ([]discovery_kit_api.Target, error) {
+func getAllRdsClusters(ctx context.Context, rdsApi rdsDBClusterApi, account *utils.AwsAccess) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 
 	paginator := rds.NewDescribeDBClustersPaginator(rdsApi, &rds.DescribeDBClustersInput{})
@@ -149,14 +149,16 @@ func getAllRdsClusters(ctx context.Context, rdsApi rdsDBClusterApi, awsAccountNu
 		}
 
 		for _, dbCluster := range output.DBClusters {
-			result = append(result, toClusterTarget(dbCluster, awsAccountNumber, awsRegion))
+			if matchesTagFilter(dbCluster.TagList, account.TagFilters) {
+				result = append(result, toClusterTarget(dbCluster, account.AccountNumber, account.Region, account.AssumeRole))
+			}
 		}
 	}
 
 	return result, nil
 }
 
-func toClusterTarget(dbCluster types.DBCluster, awsAccountNumber string, awsRegion string) discovery_kit_api.Target {
+func toClusterTarget(dbCluster types.DBCluster, awsAccountNumber string, awsRegion string, role *string) discovery_kit_api.Target {
 	arn := aws.ToString(dbCluster.DBClusterArn)
 	label := aws.ToString(dbCluster.DBClusterIdentifier)
 
@@ -188,6 +190,10 @@ func toClusterTarget(dbCluster types.DBCluster, awsAccountNumber string, awsRegi
 			key = "aws.rds.cluster.reader"
 		}
 		attributes[key] = append(attributes[key], aws.ToString(member.DBInstanceIdentifier))
+	}
+
+	if role != nil {
+		attributes["extension-aws.discovered-by-role"] = []string{aws.ToString(role)}
 	}
 
 	return discovery_kit_api.Target{

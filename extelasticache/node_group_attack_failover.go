@@ -9,13 +9,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/elasticache"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/extension-aws/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 )
 
 type elasticacheNodeGroupFailoverAttack struct {
-	clientProvider func(account string, region string) (ElasticacheApi, error)
+	clientProvider func(account string, region string, role *string) (ElasticacheApi, error)
 }
 
 var _ action_kit_sdk.Action[ElasticacheClusterAttackState] = (*elasticacheNodeGroupFailoverAttack)(nil)
@@ -56,13 +57,14 @@ func (f elasticacheNodeGroupFailoverAttack) Describe() action_kit_api.ActionDesc
 func (f elasticacheNodeGroupFailoverAttack) Prepare(_ context.Context, state *ElasticacheClusterAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
+	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 	state.ReplicationGroupID = extutil.MustHaveValue(request.Target.Attributes, "aws.elasticache.replication-group.id")[0]
 	state.NodeGroupID = extutil.MustHaveValue(request.Target.Attributes, "aws.elasticache.replication-group.node-group.id")[0]
 	return nil, nil
 }
 
 func (f elasticacheNodeGroupFailoverAttack) Start(ctx context.Context, state *ElasticacheClusterAttackState) (*action_kit_api.StartResult, error) {
-	client, err := f.clientProvider(state.Account, state.Region)
+	client, err := f.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize Elasticache client for AWS account %s", state.Account), err)
 	}

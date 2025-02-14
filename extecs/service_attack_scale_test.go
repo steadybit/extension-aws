@@ -23,7 +23,7 @@ func TestEcsServiceScaleAction_Prepare(t *testing.T) {
 		Services: []types.Service{{DesiredCount: 2}},
 	}, nil)
 
-	action := ecsServiceScaleAction{clientProvider: func(account string, region string) (ecsServiceScaleApi, error) {
+	action := ecsServiceScaleAction{clientProvider: func(account string, region string, role *string) (ecsServiceScaleApi, error) {
 		return api, nil
 	}}
 
@@ -110,7 +110,7 @@ func TestEcsServiceScaleAction_Start(t *testing.T) {
 		return true
 	})).Return(nil, nil)
 
-	action := ecsServiceScaleAction{clientProvider: func(account string, region string) (ecsServiceScaleApi, error) {
+	action := ecsServiceScaleAction{clientProvider: func(account string, region string, role *string) (ecsServiceScaleApi, error) {
 		return api, nil
 	}}
 
@@ -142,7 +142,7 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 		return true
 	})).Return(nil, nil)
 
-	action := ecsServiceScaleAction{clientProvider: func(account string, region string) (ecsServiceScaleApi, error) {
+	action := ecsServiceScaleAction{clientProvider: func(account string, region string, role *string) (ecsServiceScaleApi, error) {
 		return api, nil
 	}}
 
@@ -174,7 +174,7 @@ func TestEcsServiceScaleActionForwardsError(t *testing.T) {
 		require.Equal(t, int32(5), *params.DesiredCount)
 		return true
 	})).Return(nil, errors.New("expected"))
-	action := ecsServiceScaleAction{clientProvider: func(account string, region string) (ecsServiceScaleApi, error) {
+	action := ecsServiceScaleAction{clientProvider: func(account string, region string, role *string) (ecsServiceScaleApi, error) {
 		return api, nil
 	}}
 
