@@ -139,14 +139,18 @@ spec:
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2
               value: "true"
             {{- end }}
+            {{- if .Values.aws.discovery.disabled.ecs }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-              value: "{{.Values.aws.discovery.disabled.ecs}}"
+              value: "true"
+            {{- end }}
             {{- if .Values.aws.discovery.disabled.elasticache }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
               value: "true"
             {{- end }}
+            {{- if .Values.aws.discovery.disabled.ecs }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-              value: "{{.Values.aws.discovery.disabled.elb}}"
+              value: "true"
+            {{- end }}
             {{- if .Values.aws.discovery.disabled.fis }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS
               value: "true"

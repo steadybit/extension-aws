@@ -39,13 +39,15 @@ manifest should add aws env vars:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ECS
                   value: example.ecs.1,example.ecs.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELASTICACHE
-                  value: ""
+                  value: example.elasticache.1,example.elasticache.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELB
                   value: example.elb.1,example.elb.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ZONE
                   value: example.zone.1,example.zone.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS
                   value: example.fis.1,example.fis.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_MSK
+                  value: example.msk.1,example.msk.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA
                   value: example.lambda.1,example.lambda.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS
@@ -57,12 +59,14 @@ manifest should add aws env vars:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "false"
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "false"
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_MSK
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA
                   value: "true"
@@ -151,12 +155,6 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -236,12 +234,6 @@ manifest should match snapshot with TLS:
                   value: /etc/extension/certificates/server-cert/tls.crt
                 - name: STEADYBIT_EXTENSION_TLS_SERVER_KEY
                   value: /etc/extension/certificates/server-cert/tls.key
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -326,12 +318,6 @@ manifest should match snapshot with extra env vars:
                   value: text
                 - name: FOO
                   value: bar
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               envFrom:
                 - configMapRef: null
                   name: env-configmap
@@ -414,12 +400,6 @@ manifest should match snapshot with extra labels:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -501,12 +481,6 @@ manifest should match snapshot with mutual TLS:
                   value: /etc/extension/certificates/server-cert/tls.key
                 - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
                   value: /etc/extension/certificates/client-cert-a/tls.crt,/etc/extension/certificates/client-cert-a/tls.crt
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -602,12 +576,6 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: /etc/tls/server.key
                 - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
                   value: /etc/tls/ca.crt,/etc/tls/ca2.crt
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -683,12 +651,6 @@ manifest should match snapshot with podSecurityContext:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -765,12 +727,6 @@ manifest should match snapshot with priority class:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -847,12 +803,6 @@ manifest should match snapshot without TLS:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
-                  value: "true"
-                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
-                  value: "true"
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:

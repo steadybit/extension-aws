@@ -11,12 +11,12 @@ aws:
     disabled:
       # aws.discovery.disabled.ec2 -- Disables EC2 discovery and the related actions.
       ec2: false
-      # aws.discovery.disabled.ecs -- Disables ECS discovery and the related actions. (BETA feature, disabled by default)
-      ecs: true
-      # aws.discovery.disabled.elasticache -- Disables Elasticache replication group discovery and the related actions. (BETA feature, disabled by default)
-      elasticache: true
-      # aws.discovery.disabled.elb -- Disables ELB discovery and the related actions. (BETA feature, disabled by default)
-      elb: true
+      # aws.discovery.disabled.ecs -- Disables ECS discovery and the related actions.
+      ecs: false
+      # aws.discovery.disabled.elasticache -- Disables Elasticache replication group discovery and the related actions.
+      elasticache: false
+      # aws.discovery.disabled.elb -- Disables ELB discovery and the related actions.
+      elb: false
       # aws.discovery.disabled.fis -- Disables FIS discovery and the related actions.
       fis: false
       # aws.discovery.disabled.msk -- Disables MSK discovery and the related actions.

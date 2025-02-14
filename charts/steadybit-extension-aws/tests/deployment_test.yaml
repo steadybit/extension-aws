@@ -18,14 +18,16 @@ tests:
         discovery:
           disabled:
             ec2: true
-            ecs: false
-            elb: false
+            ecs: true
+            elasticache: true
+            elb: true
             fis: true
             lambda: true
             rds: true
             subnet: true
             zone: true
             vpc: true
+            msk: true
           attributes:
             excludes:
               ec2:
@@ -34,6 +36,9 @@ tests:
               ecs:
                 - "example.ecs.1"
                 - "example.ecs.2"
+              elasticache:
+                - "example.elasticache.1"
+                - "example.elasticache.2"
               elb:
                 - "example.elb.1"
                 - "example.elb.2"
@@ -55,6 +60,9 @@ tests:
               vpc:
                 - "example.vpc.1"
                 - "example.vpc.2"
+              msk:
+                - "example.msk.1"
+                - "example.msk.2"
     asserts:
       - matchSnapshot: {}
   - it: manifest should match snapshot using podAnnotations and Labels
