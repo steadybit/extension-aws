@@ -5,6 +5,7 @@
 - Added an [advanced method](README.md#advanced-assume-role-configuration) to configure role assuming for the extension.
 - include tags in the discovery of MSK clusters (requires new permission `tag:GetResources`)
 - include tags in the discovery of Elasticache (requires new permission `tag:GetResources`)
+- Update dependencies
 
 ## v2.4.0
 
