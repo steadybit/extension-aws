@@ -38,7 +38,7 @@ func ParseConfiguration(rootRegion string) {
 	translateToAssumeRolesAdvanced()
 	err = verifyAssumeRolesAdvanced()
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msgf("Configuration issue, shutting down.")
 	}
 
 	if Config.AssumeRolesAdvanced != nil {
@@ -59,6 +59,9 @@ func verifyAssumeRolesAdvanced() error {
 		existingAccount := make(map[string]bool)
 		existingRoles := make(map[string]bool)
 		for _, role := range Config.AssumeRolesAdvanced {
+			if role.RoleArn == "" {
+				return fmt.Errorf("roleArn must not be empty")
+			}
 			account := getAccountNumberFromArn(role.RoleArn)
 			for _, region := range role.Regions {
 				_, roleAndRegionAlreadyConfigured := existingRoles[role.RoleArn+"/"+region]
