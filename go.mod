@@ -5,7 +5,7 @@ module github.com/steadybit/extension-aws
 
 go 1.23.0
 
-toolchain go1.23.4
+toolchain go1.24.1
 
 require (
 	github.com/KimMachineGun/automemlimit v0.7.1
@@ -18,7 +18,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.44.13
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.45.0
 	github.com/aws/aws-sdk-go-v2/service/fis v1.32.0
-	github.com/aws/aws-sdk-go-v2/service/kafka v1.39.0
+	github.com/aws/aws-sdk-go-v2/service/kafka v1.39.1
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.70.1
 	github.com/aws/aws-sdk-go-v2/service/rds v1.94.1
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.25.18
