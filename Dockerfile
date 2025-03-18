@@ -10,6 +10,8 @@ ARG TARGETARCH
 ARG BUILD_WITH_COVERAGE
 ARG BUILD_SNAPSHOT=true
 ARG SKIP_LICENSES_REPORT=false
+ARG VERSION=unknown
+ARG REVISION=unknown
 
 WORKDIR /app
 
@@ -21,7 +23,13 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH goreleaser build --snapshot="${BUILD_SNAPS
 ##
 FROM alpine:3.21
 
+ARG VERSION=unknown
+ARG REVISION=unknown
+
 LABEL "steadybit.com.discovery-disabled"="true"
+LABEL "version"="${VERSION}"
+LABEL "revision"="${REVISION}"
+RUN echo "$VERSION" > /version.txt && echo "$REVISION" > /revision.txt
 
 ARG USERNAME=steadybit
 ARG USER_UID=10000
