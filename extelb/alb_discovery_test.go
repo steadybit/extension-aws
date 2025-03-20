@@ -152,12 +152,12 @@ func TestGetAllAlbTargets(t *testing.T) {
 		RegionName: discovery_kit_api.Ptr("us-east-1"),
 		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
 	}
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.MatchedBy(func(params string) bool {
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.MatchedBy(func(params string) bool {
 		return params == "us-east-1a"
-	}), mock.Anything).Return(&mockedZone1a)
-	mockedZoneUtil.On("GetZone", mock.Anything, mock.MatchedBy(func(params string) bool {
+	})).Return(&mockedZone1a)
+	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.MatchedBy(func(params string) bool {
 		return params == "us-east-1b"
-	}), mock.Anything).Return(&mockedZone1b)
+	})).Return(&mockedZone1b)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
 
 	// When
