@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.4.2
+
+- Update dependencies
+
 ## v2.4.1
 - Added optional [tag filtering](README.md#tag-filters) for all discoveries
 - Added an [advanced method](README.md#advanced-assume-role-configuration) to configure role assuming for the extension.

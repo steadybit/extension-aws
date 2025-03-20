@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/rs/zerolog/log"
-	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extutil"
 	"golang.org/x/exp/maps"
 	"sync"

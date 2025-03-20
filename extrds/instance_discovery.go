@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/steadybit/extension-aws/extec2"
+	"github.com/steadybit/extension-aws/v2/extec2"
 	"strings"
 	"time"
 
@@ -19,8 +19,8 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
-	"github.com/steadybit/extension-aws/config"
-	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-aws/v2/config"
+	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 )

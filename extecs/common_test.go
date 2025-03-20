@@ -2,7 +2,7 @@ package extecs
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
-	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-kit/extutil"
 	"testing"
 

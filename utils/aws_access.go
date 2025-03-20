@@ -12,7 +12,7 @@ import (
 	"github.com/aws/smithy-go/middleware"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	extConfig "github.com/steadybit/extension-aws/config"
+	extConfig "github.com/steadybit/extension-aws/v2/config"
 )
 
 type AwsAccess struct {

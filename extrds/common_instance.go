@@ -7,7 +7,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
-	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extutil"
 )
 

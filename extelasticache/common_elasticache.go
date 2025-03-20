@@ -6,7 +6,7 @@ package extelasticache
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/elasticache"
-	"github.com/steadybit/extension-aws/utils"
+	"github.com/steadybit/extension-aws/v2/utils"
 )
 
 const (

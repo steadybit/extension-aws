@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
-	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 	"net/http"

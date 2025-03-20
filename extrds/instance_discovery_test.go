@@ -6,8 +6,8 @@ package extrds
 import (
 	"context"
 	"errors"
-	extConfig "github.com/steadybit/extension-aws/config"
-	"github.com/steadybit/extension-aws/utils"
+	extConfig "github.com/steadybit/extension-aws/v2/config"
+	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extutil"
 
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"

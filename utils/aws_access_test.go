@@ -8,7 +8,7 @@ import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/require"
 	"sort"

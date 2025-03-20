@@ -13,8 +13,8 @@ import (
 	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	extConfig "github.com/steadybit/extension-aws/config"
-	"github.com/steadybit/extension-aws/utils"
+	extConfig "github.com/steadybit/extension-aws/v2/config"
+	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extutil"
 
 	"github.com/stretchr/testify/assert"

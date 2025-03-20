@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
-	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/v2/config"
 )
 
 func GetOptionalTargetAttribute(attributes map[string][]string, key string) *string {

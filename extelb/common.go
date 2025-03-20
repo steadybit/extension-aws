@@ -5,7 +5,7 @@ package extelb
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
-	"github.com/steadybit/extension-aws/config"
+	"github.com/steadybit/extension-aws/v2/config"
 )
 
 const (
