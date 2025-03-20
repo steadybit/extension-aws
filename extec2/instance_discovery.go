@@ -315,7 +315,7 @@ func toEc2InstanceTarget(ec2Instance types.Instance, ec2Util instanceDiscoveryEc
 		label = label + " / " + *name
 	}
 	availabilityZoneName := aws.ToString(ec2Instance.Placement.AvailabilityZone)
-	availabilityZoneApi := ec2Util.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
+	availabilityZoneApi := ec2Util.GetZone(awsAccountNumber, awsRegion, availabilityZoneName)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}

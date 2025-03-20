@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.4.3
+- Fixed a bug where the extension `aws.zone.id` was not set for all targets
+
 ## v2.4.2
 
 - Update dependencies

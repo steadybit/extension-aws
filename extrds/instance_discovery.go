@@ -141,7 +141,7 @@ func toInstanceTarget(dbInstance types.DBInstance, ec2util rdsInstanceDiscoveryE
 	arn := aws.ToString(dbInstance.DBInstanceArn)
 	label := aws.ToString(dbInstance.DBInstanceIdentifier)
 	availabilityZoneName := aws.ToString(dbInstance.AvailabilityZone)
-	availabilityZoneApi := ec2util.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
+	availabilityZoneApi := ec2util.GetZone(awsAccountNumber, awsRegion, availabilityZoneName)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}

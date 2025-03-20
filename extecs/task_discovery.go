@@ -201,7 +201,7 @@ func toTarget(task types.Task, ec2Util taskDiscoveryEc2Util, awsAccountNumber st
 
 	arn := aws.ToString(task.TaskArn)
 	availabilityZoneName := aws.ToString(task.AvailabilityZone)
-	availabilityZoneApi := ec2Util.GetZone(awsAccountNumber, availabilityZoneName, awsRegion)
+	availabilityZoneApi := ec2Util.GetZone(awsAccountNumber, awsRegion, availabilityZoneName)
 
 	attributes := make(map[string][]string)
 	attributes["aws.account"] = []string{awsAccountNumber}

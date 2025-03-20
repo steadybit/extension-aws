@@ -186,7 +186,7 @@ func toTarget(lb *types.LoadBalancer, tags []types.Tag, listeners []types.Listen
 	zoneIds := make([]string, 0, len(lb.AvailabilityZones))
 	for _, zone := range lb.AvailabilityZones {
 		zones = append(zones, aws.ToString(zone.ZoneName))
-		zoneApi := ec2Util.GetZone(awsAccountNumber, aws.ToString(zone.ZoneName), awsRegion)
+		zoneApi := ec2Util.GetZone(awsAccountNumber, awsRegion, aws.ToString(zone.ZoneName))
 		if zoneApi != nil {
 			zoneIds = append(zoneIds, *zoneApi.ZoneId)
 		}
