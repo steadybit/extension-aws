@@ -86,12 +86,12 @@ func verifyAssumeRolesAdvanced() error {
 }
 
 func getAccountNumberFromArn(arn string) string {
-	re := regexp.MustCompile(`^arn:aws:iam::(\d{12}):role/[\w+=,.@-]+$`)
+	re := regexp.MustCompile(`^arn:aws(-us-gov)?:iam::(\d{12}):role/[\w+=,.@-]+$`)
 	matches := re.FindStringSubmatch(arn)
-	if len(matches) < 2 {
+	if len(matches) < 3 {
 		return "unknown"
 	}
-	return matches[1]
+	return matches[2]
 }
 
 func translateToAssumeRolesAdvanced() {

@@ -128,3 +128,35 @@ func TestVerifyAssumeRolesAdvanced(t *testing.T) {
 		assert.EqualError(t, err, "you have configured the same role-arn for the same region twice. (arn: 'arn:aws:iam::123456789012:role/TestRole1', region: 'us-east-1')")
 	})
 }
+
+func Test_getAccountNumberFromArn(t *testing.T) {
+	type args struct {
+		arn string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "Regular ARN",
+			args: args{arn: "arn:aws:iam::123456789012:role/TestRole"},
+			want: "123456789012",
+		},
+		{
+			name: "GovCloud ARN",
+			args: args{arn: "arn:aws-us-gov:iam::123456789012:role/TestRole"},
+			want: "123456789012",
+		},
+		{
+			name: "Invalid ARN",
+			args: args{arn: "arn:this-is-not-a-valid-arn"},
+			want: "unknown",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, getAccountNumberFromArn(tt.args.arn), "getAccountNumberFromArn(%v)", tt.args.arn)
+		})
+	}
+}

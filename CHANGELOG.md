@@ -1,6 +1,12 @@
 # Changelog
 
+## v2.4.4 (next release)
+
+- Update dependencies
+- Add support for GovCloud arns
+
 ## v2.4.3
+
 - Fixed a bug where the extension `aws.zone.id` was not set for all targets
 
 ## v2.4.2
@@ -8,6 +14,7 @@
 - Update dependencies
 
 ## v2.4.1
+
 - Added optional [tag filtering](README.md#tag-filters) for all discoveries
 - Added an [advanced method](README.md#advanced-assume-role-configuration) to configure role assuming for the extension.
 - include tags in the discovery of MSK clusters (requires new permission `tag:GetResources`)
