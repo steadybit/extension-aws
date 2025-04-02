@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.4.4 (next release)
+## v2.4.4
 
 - Update dependencies
 - Add support for GovCloud arns
