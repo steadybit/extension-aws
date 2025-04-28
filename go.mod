@@ -38,7 +38,7 @@ require (
 	github.com/steadybit/extension-kit v1.9.0
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/localstack v0.36.0
+	github.com/testcontainers/testcontainers-go/modules/localstack v0.37.0
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
 )
