@@ -55,6 +55,7 @@ func Test_getExtensionList(t *testing.T) {
 				"/discovery/attributes",
 				"/discovery/enrichment-rules/com.steadybit.extension_aws.ec2-instance-to-com.steadybit.extension_aws.test",
 				"/discovery/enrichment-rules/com.steadybit.extension_aws.ec2-instance-to-com.steadybit.extension_host.host",
+				"/discovery/enrichment-rules/com.steadybit.extension_aws.ec2-instance-to-com.steadybit.extension_host_windows.host",
 				"/discovery/enrichment-rules/com.steadybit.extension_aws.ec2-instance-to-com.steadybit.extension_kubernetes.kubernetes-node",
 			},
 		},
