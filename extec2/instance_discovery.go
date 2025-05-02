@@ -19,6 +19,7 @@ import (
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
+	"slices"
 	"strings"
 	"time"
 )
@@ -77,12 +78,17 @@ func (e *ec2Discovery) DescribeTarget() discovery_kit_api.TargetDescription {
 }
 
 func (e *ec2Discovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
-	rules := []discovery_kit_api.TargetEnrichmentRule{
-		getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_host.host"),
-		getEc2InstanceToHostEnrichmentRule("com.steadybit.extension_kubernetes.kubernetes-node"),
+	defaultEnrichmentTargetTypes := []string{
+		"com.steadybit.extension_host.host",
+		"com.steadybit.extension_host_windows.host",
+		"com.steadybit.extension_kubernetes.kubernetes-node",
+	}
+	var rules []discovery_kit_api.TargetEnrichmentRule
+	for _, t := range defaultEnrichmentTargetTypes {
+		rules = append(rules, getEc2InstanceToHostEnrichmentRule(t))
 	}
 	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
-		if targetType == "com.steadybit.extension_host.host" || targetType == "com.steadybit.extension_kubernetes.kubernetes-node" {
+		if slices.Contains(defaultEnrichmentTargetTypes, targetType) {
 			log.Warn().Msgf("Target type %s is already covered by default rules. Omitting.", targetType)
 		} else {
 			rules = append(rules, getEc2InstanceToXEnrichmentRule(targetType))
