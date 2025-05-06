@@ -78,17 +78,13 @@ func (e *ec2Discovery) DescribeTarget() discovery_kit_api.TargetDescription {
 }
 
 func (e *ec2Discovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
-	defaultEnrichmentTargetTypes := []string{
-		"com.steadybit.extension_host.host",
-		"com.steadybit.extension_host_windows.host",
-		"com.steadybit.extension_kubernetes.kubernetes-node",
-	}
 	var rules []discovery_kit_api.TargetEnrichmentRule
-	for _, t := range defaultEnrichmentTargetTypes {
+	for _, t := range []string{"com.steadybit.extension_host.host", "com.steadybit.extension_kubernetes.kubernetes-node"} {
 		rules = append(rules, getEc2InstanceToHostEnrichmentRule(t))
 	}
+	rules = append(rules, getEc2InstanceToWindowsHostEnrichmentRule())
 	for _, targetType := range config.Config.EnrichEc2DataForTargetTypes {
-		if slices.Contains(defaultEnrichmentTargetTypes, targetType) {
+		if slices.Contains([]string{"com.steadybit.extension_host.host", "com.steadybit.extension_kubernetes.kubernetes-node", "com.steadybit.extension_host_windows.host"}, targetType) {
 			log.Warn().Msgf("Target type %s is already covered by default rules. Omitting.", targetType)
 		} else {
 			rules = append(rules, getEc2InstanceToXEnrichmentRule(targetType))
@@ -112,6 +108,81 @@ func getEc2InstanceToHostEnrichmentRule(target string) discovery_kit_api.TargetE
 			Type: target,
 			Selector: map[string]string{
 				config.Config.EnrichEc2DataMatcherAttribute: "${src.aws-ec2.hostname.internal}",
+			},
+		},
+		Attributes: []discovery_kit_api.Attribute{
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.account",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.region",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.zone",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws.zone.id",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.arn",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.image",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.instance.id",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.instance.name",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.ipv4.private",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.ipv4.public",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.vpc",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.hostname.internal",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "aws-ec2.hostname.public",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "aws-ec2.label.",
+			},
+		},
+	}
+}
+
+func getEc2InstanceToWindowsHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      "com.steadybit.extension_aws.ec2-instance-to-com.steadybit.extension_host_windows.host",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: ec2TargetType,
+			Selector: map[string]string{
+				"aws-ec2.instance.id": "${dest.aws-ec2.instance.id}",
+			},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: "com.steadybit.extension_host_windows.host",
+			Selector: map[string]string{
+				"aws-ec2.instance.id": "${src.aws-ec2.instance.id}",
 			},
 		},
 		Attributes: []discovery_kit_api.Attribute{

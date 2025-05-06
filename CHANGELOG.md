@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.4.5 (next)
+
+- Update dependencies
+- Add Windows host enrichment rule
+
 ## v2.4.4
 
 - Update dependencies
