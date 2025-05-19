@@ -31,10 +31,10 @@ require (
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.9.7
 	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.15
 	github.com/steadybit/action-kit/go/action_kit_test v1.3.2
-	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.6.0
+	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.7.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.2.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.2.3
-	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.1.2
+	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.0
 	github.com/steadybit/extension-kit v1.9.0
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.37.0
@@ -70,7 +70,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.12.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
-	github.com/getkin/kin-openapi v0.131.0 // indirect
+	github.com/getkin/kin-openapi v0.132.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
@@ -134,14 +134,14 @@ require (
 	go.opentelemetry.io/otel/metric v1.35.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
-	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/term v0.31.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/term v0.32.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240401170217-c3f982113cda // indirect
 	google.golang.org/protobuf v1.36.0 // indirect
