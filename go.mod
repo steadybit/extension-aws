@@ -29,13 +29,13 @@ require (
 	github.com/rs/zerolog v1.34.0
 	github.com/sosodev/duration v1.3.1
 	github.com/steadybit/action-kit/go/action_kit_api/v2 v2.10.0
-	github.com/steadybit/action-kit/go/action_kit_sdk v1.1.15
+	github.com/steadybit/action-kit/go/action_kit_sdk v1.2.0
 	github.com/steadybit/action-kit/go/action_kit_test v1.3.2
 	github.com/steadybit/discovery-kit/go/discovery_kit_api v1.7.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.2.0
 	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.2.3
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.0
-	github.com/steadybit/extension-kit v1.9.0
+	github.com/steadybit/extension-kit v1.10.0
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.37.0
@@ -65,7 +65,7 @@ require (
 	github.com/docker/docker v28.0.1+incompatible // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/ebitengine/purego v0.8.2 // indirect
-	github.com/elastic/go-sysinfo v1.15.1 // indirect
+	github.com/elastic/go-sysinfo v1.15.3 // indirect
 	github.com/elastic/go-windows v1.0.2 // indirect
 	github.com/emicklei/go-restful/v3 v3.12.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -116,7 +116,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/prometheus/procfs v0.16.0 // indirect
+	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.25.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect

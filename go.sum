@@ -87,8 +87,8 @@ github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4
 github.com/docker/go-units v0.5.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/ebitengine/purego v0.8.2 h1:jPPGWs2sZ1UgOSgD2bClL0MJIqu58nOmIcBuXr62z1I=
 github.com/ebitengine/purego v0.8.2/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
-github.com/elastic/go-sysinfo v1.15.1 h1:zBmTnFEXxIQ3iwcQuk7MzaUotmKRp3OabbbWM8TdzIQ=
-github.com/elastic/go-sysinfo v1.15.1/go.mod h1:jPSuTgXG+dhhh0GKIyI2Cso+w5lPJ5PvVqKlL8LV/Hk=
+github.com/elastic/go-sysinfo v1.15.3 h1:W+RnmhKFkqPTCRoFq2VCTmsT4p/fwpo+3gKNQsn1XU0=
+github.com/elastic/go-sysinfo v1.15.3/go.mod h1:K/cNrqYTDrSoMh2oDkYEMS2+a72GRxMvNP+GC+vRIlo=
 github.com/elastic/go-windows v1.0.2 h1:yoLLsAsV5cfg9FLhZ9EXZ2n2sQFKeDYrHenkcivY4vI=
 github.com/elastic/go-windows v1.0.2/go.mod h1:bGcDpBzXgYSqM0Gx3DM4+UxFj300SZLixie9u9ixLM8=
 github.com/emicklei/go-restful/v3 v3.12.1 h1:PJMDIM/ak7btuL8Ex0iYET9hxM3CI2sjZtzpL63nKAU=
@@ -234,8 +234,8 @@ github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 h1:o4JXh1EVt
 github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55/go.mod h1:OmDBASR4679mdNQnz2pUhc2G8CO2JrUAVFDRBDP/hJE=
 github.com/prashantv/gostub v1.1.0 h1:BTyx3RfQjRHnUWaGF9oQos79AlQ5k8WNktv7VGvVH4g=
 github.com/prashantv/gostub v1.1.0/go.mod h1:A5zLQHz7ieHGG7is6LLXLz7I8+3LZzsrV0P1IAHhP5U=
-github.com/prometheus/procfs v0.16.0 h1:xh6oHhKwnOJKMYiYBDWmkHqQPyiY40sny36Cmx2bbsM=
-github.com/prometheus/procfs v0.16.0/go.mod h1:8veyXUu3nGP7oaCxhX6yeaM5u4stL2FeMXnCqhDthZg=
+github.com/prometheus/procfs v0.16.1 h1:hZ15bTNuirocR6u0JZ6BAHHmwS1p8B4P6MRqxtzMyRg=
+github.com/prometheus/procfs v0.16.1/go.mod h1:teAbpZRB1iIAJYREa1LsoWUXykVXA1KlTmWl8x/U+Is=
 github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR38lUII=
 github.com/rogpeppe/go-internal v1.13.1/go.mod h1:uMEvuHeurkdAXX61udpOXGD/AzZDWNMNyH2VO9fmH0o=
 github.com/rs/xid v1.6.0 h1:fV591PaemRlL6JfRxGDEPl69wICngIQ3shQtzfy2gxU=
@@ -257,8 +257,8 @@ github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/spkg/bom v0.0.0-20160624110644-59b7046e48ad/go.mod h1:qLr4V1qq6nMqFKkMo8ZTx3f+BZEkzsRUY10Xsm2mwU0=
 github.com/steadybit/action-kit/go/action_kit_api/v2 v2.10.0 h1:XIEeNvyXacUn52nONt7rMQDTvWUht+sX2RyrGxzcmts=
 github.com/steadybit/action-kit/go/action_kit_api/v2 v2.10.0/go.mod h1:kc36KasHIY867fB7rBJtxg2orPaCU7xbezsAA05qcA8=
-github.com/steadybit/action-kit/go/action_kit_sdk v1.1.15 h1:GxisnidrKHdNybofwdliIQwUJwPUdFp6XY+p4Ttu16s=
-github.com/steadybit/action-kit/go/action_kit_sdk v1.1.15/go.mod h1:jUObR0rfUqSEQIJJBUgMHyGdX5PZxfQ/bsg1aGGlQOs=
+github.com/steadybit/action-kit/go/action_kit_sdk v1.2.0 h1:Jr/RVP4rrE5bDYPzPMxGI038qEUjxFY51BCGvvrk3uk=
+github.com/steadybit/action-kit/go/action_kit_sdk v1.2.0/go.mod h1:vFcl8fQMFbD+xw8CqtvixmITLToYDT4RRMqRwlVC3Zc=
 github.com/steadybit/action-kit/go/action_kit_test v1.3.2 h1:DFDznoWEbTGv+fiGYiRaq7tq5es9VTScjrWusRAbS08=
 github.com/steadybit/action-kit/go/action_kit_test v1.3.2/go.mod h1:TJRgeOEFqOn+TrHNPFEKAbguJXfwbUdQUzMS4j1UQ9o=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.7.0 h1:eT+zVqsb8oriixyDNF5DTuB5L83Z8q6vEAbfN6dbpJA=
@@ -269,8 +269,8 @@ github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.2.3 h1:nlajAKjGJJyjpt
 github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.2.3/go.mod h1:FBEM7g/o7vBVWyA3tLPJIlfGCQc4ihJv1oXxQrDiCpg=
 github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.0 h1:Pdgl5y0/MkwRqgXVWeHYYlQucTZ6BEAAAZmvgO+jzh4=
 github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.0/go.mod h1:2Ox3Se50dEoG0kSuDhTvlLEWeBvtRmSly/OZCmtDiJk=
-github.com/steadybit/extension-kit v1.9.0 h1:DMlskHGofpKs0y+2M5WmuWCB5+E5imR20xaKr3F3mbM=
-github.com/steadybit/extension-kit v1.9.0/go.mod h1:8dDrQakwjcOUQuCkfgbFLwFByof63zla3sQj9zVI47Y=
+github.com/steadybit/extension-kit v1.10.0 h1:sOeMsGwYT+9v+U+tzUxy6xLMEH2h2qVw3uzgTWhnNpk=
+github.com/steadybit/extension-kit v1.10.0/go.mod h1:Ow1kVKhBQwLGOrBRPSdGDDVdVBgaMDFjpxPV3FeoHho=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.5.2 h1:xuMeJ0Sdp5ZMRXx/aWO6RZxdr3beISkG5/G/aIRr3pY=
 github.com/stretchr/objx v0.5.2/go.mod h1:FRsXN1f5AsAjCGJKqEizvkpNtU+EGNCLh3NxZ/8L+MA=
