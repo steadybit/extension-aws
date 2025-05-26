@@ -265,8 +265,8 @@ github.com/steadybit/discovery-kit/go/discovery_kit_api v1.7.0 h1:eT+zVqsb8oriix
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.7.0/go.mod h1:caJZz4j098TZelA84CTUDhT+/0zOti8mqSTMhkYj3yQ=
 github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.2.0 h1:vhi6HK60UDBYOa7p9GKnwcq0BpBOemmjC63ZmRb+1O4=
 github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.2.0/go.mod h1:ls7es3pBOMqLJyCWEtepREVLqADvJeoNkVLXUjkPZ9k=
-github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.2.3 h1:nlajAKjGJJyjptZerl/EcFFs6GIuzUy1DGwtp6kxdQk=
-github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.2.3/go.mod h1:FBEM7g/o7vBVWyA3tLPJIlfGCQc4ihJv1oXxQrDiCpg=
+github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.0 h1:F2n7hqq90wv/fN2SFP8ltyxbrlSH+e9zruJ30FgPcQ8=
+github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.0/go.mod h1:fFHtqPbtKdVWXmGP11xuFvhGTT9yNeVnBVYV/C6X4v4=
 github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.0 h1:Pdgl5y0/MkwRqgXVWeHYYlQucTZ6BEAAAZmvgO+jzh4=
 github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.0/go.mod h1:2Ox3Se50dEoG0kSuDhTvlLEWeBvtRmSly/OZCmtDiJk=
 github.com/steadybit/extension-kit v1.10.0 h1:sOeMsGwYT+9v+U+tzUxy6xLMEH2h2qVw3uzgTWhnNpk=
