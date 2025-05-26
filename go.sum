@@ -263,8 +263,8 @@ github.com/steadybit/action-kit/go/action_kit_test v1.3.2 h1:DFDznoWEbTGv+fiGYiR
 github.com/steadybit/action-kit/go/action_kit_test v1.3.2/go.mod h1:TJRgeOEFqOn+TrHNPFEKAbguJXfwbUdQUzMS4j1UQ9o=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.7.0 h1:eT+zVqsb8oriixyDNF5DTuB5L83Z8q6vEAbfN6dbpJA=
 github.com/steadybit/discovery-kit/go/discovery_kit_api v1.7.0/go.mod h1:caJZz4j098TZelA84CTUDhT+/0zOti8mqSTMhkYj3yQ=
-github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.2.0 h1:vhi6HK60UDBYOa7p9GKnwcq0BpBOemmjC63ZmRb+1O4=
-github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.2.0/go.mod h1:ls7es3pBOMqLJyCWEtepREVLqADvJeoNkVLXUjkPZ9k=
+github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.3.0 h1:D3yk1Izl2tczk3UD60bcmaLnpCzZ03fFVrV27jgnBEQ=
+github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.3.0/go.mod h1:vRvPsLTWvsR5Y5V/N/jtzRq03GNFVnbStgN6iKhqCqM=
 github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.0 h1:F2n7hqq90wv/fN2SFP8ltyxbrlSH+e9zruJ30FgPcQ8=
 github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.0/go.mod h1:fFHtqPbtKdVWXmGP11xuFvhGTT9yNeVnBVYV/C6X4v4=
 github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.0 h1:Pdgl5y0/MkwRqgXVWeHYYlQucTZ6BEAAAZmvgO+jzh4=
