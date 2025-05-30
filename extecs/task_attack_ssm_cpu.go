@@ -19,7 +19,7 @@ import (
 func NewEcsTaskStressCpuAction() action_kit_sdk.Action[TaskSsmActionState] {
 	return newEcsTaskSsmAction(getEcsTaskStressCpuDescription, ssmCommandInvocation{
 		documentName:     "AWSFIS-Run-CPU-Stress",
-		documentVersion:  "12",
+		documentVersion:  "13",
 		stepNameToOutput: "ExecuteStressNg",
 		getParameters:    getEcsTaskStressCpuParameters,
 	})
