@@ -19,7 +19,7 @@ import (
 func NewEcsTaskStressIoAction() action_kit_sdk.Action[TaskSsmActionState] {
 	return newEcsTaskSsmAction(getEcsTaskStressIoDescription, ssmCommandInvocation{
 		documentName:     "AWSFIS-Run-IO-Stress",
-		documentVersion:  "11",
+		documentVersion:  "$DEFAULT",
 		stepNameToOutput: "ExecuteStressNg",
 		getParameters:    getEcsTaskStressIoParameters,
 	})
