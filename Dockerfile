@@ -21,7 +21,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH goreleaser build --snapshot="${BUILD_SNAPS
 ##
 ## Runtime
 ##
-FROM alpine:3.21
+FROM alpine:3.22
 
 ARG VERSION=unknown
 ARG REVISION=unknown
