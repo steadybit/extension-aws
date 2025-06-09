@@ -47,8 +47,8 @@ github.com/aws/aws-sdk-go-v2/service/kafka v1.39.3 h1:WGO8WiAml8wn9N6oIskUHi/eXB
 github.com/aws/aws-sdk-go-v2/service/kafka v1.39.3/go.mod h1:+9NIh+Gy66wZf5I3XLog+2pxKSWwOV82D3oTZ9It3eE=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.71.2 h1:z926KZ1Ysi8Mbi4biJSAIRFdKemwQpO9M0QUTRLDaXA=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.71.2/go.mod h1:c27kk10S36lBYgbG1jR3opn4OAS5Y/4wjJa1GiHK/X4=
-github.com/aws/aws-sdk-go-v2/service/rds v1.96.0 h1:fiPuUrcO7GCZjP73NK2i0l2RQ1KY1xqoGcJyGcIikZ4=
-github.com/aws/aws-sdk-go-v2/service/rds v1.96.0/go.mod h1:CXiHj5rVyQ5Q3zNSoYzwaJfWm8IGDweyyCGfO8ei5fQ=
+github.com/aws/aws-sdk-go-v2/service/rds v1.97.0 h1:9fQQVPE03oKvq+vHvDcSQiiZryHwDRUPe7nuYHMpcr4=
+github.com/aws/aws-sdk-go-v2/service/rds v1.97.0/go.mod h1:CXiHj5rVyQ5Q3zNSoYzwaJfWm8IGDweyyCGfO8ei5fQ=
 github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.26.3 h1:P87jejqS8WvQvRWyXlHUylt99VXt0y/WUIFuU6gBU7A=
 github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.26.3/go.mod h1:cgPfPTC/V3JqwCKed7Q6d0FrgarV7ltz4Bz6S4Q+Dqk=
 github.com/aws/aws-sdk-go-v2/service/ssm v1.59.1 h1:Z4cmgV3hKuUIkhJsdn47hf/ABYHUtILfMrV+L8+kRwE=
