@@ -49,12 +49,13 @@ func getEcsTaskStopProcessDescription() action_kit_api.ActionDescription {
 
 func getEcsTaskStopProcessParameters(request action_kit_api.PrepareActionRequestBody) (map[string][]string, error) {
 	process := extutil.ToString(request.Config["process"])
-	matched, err := regexp.MatchString(`^[0-9a-zA-Z.\-=_]{1,128}$`, process)
+	pattern := `^[0-9a-zA-Z.\-=_]{1,128}$`
+	matched, err := regexp.MatchString(pattern, process)
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate process name: %w", err)
 	}
 	if !matched {
-		return nil, fmt.Errorf("invalid process name: must match ^[0-9a-zA-Z.\\-=_]{1,128}$")
+		return nil, fmt.Errorf("invalid process name: must match %q", pattern)
 	}
 	var signal = "SIGKILL"
 	if extutil.ToBool(request.Config["graceful"]) {

@@ -19,6 +19,7 @@ import (
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 	"golang.org/x/exp/slices"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -411,4 +412,16 @@ func defaultTaskSsmClientProvider(account string, region string, role *string) (
 		return nil, err
 	}
 	return ssm.NewFromConfig(awsAccess.AwsConfig), nil
+}
+
+func validateSourcesPattern(sources string) error {
+	pattern := `^[0-9a-zA-Z./,-]+$`
+	matched, err := regexp.MatchString(pattern, sources)
+	if err != nil {
+		return fmt.Errorf("failed to validate sources: %w", err)
+	}
+	if !matched {
+		return fmt.Errorf("invalid sources: %q must match %q", sources, pattern)
+	}
+	return nil
 }
