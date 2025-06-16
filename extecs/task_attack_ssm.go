@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2024 Steadybit GmbH
-
-/*
- * Copyright 2024 steadybit GmbH. All rights reserved.
- */
+// SPDX-FileCopyrightText: 2025 Steadybit GmbH
 
 package extecs
 
@@ -11,8 +7,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
+	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/extension-aws/v2/utils"
@@ -41,6 +40,8 @@ var (
 )
 
 type TaskSsmActionState struct {
+	ExecutionId       uuid.UUID
+	Duration          time.Duration
 	Account           string
 	Region            string
 	DiscoveredByRole  *string
@@ -60,11 +61,16 @@ type ecsTaskSsmApi interface {
 }
 
 type ssmCommandInvocation struct {
-	documentVersion  string
-	documentName     string
-	getParameters    func(action_kit_api.PrepareActionRequestBody) (map[string][]string, error)
-	stepNameToOutput string
+	documentVersion           string
+	documentName              string
+	getParameters             func(action_kit_api.PrepareActionRequestBody) (map[string][]string, error)
+	updateHeartbeatParameters *func(map[string][]string) error
+	stepNameToOutput          string
 }
+
+var heartbeatDuration = 30 * time.Second
+var heartbeatTimeout = 15 * time.Second
+var heartbeats = make(map[uuid.UUID]chan interface{})
 
 func newEcsTaskSsmAction(makeDescription func() action_kit_api.ActionDescription, invocation ssmCommandInvocation) action_kit_sdk.ActionWithStop[TaskSsmActionState] {
 	description := makeDescription()
@@ -103,6 +109,8 @@ func (e *ecsTaskSsmAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+	state.ExecutionId = request.ExecutionId
+	state.Duration = time.Duration(extutil.ToInt64(request.Config["duration"])) * time.Millisecond
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
@@ -156,10 +164,13 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 		Parameters:      state.Parameters,
 		Comment:         extutil.Ptr(shorten(state.Comment, 100)),
 		TimeoutSeconds:  extutil.Ptr(int32(30)),
+	}, func(options *ssm.Options) {
+		options.ClientLogMode = aws.LogRequestWithBody | aws.LogResponseWithBody
 	})
 
 	result := &action_kit_api.StartResult{Messages: &[]action_kit_api.Message{}}
 	if err == nil {
+		e.startHeartbeat(state)
 		state.CommandId = *output.Command.CommandId
 		result.Messages = utils.AppendInfof(result.Messages, "Sent SSM command (%s) on ECS Task %s using document %s(%s) parameters %+v", state.CommandId, state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters)
 	} else {
@@ -213,6 +224,8 @@ func (e *ecsTaskSsmAction) Status(ctx context.Context, state *TaskSsmActionState
 }
 
 func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) (*action_kit_api.StopResult, error) {
+	e.stopHeartbeat(state)
+
 	if state.CommandEnded || state.CommandId == "" {
 		return nil, nil
 	}
@@ -265,12 +278,102 @@ func (e *ecsTaskSsmAction) evaluateResultForCommand(ctx context.Context, client 
 		resultError = &action_kit_api.ActionKitError{
 			Title: fmt.Sprintf("Ended SSM command %s on ECS Task %s with status %s", e.description.Label, state.TaskArn, status),
 		}
-		if stepOutput != nil && stepOutput.StandardOutputContent != nil && strings.Contains(*stepOutput.StandardOutputContent, "Another stress-ng command is running, exiting...") {
-			resultError.Detail = extutil.Ptr("Parallel stress attack already running on this instance")
+		if stepOutput != nil && stepOutput.StandardOutputContent != nil {
+			if strings.Contains(*stepOutput.StandardOutputContent, "Another stress-ng command is running, exiting...") {
+				resultError.Detail = extutil.Ptr("Parallel stress attack already running on this instance")
+			} else {
+				resultError.Detail = extutil.Ptr(*stepOutput.StandardOutputContent)
+			}
 		}
 	}
 
 	return messages, resultError
+}
+
+func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, client ecsTaskSsmApi, taskArn string) (string, error) {
+	output, err := client.DescribeInstanceInformation(ctx, &ssm.DescribeInstanceInformationInput{
+		Filters: []types.InstanceInformationStringFilter{
+			{Key: extutil.Ptr("tag:ECS_TASK_ARN"), Values: []string{taskArn}},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	if len(output.InstanceInformationList) == 1 && output.InstanceInformationList[0].InstanceId != nil {
+		return *output.InstanceInformationList[0].InstanceId, nil
+	} else if len(output.InstanceInformationList) > 1 {
+		return "", errorManagedInstanceAmbiguous
+	} else {
+		return "", errorManagedInstanceNotFound
+	}
+}
+
+func (e *ecsTaskSsmAction) startHeartbeat(state *TaskSsmActionState) {
+	if e.ssmCommandInvocation.updateHeartbeatParameters == nil {
+		return
+	}
+
+	stop := make(chan interface{}, 1)
+	heartbeats[state.ExecutionId] = stop
+
+	go func(currentHeartbeatParameters map[string][]string, heartbeatDuration time.Duration, heartbeatTimeout time.Duration) {
+		client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
+		if err != nil {
+			log.Warn().Err(err).Msgf("Failed to create heartbeat client for ECS Task %s", state.TaskArn)
+			return
+		}
+
+		timeoutDuration := state.Duration + heartbeatTimeout
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
+		timeout := ctx.Done()
+		defer cancel()
+
+		ticker := time.NewTicker(heartbeatDuration)
+		defer ticker.Stop()
+		defer close(stop)
+
+		for {
+			select {
+			case <-stop:
+				log.Info().Msgf("Heartbeat stopped on ECS Task %s", state.TaskArn)
+				return
+			case <-timeout:
+				log.Info().Msgf("Heartbeat stopped due to reached timeout on ECS Task %s", state.TaskArn)
+				return
+			case <-ticker.C:
+				log.Info().Msgf("Sending heartbeat to ECS Task %s", state.TaskArn)
+				err := (*e.ssmCommandInvocation.updateHeartbeatParameters)(currentHeartbeatParameters)
+				if err != nil {
+					log.Warn().Err(err).Msgf("Failed to update heartbeat parameters for ECS Task %s", state.TaskArn)
+					return
+				}
+				_, err = client.SendCommand(ctx, &ssm.SendCommandInput{
+					DocumentName:    &e.ssmCommandInvocation.documentName,
+					DocumentVersion: &e.ssmCommandInvocation.documentVersion,
+					InstanceIds:     []string{state.ManagedInstanceId},
+					Parameters:      currentHeartbeatParameters,
+					Comment:         extutil.Ptr(shorten(state.Comment+" heartbeat", 100)),
+					TimeoutSeconds:  extutil.Ptr(int32(30)),
+				})
+				if err != nil {
+					log.Warn().Err(err).Msgf("Failed to send heartbeat command to ECS Task %s", state.TaskArn)
+				}
+			}
+		}
+	}(state.Parameters, heartbeatDuration, heartbeatTimeout)
+}
+
+func (e *ecsTaskSsmAction) stopHeartbeat(state *TaskSsmActionState) {
+	if c, ok := heartbeats[state.ExecutionId]; ok {
+		// None blocking send
+		select {
+		case c <- nil:
+		default:
+			log.Info().Str("task", state.TaskArn).Msg("Task already stopped")
+		}
+		delete(heartbeats, state.ExecutionId)
+	}
 }
 
 func hasEnded(output *ssm.GetCommandInvocationOutput) bool {
@@ -300,25 +403,6 @@ func isErrInvocationDoesNotExist(err error) bool {
 func isErrInvalidPluginName(err error) bool {
 	var errorType *types.InvalidPluginName
 	return errors.As(err, &errorType)
-}
-
-func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, client ecsTaskSsmApi, taskArn string) (string, error) {
-	output, err := client.DescribeInstanceInformation(ctx, &ssm.DescribeInstanceInformationInput{
-		Filters: []types.InstanceInformationStringFilter{
-			{Key: extutil.Ptr("tag:ECS_TASK_ARN"), Values: []string{taskArn}},
-		},
-	})
-	if err != nil {
-		return "", err
-	}
-
-	if len(output.InstanceInformationList) == 1 && output.InstanceInformationList[0].InstanceId != nil {
-		return *output.InstanceInformationList[0].InstanceId, nil
-	} else if len(output.InstanceInformationList) > 1 {
-		return "", errorManagedInstanceAmbiguous
-	} else {
-		return "", errorManagedInstanceNotFound
-	}
 }
 
 func defaultTaskSsmClientProvider(account string, region string, role *string) (ecsTaskSsmApi, error) {

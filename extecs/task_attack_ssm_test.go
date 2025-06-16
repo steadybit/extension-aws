@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2024 Steadybit GmbH
+// SPDX-FileCopyrightText: 2025 Steadybit GmbH
 
 package extecs
 
@@ -9,11 +9,13 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
+	"github.com/google/uuid"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	require "github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/require"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -30,6 +32,23 @@ var (
 			documentName:     "MyDocument",
 			getParameters:    mockGetParameters,
 			stepNameToOutput: "step-0",
+		},
+	}
+
+	updateTask = func(state map[string][]string) error {
+		return nil
+	}
+
+	taskWithHeartbeat = &ecsTaskSsmAction{
+		clientProvider: func(account string, region string, role *string) (ecsTaskSsmApi, error) {
+			return &mockApi, nil
+		},
+		ssmCommandInvocation: ssmCommandInvocation{
+			documentVersion:           "$LATEST",
+			documentName:              "MyDocument",
+			getParameters:             mockGetParameters,
+			stepNameToOutput:          "step-0",
+			updateHeartbeatParameters: &updateTask,
 		},
 	}
 
@@ -340,6 +359,84 @@ func Test_ecsTaskSsmAction_Stop(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_ecsTaskSsmActionHeartbeat(t *testing.T) {
+	heartbeatDuration := 100 * time.Millisecond
+	setHeartbeatTimeForTest(t, heartbeatDuration, 1*time.Second)
+
+	var calls uint64
+	mockApi.On("SendCommand", mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		atomic.AddUint64(&calls, 1)
+	}).Return(&ssm.SendCommandOutput{
+		Command: &types.Command{
+			CommandId: extutil.Ptr("command-0"),
+		},
+	}, nil)
+
+	actionDuration := 1 * time.Second
+	state := TaskSsmActionState{
+		ExecutionId: uuid.New(),
+		Duration:    actionDuration,
+		CommandId:   "command-0",
+	}
+
+	startResult, err := taskWithHeartbeat.Start(context.Background(), &state)
+	assert.NoError(t, err)
+	assert.NotNil(t, startResult)
+
+	time.Sleep(actionDuration)
+	assert.GreaterOrEqual(t, atomic.LoadUint64(&calls), uint64(1))
+
+	state.CommandEnded = true
+	_, err = taskWithHeartbeat.Stop(context.Background(), &state)
+	assert.NoError(t, err)
+
+	time.Sleep(10 * time.Millisecond)
+	callsAfterStop := atomic.LoadUint64(&calls)
+	time.Sleep(heartbeatDuration)
+	assert.Equal(t, callsAfterStop, atomic.LoadUint64(&calls))
+}
+
+func Test_ecsTaskSsmActionHeartbeatTimeout(t *testing.T) {
+	heartbeatTimeout := 10 * time.Millisecond
+	setHeartbeatTimeForTest(t, 1*time.Second, heartbeatTimeout)
+
+	var calls uint64
+	mockApi.On("SendCommand", mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		atomic.AddUint64(&calls, 1)
+	}).Return(&ssm.SendCommandOutput{
+		Command: &types.Command{
+			CommandId: extutil.Ptr("command-0"),
+		},
+	}, nil)
+
+	actionDuration := 0 * time.Second
+	state := TaskSsmActionState{
+		ExecutionId: uuid.New(),
+		Duration:    actionDuration,
+		CommandId:   "command-0",
+	}
+
+	startResult, err := taskWithHeartbeat.Start(context.Background(), &state)
+	assert.NoError(t, err)
+	assert.NotNil(t, startResult)
+
+	time.Sleep(10 * time.Millisecond)
+	callsAfterTimeout := atomic.LoadUint64(&calls)
+	time.Sleep(10 * time.Millisecond)
+	assert.Equal(t, callsAfterTimeout, atomic.LoadUint64(&calls))
+}
+
+func setHeartbeatTimeForTest(t *testing.T, testHeartbeatDuration time.Duration, testHeartbeatTimeout time.Duration) {
+	originalHeartbeatDuration := heartbeatDuration
+	originalHeartbeatTimeout := testHeartbeatTimeout
+	t.Cleanup(func() {
+		heartbeatDuration = originalHeartbeatDuration
+		heartbeatTimeout = originalHeartbeatTimeout
+	})
+	heartbeatDuration = testHeartbeatDuration
+	heartbeatTimeout = testHeartbeatTimeout
 }
 
 func mockGetParameters(req action_kit_api.PrepareActionRequestBody) (map[string][]string, error) {
