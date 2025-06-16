@@ -148,6 +148,7 @@ func registerHandlers(ctx context.Context) {
 		discovery_kit_sdk.Register(extecs.NewEcsServiceDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStopAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsServiceScaleAction())
+		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStopProcessAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressCpuAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressMemoryAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressIoAction())
