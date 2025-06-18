@@ -154,6 +154,7 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskStressIoAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskFillDiskAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskNetworkBlockholePortAction())
+		action_kit_sdk.RegisterAction(extecs.NewEcsTaskNetworkDnsAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskNetworkDelayAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsTaskNetworkLossAction())
 		action_kit_sdk.RegisterAction(extecs.NewEcsServiceEventLogAction(serviceDiscoveryPoller))
