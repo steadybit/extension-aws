@@ -80,6 +80,7 @@ func Test_getExtensionList(t *testing.T) {
 				"/com.steadybit.extension_aws.ecs-service.task_count_check",
 				"/com.steadybit.extension_aws.ecs-task.fill_disk",
 				"/com.steadybit.extension_aws.ecs-task.network_blackhole_port",
+				"/com.steadybit.extension_aws.ecs-task.network_dns",
 				"/com.steadybit.extension_aws.ecs-task.network_delay",
 				"/com.steadybit.extension_aws.ecs-task.network_loss",
 				"/com.steadybit.extension_aws.ecs-task.stress_cpu",
