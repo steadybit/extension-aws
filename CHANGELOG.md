@@ -1,9 +1,10 @@
 # Changelog
 
-## v2.4.5 (next)
+## v2.4.5
 
-- Update dependencies
+- Add AWS ECS Fargate network attacks
 - Add Windows host enrichment rule
+- Update dependencies
 
 ## v2.4.4
 
