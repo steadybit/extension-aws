@@ -70,7 +70,7 @@ tests:
       aws:
         tagFilters:
           - key: "application"
-            value: ["Demo", "Shop"]
+            values: ["Demo", "Shop"]
     asserts:
       - matchSnapshot: {}
   - it: manifest should match snapshot with advanced assume role config
@@ -81,7 +81,7 @@ tests:
             regions: ["us-east-1", "eu-central-1"]
             tagFilters:
               - key: "application"
-                value: ["Demo", "Shop"]
+                values: ["Demo", "Shop"]
           - roleArn: "arn:aws:iam::22222222222222:role/steadybit-extension-aws"
     asserts:
       - matchSnapshot: {}

@@ -317,7 +317,7 @@ manifest should match snapshot with advanced assume role config:
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
                 - name: STEADYBIT_EXTENSION_ASSUME_ROLES_ADVANCED
-                  value: '[{"regions":["us-east-1","eu-central-1"],"roleArn":"arn:aws:iam::11111111111111:role/steadybit-extension-aws","tagFilters":[{"key":"application","value":["Demo","Shop"]}]},{"roleArn":"arn:aws:iam::22222222222222:role/steadybit-extension-aws"}]'
+                  value: '[{"regions":["us-east-1","eu-central-1"],"roleArn":"arn:aws:iam::11111111111111:role/steadybit-extension-aws","tagFilters":[{"key":"application","values":["Demo","Shop"]}]},{"roleArn":"arn:aws:iam::22222222222222:role/steadybit-extension-aws"}]'
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:
@@ -881,7 +881,7 @@ manifest should match snapshot with tag filters:
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
                 - name: STEADYBIT_EXTENSION_TAG_FILTERS
-                  value: '[{"key":"application","value":["Demo","Shop"]}]'
+                  value: '[{"key":"application","values":["Demo","Shop"]}]'
               image: ghcr.io/steadybit/extension-aws:v0.0.0
               imagePullPolicy: Always
               livenessProbe:

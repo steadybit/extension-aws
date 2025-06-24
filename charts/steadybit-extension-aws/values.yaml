@@ -10,8 +10,8 @@ aws:
   # aws.tagFilter -- Optional list of tags to filter resources by. (https://github.com/steadybit/extension-aws?tab=readme-ov-file#tag-filters)
   # Example CLI:
   #  --set aws.tagFilters[0].key="application" \
-  #  --set aws.tagFilters[0].value[0]="Demo" \
-  #  --set aws.tagFilters[0].value[1]="Shop" \
+  #  --set aws.tagFilters[0].values[0]="Demo" \
+  #  --set aws.tagFilters[0].values[1]="Shop" \
   # Example values.yaml:
   #  - key: "application"
   #    value: ["Demo", "Shop"]
@@ -22,14 +22,14 @@ aws:
   #  --set aws.assumeRolesAdvanced[0].regions[0]="us-east-1" \
   #  --set aws.assumeRolesAdvanced[0].regions[1]="eu-central-1" \
   #  --set aws.assumeRolesAdvanced[0].tagFilters[0].key="application" \
-  #  --set aws.assumeRolesAdvanced[0].tagFilters[0].value[0]="Demo" \
-  #  --set aws.assumeRolesAdvanced[0].tagFilters[0].value[1]="Shop" \
+  #  --set aws.assumeRolesAdvanced[0].tagFilters[0].values[0]="Demo" \
+  #  --set aws.assumeRolesAdvanced[0].tagFilters[0].values[1]="Shop" \
   # Example values.yaml:
   #  - roleArn: "arn:aws:iam::11111111111111:role/steadybit-extension-aws"
   #    regions: ["us-east-1", "eu-central-1"]
   #    tagFilters:
   #      - key: "application"
-  #        value: ["Demo", "Shop"]
+  #        values: ["Demo", "Shop"]
   assumeRolesAdvanced: []
   discovery:
     disabled:
