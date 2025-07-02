@@ -58,7 +58,7 @@ func (e *ecsTaskDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 func (e *ecsTaskDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       ecsTaskTargetId,
-		Label:    discovery_kit_api.PluralLabel{One: "ECS task", Other: "ECS tasks"},
+		Label:    discovery_kit_api.PluralLabel{One: "ECS Task", Other: "ECS Tasks"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(ecsTaskIcon),
