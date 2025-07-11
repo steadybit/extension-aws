@@ -54,6 +54,8 @@ func getInjectStatusCodeDescription() action_kit_api.ActionDescription {
 				Description:  extutil.Ptr("The status code to return."),
 				Type:         action_kit_api.ActionParameterTypeInteger,
 				DefaultValue: extutil.Ptr("500"),
+				MinValue:     extutil.Ptr(100),
+				MaxValue:     extutil.Ptr(599),
 				Required:     extutil.Ptr(true),
 				Order:        extutil.Ptr(2),
 			},
