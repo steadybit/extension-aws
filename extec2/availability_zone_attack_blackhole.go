@@ -69,7 +69,7 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 				Name:         "duration",
 				Label:        "Duration",
 				Description:  extutil.Ptr(""),
-				Type:         action_kit_api.Duration,
+				Type:         action_kit_api.ActionParameterTypeDuration,
 				DefaultValue: extutil.Ptr("60s"),
 				Order:        extutil.Ptr(1),
 				Required:     extutil.Ptr(true),

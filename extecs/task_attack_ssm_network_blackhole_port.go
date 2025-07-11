@@ -33,7 +33,7 @@ func getEcsTaskNetworkBlackholePortDescription() action_kit_api.ActionDescriptio
 				Name:         "duration",
 				Label:        "Duration",
 				Description:  extutil.Ptr("Duration of the attack."),
-				Type:         action_kit_api.Duration,
+				Type:         action_kit_api.ActionParameterTypeDuration,
 				DefaultValue: extutil.Ptr("30s"),
 				Required:     extutil.Ptr(true),
 				Order:        extutil.Ptr(0),

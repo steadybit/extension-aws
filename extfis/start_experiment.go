@@ -56,7 +56,7 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 		Category:    extutil.Ptr("FIS"),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			TargetType:          fisTargetId,
-			QuantityRestriction: extutil.Ptr(action_kit_api.ExactlyOne),
+			QuantityRestriction: extutil.Ptr(action_kit_api.QuantityRestrictionExactlyOne),
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "template-id",
@@ -77,7 +77,7 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 				Label:        "Estimated duration",
 				Description:  extutil.Ptr("The estimated total duration of your FIS experiment."),
 				Name:         "duration",
-				Type:         action_kit_api.Duration,
+				Type:         action_kit_api.ActionParameterTypeDuration,
 				Advanced:     extutil.Ptr(false),
 				DefaultValue: extutil.Ptr("60s"),
 			},

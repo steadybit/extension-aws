@@ -59,7 +59,7 @@ func (f rdsInstanceRebootAttack) Describe() action_kit_api.ActionDescription {
 				},
 				Label: "Force Failover",
 				Name:  "force-failover",
-				Type:  action_kit_api.Boolean,
+				Type:  action_kit_api.ActionParameterTypeBoolean,
 			},
 		},
 	}

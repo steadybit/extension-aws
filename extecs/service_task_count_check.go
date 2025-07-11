@@ -77,7 +77,7 @@ func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescript
 		TimeControl: action_kit_api.TimeControlInternal,
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			TargetType:          ecsServiceTargetId,
-			QuantityRestriction: extutil.Ptr(action_kit_api.All),
+			QuantityRestriction: extutil.Ptr(action_kit_api.QuantityRestrictionAll),
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "cluster and service",
@@ -91,7 +91,7 @@ func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescript
 				Name:         "duration",
 				Label:        "Timeout",
 				Description:  extutil.Ptr("How long the check should wait for the specified service task count."),
-				Type:         action_kit_api.Duration,
+				Type:         action_kit_api.ActionParameterTypeDuration,
 				DefaultValue: extutil.Ptr("10s"),
 				Order:        extutil.Ptr(1),
 				Required:     extutil.Ptr(true),
@@ -100,7 +100,7 @@ func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescript
 				Name:         "runningCountCheckMode",
 				Label:        "Service task count",
 				Description:  extutil.Ptr("How many running tasks are required to let the check pass."),
-				Type:         action_kit_api.String,
+				Type:         action_kit_api.ActionParameterTypeString,
 				DefaultValue: extutil.Ptr(runningCountEqualsDesiredCount),
 				Order:        extutil.Ptr(2),
 				Required:     extutil.Ptr(true),

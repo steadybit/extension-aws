@@ -58,7 +58,7 @@ func (f EcsServiceEventLogAction) Describe() action_kit_api.ActionDescription {
 		Kind:        action_kit_api.Other,
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			TargetType:          ecsServiceTargetId,
-			QuantityRestriction: extutil.Ptr(action_kit_api.All),
+			QuantityRestriction: extutil.Ptr(action_kit_api.QuantityRestrictionAll),
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "cluster and service",
@@ -72,7 +72,7 @@ func (f EcsServiceEventLogAction) Describe() action_kit_api.ActionDescription {
 				Name:         "duration",
 				Label:        "Duration",
 				Description:  extutil.Ptr(""),
-				Type:         action_kit_api.Duration,
+				Type:         action_kit_api.ActionParameterTypeDuration,
 				DefaultValue: extutil.Ptr("60s"),
 				Order:        extutil.Ptr(1),
 				Required:     extutil.Ptr(true),
