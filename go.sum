@@ -51,8 +51,8 @@ github.com/aws/aws-sdk-go-v2/service/rds v1.99.1 h1:eiDDf+cf2fAxOF5XaGLlrdCZPsnr
 github.com/aws/aws-sdk-go-v2/service/rds v1.99.1/go.mod h1:Xe+NMlf/DY/XTXSevASAjGRika9Qt2LnuCDLtos03ms=
 github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.26.6 h1:PwbxovpcJvb25k019bkibvJfCpCmIANOFrXZIFPmRzk=
 github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.26.6/go.mod h1:Z4xLt5mXspLKjBV92i165wAJ/3T6TIv4n7RtIS8pWV0=
-github.com/aws/aws-sdk-go-v2/service/ssm v1.59.3 h1:LU+VzAtElJqi84EBkMSGq6hhIMO3fuCDKRItQpaHBlw=
-github.com/aws/aws-sdk-go-v2/service/ssm v1.59.3/go.mod h1:IyVabkWrs8SNdOEZLyFFcW9bUltV4G6OQS0s6H20PHg=
+github.com/aws/aws-sdk-go-v2/service/ssm v1.60.0 h1:YuMspnzt8uHda7a6A/29WCbjMJygyiyTvq480lnsScQ=
+github.com/aws/aws-sdk-go-v2/service/ssm v1.60.0/go.mod h1:IyVabkWrs8SNdOEZLyFFcW9bUltV4G6OQS0s6H20PHg=
 github.com/aws/aws-sdk-go-v2/service/sso v1.25.5 h1:AIRJ3lfb2w/1/8wOOSqYb9fUKGwQbtysJ2H1MofRUPg=
 github.com/aws/aws-sdk-go-v2/service/sso v1.25.5/go.mod h1:b7SiVprpU+iGazDUqvRSLf5XmCdn+JtT1on7uNL6Ipc=
 github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.3 h1:BpOxT3yhLwSJ77qIY3DoHAQjZsc4HEGfMCE4NGy3uFg=
