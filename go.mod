@@ -19,7 +19,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.41.0
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.75.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.99.2
-	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.27.1
+	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.28.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.62.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.34.1
 	github.com/aws/smithy-go v1.22.5
