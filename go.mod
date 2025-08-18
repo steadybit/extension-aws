@@ -17,7 +17,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.49.0
 	github.com/aws/aws-sdk-go-v2/service/fis v1.34.1
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.41.0
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.75.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.76.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.103.0
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.28.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.63.0
