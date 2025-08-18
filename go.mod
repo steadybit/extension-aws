@@ -23,7 +23,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.62.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.36.0
 	github.com/aws/smithy-go v1.22.5
-	github.com/docker/go-connections v0.5.0
+	github.com/docker/go-connections v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.34.0
