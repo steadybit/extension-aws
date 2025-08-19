@@ -7,6 +7,6 @@ on:
 
 jobs:
   call-workflow:
-    uses: steadybit/.github/.github/workflows/cla.yml@main
+    uses: steadybit/.github/.github/workflows/cla.yml@main # NOSONAR githubactions:S7637 - our own action
     secrets:
       PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN_USED_BY_CLA_FROM_ANSGAR }}

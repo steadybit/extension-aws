@@ -7,6 +7,6 @@ on:
 
 jobs:
   ghcr-cleanup:
-    uses: steadybit/extension-kit/.github/workflows/reusable-ghcr-cleanup.yml@main
+    uses: steadybit/extension-kit/.github/workflows/reusable-ghcr-cleanup.yml@main # NOSONAR githubactions:S7637 - our own action
     secrets:
       token: ${{ secrets.GHCR_CLEANUP_PAT }}
