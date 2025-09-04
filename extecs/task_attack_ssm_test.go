@@ -7,6 +7,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync/atomic"
+	"testing"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 	"github.com/google/uuid"
@@ -15,9 +19,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"sync/atomic"
-	"testing"
-	"time"
 )
 
 var (
@@ -362,8 +363,8 @@ func Test_ecsTaskSsmAction_Stop(t *testing.T) {
 }
 
 func Test_ecsTaskSsmActionHeartbeat(t *testing.T) {
-	heartbeatDuration := 100 * time.Millisecond
-	setHeartbeatTimeForTest(t, heartbeatDuration, 1*time.Second)
+	taskWithHeartbeat.heartbeat.Duration = 100 * time.Millisecond
+	taskWithHeartbeat.heartbeat.Timeout = 1 * time.Second
 
 	var calls uint64
 	mockApi.On("SendCommand", mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
@@ -394,13 +395,13 @@ func Test_ecsTaskSsmActionHeartbeat(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 	callsAfterStop := atomic.LoadUint64(&calls)
-	time.Sleep(heartbeatDuration)
+	time.Sleep(1 * time.Second)
 	assert.Equal(t, callsAfterStop, atomic.LoadUint64(&calls))
 }
 
 func Test_ecsTaskSsmActionHeartbeatTimeout(t *testing.T) {
-	heartbeatTimeout := 10 * time.Millisecond
-	setHeartbeatTimeForTest(t, 1*time.Second, heartbeatTimeout)
+	taskWithHeartbeat.heartbeat.Duration = 1 * time.Second
+	taskWithHeartbeat.heartbeat.Timeout = 10 * time.Millisecond
 
 	var calls uint64
 	mockApi.On("SendCommand", mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
@@ -426,17 +427,6 @@ func Test_ecsTaskSsmActionHeartbeatTimeout(t *testing.T) {
 	callsAfterTimeout := atomic.LoadUint64(&calls)
 	time.Sleep(10 * time.Millisecond)
 	assert.Equal(t, callsAfterTimeout, atomic.LoadUint64(&calls))
-}
-
-func setHeartbeatTimeForTest(t *testing.T, testHeartbeatDuration time.Duration, testHeartbeatTimeout time.Duration) {
-	originalHeartbeatDuration := heartbeatDuration
-	originalHeartbeatTimeout := testHeartbeatTimeout
-	t.Cleanup(func() {
-		heartbeatDuration = originalHeartbeatDuration
-		heartbeatTimeout = originalHeartbeatTimeout
-	})
-	heartbeatDuration = testHeartbeatDuration
-	heartbeatTimeout = testHeartbeatTimeout
 }
 
 func mockGetParameters(req action_kit_api.PrepareActionRequestBody) (map[string][]string, error) {
