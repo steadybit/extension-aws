@@ -7,6 +7,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
@@ -19,15 +23,23 @@ import (
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 	"golang.org/x/exp/slices"
-	"regexp"
-	"strings"
-	"time"
+)
+
+type HeartbeatConfig struct {
+	Duration time.Duration
+	Timeout  time.Duration
+}
+
+const (
+	defaultHeartbeatDuration = 30 * time.Second
+	defaultHeartbeatTimeout  = 15 * time.Second
 )
 
 type ecsTaskSsmAction struct {
 	clientProvider       func(account string, region string, role *string) (ecsTaskSsmApi, error)
 	description          action_kit_api.ActionDescription
 	ssmCommandInvocation ssmCommandInvocation
+	heartbeat            HeartbeatConfig
 }
 
 var (
@@ -69,9 +81,7 @@ type ssmCommandInvocation struct {
 	stepNameToOutput          string
 }
 
-var heartbeatDuration = 30 * time.Second
-var heartbeatTimeout = 15 * time.Second
-var heartbeats = make(map[uuid.UUID]chan interface{})
+var heartbeats = make(map[uuid.UUID]func())
 
 func newEcsTaskSsmAction(makeDescription func() action_kit_api.ActionDescription, invocation ssmCommandInvocation) action_kit_sdk.ActionWithStop[TaskSsmActionState] {
 	description := makeDescription()
@@ -98,6 +108,10 @@ func newEcsTaskSsmAction(makeDescription func() action_kit_api.ActionDescription
 		clientProvider:       defaultTaskSsmClientProvider,
 		description:          description,
 		ssmCommandInvocation: invocation,
+		heartbeat: HeartbeatConfig{
+			Duration: defaultHeartbeatDuration,
+			Timeout:  defaultHeartbeatTimeout,
+		},
 	}
 }
 
@@ -315,37 +329,29 @@ func (e *ecsTaskSsmAction) startHeartbeat(state *TaskSsmActionState) {
 		return
 	}
 
-	stop := make(chan interface{}, 1)
-	heartbeats[state.ExecutionId] = stop
+	heartbeatCtx, heartbeatCancel := context.WithTimeout(context.Background(), e.heartbeat.Timeout)
+	heartbeats[state.ExecutionId] = heartbeatCancel
 
-	go func(currentHeartbeatParameters map[string][]string, heartbeatDuration time.Duration, heartbeatTimeout time.Duration) {
+	go func(parameters map[string][]string, ctx context.Context, cancel func()) {
 		client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
 		if err != nil {
 			log.Warn().Err(err).Msgf("Failed to create heartbeat client for ECS Task %s", state.TaskArn)
 			return
 		}
 
-		timeoutDuration := state.Duration + heartbeatTimeout
-		ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
-		timeout := ctx.Done()
-		defer cancel()
-
-		ticker := time.NewTicker(heartbeatDuration)
+		ticker := time.NewTicker(e.heartbeat.Duration)
 		defer ticker.Stop()
-		defer close(stop)
+		defer cancel()
 
 		for {
 			select {
-			case <-stop:
+			case <-ctx.Done():
 				log.Info().Msgf("Heartbeat stopped on ECS Task %s", state.TaskArn)
-				return
-			case <-timeout:
-				log.Info().Msgf("Heartbeat stopped due to reached timeout on ECS Task %s", state.TaskArn)
 				return
 			case <-ticker.C:
 				log.Info().Msgf("Sending heartbeat to ECS Task %s", state.TaskArn)
-				err := (*e.ssmCommandInvocation.updateHeartbeatParameters)(currentHeartbeatParameters)
-				if err != nil {
+
+				if err := (*e.ssmCommandInvocation.updateHeartbeatParameters)(parameters); err != nil {
 					log.Warn().Err(err).Msgf("Failed to update heartbeat parameters for ECS Task %s", state.TaskArn)
 					return
 				}
@@ -353,7 +359,7 @@ func (e *ecsTaskSsmAction) startHeartbeat(state *TaskSsmActionState) {
 					DocumentName:    &e.ssmCommandInvocation.documentName,
 					DocumentVersion: &e.ssmCommandInvocation.documentVersion,
 					InstanceIds:     []string{state.ManagedInstanceId},
-					Parameters:      currentHeartbeatParameters,
+					Parameters:      parameters,
 					Comment:         extutil.Ptr(shorten(state.Comment+" heartbeat", 100)),
 					TimeoutSeconds:  extutil.Ptr(int32(30)),
 				})
@@ -362,18 +368,13 @@ func (e *ecsTaskSsmAction) startHeartbeat(state *TaskSsmActionState) {
 				}
 			}
 		}
-	}(state.Parameters, heartbeatDuration, heartbeatTimeout)
+	}(state.Parameters, heartbeatCtx, heartbeatCancel)
 }
 
 func (e *ecsTaskSsmAction) stopHeartbeat(state *TaskSsmActionState) {
-	if c, ok := heartbeats[state.ExecutionId]; ok {
-		// None blocking send
-		select {
-		case c <- nil:
-		default:
-			log.Info().Str("task", state.TaskArn).Msg("Task already stopped")
-		}
+	if cancel, ok := heartbeats[state.ExecutionId]; ok {
 		delete(heartbeats, state.ExecutionId)
+		cancel()
 	}
 }
 
