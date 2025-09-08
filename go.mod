@@ -20,7 +20,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.77.2
 	github.com/aws/aws-sdk-go-v2/service/rds v1.104.1
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.30.2
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.63.0
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.64.2
 	github.com/aws/aws-sdk-go-v2/service/sts v1.38.2
 	github.com/aws/smithy-go v1.23.0
 	github.com/docker/go-connections v0.6.0
