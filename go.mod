@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.7
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.251.2
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.64.0
-	github.com/aws/aws-sdk-go-v2/service/elasticache v1.50.4
+	github.com/aws/aws-sdk-go-v2/service/elasticache v1.50.5
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.50.6
 	github.com/aws/aws-sdk-go-v2/service/fis v1.37.1
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.43.4
