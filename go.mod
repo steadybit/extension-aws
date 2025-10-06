@@ -18,7 +18,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/fis v1.37.5
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.43.4
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.77.6
-	github.com/aws/aws-sdk-go-v2/service/rds v1.107.2
+	github.com/aws/aws-sdk-go-v2/service/rds v1.108.0
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.30.6
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.65.1
 	github.com/aws/aws-sdk-go-v2/service/sts v1.38.6
