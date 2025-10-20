@@ -7,10 +7,10 @@ go 1.24.0
 
 require (
 	github.com/KimMachineGun/automemlimit v0.7.4
-	github.com/aws/aws-sdk-go-v2 v1.39.2
+	github.com/aws/aws-sdk-go-v2 v1.39.3
 	github.com/aws/aws-sdk-go-v2/config v1.31.12
 	github.com/aws/aws-sdk-go-v2/credentials v1.18.16
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.9
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.10
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.254.1
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.65.1
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.50.5
@@ -22,7 +22,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.30.6
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.65.1
 	github.com/aws/aws-sdk-go-v2/service/sts v1.38.6
-	github.com/aws/smithy-go v1.23.0
+	github.com/aws/smithy-go v1.23.1
 	github.com/docker/go-connections v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
