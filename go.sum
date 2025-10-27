@@ -29,8 +29,8 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.11 h1:ShdtWUZT37LCAA4Mw2
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.11/go.mod h1:7bUb2sSr2MZ3M/N+VyETLTQtInemHXb/Fl3s8CLzm0Y=
 github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4 h1:WKuaxf++XKWlHWu9ECbMlha8WOEGm0OUEZqm4K/Gcfk=
 github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4/go.mod h1:ZWy7j6v1vWGmPReu0iSGvRiise4YI5SkR3OHKTZ6Wuc=
-github.com/aws/aws-sdk-go-v2/service/ec2 v1.254.1 h1:7p9bJCZ/b3EJXXARW7JMEs2IhsnI4YFHpfXQfgMh0eg=
-github.com/aws/aws-sdk-go-v2/service/ec2 v1.254.1/go.mod h1:M8WWWIfXmxA4RgTXcI/5cSByxRqjgne32Sh0VIbrn0A=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.258.1 h1:D8cBaI1TsIF+cbB8qPmiZWsMqGsbs1/e7qYQ0NMDscY=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.258.1/go.mod h1:DT0XByGaNaOff3CtLVmj3jKcMeVDfOj5DkLD39UPJY0=
 github.com/aws/aws-sdk-go-v2/service/ecs v1.65.1 h1:pBbXc1fGRbrYl7NFujuubMmEFEp7CJiKTBsoDOIUkuk=
 github.com/aws/aws-sdk-go-v2/service/ecs v1.65.1/go.mod h1:fu6WrWUHYyPRjzYO13UDXA7O6OShI8QbH5YSl9SOJwQ=
 github.com/aws/aws-sdk-go-v2/service/elasticache v1.50.5 h1:VEdPmtEs1EzHXOcKmKwaN6rwwatgw4k12n08U7qML5w=
@@ -41,8 +41,8 @@ github.com/aws/aws-sdk-go-v2/service/fis v1.37.5 h1:yqaWoYLetwAKcnR74PvZjgaFRabb
 github.com/aws/aws-sdk-go-v2/service/fis v1.37.5/go.mod h1:htMJekf0GQU+ZgqHm5nkrpGrFQk9Sd/VX3mazLer3M4=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.2 h1:xtuxji5CS0JknaXoACOunXOYOQzgfTvGAc9s2QdCJA4=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.2/go.mod h1:zxwi0DIR0rcRcgdbl7E2MSOvxDyyXGBlScvBkARFaLQ=
-github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.10 h1:DRND0dkCKtJzCj4Xl4OpVbXZgfttY5q712H9Zj7qc/0=
-github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.10/go.mod h1:tGGNmJKOTernmR2+VJ0fCzQRurcPZj9ut60Zu5Fi6us=
+github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.11 h1:GpMf3z2KJa4RnJ0ew3Hac+hRFYLZ9DDjfgXjuW+pB54=
+github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.11/go.mod h1:6MZP3ZI4QQsgUCFTwMZA2V0sEriNQ8k2hmoHF3qjimQ=
 github.com/aws/aws-sdk-go-v2/service/kafka v1.43.4 h1:SbVDfvwIpB3c3FWTDw8VnGatPxVEn3HjOiR6y3iUY9M=
 github.com/aws/aws-sdk-go-v2/service/kafka v1.43.4/go.mod h1:nQ7kmni4yUHB1Ax8GCjeQ2myyBOBxmh1XuElflbI0tA=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.78.0 h1:o6244M0Z5ryHuO05Fm+03CCZIQSh+qmZgYbnbOuaRGo=
