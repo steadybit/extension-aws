@@ -17,7 +17,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.51.3
 	github.com/aws/aws-sdk-go-v2/service/fis v1.37.8
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.43.4
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.78.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.81.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.108.5
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.30.6
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.66.2
@@ -48,7 +48,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.1 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.2 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.12 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.12 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4 // indirect
