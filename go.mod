@@ -3,25 +3,25 @@
 
 module github.com/steadybit/extension-aws/v2
 
-go 1.25.4
+go 1.25.3
 
 require (
 	github.com/KimMachineGun/automemlimit v0.7.5
 	github.com/aws/aws-sdk-go-v2 v1.39.6
-	github.com/aws/aws-sdk-go-v2/config v1.31.15
-	github.com/aws/aws-sdk-go-v2/credentials v1.18.21
+	github.com/aws/aws-sdk-go-v2/config v1.31.20
+	github.com/aws/aws-sdk-go-v2/credentials v1.18.24
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.13
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.258.1
-	github.com/aws/aws-sdk-go-v2/service/ecs v1.67.0
-	github.com/aws/aws-sdk-go-v2/service/elasticache v1.50.5
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.51.5
-	github.com/aws/aws-sdk-go-v2/service/fis v1.37.8
-	github.com/aws/aws-sdk-go-v2/service/kafka v1.43.4
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.81.0
-	github.com/aws/aws-sdk-go-v2/service/rds v1.108.6
-	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.30.11
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.67.0
-	github.com/aws/aws-sdk-go-v2/service/sts v1.39.1
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.271.0
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.67.4
+	github.com/aws/aws-sdk-go-v2/service/elasticache v1.51.3
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.53.0
+	github.com/aws/aws-sdk-go-v2/service/fis v1.37.11
+	github.com/aws/aws-sdk-go-v2/service/kafka v1.46.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.81.3
+	github.com/aws/aws-sdk-go-v2/service/rds v1.109.0
+	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.31.0
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.67.2
+	github.com/aws/aws-sdk-go-v2/service/sts v1.40.2
 	github.com/aws/smithy-go v1.23.2
 	github.com/docker/go-connections v0.6.0
 	github.com/google/uuid v1.6.0
@@ -40,7 +40,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.40.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.40.0
 	go.uber.org/automaxprocs v1.6.0
-	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476
+	golang.org/x/exp v0.0.0-20251113190631-e25ba8c21ef6
 )
 
 require (
@@ -48,14 +48,14 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.2 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.3 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.13 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.13 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.13 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.30.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.30.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.7 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
@@ -149,7 +149,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.44.0 // indirect
-	golang.org/x/mod v0.29.0 // indirect
+	golang.org/x/mod v0.30.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.33.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
