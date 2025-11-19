@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.4.6
+
+- Update dependencies
+
 ## v2.4.5
 
 - Add AWS ECS Fargate network attacks
