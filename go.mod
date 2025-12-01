@@ -21,7 +21,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/rds v1.111.0
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.31.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.67.2
-	github.com/aws/aws-sdk-go-v2/service/sts v1.41.1
+	github.com/aws/aws-sdk-go-v2/service/sts v1.41.2
 	github.com/aws/smithy-go v1.23.2
 	github.com/docker/go-connections v0.6.0
 	github.com/google/uuid v1.6.0
