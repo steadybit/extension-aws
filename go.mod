@@ -7,7 +7,7 @@ go 1.25.3
 
 require (
 	github.com/KimMachineGun/automemlimit v0.7.5
-	github.com/aws/aws-sdk-go-v2 v1.41.0
+	github.com/aws/aws-sdk-go-v2 v1.41.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.6
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.16
