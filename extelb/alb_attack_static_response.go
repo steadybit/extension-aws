@@ -6,6 +6,8 @@ package extelb
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
 	"github.com/google/uuid"
@@ -16,7 +18,6 @@ import (
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"strconv"
 )
 
 type albStaticResponseAction struct {
@@ -69,7 +70,7 @@ func (e *albStaticResponseAction) NewEmptyState() AlbStaticResponseState {
 func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.static_response", albTargetId),
-		Label:       "Return static response",
+		Label:       "Return Static Response",
 		Description: "Define a static Response for a given Listener of an Application Load Balancer.",
 		Technology:  extutil.Ptr("AWS"),
 		Category:    extutil.Ptr("Load Balancer"),
