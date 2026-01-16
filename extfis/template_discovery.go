@@ -51,7 +51,7 @@ func (f *fisTemplateDiscovery) Describe() discovery_kit_api.DiscoveryDescription
 func (f *fisTemplateDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       fisTargetId,
-		Label:    discovery_kit_api.PluralLabel{One: "FIS experiment", Other: "FIS experiments"},
+		Label:    discovery_kit_api.PluralLabel{One: "FIS Experiment", Other: "FIS Experiments"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(fisIcon),

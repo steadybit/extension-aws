@@ -53,7 +53,7 @@ func (r *rdsInstanceDiscovery) Describe() discovery_kit_api.DiscoveryDescription
 func (r *rdsInstanceDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       rdsInstanceTargetId,
-		Label:    discovery_kit_api.PluralLabel{One: "RDS instance", Other: "RDS instances"},
+		Label:    discovery_kit_api.PluralLabel{One: "RDS Instance", Other: "RDS Instances"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(rdsIcon),

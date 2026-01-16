@@ -52,7 +52,7 @@ func (e *ec2Discovery) Describe() discovery_kit_api.DiscoveryDescription {
 func (e *ec2Discovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       ec2TargetType,
-		Label:    discovery_kit_api.PluralLabel{One: "EC2 instance", Other: "EC2 instances"},
+		Label:    discovery_kit_api.PluralLabel{One: "EC2 Instance", Other: "EC2 Instances"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(ec2Icon),

@@ -51,7 +51,7 @@ func (r *rdsClusterDiscovery) Describe() discovery_kit_api.DiscoveryDescription 
 func (r *rdsClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       rdsClusterTargetId,
-		Label:    discovery_kit_api.PluralLabel{One: "RDS cluster", Other: "RDS clusters"},
+		Label:    discovery_kit_api.PluralLabel{One: "RDS Cluster", Other: "RDS Clusters"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(rdsIcon),

@@ -55,7 +55,7 @@ func (r *mskClusterDiscovery) Describe() discovery_kit_api.DiscoveryDescription 
 func (r *mskClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       mskBrokerTargetId,
-		Label:    discovery_kit_api.PluralLabel{One: "MSK broker", Other: "MSK brokers"},
+		Label:    discovery_kit_api.PluralLabel{One: "MSK Broker", Other: "MSK Brokers"},
 		Category: extutil.Ptr("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(mskIcon),
