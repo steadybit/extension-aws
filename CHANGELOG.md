@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.4.9
+
+- Update dependencies
+
 ## v2.4.8
 
 - Update dependencies
