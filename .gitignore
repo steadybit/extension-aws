@@ -6,3 +6,5 @@
 /dist
 /licenses
 /snyk.sarif
+
+.env
