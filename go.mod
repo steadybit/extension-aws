@@ -35,7 +35,7 @@ require (
 	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.3.1
 	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.2
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.1
-	github.com/steadybit/extension-kit v1.10.1
+	github.com/steadybit/extension-kit v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.40.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.40.0
@@ -96,7 +96,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240226150601-1dcf7310316a // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/mailru/easyjson v0.9.1 // indirect

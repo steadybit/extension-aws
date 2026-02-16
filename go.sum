@@ -184,8 +184,8 @@ github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfV
 github.com/juju/gnuflag v0.0.0-20171113085948-2ce1bb71843d/go.mod h1:2PavIy+JPciBPrBUjwbNvtwB6RQlve+hkpll6QSNmOE=
 github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
-github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
-github.com/klauspost/compress v1.18.0/go.mod h1:2Pp+KzxcywXVXMr50+X0Q/Lsb43OQHYWRCY2AiWywWQ=
+github.com/klauspost/compress v1.18.4 h1:RPhnKRAQ4Fh8zU2FY/6ZFDwTVTxgJ/EMydqSTzE9a2c=
+github.com/klauspost/compress v1.18.4/go.mod h1:R0h/fSBs8DE4ENlcrlib3PsXS61voFxhIs2DeRhCvJ4=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
@@ -299,8 +299,8 @@ github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.2 h1:xt2zJ5AykcUvZY
 github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.2/go.mod h1:iF/w15ursykWjPXgciQuDV23lKffhqtx4QghgDpHJ5A=
 github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.1 h1:CabRtfE70gt/4H/TgL/TRm54OkxWKbmPhTX2qEhzKZ4=
 github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.1/go.mod h1:PPJh5gSdVRKG/0qJCGJK5XnGxXat/v6UT8/2ilIbbX8=
-github.com/steadybit/extension-kit v1.10.1 h1:fvjDuTySNb1pPTWsaIwmosv7YT1m1l/YgB+mIpnOkDE=
-github.com/steadybit/extension-kit v1.10.1/go.mod h1:H0ruxx/Lwg7PQI/oi56aivVlZgeU8cl6ebHhyoq0Fj4=
+github.com/steadybit/extension-kit v1.10.2 h1:ny62/TPgZIhZibY0+L8zuFEKqx3XuCEXZgij0Z2SDyM=
+github.com/steadybit/extension-kit v1.10.2/go.mod h1:vjcSUw8/eR11sQxR7cTEkU2oPoNvoKTihXQIqh3jlHM=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.5.3 h1:jmXUvGomnU1o3W/V5h2VEradbpJDwGrzugQQvL0POH4=
 github.com/stretchr/objx v0.5.3/go.mod h1:rDQraq+vQZU7Fde9LOZLr8Tax6zZvy4kuNKF+QYS+U0=
