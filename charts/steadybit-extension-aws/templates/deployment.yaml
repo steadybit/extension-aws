@@ -43,9 +43,10 @@ spec:
       securityContext:
       {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- include "extensionlib.imagePullSecrets" . | nindent 6 }}
       containers:
-        - image: {{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - image: {{ include "extensionlib.image" . }}
+          imagePullPolicy: {{ include "extensionlib.imagePullPolicy" . }}
           name: extension
           ports:
             - containerPort: 8085

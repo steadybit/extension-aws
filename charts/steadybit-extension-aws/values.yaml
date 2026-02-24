@@ -79,13 +79,17 @@ aws:
         zone: []
 
 image:
+  # image.registry -- The container registry to use. Defaults to global.image.registry or ghcr.io.
+  registry: null
   # image.name -- The container image to use for the steadybit AWS extension.
-  name: ghcr.io/steadybit/extension-aws
+  name: steadybit/extension-aws
   # image.tag -- tag name of the extension-aws container image to use. Defaults to appVersion of this chart.
   # See https://hub.docker.com/r/steadybit/extension-aws for all tags.
   tag: null
   # image.pullPolicy -- Specifies when to pull the image.
   pullPolicy: Always
+  # image.pullSecrets -- List of image pull secret names.
+  pullSecrets: []
 
 tls:
   server:
