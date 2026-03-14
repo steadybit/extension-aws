@@ -55,10 +55,12 @@ func helmInstallLocalStack(minikube *e2e.Minikube) error {
 	out, err = exec.Command("helm",
 		"upgrade", "--install",
 		"--kube-context", minikube.Profile,
+		"--set", "image.tag=stable",
 		"--set", "debug=true",
 		"--set", "startServices=lambda\\,ec2",
 		"--namespace=default",
-		"localstack", "localstack/localstack", "--wait").CombinedOutput()
+		"localstack", "localstack/localstack", "--wait",
+		"--timeout", "10m").CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to install helm chart: %s: %s", err, out)
 	}
