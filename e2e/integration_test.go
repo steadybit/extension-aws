@@ -59,6 +59,7 @@ func helmInstallLocalStack(minikube *e2e.Minikube) error {
 	out, err = exec.Command("helm",
 		"upgrade", "--install",
 		"--kube-context", minikube.Profile,
+		"--set", "image.repository=localstack/localstack",
 		"--set", "image.tag=stable",
 		"--set", "image.pullPolicy=IfNotPresent",
 		"--set", "debug=true",
