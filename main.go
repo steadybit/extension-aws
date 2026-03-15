@@ -5,6 +5,11 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	_ "github.com/KimMachineGun/automemlimit" // By default, it sets `GOMEMLIMIT` to 90% of cgroup's memory limit.
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/rs/zerolog"
@@ -29,10 +34,9 @@ import (
 	"github.com/steadybit/extension-kit/extlogging"
 	"github.com/steadybit/extension-kit/extruntime"
 	"github.com/steadybit/extension-kit/extsignals"
-	"os"
-	"os/signal"
-	"syscall"
 )
+
+var startedAt = time.Now().Format(time.RFC3339)
 
 func main() {
 	extlogging.InitZeroLog()
@@ -170,7 +174,7 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extelb.NewAlbStaticResponseAction())
 	}
 
-	exthttp.RegisterHttpHandler("/", exthttp.GetterAsHandler(getExtensionList))
+	exthttp.RegisterHttpHandler("/", exthttp.IfNoneMatchHandler(func() string { return startedAt }, exthttp.GetterAsHandler(getExtensionList)))
 }
 
 type ExtensionListResponse struct {

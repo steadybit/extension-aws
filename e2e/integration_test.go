@@ -5,13 +5,14 @@ package e2e
 
 import (
 	"fmt"
+	"os/exec"
+	"strings"
+	"testing"
+
 	"github.com/steadybit/action-kit/go/action_kit_test/e2e"
 	actValidate "github.com/steadybit/action-kit/go/action_kit_test/validate"
 	disValidate "github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
 	"github.com/stretchr/testify/assert"
-	"os/exec"
-	"strings"
-	"testing"
 )
 
 func TestWithMinikube(t *testing.T) {
@@ -48,19 +49,28 @@ func TestWithMinikube(t *testing.T) {
 }
 
 func helmInstallLocalStack(minikube *e2e.Minikube) error {
+	if err := minikube.PullImage("localstack/localstack:stable"); err != nil {
+		return fmt.Errorf("failed to pre-pull localstack image: %w", err)
+	}
 	out, err := exec.Command("helm", "repo", "add", "localstack", "https://localstack.github.io/helm-charts").CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to install helm chart: %s: %s", err, out)
+		return fmt.Errorf("failed to add helm repo: %s: %s", err, out)
 	}
 	out, err = exec.Command("helm",
 		"upgrade", "--install",
 		"--kube-context", minikube.Profile,
+		"--set", "image.repository=localstack/localstack",
+		"--set", "image.tag=stable",
+		"--set", "image.pullPolicy=IfNotPresent",
 		"--set", "debug=true",
 		"--set", "startServices=lambda\\,ec2",
 		"--namespace=default",
-		"localstack", "localstack/localstack", "--wait").CombinedOutput()
+		"localstack", "localstack/localstack", "--wait",
+		"--timeout", "10m").CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to install helm chart: %s: %s", err, out)
+		debugOut, _ := exec.Command("kubectl", "--context", minikube.Profile, "describe", "pods", "-l", "app.kubernetes.io/name=localstack", "-n", "default").CombinedOutput()
+		eventsOut, _ := exec.Command("kubectl", "--context", minikube.Profile, "get", "events", "-n", "default", "--sort-by=.lastTimestamp").CombinedOutput()
+		return fmt.Errorf("failed to install helm chart: %s: %s\n\npod describe:\n%s\n\nevents:\n%s", err, out, debugOut, eventsOut)
 	}
 	return nil
 }
