@@ -48,6 +48,9 @@ func TestWithMinikube(t *testing.T) {
 }
 
 func helmInstallLocalStack(minikube *e2e.Minikube) error {
+	if err := minikube.PullImage("localstack/localstack:stable"); err != nil {
+		return fmt.Errorf("failed to pre-pull localstack image: %w", err)
+	}
 	out, err := exec.Command("helm", "repo", "add", "localstack", "https://localstack.github.io/helm-charts").CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to install helm chart: %s: %s", err, out)
