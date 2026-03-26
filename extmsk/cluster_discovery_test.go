@@ -285,6 +285,36 @@ func TestGetAllMskClustersWithPagination(t *testing.T) {
 	assert.Equal(t, "node-arn2", targets[1].Id)
 }
 
+func TestGetAllMskClustersSkipsFailedClusters(t *testing.T) {
+	// Given
+	mockedApi := new(mskClusterApiMock)
+	mockedClusterReturnValue := kafka.ListClustersV2Output{
+		ClusterInfoList: []types.Cluster{
+			{
+				ClusterName:    aws.String("failed-cluster"),
+				ClusterArn:     aws.String("failed-cluster-arn"),
+				CurrentVersion: aws.String("version"),
+				State:          types.ClusterStateFailed,
+			},
+		},
+	}
+
+	mockedApi.On("ListClustersV2", mock.Anything, mock.Anything).Return(&mockedClusterReturnValue, nil)
+
+	tagApi := new(tagClientMock)
+
+	// When
+	targets, err := getAllMskClusters(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+	})
+
+	// Then
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(targets))
+	mockedApi.AssertNotCalled(t, "ListNodes", mock.Anything, mock.Anything)
+}
+
 func TestGetAllMskClustersError(t *testing.T) {
 	// Given
 	mockedApi := new(mskClusterApiMock)
