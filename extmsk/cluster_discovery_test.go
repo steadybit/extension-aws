@@ -315,6 +315,36 @@ func TestGetAllMskClustersSkipsFailedClusters(t *testing.T) {
 	mockedApi.AssertNotCalled(t, "ListNodes", mock.Anything, mock.Anything)
 }
 
+func TestGetAllMskClustersSkipsDeletingClusters(t *testing.T) {
+	// Given
+	mockedApi := new(mskClusterApiMock)
+	mockedClusterReturnValue := kafka.ListClustersV2Output{
+		ClusterInfoList: []types.Cluster{
+			{
+				ClusterName:    aws.String("deleting-cluster"),
+				ClusterArn:     aws.String("deleting-cluster-arn"),
+				CurrentVersion: aws.String("version"),
+				State:          types.ClusterStateDeleting,
+			},
+		},
+	}
+
+	mockedApi.On("ListClustersV2", mock.Anything, mock.Anything).Return(&mockedClusterReturnValue, nil)
+
+	tagApi := new(tagClientMock)
+
+	// When
+	targets, err := getAllMskClusters(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
+		AccountNumber: "42",
+		Region:        "us-east-1",
+	})
+
+	// Then
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(targets))
+	mockedApi.AssertNotCalled(t, "ListNodes", mock.Anything, mock.Anything)
+}
+
 func TestGetAllMskClustersError(t *testing.T) {
 	// Given
 	mockedApi := new(mskClusterApiMock)

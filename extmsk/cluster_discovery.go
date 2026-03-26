@@ -185,7 +185,7 @@ func getAllMskClusters(ctx context.Context, mskApi MskApi, tagsClient resourcegr
 
 		for _, mskCluster := range output.ClusterInfoList {
 			//You can't list the nodes for a cluster that is in the CREATING or FAILED state.
-			if mskCluster.State == types.ClusterStateCreating || mskCluster.State == types.ClusterStateFailed {
+			if mskCluster.State == types.ClusterStateCreating || mskCluster.State == types.ClusterStateFailed || mskCluster.State == types.ClusterStateDeleting {
 				log.Warn().Msgf("Skipping MSK cluster %s: can't list nodes for a cluster in %s state.", aws.ToString(mskCluster.ClusterName), mskCluster.State)
 			} else {
 				paginatorNodes := kafka.NewListNodesPaginator(mskApi, &kafka.ListNodesInput{ClusterArn: mskCluster.ClusterArn})
