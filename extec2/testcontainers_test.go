@@ -55,7 +55,7 @@ func WithTestContainers(t *testing.T, testCases []WithTestContainersCase) {
 }
 
 func setupTestContainers(t *testing.T, ctx context.Context) *TestContainers {
-	localstackImage := "localstack/localstack:stable"
+	localstackImage := "localstack/localstack:4.14.0"
 
 	networkCreated, err := network.New(ctx)
 	require.Nil(t, err)
