@@ -104,10 +104,12 @@ func getTargetSubnetsForBlackholeZone(clientEc2 blackholeEC2Api, ctx context.Con
 			log.Error().Err(err).Msg("Failed to get subnets")
 			return nil, extension_kit.ToError(fmt.Sprintf("Failed to get subnets for zone %s", targetZone), err)
 		}
+		subnetIds := make([]string, 0, len(subnets.Subnets))
 		for _, subnet := range subnets.Subnets {
 			subnetResults[*subnet.VpcId] = append(subnetResults[*subnet.VpcId], *subnet.SubnetId)
+			subnetIds = append(subnetIds, *subnet.SubnetId)
 		}
-		log.Debug().Msgf("Found %d subnets in AZ %s for creating temporary ACL to block traffic: %+v", len(subnets.Subnets), targetZone, subnets.Subnets)
+		log.Debug().Msgf("Found %d subnets in AZ %s for creating temporary ACL to block traffic: %v", len(subnets.Subnets), targetZone, subnetIds)
 	}
 	return subnetResults, nil
 }
