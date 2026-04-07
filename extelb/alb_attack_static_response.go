@@ -417,23 +417,21 @@ func reprioritizeIfNecessary(ctx context.Context, client *albStaticResponseApi, 
 
 	repriorityPairs := getNewPriorityPairs(describeRulesResult)
 	if len(repriorityPairs) != 0 {
-		ruleArns := make([]string, 0)
 		for _, rule := range repriorityPairs {
-			ruleArns = append(ruleArns, *rule.RuleArn)
-		}
-		_, err = (*client).AddTags(ctx, &elasticloadbalancingv2.AddTagsInput{
-			ResourceArns: ruleArns,
-			Tags: []types.Tag{
-				{
-					Key:   extutil.Ptr(steadybitReprioritized),
-					Value: extutil.Ptr(state.TargetExecutionId.String()),
+			_, err = (*client).AddTags(ctx, &elasticloadbalancingv2.AddTagsInput{
+				ResourceArns: []string{*rule.RuleArn},
+				Tags: []types.Tag{
+					{
+						Key:   extutil.Ptr(steadybitReprioritized),
+						Value: extutil.Ptr(state.TargetExecutionId.String()),
+					},
 				},
-			},
-		})
-		log.Info().Msgf("Add steadybit tags for %d rules of listener '%s'.", len(ruleArns), state.ListenerArn)
-		if err != nil {
-			return extension_kit.ToError(fmt.Sprintf("Failed to add tags to %d rules.", len(repriorityPairs)), err)
+			})
+			if err != nil {
+				return extension_kit.ToError(fmt.Sprintf("Failed to add tags to rule '%s'.", *rule.RuleArn), err)
+			}
 		}
+		log.Info().Msgf("Add steadybit tags for %d rules of listener '%s'.", len(repriorityPairs), state.ListenerArn)
 
 		_, err = (*client).SetRulePriorities(ctx, &elasticloadbalancingv2.SetRulePrioritiesInput{
 			RulePriorities: repriorityPairs,
@@ -575,16 +573,14 @@ func restoreOldPriorities(ctx context.Context, client *albStaticResponseApi, sta
 	}
 
 	if len(restorePriorities) > 0 {
-		restoreRuleArn := make([]string, 0)
 		for _, rule := range restorePriorities {
-			restoreRuleArn = append(restoreRuleArn, *rule.RuleArn)
-		}
-		_, err := (*client).RemoveTags(ctx, &elasticloadbalancingv2.RemoveTagsInput{
-			ResourceArns: restoreRuleArn,
-			TagKeys:      []string{steadybitReprioritized},
-		})
-		if err != nil {
-			return extension_kit.ToError(fmt.Sprintf("Failed to remove tags for %d rules", len(restoreRuleArn)), err)
+			_, err := (*client).RemoveTags(ctx, &elasticloadbalancingv2.RemoveTagsInput{
+				ResourceArns: []string{*rule.RuleArn},
+				TagKeys:      []string{steadybitReprioritized},
+			})
+			if err != nil {
+				return extension_kit.ToError(fmt.Sprintf("Failed to remove tags for rule '%s'", *rule.RuleArn), err)
+			}
 		}
 		log.Info().Msgf("Deleted steadybit tags from %d rules of listener '%s'.", len(restorePriorities), state.ListenerArn)
 		_, err = (*client).SetRulePriorities(ctx, &elasticloadbalancingv2.SetRulePrioritiesInput{
