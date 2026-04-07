@@ -117,7 +117,14 @@ func testPrepareAndStartAndStopBlackholeLocalStack(t *testing.T, clientEc2 *ec2.
  */
 func testApiThrottlingDuringStartWhileCreatingTheSecondNACL(t *testing.T, clientEc2 *ec2.Client, clientImds *imds.Client) {
 	// Prepare
-	prepareAdditionalVpcWithTwoSubnets(t, clientEc2)
+	defaultVpcId, createdVpcId := prepareAdditionalVpcWithTwoSubnets(t, clientEc2)
+
+	// The first VPC (sorted) gets its NACL created and subnets assigned before the second VPC fails.
+	// The rollback needs to undo the first VPC's subnet associations.
+	firstVpcSubnetCount := 1
+	if createdVpcId < defaultVpcId {
+		firstVpcSubnetCount = 2
+	}
 
 	// Given
 	// Simulate an error during CreateNetworkAcl / immediate rollback is also not possible because there are no permitted api calls for the rollback
@@ -137,9 +144,9 @@ func testApiThrottlingDuringStartWhileCreatingTheSecondNACL(t *testing.T, client
 
 	// allow rollback api calls
 	PermittedApiCalls = map[string]int{
-		"DeleteNetworkAcl":             1, //Only one was created
-		"DescribeNetworkAcls":          1, //1 calls to get all created NACLS
-		"ReplaceNetworkAclAssociation": 1, //Only one was created / assigned
+		"DeleteNetworkAcl":             1,                  //Only one was created
+		"DescribeNetworkAcls":          1,                  //1 calls to get all created NACLS
+		"ReplaceNetworkAclAssociation": firstVpcSubnetCount, //Depends on which VPC was processed first
 	}
 
 	// Stop
