@@ -1,8 +1,10 @@
 # Changelog
 
-## (next)
+## v2.4.12
 
-- Support if-none-match for the extension list endpoint
+- Bump Go to 1.25.9
+- Add tag per arn for elb rules
+- Update dependencies
 
 ## v2.4.10
 
