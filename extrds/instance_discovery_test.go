@@ -8,12 +8,10 @@ import (
 	"errors"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -26,17 +24,17 @@ func TestGetAllRdsInstances(t *testing.T) {
 	mockedReturnValue := rds.DescribeDBInstancesOutput{
 		DBInstances: []types.DBInstance{
 			{
-				DBSubnetGroup: extutil.Ptr(types.DBSubnetGroup{
-					VpcId: discovery_kit_api.Ptr("vpc-123-id"),
+				DBSubnetGroup: new(types.DBSubnetGroup{
+					VpcId: new("vpc-123-id"),
 				}),
-				DBInstanceArn:        discovery_kit_api.Ptr("arn"),
-				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier"),
-				AvailabilityZone:     discovery_kit_api.Ptr("us-east-1a"),
-				Engine:               discovery_kit_api.Ptr("engine"),
-				DBClusterIdentifier:  discovery_kit_api.Ptr("cluster"),
-				DBInstanceStatus:     discovery_kit_api.Ptr("status"),
+				DBInstanceArn:        new("arn"),
+				DBInstanceIdentifier: new("identifier"),
+				AvailabilityZone:     new("us-east-1a"),
+				Engine:               new("engine"),
+				DBClusterIdentifier:  new("cluster"),
+				DBInstanceStatus:     new("status"),
 				TagList: []types.Tag{
-					{Key: discovery_kit_api.Ptr("SpecialTag"), Value: discovery_kit_api.Ptr("Great Thing")},
+					{Key: new("SpecialTag"), Value: new("Great Thing")},
 				},
 			},
 		},
@@ -45,9 +43,9 @@ func TestGetAllRdsInstances(t *testing.T) {
 
 	mockedZoneUtil := new(zoneMock)
 	mockedZone := ec2types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+		ZoneName:   new("us-east-1a"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1a-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
@@ -56,7 +54,7 @@ func TestGetAllRdsInstances(t *testing.T) {
 	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "SpecialTag",
@@ -92,14 +90,14 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	mockedReturnValue := rds.DescribeDBInstancesOutput{
 		DBInstances: []types.DBInstance{
 			{
-				DBInstanceArn:        discovery_kit_api.Ptr("arn"),
-				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier"),
-				AvailabilityZone:     discovery_kit_api.Ptr("us-east-1a"),
-				Engine:               discovery_kit_api.Ptr("engine"),
-				DBInstanceStatus:     discovery_kit_api.Ptr("status"),
+				DBInstanceArn:        new("arn"),
+				DBInstanceIdentifier: new("identifier"),
+				AvailabilityZone:     new("us-east-1a"),
+				Engine:               new("engine"),
+				DBInstanceStatus:     new("status"),
 				DBClusterIdentifier:  nil,
 				TagList: []types.Tag{
-					{Key: discovery_kit_api.Ptr("SpecialTag"), Value: discovery_kit_api.Ptr("Great Thing")},
+					{Key: new("SpecialTag"), Value: new("Great Thing")},
 				},
 			},
 		},
@@ -107,9 +105,9 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	mockedApi.On("DescribeDBInstances", mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 	mockedZoneUtil := new(zoneMock)
 	mockedZone := ec2types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+		ZoneName:   new("us-east-1a"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1a-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
@@ -117,7 +115,7 @@ func TestGetAllRdsInstancesWithoutCluster(t *testing.T) {
 	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -139,9 +137,9 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	mockedApi := new(rdsDBInstanceApiMock)
 	mockedZoneUtil := new(zoneMock)
 	mockedZone := ec2types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+		ZoneName:   new("us-east-1a"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1a-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
@@ -151,27 +149,27 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	withoutMarker := mock.MatchedBy(func(arg *rds.DescribeDBInstancesInput) bool {
 		return arg.Marker == nil
 	})
-	mockedApi.On("DescribeDBInstances", mock.Anything, withoutMarker).Return(discovery_kit_api.Ptr(rds.DescribeDBInstancesOutput{
-		Marker: discovery_kit_api.Ptr("marker"),
+	mockedApi.On("DescribeDBInstances", mock.Anything, withoutMarker).Return(new(rds.DescribeDBInstancesOutput{
+		Marker: new("marker"),
 		DBInstances: []types.DBInstance{
 			{
-				DBInstanceArn:        discovery_kit_api.Ptr("arn1"),
-				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier1"),
-				AvailabilityZone:     discovery_kit_api.Ptr("az1"),
-				Engine:               discovery_kit_api.Ptr("engine1"),
-				DBInstanceStatus:     discovery_kit_api.Ptr("status"),
+				DBInstanceArn:        new("arn1"),
+				DBInstanceIdentifier: new("identifier1"),
+				AvailabilityZone:     new("az1"),
+				Engine:               new("engine1"),
+				DBInstanceStatus:     new("status"),
 				DBClusterIdentifier:  nil,
 			},
 		},
 	}), nil)
-	mockedApi.On("DescribeDBInstances", mock.Anything, withMarker).Return(discovery_kit_api.Ptr(rds.DescribeDBInstancesOutput{
+	mockedApi.On("DescribeDBInstances", mock.Anything, withMarker).Return(new(rds.DescribeDBInstancesOutput{
 		DBInstances: []types.DBInstance{
 			{
-				DBInstanceArn:        discovery_kit_api.Ptr("arn2"),
-				DBInstanceIdentifier: discovery_kit_api.Ptr("identifier2"),
-				AvailabilityZone:     discovery_kit_api.Ptr("az2"),
-				Engine:               discovery_kit_api.Ptr("engine2"),
-				DBInstanceStatus:     discovery_kit_api.Ptr("status2"),
+				DBInstanceArn:        new("arn2"),
+				DBInstanceIdentifier: new("identifier2"),
+				AvailabilityZone:     new("az2"),
+				Engine:               new("engine2"),
+				DBInstanceStatus:     new("status2"),
 				DBClusterIdentifier:  nil,
 			},
 		},
@@ -181,7 +179,7 @@ func TestGetAllRdsInstancesWithPagination(t *testing.T) {
 	targets, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -196,9 +194,9 @@ func TestGetAllRdsInstancesError(t *testing.T) {
 	mockedApi := new(rdsDBInstanceApiMock)
 	mockedZoneUtil := new(zoneMock)
 	mockedZone := ec2types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+		ZoneName:   new("us-east-1a"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1a-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 
@@ -208,7 +206,7 @@ func TestGetAllRdsInstancesError(t *testing.T) {
 	_, err := getAllRdsInstances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then

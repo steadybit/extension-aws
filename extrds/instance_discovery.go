@@ -22,7 +22,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 type rdsInstanceDiscovery struct {
@@ -45,7 +44,7 @@ func (r *rdsInstanceDiscovery) Describe() discovery_kit_api.DiscoveryDescription
 	return discovery_kit_api.DiscoveryDescription{
 		Id: rdsInstanceTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalRds)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalRds)),
 		},
 	}
 }
@@ -54,9 +53,9 @@ func (r *rdsInstanceDiscovery) DescribeTarget() discovery_kit_api.TargetDescript
 	return discovery_kit_api.TargetDescription{
 		Id:       rdsInstanceTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "RDS instance", Other: "RDS instances"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(rdsIcon),
+		Icon:     new(rdsIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},

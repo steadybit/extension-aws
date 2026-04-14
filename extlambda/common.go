@@ -2,7 +2,6 @@ package extlambda
 
 import (
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 const (
@@ -13,7 +12,7 @@ const (
 var (
 	lambdaTargetSelection = action_kit_api.TargetSelection{
 		TargetType: lambdaTargetID,
-		SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+		SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 			{
 				Label: "function name",
 				Query: "aws.lambda.function-name=\"\"",

@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/fis/types"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -42,15 +41,15 @@ func TestGetAllFisTemplates(t *testing.T) {
 	mockedReturnValue := fis.ListExperimentTemplatesOutput{
 		ExperimentTemplates: []types.ExperimentTemplateSummary{
 			{
-				Id:          extutil.Ptr("EXTT9pS4WzTB4qe"),
-				Description: extutil.Ptr("Lorem Ipsum"),
+				Id:          new("EXTT9pS4WzTB4qe"),
+				Description: new("Lorem Ipsum"),
 				Tags:        map[string]string{"Name": "FISible Experiment", "SpecialTag": "Great Thing"},
 			},
 		},
 	}
 	mockedReturnValueTemplate := fis.GetExperimentTemplateOutput{
 		ExperimentTemplate: &types.ExperimentTemplate{
-			Id: extutil.Ptr("EXTT9pS4WzTB4qe"),
+			Id: new("EXTT9pS4WzTB4qe"),
 			Actions: map[string]types.ExperimentTemplateAction{
 				"step1":       {Parameters: map[string]string{"duration": "PT1M"}},
 				"step2":       {Parameters: map[string]string{"duration": "PT2M"}, StartAfter: []string{"step1"}},
@@ -67,7 +66,7 @@ func TestGetAllFisTemplates(t *testing.T) {
 	targets, err := GetAllFisTemplates(context.Background(), mockedApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "SpecialTag",
@@ -106,7 +105,7 @@ func TestGetAllFisTemplatesError(t *testing.T) {
 	_, err := GetAllFisTemplates(context.Background(), mockedApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then

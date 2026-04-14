@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/v2/config"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/require"
 	"sort"
 	"testing"
@@ -29,7 +28,7 @@ func TestGetAccountSupportsRootAccount(t *testing.T) {
 func TestGetAccountSupportsAssumedAccount(t *testing.T) {
 	accounts = getTestAccountsWithRoleAssumption()
 
-	account, err := GetAwsAccess("22222222", "eu-central-1", extutil.Ptr("arn:aws:iam::22222222:role/test"))
+	account, err := GetAwsAccess("22222222", "eu-central-1", new("arn:aws:iam::22222222:role/test"))
 
 	require.NoError(t, err)
 	require.Equal(t, "22222222", account.AccountNumber)
@@ -96,7 +95,7 @@ func TestForEachAccountWithRoleAssumptionAndError(t *testing.T) {
 	config.Config.WorkerThreads = 4
 	accounts = getTestAccountsWithRoleAssumption()
 
-	result, err := ForEveryConfiguredAwsAccess(getTestFunction(extutil.Ptr("22222222"), nil), context.Background(), "discovery")
+	result, err := ForEveryConfiguredAwsAccess(getTestFunction(new("22222222"), nil), context.Background(), "discovery")
 
 	require.NoError(t, err)
 	// for stable test execution
@@ -112,7 +111,7 @@ func TestForEachAccountWithRoleAssumptionAndEmptyLists(t *testing.T) {
 	config.Config.WorkerThreads = 4
 	accounts = getTestAccountsWithRoleAssumption()
 
-	result, err := ForEveryConfiguredAwsAccess(getTestFunction(nil, extutil.Ptr("22222222")), context.Background(), "discovery")
+	result, err := ForEveryConfiguredAwsAccess(getTestFunction(nil, new("22222222")), context.Background(), "discovery")
 
 	require.NoError(t, err)
 	// for stable test execution
@@ -153,28 +152,28 @@ func getTestAccountsWithRoleAssumption() map[string]AwsAccess {
 		"11111111-us-east-1-arn:aws:iam::11111111:role/test": {
 			AccountNumber: "11111111",
 			Region:        "us-east-1",
-			AssumeRole:    extutil.Ptr("arn:aws:iam::11111111:role/test"),
+			AssumeRole:    new("arn:aws:iam::11111111:role/test"),
 		},
 		"11111111-eu-central-1-arn:aws:iam::11111111:role/test": {
 			AccountNumber: "11111111",
 			Region:        "eu-central-1",
-			AssumeRole:    extutil.Ptr("arn:aws:iam::11111111:role/test"),
+			AssumeRole:    new("arn:aws:iam::11111111:role/test"),
 		},
 		"22222222-us-east-1-arn:aws:iam::22222222:role/test": {
 			AccountNumber: "22222222",
 			Region:        "us-east-1",
-			AssumeRole:    extutil.Ptr("arn:aws:iam::22222222:role/test"),
+			AssumeRole:    new("arn:aws:iam::22222222:role/test"),
 		},
 		"22222222-eu-central-1-arn:aws:iam::22222222:role/test": {
 			AccountNumber: "22222222",
 			Region:        "eu-central-1",
-			AssumeRole:    extutil.Ptr("arn:aws:iam::22222222:role/test"),
+			AssumeRole:    new("arn:aws:iam::22222222:role/test"),
 		},
 		// 1 account with 1 region but 2 roles separated by tag filer
 		"33333333-us-east-1-arn:aws:iam::33333333:role/test": {
 			AccountNumber: "33333333",
 			Region:        "us-east-1",
-			AssumeRole:    extutil.Ptr("arn:aws:iam::33333333:role/test1"),
+			AssumeRole:    new("arn:aws:iam::33333333:role/test1"),
 			TagFilters: []config.TagFilter{
 				{Key: "env", Values: []string{"prod"}},
 			},
@@ -182,7 +181,7 @@ func getTestAccountsWithRoleAssumption() map[string]AwsAccess {
 		"33333333-eu-central-1-arn:aws:iam::33333333:role/test": {
 			AccountNumber: "33333333",
 			Region:        "us-east-1",
-			AssumeRole:    extutil.Ptr("arn:aws:iam::33333333:role/test2"),
+			AssumeRole:    new("arn:aws:iam::33333333:role/test2"),
 			TagFilters: []config.TagFilter{
 				{Key: "env", Values: []string{"dev"}},
 			},

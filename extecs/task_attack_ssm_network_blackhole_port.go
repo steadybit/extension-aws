@@ -32,21 +32,21 @@ func getEcsTaskNetworkBlackholePortDescription() action_kit_api.ActionDescriptio
 			{
 				Name:         "duration",
 				Label:        "Duration",
-				Description:  extutil.Ptr("Duration of the attack."),
+				Description:  new("Duration of the attack."),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("30s"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(0),
+				DefaultValue: new("30s"),
+				Required:     new(true),
+				Order:        new(0),
 			},
 			{
 				Name:         "protocol",
 				Label:        "Protocol",
-				Description:  extutil.Ptr("The affected protocol."),
+				Description:  new("The affected protocol."),
 				Type:         action_kit_api.ActionParameterTypeString,
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(1),
-				DefaultValue: extutil.Ptr("tcp"),
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Required:     new(true),
+				Order:        new(1),
+				DefaultValue: new("tcp"),
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "TCP",
 						Value: "tcp",
@@ -60,21 +60,21 @@ func getEcsTaskNetworkBlackholePortDescription() action_kit_api.ActionDescriptio
 			{
 				Name:         "port",
 				Label:        "Port",
-				Description:  extutil.Ptr("The affected port."),
+				Description:  new("The affected port."),
 				Type:         action_kit_api.ActionParameterTypeInteger,
-				DefaultValue: extutil.Ptr("80"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(2),
+				DefaultValue: new("80"),
+				Required:     new(true),
+				Order:        new(2),
 			},
 			{
 				Name:         "trafficType",
 				Label:        "Traffic Type",
-				Description:  extutil.Ptr("The affected traffic type."),
+				Description:  new("The affected traffic type."),
 				Type:         action_kit_api.ActionParameterTypeString,
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(3),
-				DefaultValue: extutil.Ptr("ingress"),
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Required:     new(true),
+				Order:        new(3),
+				DefaultValue: new("ingress"),
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "Ingress",
 						Value: "ingress",

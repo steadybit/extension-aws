@@ -12,10 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/aws/smithy-go/middleware"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -54,11 +52,11 @@ func TestGetAllElasticacheReplicationGroups(t *testing.T) {
 	tags := resourcegroupstaggingapi.GetResourcesOutput{
 		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
 			{
-				ResourceARN: extutil.Ptr("arn:123456"),
+				ResourceARN: new("arn:123456"),
 				Tags: []tagtypes.Tag{
 					{
-						Key:   extutil.Ptr("Example"),
-						Value: extutil.Ptr("Tag123"),
+						Key:   new("Example"),
+						Value: new("Tag123"),
 					},
 				},
 			},
@@ -70,7 +68,7 @@ func TestGetAllElasticacheReplicationGroups(t *testing.T) {
 	targets, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -127,11 +125,11 @@ func TestGetAllElasticacheReplicationGroupsShouldApplyTagFilter(t *testing.T) {
 	tags := resourcegroupstaggingapi.GetResourcesOutput{
 		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
 			{
-				ResourceARN: extutil.Ptr("arn:123456"),
+				ResourceARN: new("arn:123456"),
 				Tags: []tagtypes.Tag{
 					{
-						Key:   extutil.Ptr("Example"),
-						Value: extutil.Ptr("Tag123"),
+						Key:   new("Example"),
+						Value: new("Tag123"),
 					},
 				},
 			},
@@ -143,7 +141,7 @@ func TestGetAllElasticacheReplicationGroupsShouldApplyTagFilter(t *testing.T) {
 	targets, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "Example",
@@ -167,8 +165,8 @@ func TestGetAllElasticacheReplicationGroupsWithPagination(t *testing.T) {
 	withoutMarker := mock.MatchedBy(func(arg *elasticache.DescribeReplicationGroupsInput) bool {
 		return arg.Marker == nil
 	})
-	mockedApi.On("DescribeReplicationGroups", mock.Anything, withoutMarker).Return(discovery_kit_api.Ptr(elasticache.DescribeReplicationGroupsOutput{
-		Marker: discovery_kit_api.Ptr("marker"),
+	mockedApi.On("DescribeReplicationGroups", mock.Anything, withoutMarker).Return(new(elasticache.DescribeReplicationGroupsOutput{
+		Marker: new("marker"),
 		ReplicationGroups: []types2.ReplicationGroup{
 			{
 				ARN:                     aws.String("arn1"),
@@ -189,7 +187,7 @@ func TestGetAllElasticacheReplicationGroupsWithPagination(t *testing.T) {
 		},
 		ResultMetadata: middleware.Metadata{},
 	}), nil)
-	mockedApi.On("DescribeReplicationGroups", mock.Anything, withMarker).Return(discovery_kit_api.Ptr(elasticache.DescribeReplicationGroupsOutput{
+	mockedApi.On("DescribeReplicationGroups", mock.Anything, withMarker).Return(new(elasticache.DescribeReplicationGroupsOutput{
 		Marker: nil,
 		ReplicationGroups: []types2.ReplicationGroup{
 			{
@@ -216,11 +214,11 @@ func TestGetAllElasticacheReplicationGroupsWithPagination(t *testing.T) {
 	tags := resourcegroupstaggingapi.GetResourcesOutput{
 		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
 			{
-				ResourceARN: extutil.Ptr("arn1"),
+				ResourceARN: new("arn1"),
 				Tags: []tagtypes.Tag{
 					{
-						Key:   extutil.Ptr("Example"),
-						Value: extutil.Ptr("Tag123"),
+						Key:   new("Example"),
+						Value: new("Tag123"),
 					},
 				},
 			},
@@ -232,7 +230,7 @@ func TestGetAllElasticacheReplicationGroupsWithPagination(t *testing.T) {
 	targets, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -254,7 +252,7 @@ func TestGetAllElasticacheReplicationGroupsError(t *testing.T) {
 	_, err := getAllElasticacheReplicationGroups(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then

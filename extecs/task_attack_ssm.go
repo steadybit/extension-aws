@@ -86,23 +86,23 @@ var heartbeats = make(map[uuid.UUID]func())
 func newEcsTaskSsmAction(makeDescription func() action_kit_api.ActionDescription, invocation ssmCommandInvocation) action_kit_sdk.ActionWithStop[TaskSsmActionState] {
 	description := makeDescription()
 	description.Version = extbuild.GetSemverVersionStringOrUnknown()
-	description.Icon = extutil.Ptr(ecsTaskIcon)
+	description.Icon = new(ecsTaskIcon)
 	description.TargetSelection = &action_kit_api.TargetSelection{
 		TargetType: ecsTaskTargetId,
-		SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+		SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 			{
 				Label:       "cluster and service",
-				Description: extutil.Ptr("Find ecs task by cluster and service name"),
+				Description: new("Find ecs task by cluster and service name"),
 				Query:       "aws-ecs.cluster.name=\"\" and aws-ecs.service.name=\"\" and aws-ecs.task.amazon-ssm-agent=\"true\"",
 			},
 		}),
 	}
-	description.Technology = extutil.Ptr("AWS")
-	description.Category = extutil.Ptr("ECS")
+	description.Technology = new("AWS")
+	description.Category = new("ECS")
 	description.Kind = action_kit_api.Attack
 	description.TimeControl = action_kit_api.TimeControlInternal
 	description.Status = &action_kit_api.MutatingEndpointReferenceWithCallInterval{
-		CallInterval: extutil.Ptr("5s"),
+		CallInterval: new("5s"),
 	}
 	return &ecsTaskSsmAction{
 		clientProvider:       defaultTaskSsmClientProvider,
@@ -155,9 +155,9 @@ func (e *ecsTaskSsmAction) Prepare(ctx context.Context, state *TaskSsmActionStat
 
 		if errors.Is(err, errorManagedInstanceNotFound) {
 			if slices.Contains(request.Target.Attributes["aws-ecs.task.enable-execute-command"], "true") {
-				prepareErr.Detail = extutil.Ptr("The task has the enable-execute-command set, this may prevent the amazon-ssm-agent from running.")
+				prepareErr.Detail = new("The task has the enable-execute-command set, this may prevent the amazon-ssm-agent from running.")
 			} else {
-				prepareErr.Detail = extutil.Ptr("Please make sure that the 'amazon-ssm-agent' is added to the task definition and running.")
+				prepareErr.Detail = new("Please make sure that the 'amazon-ssm-agent' is added to the task definition and running.")
 			}
 		}
 		return nil, prepareErr
@@ -177,8 +177,8 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 		DocumentVersion: &e.ssmCommandInvocation.documentVersion,
 		InstanceIds:     []string{state.ManagedInstanceId},
 		Parameters:      state.Parameters,
-		Comment:         extutil.Ptr(shorten(state.Comment, 100)),
-		TimeoutSeconds:  extutil.Ptr(int32(30)),
+		Comment:         new(shorten(state.Comment, 100)),
+		TimeoutSeconds:  new(int32(30)),
 	}, func(options *ssm.Options) {
 		options.ClientLogMode = aws.LogRequestWithBody | aws.LogResponseWithBody
 	})
@@ -191,7 +191,7 @@ func (e *ecsTaskSsmAction) Start(ctx context.Context, state *TaskSsmActionState)
 	} else {
 		result.Error = &action_kit_api.ActionKitError{
 			Title:  fmt.Sprintf("Failed to start %s on ECS Task %s", e.description.Label, state.TaskArn),
-			Detail: extutil.Ptr(fmt.Sprintf("Sending SSM command on ECS Task %s failed. Using document %s(%s) and parameters %+v: %s", state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters, err.Error())),
+			Detail: new(fmt.Sprintf("Sending SSM command on ECS Task %s failed. Using document %s(%s) and parameters %+v: %s", state.TaskArn, e.ssmCommandInvocation.documentName, e.ssmCommandInvocation.documentVersion, state.Parameters, err.Error())),
 		}
 	}
 
@@ -264,7 +264,7 @@ func (e *ecsTaskSsmAction) Stop(ctx context.Context, state *TaskSsmActionState) 
 	}
 
 	rMsg, rErr := e.evaluateResultForCommand(ctx, client, state, output)
-	result.Messages = extutil.Ptr(append(*result.Messages, *rMsg...))
+	result.Messages = new(append(*result.Messages, *rMsg...))
 	result.Error = rErr
 	return result, nil
 }
@@ -295,9 +295,9 @@ func (e *ecsTaskSsmAction) evaluateResultForCommand(ctx context.Context, client 
 		}
 		if stepOutput != nil && stepOutput.StandardOutputContent != nil {
 			if strings.Contains(*stepOutput.StandardOutputContent, "Another stress-ng command is running, exiting...") {
-				resultError.Detail = extutil.Ptr("Parallel stress attack already running on this instance")
+				resultError.Detail = new("Parallel stress attack already running on this instance")
 			} else {
-				resultError.Detail = extutil.Ptr(*stepOutput.StandardOutputContent)
+				resultError.Detail = new(*stepOutput.StandardOutputContent)
 			}
 		}
 	}
@@ -308,7 +308,7 @@ func (e *ecsTaskSsmAction) evaluateResultForCommand(ctx context.Context, client 
 func (e *ecsTaskSsmAction) findManagedInstance(ctx context.Context, client ecsTaskSsmApi, taskArn string) (string, error) {
 	output, err := client.DescribeInstanceInformation(ctx, &ssm.DescribeInstanceInformationInput{
 		Filters: []types.InstanceInformationStringFilter{
-			{Key: extutil.Ptr("tag:ECS_TASK_ARN"), Values: []string{taskArn}},
+			{Key: new("tag:ECS_TASK_ARN"), Values: []string{taskArn}},
 		},
 	})
 	if err != nil {
@@ -360,8 +360,8 @@ func (e *ecsTaskSsmAction) startHeartbeat(state *TaskSsmActionState) {
 					DocumentVersion: &e.ssmCommandInvocation.documentVersion,
 					InstanceIds:     []string{state.ManagedInstanceId},
 					Parameters:      parameters,
-					Comment:         extutil.Ptr(shorten(state.Comment+" heartbeat", 100)),
-					TimeoutSeconds:  extutil.Ptr(int32(30)),
+					Comment:         new(shorten(state.Comment+" heartbeat", 100)),
+					TimeoutSeconds:  new(int32(30)),
 				})
 				if err != nil {
 					log.Warn().Err(err).Msgf("Failed to send heartbeat command to ECS Task %s", state.TaskArn)

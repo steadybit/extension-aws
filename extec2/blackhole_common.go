@@ -311,8 +311,8 @@ func rollbackBlackholeViaTags(ctx context.Context, state *BlackholeState, client
 	for _, networkAcl := range *networkAcls {
 		for _, tag := range networkAcl.Tags {
 			// find tags beginning with "steadybit-replaced "
-			if strings.HasPrefix(*tag.Key, "steadybit-replaced ") {
-				subnetId := strings.TrimPrefix(*tag.Key, "steadybit-replaced ")
+			if after, ok := strings.CutPrefix(*tag.Key, "steadybit-replaced "); ok {
+				subnetId := after
 				for _, networkAclAssociation := range networkAcl.Associations {
 					if *networkAclAssociation.SubnetId == subnetId {
 						networkAclAssociationInput := &ec2.ReplaceNetworkAclAssociationInput{

@@ -18,7 +18,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"strconv"
 	"strings"
 	"time"
@@ -52,7 +51,7 @@ func (e *ecsServiceDiscovery) Describe() discovery_kit_api.DiscoveryDescription 
 	return discovery_kit_api.DiscoveryDescription{
 		Id: ecsServiceTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEcsService)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEcsService)),
 		},
 	}
 }
@@ -64,9 +63,9 @@ func (e *ecsServiceDiscovery) DescribeTarget() discovery_kit_api.TargetDescripti
 			One:   "ECS service",
 			Other: "ECS services",
 		},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(ecsServiceIcon),
+		Icon:     new(ecsServiceIcon),
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
@@ -142,7 +141,7 @@ func GetAllEcsServices(account *utils.AwsAccess, ecsServiceApi ecsServiceDiscove
 func getAllServicesInCluster(clusterArn string, account *utils.AwsAccess, ecsServiceApi ecsServiceDiscoveryApi, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	result := make([]discovery_kit_api.Target, 0, 20)
 	paginator := ecs.NewListServicesPaginator(ecsServiceApi, &ecs.ListServicesInput{
-		Cluster: extutil.Ptr(clusterArn),
+		Cluster: new(clusterArn),
 	})
 	for paginator.HasMorePages() {
 		output, err := paginator.NextPage(ctx)
@@ -153,7 +152,7 @@ func getAllServicesInCluster(clusterArn string, account *utils.AwsAccess, ecsSer
 		serviceArnPages := utils.SplitIntoPages(output.ServiceArns, servicePageSize)
 		for _, serviceArnPage := range serviceArnPages {
 			describeServicesOutput, err := ecsServiceApi.DescribeServices(ctx, &ecs.DescribeServicesInput{
-				Cluster:  extutil.Ptr(clusterArn),
+				Cluster:  new(clusterArn),
 				Services: serviceArnPage,
 				Include: []types.ServiceField{
 					types.ServiceFieldTags,

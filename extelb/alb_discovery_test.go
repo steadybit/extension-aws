@@ -8,10 +8,8 @@ import (
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -62,32 +60,32 @@ func (m *albDiscoveryEc2UtilMock) GetVpcName(awsAccountNumber string, region str
 
 var albArn = "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/my-app-balancer/123"
 var alb = types.LoadBalancer{
-	LoadBalancerArn:  extutil.Ptr(albArn),
-	DNSName:          extutil.Ptr("my-app-balancer-1234567890.us-east-1.elb.amazonaws.com"),
-	LoadBalancerName: extutil.Ptr("my-app-balancer"),
+	LoadBalancerArn:  new(albArn),
+	DNSName:          new("my-app-balancer-1234567890.us-east-1.elb.amazonaws.com"),
+	LoadBalancerName: new("my-app-balancer"),
 	Type:             types.LoadBalancerTypeEnumApplication,
-	VpcId:            extutil.Ptr("vpc-123"),
+	VpcId:            new("vpc-123"),
 	AvailabilityZones: []types.AvailabilityZone{
 		{
-			ZoneName: extutil.Ptr("us-east-1a"),
+			ZoneName: new("us-east-1a"),
 		},
 		{
-			ZoneName: extutil.Ptr("us-east-1b"),
+			ZoneName: new("us-east-1b"),
 		},
 	},
 }
 
 var nlbArn = "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/net/my-net-balancer/123"
 var nlb = types.LoadBalancer{
-	LoadBalancerArn:  extutil.Ptr(nlbArn),
-	LoadBalancerName: extutil.Ptr("my-net-balancer"),
+	LoadBalancerArn:  new(nlbArn),
+	LoadBalancerName: new("my-net-balancer"),
 	Type:             types.LoadBalancerTypeEnumNetwork,
 	AvailabilityZones: []types.AvailabilityZone{
 		{
-			ZoneName: extutil.Ptr("us-east-1b"),
+			ZoneName: new("us-east-1b"),
 		},
 		{
-			ZoneName: extutil.Ptr("us-east-1c"),
+			ZoneName: new("us-east-1c"),
 		},
 	},
 }
@@ -105,24 +103,24 @@ func TestGetAllAlbTargets(t *testing.T) {
 	})).Return(&elasticloadbalancingv2.DescribeTagsOutput{
 		TagDescriptions: []types.TagDescription{
 			{
-				ResourceArn: extutil.Ptr(albArn),
+				ResourceArn: new(albArn),
 				Tags: []types.Tag{
 					{
-						Key:   extutil.Ptr("elbv2.k8s.aws/cluster"),
-						Value: extutil.Ptr("test-cluster"),
+						Key:   new("elbv2.k8s.aws/cluster"),
+						Value: new("test-cluster"),
 					},
 					{
-						Key:   extutil.Ptr("service.k8s.aws/resource"),
-						Value: extutil.Ptr("LoadBalancer"),
+						Key:   new("service.k8s.aws/resource"),
+						Value: new("LoadBalancer"),
 					},
 					{
-						Key:   extutil.Ptr("service.k8s.aws/stack"),
-						Value: extutil.Ptr("steadybit-demo/gateway"),
+						Key:   new("service.k8s.aws/stack"),
+						Value: new("steadybit-demo/gateway"),
 					},
 				},
 			},
 			{
-				ResourceArn: extutil.Ptr(nlbArn),
+				ResourceArn: new(nlbArn),
 				Tags:        []types.Tag{},
 			},
 		},
@@ -133,24 +131,24 @@ func TestGetAllAlbTargets(t *testing.T) {
 	})).Return(&elasticloadbalancingv2.DescribeListenersOutput{
 		Listeners: []types.Listener{
 			{
-				Port: extutil.Ptr(int32(80)),
+				Port: new(int32(80)),
 			},
 			{
-				Port: extutil.Ptr(int32(443)),
+				Port: new(int32(443)),
 			},
 		},
 	}, nil)
 
 	mockedZoneUtil := new(albDiscoveryEc2UtilMock)
 	mockedZone1a := ec2types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1a"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1a-id"),
+		ZoneName:   new("us-east-1a"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1a-id"),
 	}
 	mockedZone1b := ec2types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+		ZoneName:   new("us-east-1b"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.MatchedBy(func(params string) bool {
 		return params == "us-east-1a"
@@ -164,7 +162,7 @@ func TestGetAllAlbTargets(t *testing.T) {
 	targets, err := GetAlbs(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "service.k8s.aws/stack",

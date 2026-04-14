@@ -35,19 +35,19 @@ func (f mskRebootBrokerAttack) Describe() action_kit_api.ActionDescription {
 		Label:       "Trigger Broker Reboot",
 		Description: "Triggers broker reboot",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(mskIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(mskIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: mskBrokerTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "msk cluster id and broker id",
-					Description: extutil.Ptr("Find broker by id and cluster id"),
+					Description: new("Find broker by id and cluster id"),
 					Query:       "aws.msk.cluster.id=\"\" and aws.msk.cluster.broker.id=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("MSK"),
+		Technology:  new("AWS"),
+		Category:    new("MSK"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},

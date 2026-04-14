@@ -26,7 +26,7 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 		mockedApi := new(ecsDescribeServicesApiMock)
 		mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
 			Services: []types.Service{{
-				ServiceArn:   extutil.Ptr("service-arn"),
+				ServiceArn:   new("service-arn"),
 				DesiredCount: 3,
 				RunningCount: 2,
 			}},
@@ -36,11 +36,11 @@ func TestServiceTaskCountCheck_prepare_saves_initial_state(t *testing.T) {
 	poller.Start(ctx)
 
 	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"Duration":              100,
 			"RunningCountCheckMode": "runningCountEqualsDesiredCount",
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.account":         {"42"},
 				"aws.region":          {"eu-west-1"},

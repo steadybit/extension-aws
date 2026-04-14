@@ -24,7 +24,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"strings"
 	"time"
 )
@@ -51,7 +50,7 @@ func (e *albDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: albTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalElbAlb)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalElbAlb)),
 		},
 	}
 }
@@ -60,9 +59,9 @@ func (e *albDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       albTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "Application Load Balancer", Other: "Application Load Balancers"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(albIcon),
+		Icon:     new(albIcon),
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{

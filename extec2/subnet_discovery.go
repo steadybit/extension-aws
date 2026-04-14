@@ -18,7 +18,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"strings"
 	"time"
 )
@@ -42,7 +41,7 @@ func (e *subnetDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: subnetTargetType,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalSubnet)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalSubnet)),
 		},
 	}
 }
@@ -51,9 +50,9 @@ func (e *subnetDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       subnetTargetType,
 		Label:    discovery_kit_api.PluralLabel{One: "Subnet", Other: "Subnets"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(subnetIcon),
+		Icon:     new(subnetIcon),
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
@@ -128,7 +127,7 @@ func GetAllSubnets(ctx context.Context, ec2Api ec2.DescribeSubnetsAPIClient, ec2
 		input.Filters = make([]types.Filter, 0, len(account.TagFilters))
 		for _, tagFilter := range account.TagFilters {
 			input.Filters = append(input.Filters, types.Filter{
-				Name:   extutil.Ptr("tag:" + tagFilter.Key),
+				Name:   new("tag:" + tagFilter.Key),
 				Values: tagFilter.Values,
 			})
 		}

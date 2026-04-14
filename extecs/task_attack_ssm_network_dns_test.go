@@ -23,7 +23,7 @@ func Test_getEcsTaskNetworkDnsParameters(t *testing.T) {
 	id := uuid.New()
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: id,
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 60000,
 			"dnsPort":  "53",
 		},
@@ -50,7 +50,7 @@ func Test_getEcsTaskNetworkDnsParameters(t *testing.T) {
 func Test_getEcsTaskNetworkDnsParameters_invalidDuration(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 43201_000,
 		},
 	}

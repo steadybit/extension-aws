@@ -40,42 +40,42 @@ func (e *subnetBlackholeAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Blackhole Subnet",
 		Description: "Block traffic for a given subnet.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(subnetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(subnetIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: subnetTargetType,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "vpc",
-					Description: extutil.Ptr("Find subnets by vpc"),
+					Description: new("Find subnets by vpc"),
 					Query:       "aws.vpc.name=\"\"",
 				},
 				{
 					Label:       "zone",
-					Description: extutil.Ptr("Find subnets by zone"),
+					Description: new("Find subnets by zone"),
 					Query:       "aws.zone=\"\"",
 				},
 				{
 					Label:       "subnet",
-					Description: extutil.Ptr("Find subnets by name"),
+					Description: new("Find subnets by name"),
 					Query:       "aws.ec2.subnet.name=\"\"",
 				},
 			})}),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("Network"),
+		Technology:  new("AWS"),
+		Category:    new("Network"),
 		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "duration",
 				Label:        "Duration",
-				Description:  extutil.Ptr(""),
+				Description:  new(""),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("60s"),
+				Order:        new(1),
+				Required:     new(true),
 			},
 		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 

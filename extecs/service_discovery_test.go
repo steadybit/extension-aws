@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -48,12 +47,12 @@ var serviceClusterArn = "arn:aws:ecs:eu-central-1:42:cluster/" + serviceClusterN
 var serviceArn = "arn:aws:ecs:eu-central-1:503171660203:service/sandbox-demo-ecs-fargate/ecs-demo-gateway-service"
 var serviceName = "ecs-demo-gateway-service"
 var service = types.Service{
-	ClusterArn:   extutil.Ptr(serviceClusterArn),
-	ServiceArn:   extutil.Ptr(serviceArn),
-	ServiceName:  extutil.Ptr(serviceName),
+	ClusterArn:   new(serviceClusterArn),
+	ServiceArn:   new(serviceArn),
+	ServiceName:  new(serviceName),
 	DesiredCount: 3,
 	Tags: []types.Tag{
-		{Key: extutil.Ptr("test"), Value: extutil.Ptr("123")},
+		{Key: new("test"), Value: new("123")},
 	},
 }
 
@@ -65,7 +64,7 @@ func TestGetAllEcsServices(t *testing.T) {
 	targets, err := GetAllEcsServices(&utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	}, mockedApi, context.Background())
 
 	// Then
@@ -95,7 +94,7 @@ func TestGetAllEcsServicesShouldApplyTagFilters(t *testing.T) {
 	targets, err := GetAllEcsServices(&utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "test",
@@ -112,7 +111,7 @@ func TestGetAllEcsServicesShouldApplyTagFilters(t *testing.T) {
 	targets, err = GetAllEcsServices(&utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "test",

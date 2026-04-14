@@ -15,7 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 	"github.com/google/uuid"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -74,7 +73,7 @@ func Test_ecsTaskSsmAction_Prepare(t *testing.T) {
 		{
 			name: "should forward error from getParameters",
 			request: action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{"error": "true"},
+				Config: map[string]any{"error": "true"},
 				Target: testTarget,
 			},
 			wantErr: assert.Error,
@@ -82,12 +81,12 @@ func Test_ecsTaskSsmAction_Prepare(t *testing.T) {
 		{
 			name: "should set parameters",
 			request: action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{},
+				Config: map[string]any{},
 				Target: testTarget,
 			},
 			instanceInformation: &ssm.DescribeInstanceInformationOutput{
 				InstanceInformationList: []types.InstanceInformation{
-					{InstanceId: extutil.Ptr("mi-0")},
+					{InstanceId: new("mi-0")},
 				},
 			},
 			wantErr: assert.NoError,
@@ -106,7 +105,7 @@ func Test_ecsTaskSsmAction_Prepare(t *testing.T) {
 		{
 			name: "should error on managed instance error",
 			request: action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{},
+				Config: map[string]any{},
 				Target: testTarget,
 			},
 			instanceInformationErr: errors.New("test-error"),
@@ -115,7 +114,7 @@ func Test_ecsTaskSsmAction_Prepare(t *testing.T) {
 		{
 			name: "should error on no managed instance found",
 			request: action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{},
+				Config: map[string]any{},
 				Target: testTarget,
 			},
 			instanceInformation: &ssm.DescribeInstanceInformationOutput{
@@ -126,13 +125,13 @@ func Test_ecsTaskSsmAction_Prepare(t *testing.T) {
 		{
 			name: "should error on multiple managed instance found",
 			request: action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{},
+				Config: map[string]any{},
 				Target: testTarget,
 			},
 			instanceInformation: &ssm.DescribeInstanceInformationOutput{
 				InstanceInformationList: []types.InstanceInformation{
-					{InstanceId: extutil.Ptr("mi-0")},
-					{InstanceId: extutil.Ptr("mi-1")},
+					{InstanceId: new("mi-0")},
+					{InstanceId: new("mi-1")},
 				},
 			},
 			wantErr: assert.Error,
@@ -168,7 +167,7 @@ func Test_ecsTaskSsmAction_Start(t *testing.T) {
 			name: "should start command",
 			sendCommand: &ssm.SendCommandOutput{
 				Command: &types.Command{
-					CommandId: extutil.Ptr("command-0"),
+					CommandId: new("command-0"),
 				},
 			},
 			wantState: TaskSsmActionState{
@@ -243,7 +242,7 @@ func Test_ecsTaskSsmAction_Status(t *testing.T) {
 		{
 			name:                "should continue on invocation in progress",
 			commandInvocation:   &ssm.GetCommandInvocationOutput{Status: types.CommandInvocationStatusInProgress},
-			instanceInformation: &ssm.DescribeInstanceInformationOutput{InstanceInformationList: []types.InstanceInformation{{InstanceId: extutil.Ptr("mi-0")}}},
+			instanceInformation: &ssm.DescribeInstanceInformationOutput{InstanceInformationList: []types.InstanceInformation{{InstanceId: new("mi-0")}}},
 			wantErr:             assert.NoError,
 		},
 		{
@@ -371,7 +370,7 @@ func Test_ecsTaskSsmActionHeartbeat(t *testing.T) {
 		atomic.AddUint64(&calls, 1)
 	}).Return(&ssm.SendCommandOutput{
 		Command: &types.Command{
-			CommandId: extutil.Ptr("command-0"),
+			CommandId: new("command-0"),
 		},
 	}, nil)
 
@@ -408,7 +407,7 @@ func Test_ecsTaskSsmActionHeartbeatTimeout(t *testing.T) {
 		atomic.AddUint64(&calls, 1)
 	}).Return(&ssm.SendCommandOutput{
 		Command: &types.Command{
-			CommandId: extutil.Ptr("command-0"),
+			CommandId: new("command-0"),
 		},
 	}, nil)
 

@@ -23,11 +23,11 @@ func Test_getEcsTaskNetworkDelayParameters(t *testing.T) {
 	id := uuid.New()
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: id,
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration":           60000,
 			"networkDelay":       100,
 			"networkDelayJitter": true,
-			"ip":                 []interface{}{"1.1.1.1", "1.1.1.2/32"},
+			"ip":                 []any{"1.1.1.1", "1.1.1.2/32"},
 		},
 	}
 
@@ -53,7 +53,7 @@ func Test_getEcsTaskNetworkDelayParameters_defaults(t *testing.T) {
 	id := uuid.New()
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: id,
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration":           10000,
 			"networkDelay":       500,
 			"networkDelayJitter": false,
@@ -81,11 +81,11 @@ func Test_getEcsTaskNetworkDelayParameters_defaults(t *testing.T) {
 func Test_getEcsTaskNetworkDelayParameters_invalidSources(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration":           10000,
 			"networkDelay":       500,
 			"networkDelayJitter": false,
-			"ip":                 []interface{}{"foo*"},
+			"ip":                 []any{"foo*"},
 		},
 	}
 
@@ -96,7 +96,7 @@ func Test_getEcsTaskNetworkDelayParameters_invalidSources(t *testing.T) {
 func Test_getEcsTaskNetworkDelayParameters_invalidDuration(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 43201_000,
 		},
 	}

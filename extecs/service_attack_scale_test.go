@@ -36,11 +36,11 @@ func TestEcsServiceScaleAction_Prepare(t *testing.T) {
 		{
 			name: "Should return config",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"duration":     "180",
 					"desiredCount": "5",
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-ecs.cluster.arn":  {"my-cluster-arn"},
 						"aws-ecs.service.arn":  {"my-service-arn"},

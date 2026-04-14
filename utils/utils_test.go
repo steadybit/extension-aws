@@ -3,7 +3,6 @@ package utils
 import (
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/steadybit/extension-aws/v2/config"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -18,8 +17,8 @@ func TestMatchesTagFilter(t *testing.T) {
 		{
 			name: "No filters - should match",
 			tags: []types.Tag{
-				{Key: extutil.Ptr("env"), Value: extutil.Ptr("prod")},
-				{Key: extutil.Ptr("team"), Value: extutil.Ptr("devops")},
+				{Key: new("env"), Value: new("prod")},
+				{Key: new("team"), Value: new("devops")},
 			},
 			filters: []config.TagFilter{},
 			want:    true,
@@ -27,8 +26,8 @@ func TestMatchesTagFilter(t *testing.T) {
 		{
 			name: "Single filter - matching key and value",
 			tags: []types.Tag{
-				{Key: extutil.Ptr("env"), Value: extutil.Ptr("prod")},
-				{Key: extutil.Ptr("team"), Value: extutil.Ptr("devops")},
+				{Key: new("env"), Value: new("prod")},
+				{Key: new("team"), Value: new("devops")},
 			},
 			filters: []config.TagFilter{
 				{Key: "env", Values: []string{"prod"}},
@@ -38,7 +37,7 @@ func TestMatchesTagFilter(t *testing.T) {
 		{
 			name: "Single filter - matching key but no matching value",
 			tags: []types.Tag{
-				{Key: extutil.Ptr("env"), Value: extutil.Ptr("staging")},
+				{Key: new("env"), Value: new("staging")},
 			},
 			filters: []config.TagFilter{
 				{Key: "env", Values: []string{"prod"}},
@@ -48,8 +47,8 @@ func TestMatchesTagFilter(t *testing.T) {
 		{
 			name: "Multiple filters - all match",
 			tags: []types.Tag{
-				{Key: extutil.Ptr("env"), Value: extutil.Ptr("prod")},
-				{Key: extutil.Ptr("team"), Value: extutil.Ptr("devops")},
+				{Key: new("env"), Value: new("prod")},
+				{Key: new("team"), Value: new("devops")},
 			},
 			filters: []config.TagFilter{
 				{Key: "env", Values: []string{"prod"}},
@@ -60,8 +59,8 @@ func TestMatchesTagFilter(t *testing.T) {
 		{
 			name: "Multiple filters - one does not match",
 			tags: []types.Tag{
-				{Key: extutil.Ptr("env"), Value: extutil.Ptr("prod")},
-				{Key: extutil.Ptr("team"), Value: extutil.Ptr("engineering")},
+				{Key: new("env"), Value: new("prod")},
+				{Key: new("team"), Value: new("engineering")},
 			},
 			filters: []config.TagFilter{
 				{Key: "env", Values: []string{"prod"}},
@@ -72,7 +71,7 @@ func TestMatchesTagFilter(t *testing.T) {
 		{
 			name: "Filter with multiple values - one matches",
 			tags: []types.Tag{
-				{Key: extutil.Ptr("env"), Value: extutil.Ptr("staging")},
+				{Key: new("env"), Value: new("staging")},
 			},
 			filters: []config.TagFilter{
 				{Key: "env", Values: []string{"dev", "staging", "prod"}},
@@ -82,7 +81,7 @@ func TestMatchesTagFilter(t *testing.T) {
 		{
 			name: "Filter with multiple values - none match",
 			tags: []types.Tag{
-				{Key: extutil.Ptr("env"), Value: extutil.Ptr("test")},
+				{Key: new("env"), Value: new("test")},
 			},
 			filters: []config.TagFilter{
 				{Key: "env", Values: []string{"dev", "staging", "prod"}},
@@ -92,7 +91,7 @@ func TestMatchesTagFilter(t *testing.T) {
 		{
 			name: "Filter key not present in tags",
 			tags: []types.Tag{
-				{Key: extutil.Ptr("region"), Value: extutil.Ptr("us-east-1")},
+				{Key: new("region"), Value: new("us-east-1")},
 			},
 			filters: []config.TagFilter{
 				{Key: "env", Values: []string{"prod"}},

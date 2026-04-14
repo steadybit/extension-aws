@@ -129,8 +129,8 @@ func prepareActionCallSubnetBlackhole(vpcId string, subnetId string, clientEc2 *
 	state := action.NewEmptyState()
 
 	requestBodyPrepare := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Config: map[string]any{},
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.vpc.id":        {vpcId},
 				"aws.ec2.subnet.id": {subnetId},
@@ -138,7 +138,7 @@ func prepareActionCallSubnetBlackhole(vpcId string, subnetId string, clientEc2 *
 				"aws.region":        {"eu-west-1"},
 			},
 		}),
-		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+		ExecutionContext: new(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
 		ExecutionId: uuid.New(),

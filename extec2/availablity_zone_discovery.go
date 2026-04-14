@@ -14,7 +14,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"time"
 )
 
@@ -37,7 +36,7 @@ func (a *azDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: azTargetType,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalZone)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalZone)),
 		},
 	}
 }
@@ -46,9 +45,9 @@ func (a *azDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       azTargetType,
 		Label:    discovery_kit_api.PluralLabel{One: "Availability Zone", Other: "Availability Zones"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(azIcon),
+		Icon:     new(azIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "aws.zone"},

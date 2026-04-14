@@ -144,8 +144,8 @@ func testApiThrottlingDuringStartWhileCreatingTheSecondNACL(t *testing.T, client
 
 	// allow rollback api calls
 	PermittedApiCalls = map[string]int{
-		"DeleteNetworkAcl":             1,                  //Only one was created
-		"DescribeNetworkAcls":          1,                  //1 calls to get all created NACLS
+		"DeleteNetworkAcl":             1,                   //Only one was created
+		"DescribeNetworkAcls":          1,                   //1 calls to get all created NACLS
 		"ReplaceNetworkAclAssociation": firstVpcSubnetCount, //Depends on which VPC was processed first
 	}
 
@@ -274,15 +274,15 @@ func prepareActionCallAzBlackhole(clientEc2 *ec2.Client, clientImds *imds.Client
 	state := action.NewEmptyState()
 
 	requestBodyPrepare := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Config: map[string]any{},
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
 				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
-		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+		ExecutionContext: new(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
 		ExecutionId: uuid.New(),

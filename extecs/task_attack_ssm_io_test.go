@@ -11,7 +11,7 @@ import (
 
 func Test_getEcsTaskStressIoParameters(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 3333,
 			"workers":  1,
 			"percent":  99,

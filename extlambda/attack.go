@@ -97,12 +97,12 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 	}
 
 	_, err = client.PutParameter(ctx, &ssm.PutParameterInput{
-		Name:        extutil.Ptr(state.Param),
-		Value:       extutil.Ptr(string(value)),
+		Name:        new(state.Param),
+		Value:       new(string(value)),
 		Type:        types.ParameterTypeString,
-		DataType:    extutil.Ptr("text"),
-		Description: extutil.Ptr(fmt.Sprintf("lambda failure injection config - set by steadybit experiment %s / execution %d", *state.ExperimentKey, *state.ExecutionId)),
-		Overwrite:   extutil.Ptr(false),
+		DataType:    new("text"),
+		Description: new(fmt.Sprintf("lambda failure injection config - set by steadybit experiment %s / execution %d", *state.ExperimentKey, *state.ExecutionId)),
+		Overwrite:   new(false),
 	})
 	if err != nil {
 		var pae *types.ParameterAlreadyExists
@@ -113,9 +113,9 @@ func (a *lambdaAction) Start(ctx context.Context, state *LambdaActionState) (*ac
 	}
 
 	_, _ = client.AddTagsToResource(ctx, &ssm.AddTagsToResourceInput{
-		ResourceId:   extutil.Ptr(state.Param),
+		ResourceId:   new(state.Param),
 		ResourceType: types.ResourceTypeForTaggingParameter,
-		Tags:         []types.Tag{{Key: extutil.Ptr("created-by"), Value: extutil.Ptr("steadybit")}},
+		Tags:         []types.Tag{{Key: new("created-by"), Value: new("steadybit")}},
 	})
 	return nil, nil
 }
@@ -127,7 +127,7 @@ func (a *lambdaAction) Stop(ctx context.Context, state *LambdaActionState) (*act
 	}
 
 	_, err = client.DeleteParameter(ctx, &ssm.DeleteParameterInput{
-		Name: extutil.Ptr(state.Param),
+		Name: new(state.Param),
 	})
 	if err != nil {
 		var notFound *types.ParameterNotFound

@@ -12,7 +12,7 @@ import (
 type logForwarder struct {
 }
 
-func (logger logForwarder) Logf(classification logging.Classification, format string, v ...interface{}) {
+func (logger logForwarder) Logf(classification logging.Classification, format string, v ...any) {
 	switch classification {
 	case logging.Debug:
 		log.Trace().Msgf(format, v...)

@@ -18,7 +18,7 @@ import (
 func TestPrepareInstanceStop(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.rds.instance.id": {"my-instance"},
 				"aws.account":         {"42"},

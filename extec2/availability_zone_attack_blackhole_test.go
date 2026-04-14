@@ -86,22 +86,22 @@ func (m *clientImdsApiMock) GetInstanceIdentityDocument(ctx context.Context, par
 func TestPrepareBlackhole(t *testing.T) {
 	clientEc2 := new(clientEC2ApiMock)
 	clientEc2.On("DescribeSubnets", mock.Anything, mock.MatchedBy(func(params *ec2.DescribeSubnetsInput) bool {
-		require.Equal(t, extutil.Ptr("availabilityZone"), params.Filters[0].Name)
+		require.Equal(t, new("availabilityZone"), params.Filters[0].Name)
 		require.Equal(t, "eu-west-1a", params.Filters[0].Values[0])
 		return true
-	})).Return(extutil.Ptr(ec2.DescribeSubnetsOutput{
+	})).Return(new(ec2.DescribeSubnetsOutput{
 		Subnets: []types.Subnet{
 			{
-				SubnetId: extutil.Ptr("subnet-1"),
-				VpcId:    extutil.Ptr("vpcId-1"),
+				SubnetId: new("subnet-1"),
+				VpcId:    new("vpcId-1"),
 			}, {
-				SubnetId: extutil.Ptr("subnet-2"),
-				VpcId:    extutil.Ptr("vpcId-1"),
+				SubnetId: new("subnet-2"),
+				VpcId:    new("vpcId-1"),
 			},
 		},
 	}), nil)
 	clientImds := new(clientImdsApiMock)
-	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(extutil.Ptr(imds.GetInstanceIdentityDocumentOutput{
+	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(new(imds.GetInstanceIdentityDocumentOutput{
 		InstanceIdentityDocument: imds.InstanceIdentityDocument{
 			AccountID: "43",
 		},
@@ -116,17 +116,17 @@ func TestPrepareBlackhole(t *testing.T) {
 	state := action.NewEmptyState()
 
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"action": "stop",
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
 				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
-		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+		ExecutionContext: new(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
 	})
@@ -148,7 +148,7 @@ func TestPrepareBlackhole(t *testing.T) {
 func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 	// Given
 	clientImds := new(clientImdsApiMock)
-	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything, mock.Anything).Return(extutil.Ptr(imds.GetInstanceIdentityDocumentOutput{
+	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything, mock.Anything).Return(new(imds.GetInstanceIdentityDocumentOutput{
 		InstanceIdentityDocument: imds.InstanceIdentityDocument{
 			AccountID: "42",
 		},
@@ -163,17 +163,17 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountId(t *testing.T) {
 	state := action.NewEmptyState()
 
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"action": "stop",
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
 				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
-		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+		ExecutionContext: new(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
 	})
@@ -199,17 +199,17 @@ func TestShouldNotAttackWhenExtensionIsInTargetAccountIdViaStsClient(t *testing.
 	state := action.NewEmptyState()
 
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"action": "stop",
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
 				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
-		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+		ExecutionContext: new(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
 	})
@@ -235,17 +235,17 @@ func TestShouldNotAttackWhenExtensionAccountIsUnknown(t *testing.T) {
 	state := action.NewEmptyState()
 
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"action": "stop",
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
 				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
-		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+		ExecutionContext: new(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: nil,
 		}),
 	})
@@ -271,17 +271,17 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 	state := action.NewEmptyState()
 
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"action": "stop",
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
 				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
-		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+		ExecutionContext: new(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("41"),
 		}),
 	})
@@ -296,7 +296,7 @@ func TestShouldNotAttackWhenAgentAccountIsUnknown(t *testing.T) {
 func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 	// Given
 	clientImds := new(clientImdsApiMock)
-	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything, mock.Anything).Return(extutil.Ptr(imds.GetInstanceIdentityDocumentOutput{
+	clientImds.On("GetInstanceIdentityDocument", mock.Anything, mock.Anything, mock.Anything).Return(new(imds.GetInstanceIdentityDocumentOutput{
 		InstanceIdentityDocument: imds.InstanceIdentityDocument{
 			AccountID: "41",
 		},
@@ -311,17 +311,17 @@ func TestShouldNotAttackWhenAgentIsInTargetAccountId(t *testing.T) {
 	state := action.NewEmptyState()
 
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"action": "stop",
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.zone":    {"eu-west-1a"},
 				"aws.region":  {"eu-west-1"},
 				"aws.account": {"42"},
 			},
 		}),
-		ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
+		ExecutionContext: new(action_kit_api.ExecutionContext{
 			AgentAwsAccountId: aws.String("42"),
 		}),
 	})
@@ -339,26 +339,26 @@ func TestStartBlackhole(t *testing.T) {
 	executionId := uuid.New()
 	clientEc2 := new(clientEC2ApiMock)
 	clientEc2.On("DescribeNetworkAcls", mock.Anything, mock.MatchedBy(func(params *ec2.DescribeNetworkAclsInput) bool {
-		require.Equal(t, extutil.Ptr("association.subnet-id"), params.Filters[0].Name)
+		require.Equal(t, new("association.subnet-id"), params.Filters[0].Name)
 		require.Equal(t, "subnet-1", params.Filters[0].Values[0])
 		require.Equal(t, "subnet-2", params.Filters[0].Values[1])
 		return true
-	}), mock.Anything).Return(extutil.Ptr(ec2.DescribeNetworkAclsOutput{
+	}), mock.Anything).Return(new(ec2.DescribeNetworkAclsOutput{
 		NetworkAcls: []types.NetworkAcl{
 			{
 				Associations: []types.NetworkAclAssociation{
 					{
-						NetworkAclAssociationId: extutil.Ptr("association-1"),
-						NetworkAclId:            extutil.Ptr("nacl-1"),
-						SubnetId:                extutil.Ptr("subnet-1"),
+						NetworkAclAssociationId: new("association-1"),
+						NetworkAclId:            new("nacl-1"),
+						SubnetId:                new("subnet-1"),
 					}, {
-						NetworkAclAssociationId: extutil.Ptr("association-2"),
-						NetworkAclId:            extutil.Ptr("nacl-2"),
-						SubnetId:                extutil.Ptr("subnet-2"),
+						NetworkAclAssociationId: new("association-2"),
+						NetworkAclId:            new("nacl-2"),
+						SubnetId:                new("subnet-2"),
 					}, {
-						NetworkAclAssociationId: extutil.Ptr("association-3"),
-						NetworkAclId:            extutil.Ptr("nacl-3"),
-						SubnetId:                extutil.Ptr("subnet-3"),
+						NetworkAclAssociationId: new("association-3"),
+						NetworkAclId:            new("nacl-3"),
+						SubnetId:                new("subnet-3"),
 					},
 				},
 			},
@@ -366,38 +366,38 @@ func TestStartBlackhole(t *testing.T) {
 	}), nil)
 
 	clientEc2.On("CreateNetworkAcl", mock.Anything, mock.MatchedBy(func(params *ec2.CreateNetworkAclInput) bool {
-		require.Equal(t, extutil.Ptr("vpcId-1"), params.VpcId)
-		require.Equal(t, extutil.Ptr("created by steadybit"), params.TagSpecifications[0].Tags[0].Value)
-		require.Equal(t, extutil.Ptr("steadybit-attack-execution-id"), params.TagSpecifications[0].Tags[1].Key)
-		require.Equal(t, extutil.Ptr(executionId.String()), params.TagSpecifications[0].Tags[1].Value)
-		require.Equal(t, extutil.Ptr("steadybit-replaced subnet-1"), params.TagSpecifications[0].Tags[2].Key)
-		require.Equal(t, extutil.Ptr("nacl-1"), params.TagSpecifications[0].Tags[2].Value)
-		require.Equal(t, extutil.Ptr("steadybit-replaced subnet-2"), params.TagSpecifications[0].Tags[3].Key)
-		require.Equal(t, extutil.Ptr("nacl-2"), params.TagSpecifications[0].Tags[3].Value)
+		require.Equal(t, new("vpcId-1"), params.VpcId)
+		require.Equal(t, new("created by steadybit"), params.TagSpecifications[0].Tags[0].Value)
+		require.Equal(t, new("steadybit-attack-execution-id"), params.TagSpecifications[0].Tags[1].Key)
+		require.Equal(t, new(executionId.String()), params.TagSpecifications[0].Tags[1].Value)
+		require.Equal(t, new("steadybit-replaced subnet-1"), params.TagSpecifications[0].Tags[2].Key)
+		require.Equal(t, new("nacl-1"), params.TagSpecifications[0].Tags[2].Value)
+		require.Equal(t, new("steadybit-replaced subnet-2"), params.TagSpecifications[0].Tags[3].Key)
+		require.Equal(t, new("nacl-2"), params.TagSpecifications[0].Tags[3].Value)
 		return true
-	}), mock.Anything).Return(extutil.Ptr(ec2.CreateNetworkAclOutput{
+	}), mock.Anything).Return(new(ec2.CreateNetworkAclOutput{
 		NetworkAcl: &types.NetworkAcl{
-			NetworkAclId: extutil.Ptr("NEW nacl-4"),
+			NetworkAclId: new("NEW nacl-4"),
 		},
 	}), nil)
 
 	clientEc2.On("CreateNetworkAclEntry", mock.Anything, mock.MatchedBy(func(params *ec2.CreateNetworkAclEntryInput) bool {
-		require.Equal(t, extutil.Ptr("NEW nacl-4"), params.NetworkAclId)
+		require.Equal(t, new("NEW nacl-4"), params.NetworkAclId)
 		return true
-	}), mock.Anything).Return(extutil.Ptr(ec2.CreateNetworkAclEntryOutput{}), nil)
+	}), mock.Anything).Return(new(ec2.CreateNetworkAclEntryOutput{}), nil)
 
 	clientEc2.On("ReplaceNetworkAclAssociation", mock.Anything, mock.MatchedBy(func(params *ec2.ReplaceNetworkAclAssociationInput) bool {
-		require.Equal(t, extutil.Ptr("NEW nacl-4"), params.NetworkAclId)
+		require.Equal(t, new("NEW nacl-4"), params.NetworkAclId)
 		return *params.AssociationId == "association-1"
-	}), mock.Anything).Return(extutil.Ptr(ec2.ReplaceNetworkAclAssociationOutput{
-		NewAssociationId: extutil.Ptr("NEW association-4"),
+	}), mock.Anything).Return(new(ec2.ReplaceNetworkAclAssociationOutput{
+		NewAssociationId: new("NEW association-4"),
 	}), nil)
 
 	clientEc2.On("ReplaceNetworkAclAssociation", mock.Anything, mock.MatchedBy(func(params *ec2.ReplaceNetworkAclAssociationInput) bool {
-		require.Equal(t, extutil.Ptr("NEW nacl-4"), params.NetworkAclId)
+		require.Equal(t, new("NEW nacl-4"), params.NetworkAclId)
 		return *params.AssociationId == "association-2"
-	}), mock.Anything).Return(extutil.Ptr(ec2.ReplaceNetworkAclAssociationOutput{
-		NewAssociationId: extutil.Ptr("NEW association-5"),
+	}), mock.Anything).Return(new(ec2.ReplaceNetworkAclAssociationOutput{
+		NewAssociationId: new("NEW association-5"),
 	}), nil)
 
 	ctx := context.Background()
@@ -441,28 +441,28 @@ func TestStopBlackhole(t *testing.T) {
 		require.Equal(t, aws.String("tag:steadybit-attack-execution-id"), params.Filters[1].Name)
 		require.Equal(t, executionId.String(), params.Filters[1].Values[0])
 		return true
-	}), mock.Anything).Return(extutil.Ptr(ec2.DescribeNetworkAclsOutput{
+	}), mock.Anything).Return(new(ec2.DescribeNetworkAclsOutput{
 		NetworkAcls: []types.NetworkAcl{
 			{
-				NetworkAclId: extutil.Ptr("NEW nacl-4"),
+				NetworkAclId: new("NEW nacl-4"),
 				Tags: []types.Tag{
 					{
-						Key:   extutil.Ptr("steadybit-replaced subnet-1"),
-						Value: extutil.Ptr("nacl-1"),
+						Key:   new("steadybit-replaced subnet-1"),
+						Value: new("nacl-1"),
 					}, {
-						Key:   extutil.Ptr("steadybit-replaced subnet-2"),
-						Value: extutil.Ptr("nacl-2"),
+						Key:   new("steadybit-replaced subnet-2"),
+						Value: new("nacl-2"),
 					},
 				},
 				Associations: []types.NetworkAclAssociation{
 					{
-						NetworkAclAssociationId: extutil.Ptr("NEW association-4"),
-						NetworkAclId:            extutil.Ptr("NEW nacl-4"),
-						SubnetId:                extutil.Ptr("subnet-1"),
+						NetworkAclAssociationId: new("NEW association-4"),
+						NetworkAclId:            new("NEW nacl-4"),
+						SubnetId:                new("subnet-1"),
 					}, {
-						NetworkAclAssociationId: extutil.Ptr("NEW association-5"),
-						NetworkAclId:            extutil.Ptr("NEW nacl-4"),
-						SubnetId:                extutil.Ptr("subnet-2"),
+						NetworkAclAssociationId: new("NEW association-5"),
+						NetworkAclId:            new("NEW nacl-4"),
+						SubnetId:                new("subnet-2"),
 					},
 				},
 			},
@@ -477,14 +477,14 @@ func TestStopBlackhole(t *testing.T) {
 			return true
 		}
 		return false
-	}), mock.Anything).Return(extutil.Ptr(ec2.ReplaceNetworkAclAssociationOutput{
-		NewAssociationId: extutil.Ptr("New New association-6"),
+	}), mock.Anything).Return(new(ec2.ReplaceNetworkAclAssociationOutput{
+		NewAssociationId: new("New New association-6"),
 	}), nil)
 
 	clientEc2.On("DeleteNetworkAcl", mock.Anything, mock.MatchedBy(func(params *ec2.DeleteNetworkAclInput) bool {
-		require.Equal(t, extutil.Ptr("NEW nacl-4"), params.NetworkAclId)
+		require.Equal(t, new("NEW nacl-4"), params.NetworkAclId)
 		return true
-	}), mock.Anything).Return(extutil.Ptr(ec2.DeleteNetworkAclOutput{}), nil)
+	}), mock.Anything).Return(new(ec2.DeleteNetworkAclOutput{}), nil)
 
 	ctx := context.Background()
 	action := azBlackholeAction{clientProvider: func(account string, region string, role *string) (blackholeEC2Api, blackholeImdsApi, error) {

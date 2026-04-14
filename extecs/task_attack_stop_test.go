@@ -28,8 +28,8 @@ func TestEcsTaskStopAction_Prepare(t *testing.T) {
 		{
 			name: "Should return config",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Config: map[string]any{},
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-ecs.cluster.arn": {"my-cluster-arn"},
 						"aws-ecs.task.arn":    {"my-task-arn"},
@@ -96,7 +96,7 @@ func TestEcsTaskStopAction_Start(t *testing.T) {
 	api.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
 		Tasks: []types.Task{
 			{
-				LastStatus: extutil.Ptr("RUNNING"),
+				LastStatus: new("RUNNING"),
 			},
 		},
 	})
@@ -125,7 +125,7 @@ func TestEcsTaskStopAction_Start_already_stopped_task(t *testing.T) {
 	api.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
 		Tasks: []types.Task{
 			{
-				LastStatus: extutil.Ptr("STOPPED"),
+				LastStatus: new("STOPPED"),
 			},
 		},
 	})
@@ -155,7 +155,7 @@ func TestEcsTaskStopActionForwardsError(t *testing.T) {
 	api.On("DescribeTasks", mock.Anything, mock.Anything).Return(&ecs.DescribeTasksOutput{
 		Tasks: []types.Task{
 			{
-				LastStatus: extutil.Ptr("RUNNING"),
+				LastStatus: new("RUNNING"),
 			},
 		},
 	})

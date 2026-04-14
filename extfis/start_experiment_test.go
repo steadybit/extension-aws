@@ -20,7 +20,7 @@ func TestPrepareInstanceReboot(t *testing.T) {
 	// Given
 	executionId, _ := uuid.NewRandom()
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.fis.experiment.template.id": {"template-123"},
 				"aws.account":                    {"42"},
@@ -71,7 +71,7 @@ func TestStartExperiment(t *testing.T) {
 		return true
 	})).Return(&fis.StartExperimentOutput{
 		Experiment: &types.Experiment{
-			Id: extutil.Ptr("EXP-123"),
+			Id: new("EXP-123"),
 		},
 	}, nil)
 
@@ -104,7 +104,7 @@ func TestStatusExperiment(t *testing.T) {
 		return true
 	})).Return(&fis.GetExperimentOutput{
 		Experiment: &types.Experiment{
-			Id: extutil.Ptr("EXP-123"),
+			Id: new("EXP-123"),
 			Actions: map[string]types.ExperimentAction{
 				"stepC": {
 					State: &types.ExperimentActionState{
@@ -119,13 +119,13 @@ func TestStatusExperiment(t *testing.T) {
 				"stepB": {
 					State: &types.ExperimentActionState{
 						Status: types.ExperimentActionStatusFailed,
-						Reason: extutil.Ptr("Internal error."),
+						Reason: new("Internal error."),
 					},
 				},
 			},
 			State: &types.ExperimentState{
 				Status: types.ExperimentStatusFailed,
-				Reason: extutil.Ptr("stepB failed"),
+				Reason: new("stepB failed"),
 			},
 		},
 	}, nil)
@@ -152,7 +152,7 @@ func TestStatusExperiment(t *testing.T) {
 	assert.True(t, result.Completed)
 	assert.Equal(t, result.Error.Status, extutil.Ptr(action_kit_api.Failed))
 	assert.Equal(t, result.Error.Title, "FIS Experiment failed")
-	assert.Equal(t, result.Error.Detail, extutil.Ptr("stepB failed"))
+	assert.Equal(t, result.Error.Detail, new("stepB failed"))
 }
 
 func TestStopExperiment(t *testing.T) {
@@ -163,7 +163,7 @@ func TestStopExperiment(t *testing.T) {
 		return true
 	})).Return(&fis.GetExperimentOutput{
 		Experiment: &types.Experiment{
-			Id: extutil.Ptr("EXP-123"),
+			Id: new("EXP-123"),
 			State: &types.ExperimentState{
 				Status: types.ExperimentStatusRunning,
 			},

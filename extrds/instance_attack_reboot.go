@@ -34,25 +34,25 @@ func (f rdsInstanceRebootAttack) Describe() action_kit_api.ActionDescription {
 		Label:       "Trigger DB Instance Reboot",
 		Description: "Triggers rebooting a database instance",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(rdsIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(rdsIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: rdsInstanceTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label: "rds instance id",
 					Query: "aws.rds.instance.id=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("RDS"),
+		Technology:  new("AWS"),
+		Category:    new("RDS"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
-				Advanced:     extutil.Ptr(false),
-				DefaultValue: extutil.Ptr("false"),
-				Description:  extutil.Ptr("Specifies whether the reboot is conducted through a Multi-AZ failover."),
+				Advanced:     new(false),
+				DefaultValue: new("false"),
+				Description:  new("Specifies whether the reboot is conducted through a Multi-AZ failover."),
 				Hint: &action_kit_api.ActionHint{
 					Content: "You can't enable force failover if the instance isn't configured for Multi-AZ.",
 					Type:    action_kit_api.HintInfo,

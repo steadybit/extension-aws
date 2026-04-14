@@ -50,15 +50,15 @@ func (e *ecsTaskStopAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Stop Task",
 		Description: "Stop an ECS task",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("ECS"),
-		Icon:        extutil.Ptr(ecsTaskIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Technology:  new("AWS"),
+		Category:    new("ECS"),
+		Icon:        new(ecsTaskIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: ecsTaskTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "cluster and service",
-					Description: extutil.Ptr("Find ecs task by cluster and service name"),
+					Description: new("Find ecs task by cluster and service name"),
 					Query:       "aws-ecs.cluster.name=\"\" and aws-ecs.service.name=\"\"",
 				},
 			}),
@@ -95,7 +95,7 @@ func (e *ecsTaskStopAction) Start(ctx context.Context, state *TaskStopState) (*a
 	if len(describeTaskResult.Tasks) == 1 && aws.ToString(describeTaskResult.Tasks[0].LastStatus) != "RUNNING" {
 		return &action_kit_api.StartResult{
 			Error: &action_kit_api.ActionKitError{
-				Detail: extutil.Ptr(fmt.Sprintf("State of task %s was %s", state.TaskArn, aws.ToString(describeTaskResult.Tasks[0].LastStatus))),
+				Detail: new(fmt.Sprintf("State of task %s was %s", state.TaskArn, aws.ToString(describeTaskResult.Tasks[0].LastStatus))),
 				Status: extutil.Ptr(action_kit_api.Failed),
 				Title:  "Task not running",
 			},

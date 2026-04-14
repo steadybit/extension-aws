@@ -18,10 +18,10 @@ import (
 func TestPrepareInstanceReboot(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"force-failover": true,
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.rds.instance.id": {"my-instance"},
 				"aws.account":         {"42"},

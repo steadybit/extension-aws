@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -26,12 +25,11 @@ func (m *ecsDescribeServicesApiMock) DescribeServices(ctx context.Context, param
 func TestServiceDescriptionPoller_awaits_first_response(t *testing.T) {
 	account := "awsAccount"
 	region := "region"
-	role := extutil.Ptr("role")
+	role := new("role")
 	cluster := "clusterArn"
 	service := "serviceArn"
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	poller := NewServiceDescriptionPoller()
 	poller.ticker = time.NewTicker(1 * time.Millisecond)
@@ -39,7 +37,7 @@ func TestServiceDescriptionPoller_awaits_first_response(t *testing.T) {
 		mockedApi := new(ecsDescribeServicesApiMock)
 		mockedApi.On("DescribeServices", mock.Anything, mock.Anything).Return(&ecs.DescribeServicesOutput{
 			Services: []types.Service{{
-				ServiceArn:   extutil.Ptr(service),
+				ServiceArn:   new(service),
 				DesiredCount: 1,
 				RunningCount: 1,
 			}},
@@ -61,8 +59,8 @@ func TestServiceDescriptionPoller_awaits_first_response(t *testing.T) {
 
 func TestServiceDescriptionPoller_registers_and_unregisters_services(t *testing.T) {
 	p := NewServiceDescriptionPoller()
-	p.Register("a", "b", extutil.Ptr("c"), "d", "e")
-	p.Register("a", "b", extutil.Ptr("c"), "d", "f")
+	p.Register("a", "b", new("c"), "d", "e")
+	p.Register("a", "b", new("c"), "d", "f")
 	p.Register("a", "b", nil, "d", "g")
 	assert.Len(t, p.polls, 1)
 	assert.Len(t, p.polls["a"], 1)
@@ -73,17 +71,17 @@ func TestServiceDescriptionPoller_registers_and_unregisters_services(t *testing.
 	assert.NotNil(t, p.polls["a"]["b"]["c"]["d"]["e"])
 	assert.NotNil(t, p.polls["a"]["b"]["c"]["d"]["f"])
 
-	p.Unregister("a", "b", extutil.Ptr("c"), "d", "e")
+	p.Unregister("a", "b", new("c"), "d", "e")
 	assert.Len(t, p.polls["a"]["b"]["c"]["d"], 1)
-	p.Unregister("a", "b", extutil.Ptr("c"), "d", "f")
+	p.Unregister("a", "b", new("c"), "d", "f")
 	p.Unregister("a", "b", nil, "d", "g")
 	assert.Len(t, p.polls, 0)
 }
 
 func TestServiceDescriptionPoller_registers_and_unregisters_service_multiple_times(t *testing.T) {
 	p := NewServiceDescriptionPoller()
-	p.Register("a", "b", extutil.Ptr("c"), "d", "e")
-	p.Register("a", "b", extutil.Ptr("c"), "d", "e")
+	p.Register("a", "b", new("c"), "d", "e")
+	p.Register("a", "b", new("c"), "d", "e")
 	assert.Len(t, p.polls, 1)
 	assert.Len(t, p.polls["a"], 1)
 	assert.Len(t, p.polls["a"]["b"], 1)
@@ -95,9 +93,9 @@ func TestServiceDescriptionPoller_registers_and_unregisters_service_multiple_tim
 	}
 	assert.Equal(t, record, p.polls["a"]["b"]["c"]["d"]["e"])
 
-	p.Unregister("a", "b", extutil.Ptr("c"), "d", "e")
+	p.Unregister("a", "b", new("c"), "d", "e")
 	assert.Len(t, p.polls["a"]["b"]["c"], 1)
 
-	p.Unregister("a", "b", extutil.Ptr("c"), "d", "e")
+	p.Unregister("a", "b", new("c"), "d", "e")
 	assert.Len(t, p.polls, 0)
 }
