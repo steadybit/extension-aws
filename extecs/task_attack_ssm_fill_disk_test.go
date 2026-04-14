@@ -11,7 +11,7 @@ import (
 
 func Test_getEcsTaskFillDiskParameters(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 1000,
 			"percent":  77,
 		},

@@ -45,37 +45,37 @@ func (e *azBlackholeAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Blackhole Availability Zone",
 		Description: "Simulates an outage of an entire availability zone.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(azIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(azIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: azTargetType,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "zone",
-					Description: extutil.Ptr("Find zone by name"),
+					Description: new("Find zone by name"),
 					Query:       "aws.zone=\"\"",
 				},
 				{
 					Label:       "zone-id",
-					Description: extutil.Ptr("Find zone by zone id"),
+					Description: new("Find zone by zone id"),
 					Query:       "aws.zone.id=\"\"",
 				},
 			})}),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("Network"),
+		Technology:  new("AWS"),
+		Category:    new("Network"),
 		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "duration",
 				Label:        "Duration",
-				Description:  extutil.Ptr(""),
+				Description:  new(""),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("60s"),
+				Order:        new(1),
+				Required:     new(true),
 			},
 		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 

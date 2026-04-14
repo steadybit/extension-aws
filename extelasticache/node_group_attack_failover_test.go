@@ -18,7 +18,7 @@ import (
 func TestTestFailover(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.elasticache.replication-group.node-group.id": {"0001"},
 				"aws.elasticache.replication-group.id":            {"redis-steadybit-dev"},

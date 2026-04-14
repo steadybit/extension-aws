@@ -21,7 +21,7 @@ func Test_StopProcess_Description(t *testing.T) {
 func Test_getEcsTaskStopProcessParameters(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"process":  "foo",
 			"graceful": true,
 		},
@@ -38,7 +38,7 @@ func Test_getEcsTaskStopProcessParameters(t *testing.T) {
 func Test_getEcsTaskStopProcessParameters_defaults(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"process":  "foo",
 			"graceful": false,
 		},
@@ -55,7 +55,7 @@ func Test_getEcsTaskStopProcessParameters_defaults(t *testing.T) {
 func Test_getEcsTaskStopProcessParameters_invalidProcessName(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"process":  "foo*",
 			"graceful": false,
 		},

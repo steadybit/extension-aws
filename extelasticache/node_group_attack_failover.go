@@ -35,19 +35,19 @@ func (f elasticacheNodeGroupFailoverAttack) Describe() action_kit_api.ActionDesc
 		Label:       "Trigger Failover",
 		Description: "Triggers nodegroup failover by promoting a replica node to primary",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(elasticacheIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(elasticacheIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: elasticacheNodeGroupTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "elasticache nodegroup id",
-					Description: extutil.Ptr("Find node groups by replication group id and node group id"),
+					Description: new("Find node groups by replication group id and node group id"),
 					Query:       "aws.elasticache.replication-group.id=\"\" and aws.elasticache.replication-group.node-group.id=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("ElastiCache"),
+		Technology:  new("AWS"),
+		Category:    new("ElastiCache"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},

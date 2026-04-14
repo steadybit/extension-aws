@@ -23,7 +23,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/extec2"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"strings"
 	"time"
 )
@@ -50,7 +49,7 @@ func (e *ecsTaskDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: ecsTaskTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEcsTask)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEcsTask)),
 		},
 	}
 }
@@ -59,9 +58,9 @@ func (e *ecsTaskDiscovery) DescribeTarget() discovery_kit_api.TargetDescription 
 	return discovery_kit_api.TargetDescription{
 		Id:       ecsTaskTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "ECS Task", Other: "ECS Tasks"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(ecsTaskIcon),
+		Icon:     new(ecsTaskIcon),
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
@@ -145,7 +144,7 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, ec2Util taskDiscove
 	}
 	for _, clusterArn := range listClusterOutput.ClusterArns {
 		paginator := ecs.NewListTasksPaginator(ecsApi, &ecs.ListTasksInput{
-			Cluster: extutil.Ptr(clusterArn),
+			Cluster: new(clusterArn),
 		})
 		for paginator.HasMorePages() {
 			output, err := paginator.NextPage(ctx)
@@ -156,7 +155,7 @@ func GetAllEcsTasks(ctx context.Context, ecsApi EcsTasksApi, ec2Util taskDiscove
 			taskArnPages := utils.SplitIntoPages(output.TaskArns, taskPageSize)
 			for _, taskArnPage := range taskArnPages {
 				describeTasksOutput, err := ecsApi.DescribeTasks(ctx, &ecs.DescribeTasksInput{
-					Cluster: extutil.Ptr(clusterArn),
+					Cluster: new(clusterArn),
 					Tasks:   taskArnPage,
 					Include: []types.TaskField{types.TaskFieldTags},
 				})

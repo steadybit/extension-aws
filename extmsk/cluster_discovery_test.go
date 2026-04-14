@@ -13,10 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 	"github.com/aws/smithy-go/middleware"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -116,11 +114,11 @@ func TestGetAllMskClusters(t *testing.T) {
 	tags := resourcegroupstaggingapi.GetResourcesOutput{
 		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
 			{
-				ResourceARN: extutil.Ptr("node-arn"),
+				ResourceARN: new("node-arn"),
 				Tags: []tagtypes.Tag{
 					{
-						Key:   extutil.Ptr("Example"),
-						Value: extutil.Ptr("Tag123"),
+						Key:   new("Example"),
+						Value: new("Tag123"),
 					},
 				},
 			},
@@ -132,7 +130,7 @@ func TestGetAllMskClusters(t *testing.T) {
 	targets, err := getAllMskClusters(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "Example",
@@ -175,8 +173,8 @@ func TestGetAllMskClustersWithPagination(t *testing.T) {
 	withoutMarkerCluster := mock.MatchedBy(func(arg *kafka.ListClustersV2Input) bool {
 		return arg.NextToken == nil
 	})
-	mockedApi.On("ListClustersV2", mock.Anything, withoutMarkerCluster).Return(discovery_kit_api.Ptr(kafka.ListClustersV2Output{
-		NextToken: discovery_kit_api.Ptr("marker"),
+	mockedApi.On("ListClustersV2", mock.Anything, withoutMarkerCluster).Return(new(kafka.ListClustersV2Output{
+		NextToken: new("marker"),
 		ClusterInfoList: []types.Cluster{
 			{
 				ClusterName:    aws.String("dev-test"),
@@ -204,7 +202,7 @@ func TestGetAllMskClustersWithPagination(t *testing.T) {
 			},
 		},
 	}), nil)
-	mockedApi.On("ListClustersV2", mock.Anything, withMarkerCluster).Return(discovery_kit_api.Ptr(kafka.ListClustersV2Output{
+	mockedApi.On("ListClustersV2", mock.Anything, withMarkerCluster).Return(new(kafka.ListClustersV2Output{
 		ClusterInfoList: []types.Cluster{
 			{
 				ClusterName:    aws.String("dev-test"),
@@ -233,7 +231,7 @@ func TestGetAllMskClustersWithPagination(t *testing.T) {
 		},
 	}), nil)
 
-	mockedApi.On("ListNodes", context.Background(), &kafka.ListNodesInput{ClusterArn: aws.String("arn1")}).Return(discovery_kit_api.Ptr(kafka.ListNodesOutput{
+	mockedApi.On("ListNodes", context.Background(), &kafka.ListNodesInput{ClusterArn: aws.String("arn1")}).Return(new(kafka.ListNodesOutput{
 		NodeInfoList: []types.NodeInfo{
 			{
 				BrokerNodeInfo: &types.BrokerNodeInfo{
@@ -243,7 +241,7 @@ func TestGetAllMskClustersWithPagination(t *testing.T) {
 			},
 		},
 	}), nil)
-	mockedApi.On("ListNodes", context.Background(), &kafka.ListNodesInput{ClusterArn: aws.String("arn2")}).Return(discovery_kit_api.Ptr(kafka.ListNodesOutput{
+	mockedApi.On("ListNodes", context.Background(), &kafka.ListNodesInput{ClusterArn: aws.String("arn2")}).Return(new(kafka.ListNodesOutput{
 		NodeInfoList: []types.NodeInfo{
 			{
 				BrokerNodeInfo: &types.BrokerNodeInfo{
@@ -258,11 +256,11 @@ func TestGetAllMskClustersWithPagination(t *testing.T) {
 	tags := resourcegroupstaggingapi.GetResourcesOutput{
 		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
 			{
-				ResourceARN: extutil.Ptr("node-arn1"),
+				ResourceARN: new("node-arn1"),
 				Tags: []tagtypes.Tag{
 					{
-						Key:   extutil.Ptr("Example"),
-						Value: extutil.Ptr("Tag123"),
+						Key:   new("Example"),
+						Value: new("Tag123"),
 					},
 				},
 			},
@@ -274,7 +272,7 @@ func TestGetAllMskClustersWithPagination(t *testing.T) {
 	targets, err := getAllMskClusters(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -357,7 +355,7 @@ func TestGetAllMskClustersError(t *testing.T) {
 	_, err := getAllMskClusters(context.Background(), mockedApi, tagApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then

@@ -19,7 +19,7 @@ jobs:
   extension-ci:
     uses: steadybit/extension-kit/.github/workflows/reusable-extension-ci.yml@main # NOSONAR githubactions:S7637 - our own action
     with:
-      go_version: '^1.25.9'
+      go_version: '^1.26.2'
       build_linux_packages: true
       VERSION_BUMPER_APPID: ${{ vars.GH_APP_STEADYBIT_APP_ID }}
     secrets:

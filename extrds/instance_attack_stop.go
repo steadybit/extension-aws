@@ -36,18 +36,18 @@ func (f rdsInstanceStopAttack) Describe() action_kit_api.ActionDescription {
 		Label:       "Trigger DB Instance Stop",
 		Description: "Triggers stopping a DB instance",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(rdsIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(rdsIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: rdsInstanceTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label: "rds instance id",
 					Query: "aws.rds.instance.id=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("RDS"),
+		Technology:  new("AWS"),
+		Category:    new("RDS"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},

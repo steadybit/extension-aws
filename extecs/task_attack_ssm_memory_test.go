@@ -11,7 +11,7 @@ import (
 
 func Test_getEcsTaskStressMemoryParameters(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 60000,
 			"workers":  2,
 			"percent":  25,

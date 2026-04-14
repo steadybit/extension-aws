@@ -72,17 +72,17 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 		Id:          fmt.Sprintf("%s.static_response", albTargetId),
 		Label:       "Return Static Response",
 		Description: "Define a static Response for a given Listener of an Application Load Balancer.",
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("Load Balancer"),
+		Technology:  new("AWS"),
+		Category:    new("Load Balancer"),
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(albIcon),
+		Icon:        new(albIcon),
 		Kind:        action_kit_api.Attack,
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: albTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "name",
-					Description: extutil.Ptr("Find load balancer by name"),
+					Description: new("Find load balancer by name"),
 					Query:       "aws-elb.alb.name=\"\"",
 				},
 			}),
@@ -92,22 +92,22 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 			{
 				Name:         "duration",
 				Label:        "Duration",
-				Description:  extutil.Ptr("The duration of the action."),
+				Description:  new("The duration of the action."),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("180s"),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("180s"),
+				Required:     new(true),
 			},
 			{
 				Name:        "listenerPort",
 				Label:       "Listener Port",
-				Description: extutil.Ptr("The port of the listener."),
+				Description: new("The port of the listener."),
 				Type:        action_kit_api.ActionParameterTypeString,
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ParameterOptionsFromTargetAttribute{
 						Attribute: "aws-elb.alb.listener.port",
 					},
 				}),
-				Required: extutil.Ptr(true),
+				Required: new(true),
 			},
 			{
 				Name:  "-response-separator-",
@@ -122,34 +122,34 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 			{
 				Name:         "responseStatusCode",
 				Label:        "Status Code",
-				Description:  extutil.Ptr("The status code which should get returned."),
+				Description:  new("The status code which should get returned."),
 				Type:         action_kit_api.ActionParameterTypeInteger,
-				MinValue:     extutil.Ptr(100),
-				MaxValue:     extutil.Ptr(999),
-				Required:     extutil.Ptr(true),
-				DefaultValue: extutil.Ptr("503"),
+				MinValue:     new(100),
+				MaxValue:     new(999),
+				Required:     new(true),
+				DefaultValue: new("503"),
 			},
 			{
 				Name:        "responseContentType",
 				Label:       "Content Type",
-				Description: extutil.Ptr("The content type of the response."),
+				Description: new("The content type of the response."),
 				Type:        action_kit_api.ActionParameterTypeString,
-				Required:    extutil.Ptr(false),
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Required:    new(false),
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{Label: "text/plain", Value: "text/plain"},
 					action_kit_api.ExplicitParameterOption{Label: "text/html", Value: "text/html"},
 					action_kit_api.ExplicitParameterOption{Label: "text/css", Value: "text/css"},
 					action_kit_api.ExplicitParameterOption{Label: "application/json", Value: "application/json"},
 					action_kit_api.ExplicitParameterOption{Label: "application/javascript", Value: "application/javascript"},
 				}),
-				DefaultValue: extutil.Ptr("text/plain"),
+				DefaultValue: new("text/plain"),
 			},
 			{
 				Name:        "responseBody",
 				Label:       "Body",
-				Description: extutil.Ptr("The body of the response."),
+				Description: new("The body of the response."),
 				Type:        action_kit_api.ActionParameterTypeString,
-				Required:    extutil.Ptr(false),
+				Required:    new(false),
 			},
 			{
 				Name:  "-conditions-separator-",
@@ -164,44 +164,44 @@ func (e *albStaticResponseAction) Describe() action_kit_api.ActionDescription {
 			{
 				Name:        "conditionHostHeader",
 				Label:       "Host Header",
-				Description: extutil.Ptr("The host names. The maximum size of each name is 128 characters. The comparison is case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If you specify multiple strings, the condition is satisfied if one of the strings matches the host name. Max 5 values allowed."),
+				Description: new("The host names. The maximum size of each name is 128 characters. The comparison is case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If you specify multiple strings, the condition is satisfied if one of the strings matches the host name. Max 5 values allowed."),
 				Type:        action_kit_api.ActionParameterTypeStringArray,
-				Required:    extutil.Ptr(false),
+				Required:    new(false),
 			},
 			{
 				Name:        "conditionPathPattern",
 				Label:       "Path Pattern",
-				Description: extutil.Ptr("The path patterns to compare against the request URL. The maximum size of each string is 128 characters. The comparison is case sensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If you specify multiple strings, the condition is satisfied if one of them matches the request URL. The path pattern is compared only to the path of the URL, not to its query string. Max 5 values allowed."),
+				Description: new("The path patterns to compare against the request URL. The maximum size of each string is 128 characters. The comparison is case sensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). If you specify multiple strings, the condition is satisfied if one of them matches the request URL. The path pattern is compared only to the path of the URL, not to its query string. Max 5 values allowed."),
 				Type:        action_kit_api.ActionParameterTypeStringArray,
-				Required:    extutil.Ptr(false),
+				Required:    new(false),
 			},
 			{
 				Name:        "conditionHttpMethod",
 				Label:       "Http Method",
-				Description: extutil.Ptr("The name of the request method. The maximum size is 40 characters. The allowed characters are A-Z, hyphen (-), and underscore (_). The comparison is case sensitive. Wildcards are not supported; therefore, the method name must be an exact match. If you specify multiple strings, the condition is satisfied if one of the strings matches the HTTP request method. We recommend that you route GET and HEAD requests in the same way, because the response to a HEAD request may be cached. Max 5 values allowed."),
+				Description: new("The name of the request method. The maximum size is 40 characters. The allowed characters are A-Z, hyphen (-), and underscore (_). The comparison is case sensitive. Wildcards are not supported; therefore, the method name must be an exact match. If you specify multiple strings, the condition is satisfied if one of the strings matches the HTTP request method. We recommend that you route GET and HEAD requests in the same way, because the response to a HEAD request may be cached. Max 5 values allowed."),
 				Type:        action_kit_api.ActionParameterTypeStringArray,
-				Required:    extutil.Ptr(false),
+				Required:    new(false),
 			},
 			{
 				Name:        "conditionSourceIp",
 				Label:       "Source IP",
-				Description: extutil.Ptr("The source IP addresses, in CIDR format. You can use both IPv4 and IPv6 addresses. Wildcards are not supported. If you specify multiple addresses, the condition is satisfied if the source IP address of the request matches one of the CIDR blocks. This condition is not satisfied by the addresses in the X-Forwarded-For header. Max 5 values allowed."),
+				Description: new("The source IP addresses, in CIDR format. You can use both IPv4 and IPv6 addresses. Wildcards are not supported. If you specify multiple addresses, the condition is satisfied if the source IP address of the request matches one of the CIDR blocks. This condition is not satisfied by the addresses in the X-Forwarded-For header. Max 5 values allowed."),
 				Type:        action_kit_api.ActionParameterTypeStringArray,
-				Required:    extutil.Ptr(false),
+				Required:    new(false),
 			},
 			{
 				Name:        "conditionQueryString",
 				Label:       "Query String",
-				Description: extutil.Ptr("The key/value pairs or values to find in the query string. The maximum size of each string is 128 characters. The comparison is case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). To search for a literal '*' or '?' character in a query string, you must escape these characters in Values using a '\\' character. If you specify multiple key/value pairs or values, the condition is satisfied if one of them is found in the query string. Max 5 values allowed."),
+				Description: new("The key/value pairs or values to find in the query string. The maximum size of each string is 128 characters. The comparison is case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). To search for a literal '*' or '?' character in a query string, you must escape these characters in Values using a '\\' character. If you specify multiple key/value pairs or values, the condition is satisfied if one of them is found in the query string. Max 5 values allowed."),
 				Type:        action_kit_api.ActionParameterTypeKeyValue,
-				Required:    extutil.Ptr(false),
+				Required:    new(false),
 			},
 			{
 				Name:        "conditionHttpHeader",
 				Label:       "HTTP Header",
-				Description: extutil.Ptr("The name of the HTTP header field with a maximum size of 40 characters. And a value to compare against the value of the HTTP header. The maximum size of each string is 128 characters. The comparison strings are case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). Currently only a single header name with a single value is allowed."),
+				Description: new("The name of the HTTP header field with a maximum size of 40 characters. And a value to compare against the value of the HTTP header. The maximum size of each string is 128 characters. The comparison strings are case insensitive. The following wildcard characters are supported: * (matches 0 or more characters) and ? (matches exactly 1 character). Currently only a single header name with a single value is allowed."),
 				Type:        action_kit_api.ActionParameterTypeKeyValue,
-				Required:    extutil.Ptr(false),
+				Required:    new(false),
 			},
 		},
 	}
@@ -296,7 +296,7 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 	conditions := make([]types.RuleCondition, 0)
 	if len(state.ConditionHostHeader) > 0 {
 		conditions = append(conditions, types.RuleCondition{
-			Field: extutil.Ptr("host-header"),
+			Field: new("host-header"),
 			HostHeaderConfig: &types.HostHeaderConditionConfig{
 				Values: state.ConditionHostHeader,
 			},
@@ -304,7 +304,7 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 	}
 	if len(state.ConditionPathPattern) > 0 {
 		conditions = append(conditions, types.RuleCondition{
-			Field: extutil.Ptr("path-pattern"),
+			Field: new("path-pattern"),
 			PathPatternConfig: &types.PathPatternConditionConfig{
 				Values: state.ConditionPathPattern,
 			},
@@ -312,7 +312,7 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 	}
 	if len(state.ConditionHttpMethod) > 0 {
 		conditions = append(conditions, types.RuleCondition{
-			Field: extutil.Ptr("http-request-method"),
+			Field: new("http-request-method"),
 			HttpRequestMethodConfig: &types.HttpRequestMethodConditionConfig{
 				Values: state.ConditionHttpMethod,
 			},
@@ -320,7 +320,7 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 	}
 	if len(state.ConditionSourceIp) > 0 {
 		conditions = append(conditions, types.RuleCondition{
-			Field: extutil.Ptr("source-ip"),
+			Field: new("source-ip"),
 			SourceIpConfig: &types.SourceIpConditionConfig{
 				Values: state.ConditionSourceIp,
 			},
@@ -329,9 +329,9 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 	if len(state.ConditionHttpHeader) > 0 {
 		for key, value := range state.ConditionHttpHeader {
 			conditions = append(conditions, types.RuleCondition{
-				Field: extutil.Ptr("http-header"),
+				Field: new("http-header"),
 				HttpHeaderConfig: &types.HttpHeaderConditionConfig{
-					HttpHeaderName: extutil.Ptr(key),
+					HttpHeaderName: new(key),
 					Values:         []string{value},
 				},
 			})
@@ -341,12 +341,12 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 		queryValues := make([]types.QueryStringKeyValuePair, 0)
 		for key, value := range state.ConditionQueryString {
 			queryValues = append(queryValues, types.QueryStringKeyValuePair{
-				Key:   extutil.Ptr(key),
-				Value: extutil.Ptr(value),
+				Key:   new(key),
+				Value: new(value),
 			})
 		}
 		conditions = append(conditions, types.RuleCondition{
-			Field: extutil.Ptr("query-string"),
+			Field: new("query-string"),
 			QueryStringConfig: &types.QueryStringConditionConfig{
 				Values: queryValues,
 			},
@@ -355,7 +355,7 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 	if len(conditions) == 0 {
 		//Add default condition
 		conditions = append(conditions, types.RuleCondition{
-			Field: extutil.Ptr("path-pattern"),
+			Field: new("path-pattern"),
 			PathPatternConfig: &types.PathPatternConditionConfig{
 				Values: []string{"*"},
 			},
@@ -363,17 +363,17 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 	}
 
 	fixedResponseConfig := &types.FixedResponseActionConfig{
-		StatusCode: extutil.Ptr(strconv.Itoa(state.ResponseStatusCode)),
+		StatusCode: new(strconv.Itoa(state.ResponseStatusCode)),
 	}
 	if state.ResponseBody != "" {
-		fixedResponseConfig.MessageBody = extutil.Ptr(state.ResponseBody)
+		fixedResponseConfig.MessageBody = new(state.ResponseBody)
 	}
 	if state.ResponseContentType != "" {
-		fixedResponseConfig.ContentType = extutil.Ptr(state.ResponseContentType)
+		fixedResponseConfig.ContentType = new(state.ResponseContentType)
 	}
 
 	createRuleResponse, err := client.CreateRule(ctx, &elasticloadbalancingv2.CreateRuleInput{
-		Priority:    extutil.Ptr(int32(1)),
+		Priority:    new(int32(1)),
 		ListenerArn: &state.ListenerArn,
 		Conditions:  conditions,
 		Actions: []types.Action{
@@ -384,16 +384,16 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 		},
 		Tags: []types.Tag{
 			{
-				Key:   extutil.Ptr("steadybit-target-execution-id"),
-				Value: extutil.Ptr(state.TargetExecutionId.String()),
+				Key:   new("steadybit-target-execution-id"),
+				Value: new(state.TargetExecutionId.String()),
 			},
 			{
-				Key:   extutil.Ptr("steadybit-execution-id"),
-				Value: extutil.Ptr(strconv.Itoa(state.ExecutionId)),
+				Key:   new("steadybit-execution-id"),
+				Value: new(strconv.Itoa(state.ExecutionId)),
 			},
 			{
-				Key:   extutil.Ptr("steadybit-experiment-key"),
-				Value: extutil.Ptr(state.ExperimentKey),
+				Key:   new("steadybit-experiment-key"),
+				Value: new(state.ExperimentKey),
 			},
 		},
 	})
@@ -422,8 +422,8 @@ func reprioritizeIfNecessary(ctx context.Context, client *albStaticResponseApi, 
 				ResourceArns: []string{*rule.RuleArn},
 				Tags: []types.Tag{
 					{
-						Key:   extutil.Ptr(steadybitReprioritized),
-						Value: extutil.Ptr(state.TargetExecutionId.String()),
+						Key:   new(steadybitReprioritized),
+						Value: new(state.TargetExecutionId.String()),
 					},
 				},
 			})
@@ -461,8 +461,8 @@ func getNewPriorityPairs(rules *elasticloadbalancingv2.DescribeRulesOutput) []ty
 			break
 		}
 		priorityWithRuleNew = append(priorityWithRuleNew, types.RulePriorityPair{
-			Priority: extutil.Ptr(int32(i + 1)),
-			RuleArn:  extutil.Ptr(priorityWithRule[i]),
+			Priority: new(int32(i + 1)),
+			RuleArn:  new(priorityWithRule[i]),
 		})
 		i++
 	}
@@ -562,7 +562,7 @@ func restoreOldPriorities(ctx context.Context, client *albStaticResponseApi, sta
 								return extension_kit.ToError(fmt.Sprintf("Failed to parse priority '%s'", *rule.Priority), err)
 							}
 							restorePriorities = append(restorePriorities, types.RulePriorityPair{
-								Priority: extutil.Ptr(int32(currentPrio - 1)),
+								Priority: new(int32(currentPrio - 1)),
 								RuleArn:  rule.RuleArn,
 							})
 						}

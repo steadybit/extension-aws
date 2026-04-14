@@ -8,11 +8,9 @@ import (
 	"errors"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -25,14 +23,14 @@ func TestGetAllRdsClusters(t *testing.T) {
 	mockedReturnValue := rds.DescribeDBClustersOutput{
 		DBClusters: []types.DBCluster{
 			{
-				DBClusterArn:        discovery_kit_api.Ptr("arn"),
-				DBClusterIdentifier: discovery_kit_api.Ptr("identifier"),
+				DBClusterArn:        new("arn"),
+				DBClusterIdentifier: new("identifier"),
 				AvailabilityZones:   []string{"zone-1", "zone-2"},
-				Engine:              discovery_kit_api.Ptr("engine"),
-				Status:              discovery_kit_api.Ptr("status"),
-				MultiAZ:             discovery_kit_api.Ptr(true),
+				Engine:              new("engine"),
+				Status:              new("status"),
+				MultiAZ:             new(true),
 				TagList: []types.Tag{
-					{Key: discovery_kit_api.Ptr("SpecialTag"), Value: discovery_kit_api.Ptr("Great Thing")},
+					{Key: new("SpecialTag"), Value: new("Great Thing")},
 				},
 			},
 		},
@@ -43,7 +41,7 @@ func TestGetAllRdsClusters(t *testing.T) {
 	targets, err := getAllRdsClusters(context.Background(), mockedApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "SpecialTag",
@@ -79,26 +77,26 @@ func TestGetAllRdsClustersWithPagination(t *testing.T) {
 	withoutMarker := mock.MatchedBy(func(arg *rds.DescribeDBClustersInput) bool {
 		return arg.Marker == nil
 	})
-	mockedApi.On("DescribeDBClusters", mock.Anything, withoutMarker).Return(discovery_kit_api.Ptr(rds.DescribeDBClustersOutput{
-		Marker: discovery_kit_api.Ptr("marker"),
+	mockedApi.On("DescribeDBClusters", mock.Anything, withoutMarker).Return(new(rds.DescribeDBClustersOutput{
+		Marker: new("marker"),
 		DBClusters: []types.DBCluster{
 			{
-				DBClusterArn:        discovery_kit_api.Ptr("arn1"),
-				DBClusterIdentifier: discovery_kit_api.Ptr("identifier1"),
+				DBClusterArn:        new("arn1"),
+				DBClusterIdentifier: new("identifier1"),
 				AvailabilityZones:   []string{"zone-1", "zone-2"},
-				Engine:              discovery_kit_api.Ptr("engine1"),
-				Status:              discovery_kit_api.Ptr("status"),
+				Engine:              new("engine1"),
+				Status:              new("status"),
 			},
 		},
 	}), nil)
-	mockedApi.On("DescribeDBClusters", mock.Anything, withMarker).Return(discovery_kit_api.Ptr(rds.DescribeDBClustersOutput{
+	mockedApi.On("DescribeDBClusters", mock.Anything, withMarker).Return(new(rds.DescribeDBClustersOutput{
 		DBClusters: []types.DBCluster{
 			{
-				DBClusterArn:        discovery_kit_api.Ptr("arn2"),
-				DBClusterIdentifier: discovery_kit_api.Ptr("identifier2"),
+				DBClusterArn:        new("arn2"),
+				DBClusterIdentifier: new("identifier2"),
 				AvailabilityZones:   []string{"zone-1", "zone-2"},
-				Engine:              discovery_kit_api.Ptr("engine2"),
-				Status:              discovery_kit_api.Ptr("status2"),
+				Engine:              new("engine2"),
+				Status:              new("status2"),
 			},
 		},
 	}), nil)
@@ -107,7 +105,7 @@ func TestGetAllRdsClustersWithPagination(t *testing.T) {
 	targets, err := getAllRdsClusters(context.Background(), mockedApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -127,7 +125,7 @@ func TestGetAllRdsClustersError(t *testing.T) {
 	_, err := getAllRdsClusters(context.Background(), mockedApi, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then

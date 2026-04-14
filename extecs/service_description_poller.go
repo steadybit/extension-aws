@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 	"golang.org/x/exp/maps"
 	"sync"
 	"time"
@@ -227,7 +226,7 @@ func (p EcsServiceDescriptionPoller) pollAll(ctx context.Context) {
 					for _, servicePage := range servicesPages {
 						descriptions, err := client.DescribeServices(ctx, &ecs.DescribeServicesInput{
 							Services: servicePage,
-							Cluster:  extutil.Ptr(cluster),
+							Cluster:  new(cluster),
 						})
 						if err != nil {
 							log.Warn().TimeDiff("duration", time.Now(), startTime).Err(err).Msg("api call failed")

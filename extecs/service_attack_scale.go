@@ -52,16 +52,16 @@ func (e *ecsServiceScaleAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Scale Service",
 		Description: "Up-/ or downscale an ECS service",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("ECS"),
-		Icon:        extutil.Ptr(ecsServiceIcon),
+		Technology:  new("AWS"),
+		Category:    new("ECS"),
+		Icon:        new(ecsServiceIcon),
 		Kind:        action_kit_api.Attack,
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: ecsServiceTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "cluster and service",
-					Description: extutil.Ptr("Find ecs service by cluster and service name"),
+					Description: new("Find ecs service by cluster and service name"),
 					Query:       "aws-ecs.cluster.name=\"\" and aws-ecs.service.name=\"\"",
 				},
 			}),
@@ -70,19 +70,19 @@ func (e *ecsServiceScaleAction) Describe() action_kit_api.ActionDescription {
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Label:        "Duration",
-				Description:  extutil.Ptr("The duration of the action. The service will be scaled back to the original value after the action."),
+				Description:  new("The duration of the action. The service will be scaled back to the original value after the action."),
 				Name:         "duration",
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("180s"),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("180s"),
+				Required:     new(true),
 			},
 			{
 				Name:         "desiredCount",
 				Label:        "Desired Count",
-				Description:  extutil.Ptr("The new desired count."),
+				Description:  new("The new desired count."),
 				Type:         action_kit_api.ActionParameterTypeInteger,
-				DefaultValue: extutil.Ptr("1"),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("1"),
+				Required:     new(true),
 			},
 		},
 	}

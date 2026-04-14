@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/v2/config"
@@ -179,8 +178,7 @@ func Test_getExtensionList(t *testing.T) {
 			discovery_kit_sdk.ClearRegisteredDiscoveries()
 			http.DefaultServeMux = http.NewServeMux()
 			config.Config = tt.config
-			background, cancel := context.WithCancel(context.Background())
-			defer cancel()
+			background := t.Context()
 			registerHandlers(background)
 
 			got := getExtensionList()

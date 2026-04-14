@@ -11,10 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	tagtypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -62,26 +60,26 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 			{
 				Architectures: []types.Architecture{"x86_64"},
 				CodeSize:      1024,
-				Description:   extutil.Ptr("description"),
-				Environment: extutil.Ptr(types.EnvironmentResponse{
+				Description:   new("description"),
+				Environment: new(types.EnvironmentResponse{
 					Variables: map[string]string{
 						"FAILURE_INJECTION_PARAM": "env-fip",
 					},
 				}),
-				VpcConfig: extutil.Ptr(types.VpcConfigResponse{
-					VpcId: extutil.Ptr("vpc-123"),
+				VpcConfig: new(types.VpcConfigResponse{
+					VpcId: new("vpc-123"),
 				}),
-				FunctionArn:  extutil.Ptr("arn"),
-				FunctionName: extutil.Ptr("name"),
-				LastModified: extutil.Ptr("last-modified"),
-				MasterArn:    extutil.Ptr("master-arn"),
-				MemorySize:   extutil.Ptr(int32(1024)),
+				FunctionArn:  new("arn"),
+				FunctionName: new("name"),
+				LastModified: new("last-modified"),
+				MasterArn:    new("master-arn"),
+				MemorySize:   new(int32(1024)),
 				PackageType:  "package-type",
-				RevisionId:   extutil.Ptr("revision-id"),
-				Role:         extutil.Ptr("role"),
+				RevisionId:   new("revision-id"),
+				Role:         new("role"),
 				Runtime:      "runtime",
-				Timeout:      extutil.Ptr(int32(10)),
-				Version:      extutil.Ptr("version"),
+				Timeout:      new(int32(10)),
+				Version:      new("version"),
 			},
 		},
 	}
@@ -90,11 +88,11 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	tags := resourcegroupstaggingapi.GetResourcesOutput{
 		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
 			{
-				ResourceARN: extutil.Ptr("arn"),
+				ResourceARN: new("arn"),
 				Tags: []tagtypes.Tag{
 					{
-						Key:   extutil.Ptr("Example"),
-						Value: extutil.Ptr("Tag123"),
+						Key:   new("Example"),
+						Value: new("Tag123"),
 					},
 				},
 			},
@@ -108,7 +106,7 @@ func Test_getAllAwsLambdaFunctions(t *testing.T) {
 	targets, err := getAllAwsLambdaFunctions(context.Background(), lambdaApi, tagApi, ec2util, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "Example",
@@ -149,28 +147,28 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 		return arg.Marker == nil
 	})
 	mockedApi.On("ListFunctions", mock.Anything, withoutMarker, mock.Anything).Return(&lambda.ListFunctionsOutput{
-		NextMarker: discovery_kit_api.Ptr("marker"),
+		NextMarker: new("marker"),
 		Functions: []types.FunctionConfiguration{
 			{
-				FunctionArn: extutil.Ptr("arn1"),
+				FunctionArn: new("arn1"),
 			},
 		},
 	}, nil)
 	mockedApi.On("ListFunctions", mock.Anything, withMarker, mock.Anything).Return(&lambda.ListFunctionsOutput{
 		Functions: []types.FunctionConfiguration{
 			{
-				FunctionArn: extutil.Ptr("arn2"),
+				FunctionArn: new("arn2"),
 			},
 		},
 	}, nil)
 	tags := resourcegroupstaggingapi.GetResourcesOutput{
 		ResourceTagMappingList: []tagtypes.ResourceTagMapping{
 			{
-				ResourceARN: extutil.Ptr("arn"),
+				ResourceARN: new("arn"),
 				Tags: []tagtypes.Tag{
 					{
-						Key:   extutil.Ptr("Example"),
-						Value: extutil.Ptr("Tag123"),
+						Key:   new("Example"),
+						Value: new("Tag123"),
 					},
 				},
 			},
@@ -182,7 +180,7 @@ func Test_getAllAwsLambdaFunctions_withPagination(t *testing.T) {
 	targets, err := getAllAwsLambdaFunctions(context.Background(), mockedApi, tagApi, ec2util, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -203,7 +201,7 @@ func Test_getAllAwsLambdaFunctions_withError(t *testing.T) {
 	_, err := getAllAwsLambdaFunctions(context.Background(), clientApi, tagApi, ec2util, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 	assert.Equal(t, "error", err.Error())
 }

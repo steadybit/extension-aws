@@ -23,10 +23,10 @@ func Test_getEcsTaskNetworkLossParameters(t *testing.T) {
 	id := uuid.New()
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: id,
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration":   60000,
 			"percentage": 90,
-			"ip":         []interface{}{"1.1.1.1", "1.1.1.2/32"},
+			"ip":         []any{"1.1.1.1", "1.1.1.2/32"},
 		},
 	}
 
@@ -51,7 +51,7 @@ func Test_getEcsTaskNetworkLatencyParameters_defaults(t *testing.T) {
 	id := uuid.New()
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: id,
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration":   10000,
 			"percentage": 10,
 		},
@@ -77,10 +77,10 @@ func Test_getEcsTaskNetworkLatencyParameters_defaults(t *testing.T) {
 func Test_getEcsTaskNetworkLatencyParameters_invalidSources(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration":   10000,
 			"percentage": 10,
-			"ip":         []interface{}{"foo*"},
+			"ip":         []any{"foo*"},
 		},
 	}
 
@@ -91,7 +91,7 @@ func Test_getEcsTaskNetworkLatencyParameters_invalidSources(t *testing.T) {
 func Test_getEcsTaskNetworkLatencyParameters_invalidDuration(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 46801_000,
 		},
 	}

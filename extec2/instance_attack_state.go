@@ -51,34 +51,34 @@ func (e *ec2InstanceStateAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Change Instance State",
 		Description: "Reboot, terminate, stop or hibernate EC2 instances",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(ec2Icon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(ec2Icon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: ec2TargetType,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "instance-id",
-					Description: extutil.Ptr("Find ec2-instance by instance-id"),
+					Description: new("Find ec2-instance by instance-id"),
 					Query:       "aws-ec2.instance.id=\"\"",
 				},
 				{
 					Label:       "instance-name",
-					Description: extutil.Ptr("Find ec2-instance by instance-name"),
+					Description: new("Find ec2-instance by instance-name"),
 					Query:       "aws-ec2.instance.name=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("EC2"),
+		Technology:  new("AWS"),
+		Category:    new("EC2"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:        "action",
 				Label:       "Action",
-				Description: extutil.Ptr("The kind of state change operation to execute for the EC2 instances"),
-				Required:    extutil.Ptr(true),
+				Description: new("The kind of state change operation to execute for the EC2 instances"),
+				Required:    new(true),
 				Type:        action_kit_api.ActionParameterTypeString,
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "Reboot",
 						Value: "reboot",
@@ -135,13 +135,13 @@ func (e *ec2InstanceStateAction) Start(ctx context.Context, state *InstanceState
 	} else if state.Action == "stop" {
 		in := ec2.StopInstancesInput{
 			InstanceIds: instanceIds,
-			Hibernate:   extutil.Ptr(false),
+			Hibernate:   new(false),
 		}
 		_, err = client.StopInstances(ctx, &in)
 	} else if state.Action == "hibernate" {
 		in := ec2.StopInstancesInput{
 			InstanceIds: instanceIds,
-			Hibernate:   extutil.Ptr(true),
+			Hibernate:   new(true),
 		}
 		_, err = client.StopInstances(ctx, &in)
 	} else if state.Action == "terminate" {

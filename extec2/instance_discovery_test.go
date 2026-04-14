@@ -9,10 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -31,22 +29,22 @@ func (m *instanceDiscoveryApiMock) DescribeInstances(ctx context.Context, params
 }
 
 var instance = types.Instance{
-	InstanceId: extutil.Ptr("i-0ef9adc9fbd3b19c5"),
-	ImageId:    extutil.Ptr("ami-02fc9c535f43bbc91"),
+	InstanceId: new("i-0ef9adc9fbd3b19c5"),
+	ImageId:    new("ami-02fc9c535f43bbc91"),
 	Placement: &types.Placement{
-		AvailabilityZone: extutil.Ptr("us-east-1b"),
+		AvailabilityZone: new("us-east-1b"),
 	},
-	SubnetId:         extutil.Ptr("subnet-0e3b6b7b1b7b7b7b7"),
-	PrivateIpAddress: extutil.Ptr("10.3.92.28"),
-	PrivateDnsName:   extutil.Ptr("ip-10-3-92-28.eu-central-1.compute.internal"),
-	VpcId:            extutil.Ptr("vpc-003cf5dda88c814c6"),
+	SubnetId:         new("subnet-0e3b6b7b1b7b7b7b7"),
+	PrivateIpAddress: new("10.3.92.28"),
+	PrivateDnsName:   new("ip-10-3-92-28.eu-central-1.compute.internal"),
+	VpcId:            new("vpc-003cf5dda88c814c6"),
 	State: &types.InstanceState{
 		Name: "running",
-		Code: extutil.Ptr(int32(16)),
+		Code: new(int32(16)),
 	},
 	Tags: []types.Tag{
-		{Key: extutil.Ptr("Name"), Value: extutil.Ptr("dev-demo-ngroup2")},
-		{Key: extutil.Ptr("SpecialTag"), Value: extutil.Ptr("Great Thing")},
+		{Key: new("Name"), Value: new("dev-demo-ngroup2")},
+		{Key: new("SpecialTag"), Value: new("Great Thing")},
 	},
 }
 
@@ -66,9 +64,9 @@ func TestGetAllEc2Instances(t *testing.T) {
 
 	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+		ZoneName:   new("us-east-1b"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
@@ -76,7 +74,7 @@ func TestGetAllEc2Instances(t *testing.T) {
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -122,9 +120,9 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 
 	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+		ZoneName:   new("us-east-1b"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
@@ -133,7 +131,7 @@ func TestGetAllEc2InstancesWithFilteredAttributes(t *testing.T) {
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -180,9 +178,9 @@ func TestGetAllEc2InstancesShouldApplyTagFilters(t *testing.T) {
 
 	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+		ZoneName:   new("us-east-1b"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
@@ -191,7 +189,7 @@ func TestGetAllEc2InstancesShouldApplyTagFilters(t *testing.T) {
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []config.TagFilter{
 			{
 				Key:    "application",
@@ -214,9 +212,9 @@ func TestNameNotSet(t *testing.T) {
 			{
 				Instances: []types.Instance{
 					{
-						InstanceId: extutil.Ptr("i-0ef9adc9fbd3b19c5"),
+						InstanceId: new("i-0ef9adc9fbd3b19c5"),
 						Placement: &types.Placement{
-							AvailabilityZone: extutil.Ptr("us-east-1b"),
+							AvailabilityZone: new("us-east-1b"),
 						},
 					},
 				},
@@ -227,9 +225,9 @@ func TestNameNotSet(t *testing.T) {
 
 	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+		ZoneName:   new("us-east-1b"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
@@ -238,7 +236,7 @@ func TestNameNotSet(t *testing.T) {
 	targets, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -257,9 +255,9 @@ func TestGetAllEc2InstancesError(t *testing.T) {
 
 	mockedZoneUtil := new(ec2UtilMock)
 	mockedZone := types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+		ZoneName:   new("us-east-1b"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 	mockedZoneUtil.On("GetVpcName", mock.Anything, mock.Anything, mock.Anything).Return("vpc-123-name")
@@ -268,7 +266,7 @@ func TestGetAllEc2InstancesError(t *testing.T) {
 	_, err := GetAllEc2Instances(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then

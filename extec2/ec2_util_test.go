@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -33,14 +32,14 @@ func TestAwsZones(t *testing.T) {
 	mockedReturnValue42 := ec2.DescribeAvailabilityZonesOutput{
 		AvailabilityZones: []types.AvailabilityZone{
 			{
-				ZoneName:   discovery_kit_api.Ptr("eu-central-1a"),
-				RegionName: discovery_kit_api.Ptr("eu-central-1"),
-				ZoneId:     discovery_kit_api.Ptr("euc1-az1"),
+				ZoneName:   new("eu-central-1a"),
+				RegionName: new("eu-central-1"),
+				ZoneId:     new("euc1-az1"),
 			},
 			{
-				ZoneName:   discovery_kit_api.Ptr("eu-central-1b"),
-				RegionName: discovery_kit_api.Ptr("eu-central-1"),
-				ZoneId:     discovery_kit_api.Ptr("euc1-az3"),
+				ZoneName:   new("eu-central-1b"),
+				RegionName: new("eu-central-1"),
+				ZoneId:     new("euc1-az3"),
 			},
 		},
 	}

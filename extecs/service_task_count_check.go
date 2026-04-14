@@ -70,18 +70,18 @@ func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescript
 		Label:       "Service Task Count",
 		Description: "Verify service task counts.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(ecsServiceIcon),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("ECS"),
+		Icon:        new(ecsServiceIcon),
+		Technology:  new("AWS"),
+		Category:    new("ECS"),
 		Kind:        action_kit_api.Check,
 		TimeControl: action_kit_api.TimeControlInternal,
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType:          ecsServiceTargetId,
 			QuantityRestriction: extutil.Ptr(action_kit_api.QuantityRestrictionAll),
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "cluster and service",
-					Description: extutil.Ptr("Find service by cluster and service name"),
+					Description: new("Find service by cluster and service name"),
 					Query:       "aws-ecs.cluster.name=\"\" AND aws-ecs.service.name=\"\"",
 				},
 			}),
@@ -90,21 +90,21 @@ func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescript
 			{
 				Name:         "duration",
 				Label:        "Timeout",
-				Description:  extutil.Ptr("How long the check should wait for the specified service task count."),
+				Description:  new("How long the check should wait for the specified service task count."),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("10s"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("10s"),
+				Order:        new(1),
+				Required:     new(true),
 			},
 			{
 				Name:         "runningCountCheckMode",
 				Label:        "Service task count",
-				Description:  extutil.Ptr("How many running tasks are required to let the check pass."),
+				Description:  new("How many running tasks are required to let the check pass."),
 				Type:         action_kit_api.ActionParameterTypeString,
-				DefaultValue: extutil.Ptr(runningCountEqualsDesiredCount),
-				Order:        extutil.Ptr(2),
-				Required:     extutil.Ptr(true),
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				DefaultValue: new(runningCountEqualsDesiredCount),
+				Order:        new(2),
+				Required:     new(true),
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "running count > 0",
 						Value: runningCountMin1,
@@ -130,8 +130,8 @@ func (f EcsServiceTaskCountCheckAction) Describe() action_kit_api.ActionDescript
 		},
 		Prepare: action_kit_api.MutatingEndpointReference{},
 		Start:   action_kit_api.MutatingEndpointReference{},
-		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("5s"),
+		Status: new(action_kit_api.MutatingEndpointReferenceWithCallInterval{
+			CallInterval: new("5s"),
 		}),
 	}
 }
@@ -243,7 +243,7 @@ func (f EcsServiceTaskCountCheckAction) checkRunningAndDesiredCount(state *EcsSe
 		checkMessage = fmt.Sprintf("unsupported check type %q", state.RunningCountCheckMode)
 	}
 	if checkMessage != "" {
-		return extutil.Ptr(action_kit_api.ActionKitError{
+		return new(action_kit_api.ActionKitError{
 			Title:  checkMessage,
 			Status: extutil.Ptr(action_kit_api.Failed),
 		})

@@ -7,10 +7,7 @@ func SplitIntoPages[T any](input []T, pageSize int) [][]T {
 	capacity := int(math.Ceil(float64(inputLength) / float64(pageSize)))
 	pages := make([][]T, 0, capacity)
 	for i := 0; i < inputLength; {
-		end := i + pageSize
-		if end > inputLength {
-			end = inputLength
-		}
+		end := min(i+pageSize, inputLength)
 		pages = append(pages, input[i:end])
 		i = end
 	}

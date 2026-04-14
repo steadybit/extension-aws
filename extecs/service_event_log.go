@@ -51,18 +51,18 @@ func (f EcsServiceEventLogAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Service Event Log",
 		Description: "Collect service events from ECS",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(ecsServiceIcon),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("ECS"),
+		Icon:        new(ecsServiceIcon),
+		Technology:  new("AWS"),
+		Category:    new("ECS"),
 		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Other,
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType:          ecsServiceTargetId,
 			QuantityRestriction: extutil.Ptr(action_kit_api.QuantityRestrictionAll),
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "cluster and service",
-					Description: extutil.Ptr("Find service by cluster and service name"),
+					Description: new("Find service by cluster and service name"),
 					Query:       "aws-ecs.cluster.name=\"\" AND aws-ecs.service.name=\"\"",
 				},
 			}),
@@ -71,14 +71,14 @@ func (f EcsServiceEventLogAction) Describe() action_kit_api.ActionDescription {
 			{
 				Name:         "duration",
 				Label:        "Duration",
-				Description:  extutil.Ptr(""),
+				Description:  new(""),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("60s"),
+				Order:        new(1),
+				Required:     new(true),
 			},
 		},
-		Widgets: extutil.Ptr([]action_kit_api.Widget{
+		Widgets: new([]action_kit_api.Widget{
 			action_kit_api.LogWidget{
 				Type:    action_kit_api.ComSteadybitWidgetLog,
 				Title:   "Service Events",
@@ -87,10 +87,10 @@ func (f EcsServiceEventLogAction) Describe() action_kit_api.ActionDescription {
 		}),
 		Prepare: action_kit_api.MutatingEndpointReference{},
 		Start:   action_kit_api.MutatingEndpointReference{},
-		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("5s"),
+		Status: new(action_kit_api.MutatingEndpointReferenceWithCallInterval{
+			CallInterval: new("5s"),
 		}),
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
@@ -162,13 +162,13 @@ func eventsToMessages(events []types.ServiceEvent) *action_kit_api.Messages {
 	for _, event := range events {
 		messages = append(messages, action_kit_api.Message{
 			Message:         aws.ToString(event.Message),
-			Type:            extutil.Ptr(LogType),
+			Type:            new(LogType),
 			Timestamp:       event.CreatedAt,
 			TimestampSource: extutil.Ptr(action_kit_api.TimestampSourceExternal),
-			Fields: extutil.Ptr(action_kit_api.MessageFields{
+			Fields: new(action_kit_api.MessageFields{
 				"Id": aws.ToString(event.Id),
 			}),
 		})
 	}
-	return extutil.Ptr(messages)
+	return new(messages)
 }

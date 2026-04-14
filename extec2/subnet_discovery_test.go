@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -34,15 +33,15 @@ func TestGetAllSubnets(t *testing.T) {
 	mockedReturnValue := ec2.DescribeSubnetsOutput{
 		Subnets: []types.Subnet{
 			{
-				SubnetId:  extutil.Ptr("subnet-0ef9adc9fbd3b19c5"),
-				CidrBlock: extutil.Ptr("10.10.0.0/21"),
-				VpcId:     extutil.Ptr("vpc-123"),
+				SubnetId:  new("subnet-0ef9adc9fbd3b19c5"),
+				CidrBlock: new("10.10.0.0/21"),
+				VpcId:     new("vpc-123"),
 				Tags: []types.Tag{
-					{Key: extutil.Ptr("Name"), Value: extutil.Ptr("dev-demo-ngroup2")},
-					{Key: extutil.Ptr("SpecialTag"), Value: extutil.Ptr("Great Thing")},
+					{Key: new("Name"), Value: new("dev-demo-ngroup2")},
+					{Key: new("SpecialTag"), Value: new("Great Thing")},
 				},
-				AvailabilityZone:   extutil.Ptr("eu-central-1b"),
-				AvailabilityZoneId: extutil.Ptr("euc1-az3"),
+				AvailabilityZone:   new("eu-central-1b"),
+				AvailabilityZoneId: new("euc1-az3"),
 			},
 		},
 	}
@@ -54,7 +53,7 @@ func TestGetAllSubnets(t *testing.T) {
 	targets, err := GetAllSubnets(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "eu-central-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -83,15 +82,15 @@ func TestGetAllSubnetsShouldApplyTagFilters(t *testing.T) {
 	mockedReturnValue := ec2.DescribeSubnetsOutput{
 		Subnets: []types.Subnet{
 			{
-				SubnetId:  extutil.Ptr("subnet-0ef9adc9fbd3b19c5"),
-				CidrBlock: extutil.Ptr("10.10.0.0/21"),
-				VpcId:     extutil.Ptr("vpc-123"),
+				SubnetId:  new("subnet-0ef9adc9fbd3b19c5"),
+				CidrBlock: new("10.10.0.0/21"),
+				VpcId:     new("vpc-123"),
 				Tags: []types.Tag{
-					{Key: extutil.Ptr("Name"), Value: extutil.Ptr("dev-demo-ngroup2")},
-					{Key: extutil.Ptr("SpecialTag"), Value: extutil.Ptr("Great Thing")},
+					{Key: new("Name"), Value: new("dev-demo-ngroup2")},
+					{Key: new("SpecialTag"), Value: new("Great Thing")},
 				},
-				AvailabilityZone:   extutil.Ptr("eu-central-1b"),
-				AvailabilityZoneId: extutil.Ptr("euc1-az3"),
+				AvailabilityZone:   new("eu-central-1b"),
+				AvailabilityZoneId: new("euc1-az3"),
 			},
 		},
 	}
@@ -105,7 +104,7 @@ func TestGetAllSubnetsShouldApplyTagFilters(t *testing.T) {
 	targets, err := GetAllSubnets(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "eu-central-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "application",

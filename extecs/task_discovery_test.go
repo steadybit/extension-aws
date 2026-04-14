@@ -8,10 +8,8 @@ import (
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	extConfig "github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -61,33 +59,33 @@ func (m *taskDiscoveryEc2UtilMock) GetVpcName(awsAccountNumber string, region st
 var taskArn = "arn:aws:ecs:eu-central-1:42:task/sandbox-demo-ecs-fargate/15ac9bc28dce4a6fb757580ac87eb854"
 var clusterArn = "arn:aws:ecs:eu-central-1:42:cluster/sandbox-demo-ecs-fargate"
 var task = types.Task{
-	TaskArn:          extutil.Ptr(taskArn),
-	AvailabilityZone: extutil.Ptr("us-east-1b"),
-	ClusterArn:       extutil.Ptr(clusterArn),
-	LastStatus:       extutil.Ptr("RUNNING"),
+	TaskArn:          new(taskArn),
+	AvailabilityZone: new("us-east-1b"),
+	ClusterArn:       new(clusterArn),
+	LastStatus:       new("RUNNING"),
 	LaunchType:       types.LaunchTypeFargate,
 	Tags: []types.Tag{
-		{Key: extutil.Ptr("aws:ecs:clusterName"), Value: extutil.Ptr("sandbox-demo-ecs-fargate")},
-		{Key: extutil.Ptr("aws:ecs:serviceName"), Value: extutil.Ptr("ecs-demo-gateway-service")},
-		{Key: extutil.Ptr("test"), Value: extutil.Ptr("123")},
+		{Key: new("aws:ecs:clusterName"), Value: new("sandbox-demo-ecs-fargate")},
+		{Key: new("aws:ecs:serviceName"), Value: new("ecs-demo-gateway-service")},
+		{Key: new("test"), Value: new("123")},
 	},
 	Containers: []types.Container{
 		{
-			Image: extutil.Ptr("public.ecr.aws/amazon-ssm-agent/amazon-ssm-agent:latest"),
+			Image: new("public.ecr.aws/amazon-ssm-agent/amazon-ssm-agent:latest"),
 		},
 	},
 }
 var taskArn2 = "arn:aws:ecs:eu-central-1:42:task/sandbox-demo-ecs-fargate/15ac9bc28dce4a6fb757580ac87eb855"
 var taskStopped = types.Task{
-	TaskArn:          extutil.Ptr(taskArn2),
-	AvailabilityZone: extutil.Ptr("us-east-1b"),
-	ClusterArn:       extutil.Ptr(clusterArn),
-	LastStatus:       extutil.Ptr("STOPPED"),
+	TaskArn:          new(taskArn2),
+	AvailabilityZone: new("us-east-1b"),
+	ClusterArn:       new(clusterArn),
+	LastStatus:       new("STOPPED"),
 	LaunchType:       types.LaunchTypeFargate,
 	Tags: []types.Tag{
-		{Key: extutil.Ptr("aws:ecs:clusterName"), Value: extutil.Ptr("sandbox-demo-ecs-fargate")},
-		{Key: extutil.Ptr("aws:ecs:serviceName"), Value: extutil.Ptr("ecs-demo-gateway-service")},
-		{Key: extutil.Ptr("test"), Value: extutil.Ptr("123")},
+		{Key: new("aws:ecs:clusterName"), Value: new("sandbox-demo-ecs-fargate")},
+		{Key: new("aws:ecs:serviceName"), Value: new("ecs-demo-gateway-service")},
+		{Key: new("test"), Value: new("123")},
 	},
 }
 
@@ -99,7 +97,7 @@ func TestGetAllEcsTasks(t *testing.T) {
 	targets, err := GetAllEcsTasks(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 	})
 
 	// Then
@@ -130,7 +128,7 @@ func TestGetAllEcsTasksShouldApplyTagFilters(t *testing.T) {
 	targets, err := GetAllEcsTasks(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "test",
@@ -147,7 +145,7 @@ func TestGetAllEcsTasksShouldApplyTagFilters(t *testing.T) {
 	targets, err = GetAllEcsTasks(context.Background(), mockedApi, mockedZoneUtil, &utils.AwsAccess{
 		AccountNumber: "42",
 		Region:        "us-east-1",
-		AssumeRole:    extutil.Ptr("arn:aws:iam::42:role/extension-aws-role"),
+		AssumeRole:    new("arn:aws:iam::42:role/extension-aws-role"),
 		TagFilters: []extConfig.TagFilter{
 			{
 				Key:    "test",
@@ -175,9 +173,9 @@ func mockApisTaskDiscovery() (*ecsClientMock, *taskDiscoveryEc2UtilMock) {
 
 	mockedZoneUtil := new(taskDiscoveryEc2UtilMock)
 	mockedZone := ec2types.AvailabilityZone{
-		ZoneName:   discovery_kit_api.Ptr("us-east-1b"),
-		RegionName: discovery_kit_api.Ptr("us-east-1"),
-		ZoneId:     discovery_kit_api.Ptr("us-east-1b-id"),
+		ZoneName:   new("us-east-1b"),
+		RegionName: new("us-east-1"),
+		ZoneId:     new("us-east-1b-id"),
 	}
 	mockedZoneUtil.On("GetZone", mock.Anything, mock.Anything, mock.Anything).Return(&mockedZone)
 	return mockedApi, mockedZoneUtil

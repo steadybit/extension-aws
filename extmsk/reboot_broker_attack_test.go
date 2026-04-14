@@ -18,7 +18,7 @@ import (
 func TestRebootBroker(t *testing.T) {
 	// Given
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.msk.cluster.arn":       {"arn"},
 				"aws.msk.cluster.broker.id": {"1"},

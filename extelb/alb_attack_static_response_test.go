@@ -60,8 +60,8 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 	api.On("DescribeListeners", mock.Anything, mock.Anything).Return(&elasticloadbalancingv2.DescribeListenersOutput{
 		Listeners: []types.Listener{
 			{
-				Port:        extutil.Ptr(int32(443)),
-				ListenerArn: extutil.Ptr("my-listener-arn"),
+				Port:        new(int32(443)),
+				ListenerArn: new("my-listener-arn"),
 			}},
 	}, nil)
 
@@ -80,29 +80,29 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 		{
 			name: "Should return config",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"duration":             "180",
 					"listenerPort":         "443",
 					"responseStatusCode":   "500",
 					"responseContentType":  "text/plain",
 					"responseBody":         "Steadybit killed your request",
-					"conditionHostHeader":  []interface{}{"example.com", "example.org"},
-					"conditionHttpMethod":  []interface{}{"GET"},
-					"conditionPathPattern": []interface{}{"/test", "/test2"},
-					"conditionQueryString": []interface{}{map[string]interface{}{"key": "key-1", "value": "value-1"}, map[string]interface{}{"key": "key-2", "value": "value-2"}},
-					"conditionSourceIp":    []interface{}{"0.0.0.0/32", "0.0.0.1/32"},
-					"conditionHttpHeader":  []interface{}{map[string]interface{}{"key": "X-HEADER", "value": "value-1"}},
+					"conditionHostHeader":  []any{"example.com", "example.org"},
+					"conditionHttpMethod":  []any{"GET"},
+					"conditionPathPattern": []any{"/test", "/test2"},
+					"conditionQueryString": []any{map[string]any{"key": "key-1", "value": "value-1"}, map[string]any{"key": "key-2", "value": "value-2"}},
+					"conditionSourceIp":    []any{"0.0.0.0/32", "0.0.0.1/32"},
+					"conditionHttpHeader":  []any{map[string]any{"key": "X-HEADER", "value": "value-1"}},
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
 						"aws.region":      {"us-west-1"},
 					},
 				}),
-				ExecutionContext: extutil.Ptr(action_kit_api.ExecutionContext{
-					ExecutionId:   extutil.Ptr(5),
-					ExperimentKey: extutil.Ptr("ADM-1"),
+				ExecutionContext: new(action_kit_api.ExecutionContext{
+					ExecutionId:   new(5),
+					ExperimentKey: new("ADM-1"),
 				}),
 				ExecutionId: targetExecutionId,
 			}),
@@ -134,12 +134,12 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if too many host headers",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"duration":            "180",
 					"listenerPort":        "443",
-					"conditionHostHeader": []interface{}{"example.com", "example.org", "example.net", "example.de", "example.xyz", "example.io"},
+					"conditionHostHeader": []any{"example.com", "example.org", "example.net", "example.de", "example.xyz", "example.io"},
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
@@ -152,12 +152,12 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if too many http methods",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"duration":            "180",
 					"listenerPort":        "443",
-					"conditionHttpMethod": []interface{}{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+					"conditionHttpMethod": []any{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
@@ -170,12 +170,12 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if too many path patterns",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"duration":             "180",
 					"listenerPort":         "443",
-					"conditionPathPattern": []interface{}{"/test", "/test2", "/test3", "/test4", "/test5", "/test6"},
+					"conditionPathPattern": []any{"/test", "/test2", "/test3", "/test4", "/test5", "/test6"},
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
@@ -188,19 +188,19 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if too many query string",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"duration":     "180",
 					"listenerPort": "443",
-					"conditionQueryString": []interface{}{
-						map[string]interface{}{"key": "key-1", "value": "value-1"},
-						map[string]interface{}{"key": "key-2", "value": "value-2"},
-						map[string]interface{}{"key": "key-3", "value": "value-3"},
-						map[string]interface{}{"key": "key-4", "value": "value-4"},
-						map[string]interface{}{"key": "key-5", "value": "value-5"},
-						map[string]interface{}{"key": "key-6", "value": "value-6"},
+					"conditionQueryString": []any{
+						map[string]any{"key": "key-1", "value": "value-1"},
+						map[string]any{"key": "key-2", "value": "value-2"},
+						map[string]any{"key": "key-3", "value": "value-3"},
+						map[string]any{"key": "key-4", "value": "value-4"},
+						map[string]any{"key": "key-5", "value": "value-5"},
+						map[string]any{"key": "key-6", "value": "value-6"},
 					},
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
@@ -213,12 +213,12 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if too many source ips",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"duration":          "180",
 					"listenerPort":      "443",
-					"conditionSourceIp": []interface{}{"0.0.0.0/32", "0.0.0.1/32", "0.0.0.2/32", "0.0.0.3/32", "0.0.0.4/32", "0.0.0.5/32", "0.0.0.6/32"},
+					"conditionSourceIp": []any{"0.0.0.0/32", "0.0.0.1/32", "0.0.0.2/32", "0.0.0.3/32", "0.0.0.4/32", "0.0.0.5/32", "0.0.0.6/32"},
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
@@ -231,15 +231,15 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if too many http header",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"duration":     "180",
 					"listenerPort": "443",
-					"conditionHttpHeader": []interface{}{
-						map[string]interface{}{"key": "X-HEADER", "value": "value-1"},
-						map[string]interface{}{"key": "X-HEADER-2", "value": "value-2"},
+					"conditionHttpHeader": []any{
+						map[string]any{"key": "X-HEADER", "value": "value-1"},
+						map[string]any{"key": "X-HEADER-2", "value": "value-2"},
 					},
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
 						"aws.account":     {"42"},
@@ -278,14 +278,14 @@ func TestAlbStaticResponseAction_Start(t *testing.T) {
 	api.On("DescribeRules", mock.Anything, mock.Anything).Return(&elasticloadbalancingv2.DescribeRulesOutput{
 		Rules: []types.Rule{
 			{
-				Priority:  extutil.Ptr("1"),
-				RuleArn:   extutil.Ptr("rule-arn-exisiting-1"),
-				IsDefault: extutil.Ptr(false),
+				Priority:  new("1"),
+				RuleArn:   new("rule-arn-exisiting-1"),
+				IsDefault: new(false),
 			},
 			{
-				Priority:  extutil.Ptr("default"),
-				RuleArn:   extutil.Ptr("rule-arn-existing-default"),
-				IsDefault: extutil.Ptr(true),
+				Priority:  new("default"),
+				RuleArn:   new("rule-arn-existing-default"),
+				IsDefault: new(true),
 			},
 		},
 	}, nil)
@@ -317,7 +317,7 @@ func TestAlbStaticResponseAction_Start(t *testing.T) {
 	})).Return(&elasticloadbalancingv2.CreateRuleOutput{
 		Rules: []types.Rule{
 			{
-				RuleArn: extutil.Ptr("rule-arn-created-by-steadybit"),
+				RuleArn: new("rule-arn-created-by-steadybit"),
 			},
 		},
 	}, nil)
@@ -362,19 +362,19 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 	api.On("DescribeRules", mock.Anything, mock.Anything).Return(&elasticloadbalancingv2.DescribeRulesOutput{
 		Rules: []types.Rule{
 			{
-				Priority:  extutil.Ptr("1"),
-				RuleArn:   extutil.Ptr("rule-arn-created-by-steadybit"),
-				IsDefault: extutil.Ptr(false),
+				Priority:  new("1"),
+				RuleArn:   new("rule-arn-created-by-steadybit"),
+				IsDefault: new(false),
 			},
 			{
-				Priority:  extutil.Ptr("2"),
-				RuleArn:   extutil.Ptr("rule-arn-exisiting-1"),
-				IsDefault: extutil.Ptr(false),
+				Priority:  new("2"),
+				RuleArn:   new("rule-arn-exisiting-1"),
+				IsDefault: new(false),
 			},
 			{
-				Priority:  extutil.Ptr("default"),
-				RuleArn:   extutil.Ptr("rule-arn-existing-default"),
-				IsDefault: extutil.Ptr(true),
+				Priority:  new("default"),
+				RuleArn:   new("rule-arn-existing-default"),
+				IsDefault: new(true),
 			},
 		},
 	}, nil).Once()
@@ -389,8 +389,8 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 			{
 				Tags: []types.Tag{
 					{
-						Key:   extutil.Ptr("steadybit-target-execution-id"),
-						Value: extutil.Ptr(targetExecutionId.String()),
+						Key:   new("steadybit-target-execution-id"),
+						Value: new(targetExecutionId.String()),
 					},
 				},
 			},
@@ -400,14 +400,14 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 	api.On("DescribeRules", mock.Anything, mock.Anything).Return(&elasticloadbalancingv2.DescribeRulesOutput{
 		Rules: []types.Rule{
 			{
-				IsDefault: extutil.Ptr(false),
-				Priority:  extutil.Ptr("2"),
-				RuleArn:   extutil.Ptr("rule-arn-exisiting-1"),
+				IsDefault: new(false),
+				Priority:  new("2"),
+				RuleArn:   new("rule-arn-exisiting-1"),
 			},
 			{
-				IsDefault: extutil.Ptr(true),
-				Priority:  extutil.Ptr("default"),
-				RuleArn:   extutil.Ptr("rule-arn-existing-default"),
+				IsDefault: new(true),
+				Priority:  new("default"),
+				RuleArn:   new("rule-arn-existing-default"),
 			},
 		},
 	}, nil).Once()
@@ -421,11 +421,11 @@ func TestEcsServiceScaleAction_Stop(t *testing.T) {
 	})).Return(&elasticloadbalancingv2.DescribeTagsOutput{
 		TagDescriptions: []types.TagDescription{
 			{
-				ResourceArn: extutil.Ptr("rule-arn-exisiting-1"),
+				ResourceArn: new("rule-arn-exisiting-1"),
 				Tags: []types.Tag{
 					{
-						Key:   extutil.Ptr("steadybit-reprioritized"),
-						Value: extutil.Ptr(targetExecutionId.String()),
+						Key:   new("steadybit-reprioritized"),
+						Value: new(targetExecutionId.String()),
 					},
 				},
 			},
@@ -492,14 +492,14 @@ func Test_getNewPriorityPairs(t *testing.T) {
 				rules: &elasticloadbalancingv2.DescribeRulesOutput{
 					Rules: []types.Rule{
 						{
-							IsDefault: extutil.Ptr(false),
-							Priority:  extutil.Ptr("2"),
-							RuleArn:   extutil.Ptr("rule-arn-a"),
+							IsDefault: new(false),
+							Priority:  new("2"),
+							RuleArn:   new("rule-arn-a"),
 						},
 						{
-							IsDefault: extutil.Ptr(true),
-							Priority:  extutil.Ptr("default"),
-							RuleArn:   extutil.Ptr("rule-arn-b"),
+							IsDefault: new(true),
+							Priority:  new("default"),
+							RuleArn:   new("rule-arn-b"),
 						},
 					},
 				},
@@ -512,50 +512,50 @@ func Test_getNewPriorityPairs(t *testing.T) {
 				rules: &elasticloadbalancingv2.DescribeRulesOutput{
 					Rules: []types.Rule{
 						{
-							IsDefault: extutil.Ptr(false),
-							Priority:  extutil.Ptr("1"),
-							RuleArn:   extutil.Ptr("rule-arn-a"),
+							IsDefault: new(false),
+							Priority:  new("1"),
+							RuleArn:   new("rule-arn-a"),
 						},
 						{
-							IsDefault: extutil.Ptr(false),
-							Priority:  extutil.Ptr("2"),
-							RuleArn:   extutil.Ptr("rule-arn-b"),
+							IsDefault: new(false),
+							Priority:  new("2"),
+							RuleArn:   new("rule-arn-b"),
 						},
 						{
-							IsDefault: extutil.Ptr(false),
-							Priority:  extutil.Ptr("3"),
-							RuleArn:   extutil.Ptr("rule-arn-c"),
+							IsDefault: new(false),
+							Priority:  new("3"),
+							RuleArn:   new("rule-arn-c"),
 						},
 						{
-							IsDefault: extutil.Ptr(false),
-							Priority:  extutil.Ptr("5"),
-							RuleArn:   extutil.Ptr("rule-arn-d"),
+							IsDefault: new(false),
+							Priority:  new("5"),
+							RuleArn:   new("rule-arn-d"),
 						},
 						{
-							IsDefault: extutil.Ptr(false),
-							Priority:  extutil.Ptr("6"),
-							RuleArn:   extutil.Ptr("rule-arn-e"),
+							IsDefault: new(false),
+							Priority:  new("6"),
+							RuleArn:   new("rule-arn-e"),
 						},
 						{
-							IsDefault: extutil.Ptr(true),
-							Priority:  extutil.Ptr("default"),
-							RuleArn:   extutil.Ptr("rule-arn-f"),
+							IsDefault: new(true),
+							Priority:  new("default"),
+							RuleArn:   new("rule-arn-f"),
 						},
 					},
 				},
 			},
 			want: []types.RulePriorityPair{
 				{
-					Priority: extutil.Ptr(int32(2)),
-					RuleArn:  extutil.Ptr("rule-arn-a"),
+					Priority: new(int32(2)),
+					RuleArn:  new("rule-arn-a"),
 				},
 				{
-					Priority: extutil.Ptr(int32(3)),
-					RuleArn:  extutil.Ptr("rule-arn-b"),
+					Priority: new(int32(3)),
+					RuleArn:  new("rule-arn-b"),
 				},
 				{
-					Priority: extutil.Ptr(int32(4)),
-					RuleArn:  extutil.Ptr("rule-arn-c"),
+					Priority: new(int32(4)),
+					RuleArn:  new("rule-arn-c"),
 				},
 			},
 		},

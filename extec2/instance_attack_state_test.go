@@ -28,10 +28,10 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 		{
 			name: "Should return config",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"action": "stop",
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-ec2.instance.id": {"my-instance"},
 						"aws.account":         {"42"},
@@ -50,8 +50,8 @@ func TestEc2InstanceStateAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if action is missing",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Config: map[string]any{},
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"aws-ec2.instance.id": {"my-instance"},
 						"aws.account":         {"42"},

@@ -61,8 +61,8 @@ func TestLambdaAction_Prepare(t *testing.T) {
 					Attributes: tt.attributes,
 				},
 				ExecutionContext: &action_kit_api.ExecutionContext{
-					ExperimentKey: extutil.Ptr("TEST-1"),
-					ExecutionId:   extutil.Ptr(42),
+					ExperimentKey: new("TEST-1"),
+					ExecutionId:   new(42),
 				},
 			})
 
@@ -87,17 +87,17 @@ func TestLambdaAction_Prepare(t *testing.T) {
 func TestLambdaAction_Start(t *testing.T) {
 	api := new(ssmClientMock)
 	api.On("PutParameter", mock.Anything, &ssm.PutParameterInput{
-		Name:        extutil.Ptr("PARAM"),
-		Value:       extutil.Ptr("{\"failureMode\":\"test\",\"rate\":0.5,\"isEnabled\":true}"),
+		Name:        new("PARAM"),
+		Value:       new("{\"failureMode\":\"test\",\"rate\":0.5,\"isEnabled\":true}"),
 		Type:        types.ParameterTypeString,
-		DataType:    extutil.Ptr("text"),
-		Description: extutil.Ptr("lambda failure injection config - set by steadybit experiment TEST-1 / execution 42"),
-		Overwrite:   extutil.Ptr(false),
+		DataType:    new("text"),
+		Description: new("lambda failure injection config - set by steadybit experiment TEST-1 / execution 42"),
+		Overwrite:   new(false),
 	}, mock.Anything).Return(&ssm.PutParameterOutput{}, nil)
 	api.On("AddTagsToResource", mock.Anything, &ssm.AddTagsToResourceInput{
-		ResourceId:   extutil.Ptr("PARAM"),
+		ResourceId:   new("PARAM"),
 		ResourceType: types.ResourceTypeForTaggingParameter,
-		Tags:         []types.Tag{{Key: extutil.Ptr("created-by"), Value: extutil.Ptr("steadybit")}},
+		Tags:         []types.Tag{{Key: new("created-by"), Value: new("steadybit")}},
 	}, mock.Anything).Return(&ssm.AddTagsToResourceOutput{}, nil)
 
 	action := lambdaAction{
@@ -109,8 +109,8 @@ func TestLambdaAction_Start(t *testing.T) {
 	state.Account = "123456789012"
 	state.Region = "us-west-1"
 	state.Param = "PARAM"
-	state.ExperimentKey = extutil.Ptr("TEST-1")
-	state.ExecutionId = extutil.Ptr(42)
+	state.ExperimentKey = new("TEST-1")
+	state.ExecutionId = new(42)
 	state.Config = &FailureInjectionConfig{
 		IsEnabled:   true,
 		FailureMode: "test",
@@ -127,7 +127,7 @@ func TestLambdaAction_Start(t *testing.T) {
 func TestLambdaAction_Stop(t *testing.T) {
 	api := new(ssmClientMock)
 	api.On("DeleteParameter", mock.Anything, &ssm.DeleteParameterInput{
-		Name: extutil.Ptr("PARAM"),
+		Name: new("PARAM"),
 	}, mock.Anything).Return(&ssm.DeleteParameterOutput{}, nil)
 
 	action := lambdaAction{
@@ -168,7 +168,7 @@ func (m *ssmClientMock) AddTagsToResource(ctx context.Context, s *ssm.AddTagsToR
 
 func Test_injectStatusCode(t *testing.T) {
 	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"statuscode": 500.0,
 			"rate":       50.0,
 		},
@@ -184,7 +184,7 @@ func Test_injectStatusCode(t *testing.T) {
 
 func Test_injectLatency(t *testing.T) {
 	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"minLatency": 200.0,
 			"maxLatency": 300.0,
 			"rate":       50.0,
@@ -202,7 +202,7 @@ func Test_injectLatency(t *testing.T) {
 
 func Test_fillDiskspace(t *testing.T) {
 	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"diskSpace": 128.0,
 			"rate":      100.0,
 		},
@@ -218,7 +218,7 @@ func Test_fillDiskspace(t *testing.T) {
 
 func Test_injectException(t *testing.T) {
 	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"exceptionMsg": "Error",
 			"rate":         25.0,
 		},
@@ -232,12 +232,12 @@ func Test_injectException(t *testing.T) {
 	assert.EqualValues(t, true, config.IsEnabled)
 }
 
-func toGenericArray(arr ...interface{}) []interface{} {
+func toGenericArray(arr ...any) []any {
 	return arr
 }
 func Test_denyConnection(t *testing.T) {
 	request := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"denylist": ".*.google.com",
 			"rate":     25.0,
 		},

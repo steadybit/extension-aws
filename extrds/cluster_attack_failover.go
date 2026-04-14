@@ -34,18 +34,18 @@ func (f rdsClusterFailoverAttack) Describe() action_kit_api.ActionDescription {
 		Label:       "Trigger Failover DB Cluster",
 		Description: "Triggers DB cluster failover by promoting a standby instance to primary",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(rdsIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(rdsIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: rdsClusterTargetId,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label: "rds cluster id",
 					Query: "aws.rds.cluster.id=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("RDS"),
+		Technology:  new("AWS"),
+		Category:    new("RDS"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},

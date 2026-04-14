@@ -23,7 +23,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 type mskClusterDiscovery struct {
@@ -47,7 +46,7 @@ func (r *mskClusterDiscovery) Describe() discovery_kit_api.DiscoveryDescription 
 	return discovery_kit_api.DiscoveryDescription{
 		Id: mskBrokerTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalMsk)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalMsk)),
 		},
 	}
 }
@@ -56,9 +55,9 @@ func (r *mskClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescripti
 	return discovery_kit_api.TargetDescription{
 		Id:       mskBrokerTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "MSK broker", Other: "MSK brokers"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(mskIcon),
+		Icon:     new(mskIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},

@@ -13,12 +13,11 @@ import (
 func TestServiceEventLog_Lifecycle(t *testing.T) {
 	const account = "awsAccount"
 	const region = "region"
-	role := extutil.Ptr("role")
+	role := new("role")
 	const cluster = "cluster"
 	const service = "service"
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	pollerMock := new(ServiceDescriptionPollerMock)
 	pollerMock.On("Register", account, region, role, cluster, service)
@@ -111,8 +110,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 						Events: []types.ServiceEvent{
 							{
 								CreatedAt: &after,
-								Id:        extutil.Ptr("Id"),
-								Message:   extutil.Ptr("Message"),
+								Id:        new("Id"),
+								Message:   new("Message"),
 							},
 						},
 					},
@@ -127,8 +126,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 					Message:         "Message",
 					Timestamp:       &after,
 					TimestampSource: extutil.Ptr(action_kit_api.TimestampSourceExternal),
-					Type:            extutil.Ptr(LogType),
-					Fields: extutil.Ptr(action_kit_api.MessageFields{
+					Type:            new(LogType),
+					Fields: new(action_kit_api.MessageFields{
 						"Id": "Id",
 					}),
 				})
@@ -142,8 +141,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 						Events: []types.ServiceEvent{
 							{
 								CreatedAt: &now,
-								Id:        extutil.Ptr("Old"),
-								Message:   extutil.Ptr("Message1"),
+								Id:        new("Old"),
+								Message:   new("Message1"),
 							},
 						},
 					},
@@ -153,8 +152,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 						Events: []types.ServiceEvent{
 							{
 								CreatedAt: &after,
-								Id:        extutil.Ptr("New"),
-								Message:   extutil.Ptr("Message2"),
+								Id:        new("New"),
+								Message:   new("Message2"),
 							},
 						},
 					},
@@ -172,8 +171,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 						Message:         "Message2",
 						Timestamp:       &after,
 						TimestampSource: extutil.Ptr(action_kit_api.TimestampSourceExternal),
-						Type:            extutil.Ptr(LogType),
-						Fields: extutil.Ptr(action_kit_api.MessageFields{
+						Type:            new(LogType),
+						Fields: new(action_kit_api.MessageFields{
 							"Id": "New",
 						}),
 					})
@@ -188,8 +187,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 						Events: []types.ServiceEvent{
 							{
 								CreatedAt: &after,
-								Id:        extutil.Ptr("New1"),
-								Message:   extutil.Ptr("Message1"),
+								Id:        new("New1"),
+								Message:   new("Message1"),
 							},
 						},
 					},
@@ -199,8 +198,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 						Events: []types.ServiceEvent{
 							{
 								CreatedAt: &moreAfter,
-								Id:        extutil.Ptr("New2"),
-								Message:   extutil.Ptr("Message2"),
+								Id:        new("New2"),
+								Message:   new("Message2"),
 							},
 						},
 					},
@@ -216,8 +215,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 						Message:         "Message1",
 						Timestamp:       &after,
 						TimestampSource: extutil.Ptr(action_kit_api.TimestampSourceExternal),
-						Type:            extutil.Ptr(LogType),
-						Fields: extutil.Ptr(action_kit_api.MessageFields{
+						Type:            new(LogType),
+						Fields: new(action_kit_api.MessageFields{
 							"Id": "New1",
 						}),
 					})
@@ -227,8 +226,8 @@ func TestServiceEventLog_Status(t *testing.T) {
 						Message:         "Message2",
 						Timestamp:       &after,
 						TimestampSource: extutil.Ptr(action_kit_api.TimestampSourceExternal),
-						Type:            extutil.Ptr(LogType),
-						Fields: extutil.Ptr(action_kit_api.MessageFields{
+						Type:            new(LogType),
+						Fields: new(action_kit_api.MessageFields{
 							"Id": "New2",
 						}),
 					})

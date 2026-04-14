@@ -18,7 +18,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"slices"
 	"strings"
 	"time"
@@ -44,7 +43,7 @@ func (e *ec2Discovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: ec2TargetType,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEc2)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalEc2)),
 		},
 	}
 }
@@ -53,9 +52,9 @@ func (e *ec2Discovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       ec2TargetType,
 		Label:    discovery_kit_api.PluralLabel{One: "EC2 instance", Other: "EC2 instances"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(ec2Icon),
+		Icon:     new(ec2Icon),
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
@@ -356,7 +355,7 @@ func GetAllEc2Instances(ctx context.Context, ec2Api ec2.DescribeInstancesAPIClie
 		input.Filters = make([]types.Filter, 0, len(account.TagFilters))
 		for _, tagFilter := range account.TagFilters {
 			input.Filters = append(input.Filters, types.Filter{
-				Name:   extutil.Ptr("tag:" + tagFilter.Key),
+				Name:   new("tag:" + tagFilter.Key),
 				Values: tagFilter.Values,
 			})
 		}

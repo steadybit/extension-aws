@@ -11,7 +11,7 @@ import (
 
 func Test_getEcsTaskStressCpuParameters(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 1000,
 			"workers":  0,
 			"cpuLoad":  100,

@@ -51,21 +51,21 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 		Label:       "AWS FIS Experiment",
 		Description: "Start an AWS FIS experiment",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(fisIcon),
-		Technology:  extutil.Ptr("AWS"),
-		Category:    extutil.Ptr("FIS"),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(fisIcon),
+		Technology:  new("AWS"),
+		Category:    new("FIS"),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType:          fisTargetId,
 			QuantityRestriction: extutil.Ptr(action_kit_api.QuantityRestrictionExactlyOne),
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "template-id",
-					Description: extutil.Ptr("Find fis-template by template-id"),
+					Description: new("Find fis-template by template-id"),
 					Query:       "aws.fis.experiment.template.id=\"\"",
 				},
 				{
 					Label:       "template-name",
-					Description: extutil.Ptr("Find fis-template by template-name"),
+					Description: new("Find fis-template by template-name"),
 					Query:       "aws.fis.experiment.template.name=\"\"",
 				},
 			}),
@@ -75,19 +75,19 @@ func (f FisExperimentAction) Describe() action_kit_api.ActionDescription {
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Label:        "Estimated duration",
-				Description:  extutil.Ptr("The estimated total duration of your FIS experiment."),
+				Description:  new("The estimated total duration of your FIS experiment."),
 				Name:         "duration",
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				Advanced:     extutil.Ptr(false),
-				DefaultValue: extutil.Ptr("60s"),
+				Advanced:     new(false),
+				DefaultValue: new("60s"),
 			},
 		},
 		Prepare: action_kit_api.MutatingEndpointReference{},
 		Start:   action_kit_api.MutatingEndpointReference{},
-		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("5s"),
+		Status: new(action_kit_api.MutatingEndpointReferenceWithCallInterval{
+			CallInterval: new("5s"),
 		}),
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
@@ -127,7 +127,7 @@ func startExperiment(ctx context.Context, state *FisExperimentState, clientProvi
 
 	input := fis.StartExperimentInput{
 		ExperimentTemplateId: &state.TemplateId,
-		ClientToken:          extutil.Ptr(clientToken.String()),
+		ClientToken:          new(clientToken.String()),
 		Tags:                 map[string]string{"steadybit-execution-id": state.ExecutionId.String()},
 	}
 	response, err := client.StartExperiment(ctx, &input)
@@ -159,7 +159,7 @@ func statusExperiment(ctx context.Context, state *FisExperimentState, clientProv
 		return nil, extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err)
 	}
 
-	experiment, err := client.GetExperiment(ctx, extutil.Ptr(fis.GetExperimentInput{
+	experiment, err := client.GetExperiment(ctx, new(fis.GetExperimentInput{
 		Id: &state.ExperimentId,
 	}))
 	if err != nil {
@@ -178,7 +178,7 @@ func statusExperiment(ctx context.Context, state *FisExperimentState, clientProv
 		if experiment.Experiment.State.Status == types.ExperimentStatusCompleted || experiment.Experiment.State.Status == types.ExperimentStatusStopped {
 			result.Completed = true
 		} else if experiment.Experiment.State.Status == types.ExperimentStatusFailed {
-			result.Error = extutil.Ptr(action_kit_api.ActionKitError{
+			result.Error = new(action_kit_api.ActionKitError{
 				Title:  "FIS Experiment failed",
 				Detail: experiment.Experiment.State.Reason,
 				Status: extutil.Ptr(action_kit_api.Failed),
@@ -234,7 +234,7 @@ func stopExperiment(ctx context.Context, state *FisExperimentState, clientProvid
 		return nil, extension_kit.ToError("Failed to initialize FIS client for AWS account %s", err)
 	}
 
-	experiment, err := client.GetExperiment(ctx, extutil.Ptr(fis.GetExperimentInput{
+	experiment, err := client.GetExperiment(ctx, new(fis.GetExperimentInput{
 		Id: &state.ExperimentId,
 	}))
 	if err != nil {
@@ -243,7 +243,7 @@ func stopExperiment(ctx context.Context, state *FisExperimentState, clientProvid
 
 	status := experiment.Experiment.State.Status
 	if status == types.ExperimentStatusPending || status == types.ExperimentStatusInitiating || status == types.ExperimentStatusRunning {
-		_, err := client.StopExperiment(ctx, extutil.Ptr(fis.StopExperimentInput{Id: &state.ExperimentId}))
+		_, err := client.StopExperiment(ctx, new(fis.StopExperimentInput{Id: &state.ExperimentId}))
 		if err != nil {
 			return nil, extension_kit.ToError("Failed to stop experiment", err)
 		}

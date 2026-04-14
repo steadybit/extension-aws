@@ -22,7 +22,6 @@ import (
 	"github.com/steadybit/extension-aws/v2/extec2"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"strconv"
 	"strings"
 	"time"
@@ -48,7 +47,7 @@ func (l *lambdaDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: lambdaTargetID,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalLambda)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalLambda)),
 		},
 	}
 }
@@ -57,12 +56,12 @@ func (*lambdaDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:      lambdaTargetID,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(lambdaTargetIcon),
+		Icon:    new(lambdaTargetIcon),
 
 		Label: discovery_kit_api.PluralLabel{One: "AWS Lambda", Other: "AWS Lambdas"},
 
 		// Category for the targets to appear in
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 
 		// Specify attributes shown in table columns and to be used for sorting
 		Table: discovery_kit_api.Table{

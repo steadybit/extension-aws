@@ -23,7 +23,7 @@ func Test_getEcsTaskNetworkBlackholePortParameters(t *testing.T) {
 	id := uuid.New()
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: id,
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration":    60000,
 			"protocol":    "udp",
 			"port":        "80",
@@ -52,7 +52,7 @@ func Test_getEcsTaskNetworkBlackholePortParameters(t *testing.T) {
 func Test_getEcsTaskNetworkBlackholePortParameters_invalidDuration(t *testing.T) {
 	req := action_kit_api.PrepareActionRequestBody{
 		ExecutionId: uuid.New(),
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"duration": 43201_000,
 		},
 	}

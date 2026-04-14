@@ -19,7 +19,7 @@ import (
 	"github.com/steadybit/extension-aws/v2/config"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
+	"slices"
 	"strings"
 	"time"
 )
@@ -43,7 +43,7 @@ func (f *fisTemplateDiscovery) Describe() discovery_kit_api.DiscoveryDescription
 	return discovery_kit_api.DiscoveryDescription{
 		Id: fisTargetId,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalFis)),
+			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalFis)),
 		},
 	}
 }
@@ -52,9 +52,9 @@ func (f *fisTemplateDiscovery) DescribeTarget() discovery_kit_api.TargetDescript
 	return discovery_kit_api.TargetDescription{
 		Id:       fisTargetId,
 		Label:    discovery_kit_api.PluralLabel{One: "FIS experiment", Other: "FIS experiments"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(fisIcon),
+		Icon:     new(fisIcon),
 
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
@@ -150,11 +150,8 @@ func matchesTagFilter(tags map[string]string, filters []config.TagFilter) bool {
 	for _, filter := range filters {
 		matched := false
 		if value, exists := tags[filter.Key]; exists {
-			for _, filterValue := range filter.Values {
-				if value == filterValue {
-					matched = true
-					break
-				}
+			if slices.Contains(filter.Values, value) {
+				matched = true
 			}
 		}
 		if !matched {
