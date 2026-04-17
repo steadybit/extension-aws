@@ -1,6 +1,6 @@
 # Changelog
 
-## (next)
+## v2.4.13
 
 - Bump Go to 1.26.2
 - Update dependencies
