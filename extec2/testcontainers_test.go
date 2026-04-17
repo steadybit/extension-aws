@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/smithy-go/middleware"
-	"github.com/docker/go-connections/nat"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -106,7 +105,7 @@ var apiThrottlingMiddleware = middleware.InitializeMiddlewareFunc("apiThrottling
 	})
 
 func setupEc2Client(ctx context.Context, l *localstack.LocalStackContainer) (*ec2.Client, error) {
-	mappedPort, err := l.MappedPort(ctx, nat.Port("4566/tcp"))
+	mappedPort, err := l.MappedPort(ctx, "4566/tcp")
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +132,7 @@ func setupEc2Client(ctx context.Context, l *localstack.LocalStackContainer) (*ec
 		return nil, err
 	}
 
-	awsCfg.BaseEndpoint = aws.String(fmt.Sprintf("http://%s:%d", host, mappedPort.Int()))
+	awsCfg.BaseEndpoint = aws.String(fmt.Sprintf("http://%s:%d", host, mappedPort.Num()))
 
 	return ec2.NewFromConfig(awsCfg), nil
 }
@@ -158,7 +157,7 @@ func setupImdsClient(ctx context.Context, l *localstack.LocalStackContainer) (*i
 		config.WithRegion("eu-west-1"),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("accesskey", "secretkey", "token")),
 	)
-	awsCfg.BaseEndpoint = aws.String(fmt.Sprintf("http://%s:%d", host, mappedPort.Int()))
+	awsCfg.BaseEndpoint = aws.String(fmt.Sprintf("http://%s:%d", host, mappedPort.Num()))
 	if err != nil {
 		return nil, err
 	}
