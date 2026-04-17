@@ -3,6 +3,7 @@
 ## (next)
 
 - Bump Go to 1.26.2
+- Update dependencies
 
 ## v2.4.12
 
