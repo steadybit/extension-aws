@@ -34,7 +34,7 @@ require (
 	github.com/steadybit/discovery-kit/go/discovery_kit_commons v0.3.1
 	github.com/steadybit/discovery-kit/go/discovery_kit_sdk v1.3.2
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.1
-	github.com/steadybit/extension-kit v1.10.3
+	github.com/steadybit/extension-kit v1.10.4
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/localstack v0.42.0
@@ -150,7 +150,7 @@ require (
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/term v0.40.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
