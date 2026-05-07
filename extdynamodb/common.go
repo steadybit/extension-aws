@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Steadybit GmbH
+
+package extdynamodb
+
+import (
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/service/applicationautoscaling"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/steadybit/extension-aws/v2/utils"
+)
+
+const (
+	dynamodbIcon  = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj48cGF0aCBkPSJNMTIgMmM0LjQyIDAgOCAxLjc5IDggNHM"
+	tableTargetId = "com.steadybit.extension_aws.dynamodb.table"
+)
+
+type DynamodbApi interface {
+	dynamodb.ListTablesAPIClient
+	DescribeTable(ctx context.Context, params *dynamodb.DescribeTableInput, optFns ...func(*dynamodb.Options)) (*dynamodb.DescribeTableOutput, error)
+	DescribeContinuousBackups(ctx context.Context, params *dynamodb.DescribeContinuousBackupsInput, optFns ...func(*dynamodb.Options)) (*dynamodb.DescribeContinuousBackupsOutput, error)
+	DescribeTimeToLive(ctx context.Context, params *dynamodb.DescribeTimeToLiveInput, optFns ...func(*dynamodb.Options)) (*dynamodb.DescribeTimeToLiveOutput, error)
+	ListTagsOfResource(ctx context.Context, params *dynamodb.ListTagsOfResourceInput, optFns ...func(*dynamodb.Options)) (*dynamodb.ListTagsOfResourceOutput, error)
+}
+
+type AppAutoScalingApi interface {
+	applicationautoscaling.DescribeScalableTargetsAPIClient
+}
+
+func defaultDynamodbClientProvider(account string, region string, role *string) (DynamodbApi, AppAutoScalingApi, error) {
+	awsAccess, err := utils.GetAwsAccess(account, region, role)
+	if err != nil {
+		return nil, nil, err
+	}
+	return dynamodb.NewFromConfig(awsAccess.AwsConfig), applicationautoscaling.NewFromConfig(awsAccess.AwsConfig), nil
+}

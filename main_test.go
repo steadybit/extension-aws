@@ -35,6 +35,17 @@ func createConfig(ec2 bool, ecs bool, elasticache bool, elb bool, fis bool, msk 
 		DiscoveryDisabledZone:                        zone,
 		DiscoveryIntervalZone:                        10,
 		DiscoveryDisabledVpc:                         vpc,
+		// Modules added after the original test was written. All default to disabled here so that
+		// existing tests (which assert exact route lists) keep working without per-test wiring.
+		DiscoveryDisabledApigateway:  true,
+		DiscoveryDisabledAsg:         true,
+		DiscoveryDisabledDynamodb:    true,
+		DiscoveryDisabledEbs:         true,
+		DiscoveryDisabledEks:         true,
+		DiscoveryDisabledEventbridge: true,
+		DiscoveryDisabledMq:          true,
+		DiscoveryDisabledNatGateway:  true,
+		DiscoveryDisabledSqs:         true,
 	}
 }
 
@@ -99,6 +110,8 @@ func Test_getExtensionList(t *testing.T) {
 				"/com.steadybit.extension_aws.alb.static_response",
 				"/com.steadybit.extension_aws.alb/discovery",
 				"/com.steadybit.extension_aws.alb/discovery/target-description",
+				"/com.steadybit.extension_aws.nlb/discovery",
+				"/com.steadybit.extension_aws.nlb/discovery/target-description",
 				"/discovery/attributes",
 			},
 		},

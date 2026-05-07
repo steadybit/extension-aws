@@ -34,10 +34,26 @@ manifest should add aws env vars:
                   value: arn:aws:iam::123456789012:role/role1,arn:aws:iam::123456789012:role/role2
                 - name: STEADYBIT_EXTENSION_REGIONS
                   value: eu-central-1,us-east-1
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_APIGATEWAY
+                  value: example.apigw.1,example.apigw.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ASG
+                  value: example.asg.1,example.asg.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_DYNAMODB
+                  value: example.dynamodb.1,example.dynamodb.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EC2
                   value: example.ec2.1,example.ec2.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ECS
                   value: example.ecs.1,example.ecs.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EBS
+                  value: example.ebs.1,example.ebs.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EKS
+                  value: example.eks.1,example.eks.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EVENTBRIDGE
+                  value: example.eventbridge.1,example.eventbridge.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_NAT_GATEWAY
+                  value: example.natgw.1,example.natgw.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_SQS
+                  value: example.sqs.1,example.sqs.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELASTICACHE
                   value: example.elasticache.1,example.elasticache.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELB
@@ -46,6 +62,8 @@ manifest should add aws env vars:
                   value: example.zone.1,example.zone.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS
                   value: example.fis.1,example.fis.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_MQ
+                  value: example.mq.1,example.mq.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_MSK
                   value: example.msk.1,example.msk.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA
@@ -56,15 +74,33 @@ manifest should add aws env vars:
                   value: example.subnet.1,example.subnet.2
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_VPC
                   value: example.vpc.1,example.vpc.2
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_APIGATEWAY
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ASG
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_DYNAMODB
+                  value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EBS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EKS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EVENTBRIDGE
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_NAT_GATEWAY
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_SQS
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_MQ
                   value: "true"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_DISABLED_MSK
                   value: "true"

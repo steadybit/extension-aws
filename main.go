@@ -19,14 +19,21 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-aws/v2/config"
+	"github.com/steadybit/extension-aws/v2/extapigateway"
+	"github.com/steadybit/extension-aws/v2/extasg"
+	"github.com/steadybit/extension-aws/v2/extdynamodb"
 	"github.com/steadybit/extension-aws/v2/extec2"
 	"github.com/steadybit/extension-aws/v2/extecs"
+	"github.com/steadybit/extension-aws/v2/exteks"
 	"github.com/steadybit/extension-aws/v2/extelasticache"
 	"github.com/steadybit/extension-aws/v2/extelb"
+	"github.com/steadybit/extension-aws/v2/exteventbridge"
 	"github.com/steadybit/extension-aws/v2/extfis"
 	"github.com/steadybit/extension-aws/v2/extlambda"
+	"github.com/steadybit/extension-aws/v2/extmq"
 	"github.com/steadybit/extension-aws/v2/extmsk"
 	"github.com/steadybit/extension-aws/v2/extrds"
+	"github.com/steadybit/extension-aws/v2/extsqs"
 	"github.com/steadybit/extension-aws/v2/utils"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthealth"
@@ -100,6 +107,16 @@ func registerHandlers(ctx context.Context) {
 	cfg := config.Config
 	discovery_kit_sdk.Register(utils.NewCommonAttributeDescriber())
 
+	if !cfg.DiscoveryDisabledApigateway {
+		discovery_kit_sdk.Register(extapigateway.NewStageDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extapigateway.NewStageThrottleAttack())
+	}
+
+	if !cfg.DiscoveryDisabledAsg {
+		discovery_kit_sdk.Register(extasg.NewAsgDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extasg.NewAsgSuspendProcessesAttack())
+	}
+
 	if !cfg.DiscoveryDisabledRds {
 		discovery_kit_sdk.Register(extrds.NewRdsInstanceDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extrds.NewRdsInstanceRebootAttack())
@@ -124,9 +141,31 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extec2.NewEc2InstanceStateAction())
 	}
 
+	if !cfg.DiscoveryDisabledNatGateway {
+		discovery_kit_sdk.Register(extec2.NewNatGatewayDiscovery(ctx))
+	}
+
+	if !cfg.DiscoveryDisabledEbs {
+		discovery_kit_sdk.Register(extec2.NewEbsVolumeDiscovery(ctx))
+	}
+
+	if !cfg.DiscoveryDisabledSqs {
+		discovery_kit_sdk.Register(extsqs.NewQueueDiscovery(ctx))
+	}
+
+	if !cfg.DiscoveryDisabledEventbridge {
+		discovery_kit_sdk.Register(exteventbridge.NewRuleDiscovery(ctx))
+		action_kit_sdk.RegisterAction(exteventbridge.NewRuleDisableAttack())
+	}
+
 	if !cfg.DiscoveryDisabledFis {
 		discovery_kit_sdk.Register(extfis.NewFisTemplateDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extfis.NewFisExperimentAction())
+	}
+
+	if !cfg.DiscoveryDisabledMq {
+		discovery_kit_sdk.Register(extmq.NewBrokerDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extmq.NewBrokerRebootAttack())
 	}
 
 	if !cfg.DiscoveryDisabledMsk {
@@ -164,6 +203,16 @@ func registerHandlers(ctx context.Context) {
 		action_kit_sdk.RegisterAction(extecs.NewEcsServiceTaskCountCheckAction(serviceDiscoveryPoller))
 	}
 
+	if !cfg.DiscoveryDisabledDynamodb {
+		discovery_kit_sdk.Register(extdynamodb.NewTableDiscovery(ctx))
+	}
+
+	if !cfg.DiscoveryDisabledEks {
+		discovery_kit_sdk.Register(exteks.NewEksClusterDiscovery(ctx))
+		discovery_kit_sdk.Register(exteks.NewEksNodegroupDiscovery(ctx))
+		action_kit_sdk.RegisterAction(exteks.NewEksNodegroupTerminateInstancesAttack())
+	}
+
 	if !cfg.DiscoveryDisabledElasticache {
 		discovery_kit_sdk.Register(extelasticache.NewElasticacheReplicationGroupDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extelasticache.NewElasticacheNodeGroupFailoverAttack())
@@ -172,6 +221,7 @@ func registerHandlers(ctx context.Context) {
 	if !cfg.DiscoveryDisabledElb {
 		discovery_kit_sdk.Register(extelb.NewAlbDiscovery(ctx))
 		action_kit_sdk.RegisterAction(extelb.NewAlbStaticResponseAction())
+		discovery_kit_sdk.Register(extelb.NewNlbDiscovery(ctx))
 	}
 
 	exthttp.RegisterHttpHandler("/", exthttp.IfNoneMatchHandler(func() string { return startedAt }, exthttp.GetterAsHandler(getExtensionList)))
