@@ -28,9 +28,44 @@ type eksClusterDiscovery struct {
 }
 
 var (
-	_ discovery_kit_sdk.TargetDescriber    = (*eksClusterDiscovery)(nil)
-	_ discovery_kit_sdk.AttributeDescriber = (*eksClusterDiscovery)(nil)
+	_ discovery_kit_sdk.TargetDescriber          = (*eksClusterDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber       = (*eksClusterDiscovery)(nil)
+	_ discovery_kit_sdk.EnrichmentRulesDescriber = (*eksClusterDiscovery)(nil)
 )
+
+// eksEnrichmentTargetTypes are the extension-kubernetes target types that get enriched with EKS cluster
+// reliability config (kubernetes version, public-access posture, logging gaps, secrets-encryption, etc.).
+// Targets in extension-kubernetes already carry k8s.cluster-name; we join on that.
+var eksEnrichmentTargetTypes = []string{
+	"com.steadybit.extension_kubernetes.kubernetes-deployment",
+	"com.steadybit.extension_kubernetes.kubernetes-pod",
+	"com.steadybit.extension_kubernetes.kubernetes-statefulset",
+	"com.steadybit.extension_kubernetes.kubernetes-daemonset",
+	"com.steadybit.extension_kubernetes.kubernetes-node",
+	"com.steadybit.extension_kubernetes.argo-rollout",
+}
+
+// eksEnrichmentAttributes are the EKS cluster attributes copied onto matching Kubernetes targets.
+// We forward only the stable, reliability-relevant fields — not labels (would be high-cardinality) and not
+// volatile state. Account/region/arn give the agent enough to attribute findings back to AWS.
+var eksEnrichmentAttributes = []discovery_kit_api.Attribute{
+	{Matcher: discovery_kit_api.Equals, Name: "aws.account"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.region"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.arn"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.name"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.version"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.platform-version"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.endpoint-public-access"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.endpoint-private-access"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.public-access-cidrs"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.public-access-open-to-internet"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.subnets"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.vpc"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.logging.enabled-types"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.logging.disabled-types"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.secrets-encryption.enabled"},
+	{Matcher: discovery_kit_api.Equals, Name: "aws.eks.cluster.deletion-protection"},
+}
 
 func NewEksClusterDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
 	discovery := &eksClusterDiscovery{}
@@ -86,6 +121,7 @@ func (d *eksClusterDiscovery) DescribeAttributes() []discovery_kit_api.Attribute
 		{Attribute: "aws.eks.cluster.secrets-encryption.enabled", Label: discovery_kit_api.PluralLabel{One: "AWS EKS secrets-encryption", Other: "AWS EKS secrets-encryption"}},
 		{Attribute: "aws.eks.cluster.deletion-protection", Label: discovery_kit_api.PluralLabel{One: "AWS EKS deletion-protection", Other: "AWS EKS deletion-protection"}},
 		{Attribute: "aws.eks.cluster.status", Label: discovery_kit_api.PluralLabel{One: "AWS EKS cluster status", Other: "AWS EKS cluster status"}},
+		{Attribute: "k8s.cluster-name", Label: discovery_kit_api.PluralLabel{One: "Kubernetes cluster name", Other: "Kubernetes cluster names"}},
 	}
 }
 
@@ -164,6 +200,10 @@ func toClusterTarget(cluster types.Cluster, account string, region string, role 
 	attributes["aws.arn"] = []string{arn}
 	attributes["aws.eks.cluster.name"] = []string{name}
 	attributes["aws.eks.cluster.status"] = []string{string(cluster.Status)}
+	// The EKS cluster name IS the Kubernetes cluster name (1:1). Surface it under the cluster-wide
+	// k8s.cluster-name attribute that the extension-kubernetes discovery uses, so enrichment rules
+	// can join EKS reliability config onto Kubernetes targets discovered by the K8s extension.
+	attributes["k8s.cluster-name"] = []string{name}
 
 	if cluster.Version != nil {
 		attributes["aws.eks.cluster.version"] = []string{*cluster.Version}
@@ -263,4 +303,32 @@ func isOpenToInternet(publicEndpoint bool, cidrs []string) bool {
 		}
 	}
 	return false
+}
+
+func (d *eksClusterDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
+	rules := make([]discovery_kit_api.TargetEnrichmentRule, 0, len(eksEnrichmentTargetTypes))
+	for _, t := range eksEnrichmentTargetTypes {
+		rules = append(rules, eksClusterToK8sEnrichmentRule(t))
+	}
+	return rules
+}
+
+func eksClusterToK8sEnrichmentRule(destTargetType string) discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      fmt.Sprintf("com.steadybit.extension_aws.eks.cluster-to-%s", destTargetType),
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: clusterTargetId,
+			Selector: map[string]string{
+				"k8s.cluster-name": "${dest.k8s.cluster-name}",
+			},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: destTargetType,
+			Selector: map[string]string{
+				"k8s.cluster-name": "${src.k8s.cluster-name}",
+			},
+		},
+		Attributes: eksEnrichmentAttributes,
+	}
 }

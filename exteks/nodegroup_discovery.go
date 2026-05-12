@@ -91,6 +91,7 @@ func (d *eksNodegroupDiscovery) DescribeAttributes() []discovery_kit_api.Attribu
 		{Attribute: "aws.eks.nodegroup.launch-template.version", Label: discovery_kit_api.PluralLabel{One: "AWS EKS node group launch template version", Other: "AWS EKS node group launch template versions"}},
 		{Attribute: "aws.eks.nodegroup.autoscaling-groups", Label: discovery_kit_api.PluralLabel{One: "AWS EKS node group underlying Auto Scaling group", Other: "AWS EKS node group underlying Auto Scaling groups"}},
 		{Attribute: "aws.eks.nodegroup.status", Label: discovery_kit_api.PluralLabel{One: "AWS EKS node group status", Other: "AWS EKS node group status"}},
+		{Attribute: "k8s.cluster-name", Label: discovery_kit_api.PluralLabel{One: "Kubernetes cluster name", Other: "Kubernetes cluster names"}},
 	}
 }
 
@@ -163,6 +164,9 @@ func toNodegroupTarget(ng types.Nodegroup, account string, region string, role *
 	attributes["aws.arn"] = []string{arn}
 	attributes["aws.eks.cluster.name"] = []string{clusterName}
 	attributes["aws.eks.nodegroup.name"] = []string{name}
+	// Surface the cluster-wide k8s.cluster-name attribute so the K8s extension's targets can be joined
+	// to this node group via enrichment (matches the EKS cluster target's k8s.cluster-name).
+	attributes["k8s.cluster-name"] = []string{clusterName}
 	attributes["aws.eks.nodegroup.status"] = []string{string(ng.Status)}
 
 	if len(ng.Subnets) > 0 {

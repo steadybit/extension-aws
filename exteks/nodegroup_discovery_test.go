@@ -68,6 +68,8 @@ func TestGetAllEksNodegroups(t *testing.T) {
 	assert.Equal(t, nodegroupTargetId, tgt.TargetType)
 	assert.Equal(t, "prod/workers", tgt.Label)
 	assert.Equal(t, []string{"prod"}, tgt.Attributes["aws.eks.cluster.name"])
+	// Cluster name is also surfaced under k8s.cluster-name so extension-kubernetes enrichment can join.
+	assert.Equal(t, []string{"prod"}, tgt.Attributes["k8s.cluster-name"])
 	assert.Equal(t, []string{"workers"}, tgt.Attributes["aws.eks.nodegroup.name"])
 	assert.Equal(t, []string{"subnet-a", "subnet-b"}, tgt.Attributes["aws.eks.nodegroup.subnets"])
 	assert.Equal(t, []string{"2"}, tgt.Attributes["aws.eks.nodegroup.min-size"])

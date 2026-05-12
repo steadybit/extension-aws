@@ -112,6 +112,8 @@ func TestGetAllEksClusters(t *testing.T) {
 	assert.Equal(t, clusterTargetId, target.TargetType)
 	assert.Equal(t, "prod-cluster", target.Label)
 	assert.Equal(t, []string{"prod-cluster"}, target.Attributes["aws.eks.cluster.name"])
+	// Cluster name is also surfaced under k8s.cluster-name so extension-kubernetes enrichment can join.
+	assert.Equal(t, []string{"prod-cluster"}, target.Attributes["k8s.cluster-name"])
 	assert.Equal(t, []string{"1.29"}, target.Attributes["aws.eks.cluster.version"])
 	assert.Equal(t, []string{"eks.10"}, target.Attributes["aws.eks.cluster.platform-version"])
 	assert.Equal(t, []string{"true"}, target.Attributes["aws.eks.cluster.endpoint-public-access"])
@@ -194,4 +196,24 @@ func TestTagFilterMismatchSkipsCluster(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(targets))
+}
+
+func TestClusterDiscoveryEmitsK8sEnrichmentRules(t *testing.T) {
+	d := &eksClusterDiscovery{}
+	rules := d.DescribeEnrichmentRules()
+	// One rule per K8s target type we forward EKS reliability config to.
+	assert.Equal(t, len(eksEnrichmentTargetTypes), len(rules))
+
+	destTypes := make(map[string]bool, len(rules))
+	for _, r := range rules {
+		// Both sides join on k8s.cluster-name.
+		assert.Equal(t, "${dest.k8s.cluster-name}", r.Src.Selector["k8s.cluster-name"])
+		assert.Equal(t, "${src.k8s.cluster-name}", r.Dest.Selector["k8s.cluster-name"])
+		assert.Equal(t, clusterTargetId, r.Src.Type)
+		destTypes[r.Dest.Type] = true
+	}
+	// All expected K8s target types are covered.
+	for _, dt := range eksEnrichmentTargetTypes {
+		assert.True(t, destTypes[dt], "expected enrichment rule for %s", dt)
+	}
 }
