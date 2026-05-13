@@ -14,22 +14,41 @@ type Specification struct {
 	AssumeRolesAdvanced                          AssumeRoles `json:"assumeRolesAdvanced" split_words:"true" required:"false"` // If you need a more fine-grained approach and want to specify Regions/TagFilters per role.
 	WorkerThreads                                int         `json:"workerThreads" split_words:"true" required:"false" default:"1"`
 	AwsEndpointOverride                          string      `json:"awsEndpointOverride" split_words:"true" required:"false"`
+	DiscoveryDisabledApigateway                  bool        `json:"discoveryDisabledApigateway" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledAsg                         bool        `json:"discoveryDisabledAsg" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledEc2                         bool        `json:"discoveryDisabledEc2" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledDynamodb                    bool        `json:"discoveryDisabledDynamodb" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledEcs                         bool        `json:"discoveryDisabledEcs" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledEks                         bool        `json:"discoveryDisabledEks" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledElasticache                 bool        `json:"discoveryDisabledElasticache" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledElb                         bool        `json:"discoveryDisabledElb" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledFis                         bool        `json:"discoveryDisabledFis" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledEbs                         bool        `json:"discoveryDisabledEbs" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledEventbridge                 bool        `json:"discoveryDisabledEventbridge" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledMq                          bool        `json:"discoveryDisabledMq" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledNatGateway                  bool        `json:"discoveryDisabledNatGateway" split_words:"true" required:"false" default:"false"`
+	DiscoveryDisabledSqs                         bool        `json:"discoveryDisabledSqs" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledMsk                         bool        `json:"discoveryDisabledMsk" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledLambda                      bool        `json:"discoveryDisabledLambda" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledRds                         bool        `json:"discoveryDisabledRds" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledSubnet                      bool        `json:"discoveryDisabledSubnet" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledZone                        bool        `json:"discoveryDisabledZone" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledVpc                         bool        `json:"discoveryDisabledVpc" split_words:"true" required:"false" default:"false"`
+	DiscoveryIntervalApigateway                  int         `json:"discoveryIntervalApigateway" split_words:"true" required:"false" default:"60"`
+	DiscoveryIntervalAsg                         int         `json:"discoveryIntervalAsg" split_words:"true" required:"false" default:"60"`
+	DiscoveryIntervalDynamodb                    int         `json:"discoveryIntervalDynamodb" split_words:"true" required:"false" default:"60"`
 	DiscoveryIntervalEc2                         int         `json:"discoveryIntervalEc2" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalEcsService                  int         `json:"discoveryIntervalEcsService" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalEcsTask                     int         `json:"discoveryIntervalEcsTask" split_words:"true" required:"false" default:"30"`
+	DiscoveryIntervalEks                         int         `json:"discoveryIntervalEks" split_words:"true" required:"false" default:"60"`
 	DiscoveryIntervalElasticacheReplicationGroup int         `json:"discoveryIntervalElasticacheReplicationGroup" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalElbAlb                      int         `json:"discoveryIntervalElbAlb" split_words:"true" required:"false" default:"30"`
+	DiscoveryIntervalElbNlb                      int         `json:"discoveryIntervalElbNlb" split_words:"true" required:"false" default:"30"`
+	DiscoveryIntervalEbs                         int         `json:"discoveryIntervalEbs" split_words:"true" required:"false" default:"60"`
+	DiscoveryIntervalEventbridge                 int         `json:"discoveryIntervalEventbridge" split_words:"true" required:"false" default:"60"`
+	DiscoveryIntervalMq                          int         `json:"discoveryIntervalMq" split_words:"true" required:"false" default:"60"`
+	DiscoveryIntervalNatGateway                  int         `json:"discoveryIntervalNatGateway" split_words:"true" required:"false" default:"60"`
+	DiscoveryIntervalSqs                         int         `json:"discoveryIntervalSqs" split_words:"true" required:"false" default:"60"`
 	DiscoveryIntervalMsk                         int         `json:"discoveryIntervalMsk" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalFis                         int         `json:"discoveryIntervalFis" split_words:"true" required:"false" default:"300"`
 	DiscoveryIntervalLambda                      int         `json:"discoveryIntervalLambda" split_words:"true" required:"false" default:"60"`
@@ -38,11 +57,20 @@ type Specification struct {
 	DiscoveryIntervalZone                        int         `json:"discoveryIntervalZone" split_words:"true" required:"false" default:"300"`
 	EnrichEc2DataForTargetTypes                  []string    `json:"EnrichEc2DataForTargetTypes" split_words:"true" default:"com.steadybit.extension_jvm.jvm-instance,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.argo-rollout,com.steadybit.extension_kubernetes.kubernetes-deployment,com.steadybit.extension_kubernetes.kubernetes-pod,com.steadybit.extension_kubernetes.kubernetes-daemonset,com.steadybit.extension_kubernetes.kubernetes-statefulset,com.steadybit.extension_http.client-location,com.steadybit.extension_jmeter.location,com.steadybit.extension_k6.location,com.steadybit.extension_gatling.location"`
 	EnrichEc2DataMatcherAttribute                string      `json:"EnrichEc2DataMatcherAttribute" split_words:"true" default:"host.hostname"`
+	DiscoveryAttributesExcludesApigateway        []string    `json:"discoveryAttributesExcludesApigateway" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesAsg               []string    `json:"discoveryAttributesExcludesAsg" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesElb               []string    `json:"discoveryAttributesExcludesElb" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesEc2               []string    `json:"discoveryAttributesExcludesEc2" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesDynamodb          []string    `json:"discoveryAttributesExcludesDynamodb" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesEcs               []string    `json:"discoveryAttributesExcludesEcs" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesEks               []string    `json:"discoveryAttributesExcludesEks" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesElasticache       []string    `json:"discoveryAttributesExcludesElasticache" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesFis               []string    `json:"discoveryAttributesExcludesFis" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesEbs               []string    `json:"discoveryAttributesExcludesEbs" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesEventbridge       []string    `json:"discoveryAttributesExcludesEventbridge" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesMq                []string    `json:"discoveryAttributesExcludesMq" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesNatGateway        []string    `json:"discoveryAttributesExcludesNatGateway" split_words:"true" required:"false"`
+	DiscoveryAttributesExcludesSqs               []string    `json:"discoveryAttributesExcludesSqs" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesMsk               []string    `json:"discoveryAttributesExcludesMsk" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesLambda            []string    `json:"discoveryAttributesExcludesLambda" split_words:"true" required:"false"`
 	DiscoveryAttributesExcludesRds               []string    `json:"discoveryAttributesExcludesRds" split_words:"true" required:"false"`

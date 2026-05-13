@@ -17,17 +17,36 @@ our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extensio
 | `STEADYBIT_EXTENSION_TAG_FILTERS`                               | `aws.tagFilters`                                | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_ASSUME_ROLES_ADVANCED`                     | `aws.assumeRolesAdvanced`                       | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_WORKER_THREADS`                            |                                                 | How many parallel workers should call aws apis (only used if `STEADYBIT_EXTENSION_ASSUME_ROLES` is used)                                                      | no       | 1                                                                                                                                             |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_APIGATEWAY`             | `aws.discovery.disabled.apigateway`             | Disable API Gateway stage discovery and all related definitions                                                                                               | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_APIGATEWAY`             |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ASG`                    | `aws.discovery.disabled.asg`                    | Disable Auto Scaling group discovery and all related definitions                                                                                              | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ASG`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EBS`                    | `aws.discovery.disabled.ebs`                    | Disable EBS volume Discovery and all related definitions                                                                                                      | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_EBS`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EVENTBRIDGE`            | `aws.discovery.disabled.eventbridge`            | Disable EventBridge Discovery and all related definitions                                                                                                     | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_EVENTBRIDGE`            |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_NAT_GATEWAY`            | `aws.discovery.disabled.natGateway`             | Disable NAT Gateway Discovery and all related definitions                                                                                                     | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_NAT_GATEWAY`            |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_SQS`                    | `aws.discovery.disabled.sqs`                    | Disable SQS Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_SQS`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_DYNAMODB`               | `aws.discovery.disabled.dynamodb`               | Disable DynamoDB-Discovery and all related definitions                                                                                                        | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_DYNAMODB`               |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EC2`                    | `aws.discovery.disabled.ec2`                    | Disable EC2-Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_EC2`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ECS`                    | `aws.discovery.disabled.ecs`                    | Disable ECS-Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_EKS`                    | `aws.discovery.disabled.eks`                    | Disable EKS-Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_EKS`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ECS_TASK`               |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ECS_SERVICE`            |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELASTICACHE`            | `aws.discovery.disabled.elasticache`            | Disable Elasticache-Discovery and all related definitions                                                                                                     | no       | true                                                                                                                                          |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ELASTICACHE`            |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
-| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB`                    | `aws.discovery.disabled.elb`                    | Disable ELB-Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
-| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ELB_ALB`                |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ELB`                    | `aws.discovery.disabled.elb`                    | Disable ELB-Discovery (ALB + NLB) and all related definitions                                                                                                 | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ELB_ALB`                |                                                 | Discovery-Interval in seconds for ALBs                                                                                                                        | no       | 30                                                                                                                                            |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ELB_NLB`                |                                                 | Discovery-Interval in seconds for NLBs                                                                                                                        | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_FIS`                    | `aws.discovery.disabled.fis`                    | Disable FIS-Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_FIS`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 300                                                                                                                                           |
+| `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_MQ`                     | `aws.discovery.disabled.mq`                     | Disable Amazon MQ Discovery and all related definitions                                                                                                       | no       | false                                                                                                                                         |
+| `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_MQ`                     |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_MSK`                    | `aws.discovery.disabled.msk`                    | Disable MSK-Discovery and all related definitions                                                                                                             | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_MSK`                    |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 30                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_LAMBDA`                 | `aws.discovery.disabled.lambda`                 | Disable Lambda-Discovery and all related definitions                                                                                                          | no       | false                                                                                                                                         |
@@ -41,11 +60,16 @@ our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extensio
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_ZONE`                   |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 300                                                                                                                                           |
 | `STEADYBIT_EXTENSION_ENRICH_EC2_DATA_FOR_TARGET_TYPES`          |                                                 | These target types will be enriched with EC2 data. They must have the attribute specified by 'STEADYBIT_EXTENSION_ENRICH_EC2_DATA_MATCHER_ATTRIBUTE' for this | no       | com.steadybit.extension_jvm.jvm-instance,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.kubernetes-deployment |
 | `STEADYBIT_EXTENSION_ENRICH_EC2_DATA_MATCHER_ATTRIBUTE`         |                                                 | Targets for EC2 Data enrichment will be matched by this attribute.                                                                                            | no       | host.hostname                                                                                                                                 |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_APIGATEWAY`  | `aws.discovery.attributes.excludes.apigateway`  | List of API Gateway Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                            | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ASG`         | `aws.discovery.attributes.excludes.asg`         | List of Auto Scaling group Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                     | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_DYNAMODB`    | `aws.discovery.attributes.excludes.dynamodb`    | List of DynamoDB Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                               | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EC2`         | `aws.discovery.attributes.excludes.ec2`         | List of EC2 Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ECS`         | `aws.discovery.attributes.excludes.ecs`         | List of ECS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_EKS`         | `aws.discovery.attributes.excludes.eks`         | List of EKS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELASTICACHE` | `aws.discovery.attributes.excludes.elasticache` | List of Elasticache Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                            | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_ELB`         | `aws.discovery.attributes.excludes.elb`         | List of ELB Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_FIS`         | `aws.discovery.attributes.excludes.fis`         | List of FIS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
+| `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_MQ`          | `aws.discovery.attributes.excludes.mq`          | List of Amazon MQ Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                              | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_MSK`         | `aws.discovery.attributes.excludes.msk`         | List of MSK Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_LAMBDA`      | `aws.discovery.attributes.excludes.lambda`      | List of Lambda Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                 | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_RDS`         | `aws.discovery.attributes.excludes.rds`         | List of RDS Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*"                                    | no       |                                                                                                                                               |
@@ -95,6 +119,82 @@ by tweaking the `Resource` clause.
 
 </details>
 <details>
+    <summary>API Gateway-Discovery & Actions</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "apigateway:GET",
+        "apigateway:PATCH"
+      ],
+      "Resource": [
+        "arn:aws:apigateway:*::/restapis",
+        "arn:aws:apigateway:*::/restapis/*",
+        "arn:aws:apigateway:*::/restapis/*/stages",
+        "arn:aws:apigateway:*::/restapis/*/stages/*",
+        "arn:aws:apigateway:*::/apis",
+        "arn:aws:apigateway:*::/apis/*",
+        "arn:aws:apigateway:*::/apis/*/stages",
+        "arn:aws:apigateway:*::/apis/*/stages/*"
+      ]
+    }
+  ]
+}
+```
+
+> Note: API Gateway uses the `apigateway:GET`/`apigateway:PATCH` style of permissions instead of dedicated action verbs. `PATCH` is only required if you want to use the throttle attack on REST stages; otherwise, only `GET` is needed.
+
+</details>
+<details>
+    <summary>Auto Scaling group-Discovery & Actions</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:SuspendProcesses",
+        "autoscaling:ResumeProcesses"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+<details>
+    <summary>DynamoDB-Discovery</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:ListTables",
+        "dynamodb:DescribeTable",
+        "dynamodb:DescribeContinuousBackups",
+        "dynamodb:DescribeTimeToLive",
+        "dynamodb:ListTagsOfResource",
+        "application-autoscaling:DescribeScalableTargets"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+<details>
     <summary>EC2-Discovery & Actions</summary>
 
 ```yaml
@@ -110,6 +210,91 @@ by tweaking the `Resource` clause.
         "ec2:RebootInstances",
         "ec2:TerminateInstances",
 				"ec2:StartInstances",
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+<details>
+    <summary>NAT Gateway-Discovery</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeNatGateways",
+        "ec2:DescribeSubnets"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+<details>
+    <summary>EBS volume-Discovery</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeVolumes",
+        "ec2:DescribeSnapshots"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+<details>
+    <summary>SQS-Discovery</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ListQueues",
+        "sqs:GetQueueAttributes",
+        "sqs:ListQueueTags"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+</details>
+<details>
+    <summary>EventBridge-Discovery & Actions</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "events:ListEventBuses",
+        "events:ListRules",
+        "events:ListTargetsByRule",
+        "events:ListTagsForResource",
+        "events:EnableRule",
+        "events:DisableRule"
       ],
       "Resource": "*"
     }
@@ -185,6 +370,32 @@ If you want to perform the stress CPU/memory/io or fill disk attacks on ECS Task
 [Installation guide for the SSM Agent](./README-ecs-ssm-setup.md).
 </details>
 <details>
+    <summary>EKS-Discovery & Actions</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "eks:ListClusters",
+        "eks:DescribeCluster",
+        "eks:ListNodegroups",
+        "eks:DescribeNodegroup",
+        "autoscaling:DescribeAutoScalingGroups",
+        "ec2:TerminateInstances"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+> Note: `autoscaling:DescribeAutoScalingGroups` and `ec2:TerminateInstances` are only required for the "Terminate node group instances" attack. If you only need EKS discovery, you can omit them.
+
+</details>
+<details>
     <summary>Elasticache-Discovery & Actions</summary>
 
 ```yaml
@@ -206,7 +417,7 @@ If you want to perform the stress CPU/memory/io or fill disk attacks on ECS Task
 
 </details>
 <details>
-    <summary>ELB-Discovery & Actions</summary>
+    <summary>ELB-Discovery & Actions (ALB + NLB)</summary>
 
 ```yaml
 {
@@ -216,6 +427,7 @@ If you want to perform the stress CPU/memory/io or fill disk attacks on ECS Task
       "Effect": "Allow",
       "Action": [
         "elasticloadbalancing:DescribeLoadBalancers",
+        "elasticloadbalancing:DescribeLoadBalancerAttributes",
         "elasticloadbalancing:DescribeListeners",
         "elasticloadbalancing:DescribeTags",
         "elasticloadbalancing:DescribeRules",
@@ -261,6 +473,27 @@ start the very first fis experiment via the steadybit agent, you will need to ad
       "Effect": "Allow",
       "Action": "iam:CreateServiceLinkedRole",
       "Resource": "arn:aws:iam::<YOUR-ACCOUNT>:role/aws-service-role/fis.amazonaws.com/AWSServiceRoleForFIS"
+    }
+  ]
+}
+```
+
+</details>
+<details>
+    <summary>Amazon MQ-Discovery & Actions</summary>
+
+```yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "mq:ListBrokers",
+        "mq:DescribeBroker",
+        "mq:RebootBroker"
+      ],
+      "Resource": "*"
     }
   ]
 }
