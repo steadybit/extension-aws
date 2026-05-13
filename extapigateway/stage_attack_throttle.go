@@ -326,10 +326,20 @@ func (a *stageThrottleAttack) stopHttp(ctx context.Context, state *ApiGatewaySta
 	if err != nil {
 		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway v2 client for AWS account %s", state.Account), err)
 	}
-	// Send the original DefaultRouteSettings verbatim. If there was no original, we send an empty
-	// RouteSettings{} — that clears the throttling fields we set without affecting other stage config
-	// (v2 UpdateStage only touches fields present in the request body).
+	// Restore the original DefaultRouteSettings. For the "no original throttle" case we cannot truly clear
+	// the throttle fields — the v2 API has no documented way to remove them once set, and the Go SDK omits
+	// nil-pointer fields from the PATCH body, which AWS interprets as "no change" (see
+	// https://github.com/hashicorp/terraform-provider-aws/issues/30373, open since 2023). Workaround: set
+	// throttle to account-default values (rate=10000 rps, burst=5000) so traffic is effectively un-throttled.
+	// Note: the stage's DefaultRouteSettings will retain these explicit values rather than being byte-
+	// identical to pre-attack, but request-handling behavior matches.
 	settings := decodeRouteSettings(state.HttpOrigDefaultRouteSettings)
+	if !state.HadOriginalThrottleSettings {
+		rate := apigwV2AccountDefaultRateLimit
+		burst := apigwV2AccountDefaultBurstLimit
+		settings.ThrottlingRateLimit = &rate
+		settings.ThrottlingBurstLimit = &burst
+	}
 	_, err = client.UpdateStage(ctx, &apigatewayv2.UpdateStageInput{
 		ApiId:                aws.String(state.ApiId),
 		StageName:            aws.String(state.StageName),
@@ -340,6 +350,13 @@ func (a *stageThrottleAttack) stopHttp(ctx context.Context, state *ApiGatewaySta
 	}
 	return nil
 }
+
+const (
+	// AWS regional default throttle quotas for API Gateway. Used to "un-throttle" v2 stages on Stop when
+	// the stage had no original throttle override (AWS provides no way to actually delete the field).
+	apigwV2AccountDefaultRateLimit  float64 = 10000
+	apigwV2AccountDefaultBurstLimit int32   = 5000
+)
 
 func decodeRouteSettings(encoded string) apigwv2types.RouteSettings {
 	if encoded == "" {

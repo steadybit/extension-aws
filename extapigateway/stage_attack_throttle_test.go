@@ -295,12 +295,18 @@ func TestStopThrottleHttpRestoresSnapshot(t *testing.T) {
 	api.AssertExpectations(t)
 }
 
-func TestStopThrottleHttpClearsWhenNoOriginalSettings(t *testing.T) {
+func TestStopThrottleHttpResetsToAccountDefaultWhenNoOriginalSettings(t *testing.T) {
+	// AWS v2 has no documented way to clear throttle fields once set
+	// (https://github.com/hashicorp/terraform-provider-aws/issues/30373). Workaround: when there was no
+	// original throttle, restore to account-default values (10000 rps / 5000 burst) so traffic is
+	// effectively un-throttled, even though the stage's DefaultRouteSettings now carries explicit values.
 	api := new(httpApiMock)
 	api.On("UpdateStage", mock.Anything, mock.MatchedBy(func(p *apigatewayv2.UpdateStageInput) bool {
 		require.NotNil(t, p.DefaultRouteSettings)
-		require.Nil(t, p.DefaultRouteSettings.ThrottlingRateLimit)
-		require.Nil(t, p.DefaultRouteSettings.ThrottlingBurstLimit)
+		require.NotNil(t, p.DefaultRouteSettings.ThrottlingRateLimit)
+		require.Equal(t, float64(10000), *p.DefaultRouteSettings.ThrottlingRateLimit)
+		require.NotNil(t, p.DefaultRouteSettings.ThrottlingBurstLimit)
+		require.Equal(t, int32(5000), *p.DefaultRouteSettings.ThrottlingBurstLimit)
 		return true
 	})).Return(&apigatewayv2.UpdateStageOutput{}, nil)
 	attack := newHttpAttack(api)
