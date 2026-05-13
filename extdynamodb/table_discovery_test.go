@@ -63,6 +63,14 @@ func (m *ddbApiMock) ListTagsOfResource(ctx context.Context, params *dynamodb.Li
 	return args.Get(0).(*dynamodb.ListTagsOfResourceOutput), args.Error(1)
 }
 
+func (m *ddbApiMock) UpdateTable(ctx context.Context, params *dynamodb.UpdateTableInput, optFns ...func(*dynamodb.Options)) (*dynamodb.UpdateTableOutput, error) {
+	args := m.Called(ctx, params)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*dynamodb.UpdateTableOutput), args.Error(1)
+}
+
 type aasApiMock struct {
 	mock.Mock
 }

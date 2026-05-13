@@ -18,4 +18,16 @@ type SqsApi interface {
 	sqs.ListQueuesAPIClient
 	GetQueueAttributes(ctx context.Context, params *sqs.GetQueueAttributesInput, optFns ...func(*sqs.Options)) (*sqs.GetQueueAttributesOutput, error)
 	ListQueueTags(ctx context.Context, params *sqs.ListQueueTagsInput, optFns ...func(*sqs.Options)) (*sqs.ListQueueTagsOutput, error)
+	SetQueueAttributes(ctx context.Context, params *sqs.SetQueueAttributesInput, optFns ...func(*sqs.Options)) (*sqs.SetQueueAttributesOutput, error)
+}
+
+// QueueVisibilityTimeoutAttackState captures the original VisibilityTimeout so we can restore on Stop.
+type QueueVisibilityTimeoutAttackState struct {
+	QueueUrl                  string
+	QueueName                 string
+	Account                   string
+	Region                    string
+	DiscoveredByRole          *string
+	OriginalVisibilityTimeout int32
+	TargetVisibilityTimeout   int32
 }
