@@ -66,11 +66,14 @@ func (a *asgSuspendProcessesAttack) Describe() action_kit_api.ActionDescription 
 				Required:     new(true),
 			},
 			{
-				Name:         "processes",
-				Label:        "Processes to suspend",
-				Description:  new("Select the Auto Scaling processes to suspend. See AWS docs for the effect of each process."),
-				Type:         action_kit_api.ActionParameterTypeStringArray,
-				DefaultValue: new("Launch,HealthCheck,ReplaceUnhealthy"),
+				Name:        "processes",
+				Label:       "Processes to suspend",
+				Description: new("Select the Auto Scaling processes to suspend. See AWS docs for the effect of each process."),
+				Type:        action_kit_api.ActionParameterTypeStringArray,
+				// JSON-array literal: ActionParameterTypeStringArray ("string_array") expects DefaultValue to
+				// be a JSON-array string. A comma-joined default is flagged as "invalid option value" by the UI
+				// because the whole string gets matched against the Options list as a single value.
+				DefaultValue: new(`["Launch","HealthCheck","ReplaceUnhealthy"]`),
 				Order:        new(2),
 				Required:     new(true),
 				Options: extutil.Ptr([]action_kit_api.ParameterOption{
