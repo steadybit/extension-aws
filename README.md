@@ -90,6 +90,10 @@ The extension needs an IAM Role with the given permissions. You can optionally r
 become active
 by tweaking the `Resource` clause.
 
+> AWS limits each IAM role to 10 attached managed policies by default. If you enable many of the modules below, you may hit `LimitExceeded: Cannot exceed quota for PoliciesPerRole: 10` on attach. Two options:
+> - **Consolidate**: merge related blocks into one larger policy (e.g. group `ASG` into `EC2`, `EKS` into `ECS`, API Gateway into `ELB`, DynamoDB into `RDS`, and a single `messaging` policy for MQ + SQS + EventBridge). Each policy's body can be up to 6,144 characters.
+> - **Quota increase**: request an increase via AWS Service Quotas → IAM → "Managed policies per IAM role" (default 10, raisable to ~20).
+
 <details>
     <summary>Availability Zone-Discovery & Availability Zone Blackhole</summary>
 
@@ -141,12 +145,27 @@ by tweaking the `Resource` clause.
         "arn:aws:apigateway:*::/apis/*/stages",
         "arn:aws:apigateway:*::/apis/*/stages/*"
       ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogDelivery",
+        "logs:GetLogDelivery",
+        "logs:UpdateLogDelivery",
+        "logs:DeleteLogDelivery",
+        "logs:ListLogDeliveries",
+        "logs:DescribeResourcePolicies",
+        "logs:PutResourcePolicy"
+      ],
+      "Resource": "*"
     }
   ]
 }
 ```
 
 > Note: API Gateway uses the `apigateway:GET`/`apigateway:PATCH` style of permissions instead of dedicated action verbs. `GET` covers discovery of both REST (v1) and HTTP (v2) APIs. `PATCH` is required if you want to use the throttle attack on either REST or HTTP stages (a single IAM action covers both API types). WebSocket stages are not supported by the throttle attack.
+>
+> The `logs:*LogDelivery`/`logs:*ResourcePolicy*` block is only required for the throttle attack on HTTP (v2) stages that have **access logging enabled** (`AccessLogSettings` configured). AWS validates the vended-logs delivery setup on any `UpdateStage` call when access logging is on, even when the update only touches throttle fields. Without these permissions the attack fails at Start with `Insufficient permissions to enable logging ... logs:CreateLogDelivery`. Discovery-only and the REST throttle attack do not need this block.
 
 </details>
 <details>
