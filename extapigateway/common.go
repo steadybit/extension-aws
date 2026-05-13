@@ -31,11 +31,18 @@ type ApiGatewayStageThrottleAttackState struct {
 	TargetRateLimit  float64
 	TargetBurstLimit int32
 
-	// REST snapshot: pulled from Stage.MethodSettings["*/*"]. HadOriginalThrottleSettings=false means we
-	// remove the override on Stop so the stage falls back to account defaults.
+	// REST snapshot pulled from Stage.MethodSettings["*/*"]. Three cases drive the Stop restore:
+	//   - HadOriginalThrottleSettings=true → replace throttle fields with the captured values.
+	//   - HadOriginalThrottleSettings=false && RestStageHadMethodSetting=true → reset throttle to
+	//     account defaults via op=replace value=-1, preserving other MethodSetting fields (caching,
+	//     metrics, logging).
+	//   - RestStageHadMethodSetting=false → op=remove path=/*/* to delete the MethodSetting our Start
+	//     implicitly created. AWS does not support op=remove on individual property paths under a
+	//     MethodSetting, so the per-field remove that was here previously erroneously failed.
 	OriginalRateLimit           float64
 	OriginalBurstLimit          int32
 	HadOriginalThrottleSettings bool
+	RestStageHadMethodSetting   bool
 
 	// HTTP snapshot: full Stage.DefaultRouteSettings serialised as JSON so we can restore non-throttle
 	// fields (DataTraceEnabled, DetailedMetricsEnabled, LoggingLevel) verbatim. Empty string means

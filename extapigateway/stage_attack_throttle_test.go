@@ -68,6 +68,7 @@ func TestPrepareThrottleCapturesOriginalSettings(t *testing.T) {
 	assert.Equal(t, "prod", state.StageName)
 	assert.Equal(t, float64(1), state.TargetRateLimit)
 	assert.Equal(t, int32(1), state.TargetBurstLimit)
+	assert.True(t, state.RestStageHadMethodSetting)
 	assert.True(t, state.HadOriginalThrottleSettings)
 	assert.Equal(t, float64(500), state.OriginalRateLimit)
 	assert.Equal(t, int32(1000), state.OriginalBurstLimit)
@@ -82,6 +83,25 @@ func TestPrepareThrottleNoOriginalSettings(t *testing.T) {
 	state := attack.NewEmptyState()
 	_, err := attack.Prepare(context.Background(), &state, newThrottleRequest(5, 10, "REST"))
 	require.NoError(t, err)
+	assert.False(t, state.RestStageHadMethodSetting)
+	assert.False(t, state.HadOriginalThrottleSettings)
+}
+
+func TestPrepareThrottleMethodSettingExistsWithoutThrottle(t *testing.T) {
+	// */* MethodSetting present but throttle fields are zero (Go SDK quirk for unset). Should NOT be
+	// treated as "had original throttle" — Stop will reset to account default instead of locking the
+	// stage to 0 rps.
+	api := new(restApiMock)
+	api.On("GetStage", mock.Anything, mock.Anything).Return(&apigateway.GetStageOutput{
+		MethodSettings: map[string]apigwtypes.MethodSetting{
+			"*/*": {CachingEnabled: true, MetricsEnabled: true},
+		},
+	}, nil)
+	attack := newRestAttack(api)
+	state := attack.NewEmptyState()
+	_, err := attack.Prepare(context.Background(), &state, newThrottleRequest(1, 1, "REST"))
+	require.NoError(t, err)
+	assert.True(t, state.RestStageHadMethodSetting)
 	assert.False(t, state.HadOriginalThrottleSettings)
 }
 
@@ -133,18 +153,46 @@ func TestStopRestoresOriginalSettings(t *testing.T) {
 	api.AssertExpectations(t)
 }
 
-func TestStopRemovesPatchesWhenNoOriginalSettings(t *testing.T) {
+func TestStopRemovesMethodSettingWhenItDidNotExist(t *testing.T) {
+	// */* MethodSetting did not exist before our Start; Stop must remove the one Start implicitly
+	// created via a single op=remove path=/*/*. Per-property op=remove is not supported by AWS.
 	api := new(restApiMock)
 	api.On("UpdateStage", mock.Anything, mock.MatchedBy(func(p *apigateway.UpdateStageInput) bool {
-		require.Equal(t, 2, len(p.PatchOperations))
+		require.Equal(t, 1, len(p.PatchOperations))
 		require.Equal(t, apigwtypes.OpRemove, p.PatchOperations[0].Op)
-		require.Equal(t, apigwtypes.OpRemove, p.PatchOperations[1].Op)
+		require.Equal(t, "/*/*", aws.ToString(p.PatchOperations[0].Path))
 		return true
 	})).Return(&apigateway.UpdateStageOutput{}, nil)
 	attack := newRestAttack(api)
 	state := ApiGatewayStageThrottleAttackState{
 		ApiId: "rest-1", StageName: "prod", ProtocolType: "REST",
 		HadOriginalThrottleSettings: false,
+		RestStageHadMethodSetting:   false,
+	}
+	_, err := attack.Stop(context.Background(), &state)
+	assert.NoError(t, err)
+	api.AssertExpectations(t)
+}
+
+func TestStopResetsToAccountDefaultWhenMethodSettingExistedWithoutThrottle(t *testing.T) {
+	// */* MethodSetting existed with caching/metrics but no throttle; Stop must reset throttle to
+	// account default (-1) without wiping the MethodSetting.
+	api := new(restApiMock)
+	api.On("UpdateStage", mock.Anything, mock.MatchedBy(func(p *apigateway.UpdateStageInput) bool {
+		require.Equal(t, 2, len(p.PatchOperations))
+		require.Equal(t, apigwtypes.OpReplace, p.PatchOperations[0].Op)
+		require.Equal(t, "/*/*/throttling/rateLimit", aws.ToString(p.PatchOperations[0].Path))
+		require.Equal(t, "-1", aws.ToString(p.PatchOperations[0].Value))
+		require.Equal(t, apigwtypes.OpReplace, p.PatchOperations[1].Op)
+		require.Equal(t, "/*/*/throttling/burstLimit", aws.ToString(p.PatchOperations[1].Path))
+		require.Equal(t, "-1", aws.ToString(p.PatchOperations[1].Value))
+		return true
+	})).Return(&apigateway.UpdateStageOutput{}, nil)
+	attack := newRestAttack(api)
+	state := ApiGatewayStageThrottleAttackState{
+		ApiId: "rest-1", StageName: "prod", ProtocolType: "REST",
+		HadOriginalThrottleSettings: false,
+		RestStageHadMethodSetting:   true,
 	}
 	_, err := attack.Stop(context.Background(), &state)
 	assert.NoError(t, err)

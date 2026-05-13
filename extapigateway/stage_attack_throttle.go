@@ -150,9 +150,16 @@ func (a *stageThrottleAttack) prepareRest(ctx context.Context, state *ApiGateway
 		return extension_kit.ToError(fmt.Sprintf("Failed to describe API Gateway stage %s/%s", state.ApiId, state.StageName), err)
 	}
 	if ms, ok := stageOut.MethodSettings["*/*"]; ok {
-		state.HadOriginalThrottleSettings = true
-		state.OriginalRateLimit = ms.ThrottlingRateLimit
-		state.OriginalBurstLimit = ms.ThrottlingBurstLimit
+		state.RestStageHadMethodSetting = true
+		// The AWS Go SDK uses non-pointer fields for ThrottlingRateLimit/BurstLimit, so an unset throttle
+		// returns as zero. A literal 0 throttle is pathological (locks the stage to no traffic) and
+		// indistinguishable here from "unset"; treat any positive value as set, otherwise fall through to
+		// the "reset to account default" branch on Stop. AWS reports the unset sentinel as -1 too.
+		if ms.ThrottlingRateLimit > 0 || ms.ThrottlingBurstLimit > 0 {
+			state.HadOriginalThrottleSettings = true
+			state.OriginalRateLimit = ms.ThrottlingRateLimit
+			state.OriginalBurstLimit = ms.ThrottlingBurstLimit
+		}
 	}
 	return nil
 }
@@ -280,18 +287,28 @@ func (a *stageThrottleAttack) stopRest(ctx context.Context, state *ApiGatewaySta
 	if err != nil {
 		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
 	}
-	patches := make([]apigwtypes.PatchOperation, 0, 2)
-	if state.HadOriginalThrottleSettings {
-		patches = append(patches,
-			apigwtypes.PatchOperation{Op: apigwtypes.OpReplace, Path: aws.String("/*/*/throttling/rateLimit"), Value: aws.String(strconv.FormatFloat(state.OriginalRateLimit, 'f', -1, 64))},
-			apigwtypes.PatchOperation{Op: apigwtypes.OpReplace, Path: aws.String("/*/*/throttling/burstLimit"), Value: aws.String(strconv.Itoa(int(state.OriginalBurstLimit)))},
-		)
-	} else {
-		// Stage had no */* throttle override before; remove the ones we added so the stage falls back to account-level defaults.
-		patches = append(patches,
-			apigwtypes.PatchOperation{Op: apigwtypes.OpRemove, Path: aws.String("/*/*/throttling/rateLimit")},
-			apigwtypes.PatchOperation{Op: apigwtypes.OpRemove, Path: aws.String("/*/*/throttling/burstLimit")},
-		)
+	var patches []apigwtypes.PatchOperation
+	switch {
+	case state.HadOriginalThrottleSettings:
+		// Throttle was set on */* before our attack — restore the captured values.
+		patches = []apigwtypes.PatchOperation{
+			{Op: apigwtypes.OpReplace, Path: aws.String("/*/*/throttling/rateLimit"), Value: aws.String(strconv.FormatFloat(state.OriginalRateLimit, 'f', -1, 64))},
+			{Op: apigwtypes.OpReplace, Path: aws.String("/*/*/throttling/burstLimit"), Value: aws.String(strconv.Itoa(int(state.OriginalBurstLimit)))},
+		}
+	case state.RestStageHadMethodSetting:
+		// */* MethodSetting existed (caching, metrics, etc.) but throttle was not set; reset throttle
+		// to account-default via value=-1 while preserving the rest of the MethodSetting fields.
+		patches = []apigwtypes.PatchOperation{
+			{Op: apigwtypes.OpReplace, Path: aws.String("/*/*/throttling/rateLimit"), Value: aws.String("-1")},
+			{Op: apigwtypes.OpReplace, Path: aws.String("/*/*/throttling/burstLimit"), Value: aws.String("-1")},
+		}
+	default:
+		// */* MethodSetting did not exist before our Start; remove the one our Start implicitly created.
+		// AWS only accepts remove at the MethodSetting level — op=remove on /*/*/throttling/rateLimit
+		// errors with "Cannot remove method setting ... because there is no method setting for this method".
+		patches = []apigwtypes.PatchOperation{
+			{Op: apigwtypes.OpRemove, Path: aws.String("/*/*")},
+		}
 	}
 	_, err = client.UpdateStage(ctx, &apigateway.UpdateStageInput{
 		RestApiId:       aws.String(state.ApiId),
