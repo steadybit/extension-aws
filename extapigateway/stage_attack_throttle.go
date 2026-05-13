@@ -5,12 +5,15 @@ package extapigateway
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/apigateway"
 	apigwtypes "github.com/aws/aws-sdk-go-v2/service/apigateway/types"
+	"github.com/aws/aws-sdk-go-v2/service/apigatewayv2"
+	apigwv2types "github.com/aws/aws-sdk-go-v2/service/apigatewayv2/types"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
@@ -21,7 +24,8 @@ import (
 )
 
 type stageThrottleAttack struct {
-	clientProvider func(account string, region string, role *string) (RestApiGatewayApi, error)
+	restClientProvider func(account string, region string, role *string) (RestApiGatewayApi, error)
+	httpClientProvider func(account string, region string, role *string) (HttpApiGatewayApi, error)
 }
 
 var (
@@ -30,7 +34,10 @@ var (
 )
 
 func NewStageThrottleAttack() action_kit_sdk.ActionWithStop[ApiGatewayStageThrottleAttackState] {
-	return &stageThrottleAttack{clientProvider: defaultRestClientProvider}
+	return &stageThrottleAttack{
+		restClientProvider: defaultRestClientProvider,
+		httpClientProvider: defaultHttpClientProvider,
+	}
 }
 
 func (a *stageThrottleAttack) NewEmptyState() ApiGatewayStageThrottleAttackState {
@@ -39,11 +46,12 @@ func (a *stageThrottleAttack) NewEmptyState() ApiGatewayStageThrottleAttackState
 
 func (a *stageThrottleAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.throttle", stageTargetType),
-		Label:       "Throttle API Gateway stage (REST)",
-		Description: "Lowers the stage-level throttle rate and burst limits for the duration of the experiment to simulate API throttling. Original limits are restored on stop. Supported on REST APIs only.",
-		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        new(apiGatewayIcon),
+		Id:    fmt.Sprintf("%s.throttle", stageTargetType),
+		Label: "Throttle API Gateway stage",
+		Description: "Lowers the stage-level throttle rate and burst limits for the duration of the experiment to simulate API throttling. " +
+			"Original limits are restored on stop. Supports REST APIs (v1) and HTTP APIs (v2); WebSocket APIs are not supported.",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Icon:    new(apiGatewayIcon),
 		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: stageTargetType,
 			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
@@ -51,6 +59,11 @@ func (a *stageThrottleAttack) Describe() action_kit_api.ActionDescription {
 					Label:       "by API id and stage (REST)",
 					Description: new("Find REST API stage by API id and stage name"),
 					Query:       "aws.apigateway.api.protocol-type=\"REST\" and aws.apigateway.api.id=\"\" and aws.apigateway.stage.name=\"\"",
+				},
+				{
+					Label:       "by API id and stage (HTTP)",
+					Description: new("Find HTTP API stage by API id and stage name"),
+					Query:       "aws.apigateway.api.protocol-type=\"HTTP\" and aws.apigateway.api.id=\"\" and aws.apigateway.stage.name=\"\"",
 				},
 			}),
 		}),
@@ -99,8 +112,12 @@ func (a *stageThrottleAttack) Prepare(ctx context.Context, state *ApiGatewayStag
 	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 
 	protocols := request.Target.Attributes["aws.apigateway.api.protocol-type"]
-	if len(protocols) == 0 || protocols[0] != protocolREST {
-		return nil, extension_kit.ToError("Throttle attack is supported on REST API stages only.", nil)
+	if len(protocols) == 0 {
+		return nil, extension_kit.ToError("Target is missing aws.apigateway.api.protocol-type attribute.", nil)
+	}
+	state.ProtocolType = protocols[0]
+	if state.ProtocolType != protocolREST && state.ProtocolType != protocolHTTP {
+		return nil, extension_kit.ToError(fmt.Sprintf("Throttle attack does not support protocol-type %q. Supported: REST, HTTP.", state.ProtocolType), nil)
 	}
 
 	rateLimit := extutil.ToInt(request.Config["rateLimit"])
@@ -111,29 +128,96 @@ func (a *stageThrottleAttack) Prepare(ctx context.Context, state *ApiGatewayStag
 	state.TargetRateLimit = float64(rateLimit)
 	state.TargetBurstLimit = int32(burstLimit)
 
-	client, err := a.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
+	switch state.ProtocolType {
+	case protocolREST:
+		return nil, a.prepareRest(ctx, state)
+	case protocolHTTP:
+		return nil, a.prepareHttp(ctx, state)
+	}
+	return nil, nil
+}
+
+func (a *stageThrottleAttack) prepareRest(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+	client, err := a.restClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
+		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
 	}
 	stageOut, err := client.GetStage(ctx, &apigateway.GetStageInput{
 		RestApiId: aws.String(state.ApiId),
 		StageName: aws.String(state.StageName),
 	})
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to describe API Gateway stage %s/%s", state.ApiId, state.StageName), err)
+		return extension_kit.ToError(fmt.Sprintf("Failed to describe API Gateway stage %s/%s", state.ApiId, state.StageName), err)
 	}
 	if ms, ok := stageOut.MethodSettings["*/*"]; ok {
 		state.HadOriginalThrottleSettings = true
 		state.OriginalRateLimit = ms.ThrottlingRateLimit
 		state.OriginalBurstLimit = ms.ThrottlingBurstLimit
 	}
-	return nil, nil
+	return nil
+}
+
+func (a *stageThrottleAttack) prepareHttp(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+	client, err := a.httpClientProvider(state.Account, state.Region, state.DiscoveredByRole)
+	if err != nil {
+		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway v2 client for AWS account %s", state.Account), err)
+	}
+	stageOut, err := client.GetStage(ctx, &apigatewayv2.GetStageInput{
+		ApiId:     aws.String(state.ApiId),
+		StageName: aws.String(state.StageName),
+	})
+	if err != nil {
+		return extension_kit.ToError(fmt.Sprintf("Failed to describe API Gateway v2 stage %s/%s", state.ApiId, state.StageName), err)
+	}
+	// HTTP $default stage on quick-created APIs is managed by API Gateway and cannot be modified — surface
+	// the constraint here instead of letting UpdateStage fail mid-experiment with a less obvious error.
+	if stageOut.ApiGatewayManaged != nil && *stageOut.ApiGatewayManaged {
+		return extension_kit.ToError(fmt.Sprintf("HTTP API stage %s/%s is managed by API Gateway and cannot be modified.", state.ApiId, state.StageName), nil)
+	}
+	if stageOut.DefaultRouteSettings != nil {
+		// Snapshot DefaultRouteSettings as JSON so we can restore non-throttle fields verbatim on Stop;
+		// v2 has no JSON-Patch shape so a Start that only sets throttling would clobber DataTraceEnabled,
+		// DetailedMetricsEnabled, LoggingLevel.
+		encoded, err := json.Marshal(stageOut.DefaultRouteSettings)
+		if err != nil {
+			return extension_kit.ToError("Failed to snapshot original DefaultRouteSettings", err)
+		}
+		state.HttpOrigDefaultRouteSettings = string(encoded)
+		if stageOut.DefaultRouteSettings.ThrottlingRateLimit != nil || stageOut.DefaultRouteSettings.ThrottlingBurstLimit != nil {
+			state.HadOriginalThrottleSettings = true
+			if stageOut.DefaultRouteSettings.ThrottlingRateLimit != nil {
+				state.OriginalRateLimit = *stageOut.DefaultRouteSettings.ThrottlingRateLimit
+			}
+			if stageOut.DefaultRouteSettings.ThrottlingBurstLimit != nil {
+				state.OriginalBurstLimit = *stageOut.DefaultRouteSettings.ThrottlingBurstLimit
+			}
+		}
+	}
+	return nil
 }
 
 func (a *stageThrottleAttack) Start(ctx context.Context, state *ApiGatewayStageThrottleAttackState) (*action_kit_api.StartResult, error) {
-	client, err := a.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
+	switch state.ProtocolType {
+	case protocolREST:
+		if err := a.startRest(ctx, state); err != nil {
+			return nil, err
+		}
+	case protocolHTTP:
+		if err := a.startHttp(ctx, state); err != nil {
+			return nil, err
+		}
+	}
+	msg := fmt.Sprintf("Throttled API Gateway stage %s/%s (%s) to rate=%v, burst=%d. Original: rate=%v, burst=%d (had-settings=%t).",
+		state.ApiId, state.StageName, state.ProtocolType, state.TargetRateLimit, state.TargetBurstLimit, state.OriginalRateLimit, state.OriginalBurstLimit, state.HadOriginalThrottleSettings)
+	return &action_kit_api.StartResult{
+		Messages: extutil.Ptr([]action_kit_api.Message{{Level: extutil.Ptr(action_kit_api.Info), Message: msg}}),
+	}, nil
+}
+
+func (a *stageThrottleAttack) startRest(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+	client, err := a.restClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
+		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
 	}
 	_, err = client.UpdateStage(ctx, &apigateway.UpdateStageInput{
 		RestApiId: aws.String(state.ApiId),
@@ -144,21 +228,58 @@ func (a *stageThrottleAttack) Start(ctx context.Context, state *ApiGatewayStageT
 		},
 	})
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to throttle API Gateway stage %s/%s", state.ApiId, state.StageName), err)
+		return extension_kit.ToError(fmt.Sprintf("Failed to throttle API Gateway stage %s/%s", state.ApiId, state.StageName), err)
 	}
-	msg := fmt.Sprintf("Throttled API Gateway stage %s/%s to rate=%v, burst=%d. Original: rate=%v, burst=%d (had-settings=%t).",
-		state.ApiId, state.StageName, state.TargetRateLimit, state.TargetBurstLimit, state.OriginalRateLimit, state.OriginalBurstLimit, state.HadOriginalThrottleSettings)
-	return &action_kit_api.StartResult{
+	return nil
+}
+
+func (a *stageThrottleAttack) startHttp(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+	client, err := a.httpClientProvider(state.Account, state.Region, state.DiscoveredByRole)
+	if err != nil {
+		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway v2 client for AWS account %s", state.Account), err)
+	}
+	// Start from the original DefaultRouteSettings snapshot (if any) so non-throttle fields are preserved,
+	// then override the two throttle fields. v2 UpdateStage replaces the whole DefaultRouteSettings object.
+	settings := decodeRouteSettings(state.HttpOrigDefaultRouteSettings)
+	rate := state.TargetRateLimit
+	burst := state.TargetBurstLimit
+	settings.ThrottlingRateLimit = &rate
+	settings.ThrottlingBurstLimit = &burst
+	_, err = client.UpdateStage(ctx, &apigatewayv2.UpdateStageInput{
+		ApiId:                aws.String(state.ApiId),
+		StageName:            aws.String(state.StageName),
+		DefaultRouteSettings: &settings,
+	})
+	if err != nil {
+		return extension_kit.ToError(fmt.Sprintf("Failed to throttle API Gateway v2 stage %s/%s", state.ApiId, state.StageName), err)
+	}
+	return nil
+}
+
+func (a *stageThrottleAttack) Stop(ctx context.Context, state *ApiGatewayStageThrottleAttackState) (*action_kit_api.StopResult, error) {
+	switch state.ProtocolType {
+	case protocolREST:
+		if err := a.stopRest(ctx, state); err != nil {
+			log.Error().Err(err).Msgf("Failed to restore throttle settings on API Gateway stage %s/%s", state.ApiId, state.StageName)
+			return nil, err
+		}
+	case protocolHTTP:
+		if err := a.stopHttp(ctx, state); err != nil {
+			log.Error().Err(err).Msgf("Failed to restore throttle settings on API Gateway v2 stage %s/%s", state.ApiId, state.StageName)
+			return nil, err
+		}
+	}
+	msg := fmt.Sprintf("Restored throttle settings on API Gateway stage %s/%s (%s, had-settings=%t).", state.ApiId, state.StageName, state.ProtocolType, state.HadOriginalThrottleSettings)
+	return &action_kit_api.StopResult{
 		Messages: extutil.Ptr([]action_kit_api.Message{{Level: extutil.Ptr(action_kit_api.Info), Message: msg}}),
 	}, nil
 }
 
-func (a *stageThrottleAttack) Stop(ctx context.Context, state *ApiGatewayStageThrottleAttackState) (*action_kit_api.StopResult, error) {
-	client, err := a.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
+func (a *stageThrottleAttack) stopRest(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+	client, err := a.restClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
+		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
 	}
-
 	patches := make([]apigwtypes.PatchOperation, 0, 2)
 	if state.HadOriginalThrottleSettings {
 		patches = append(patches,
@@ -172,18 +293,45 @@ func (a *stageThrottleAttack) Stop(ctx context.Context, state *ApiGatewayStageTh
 			apigwtypes.PatchOperation{Op: apigwtypes.OpRemove, Path: aws.String("/*/*/throttling/burstLimit")},
 		)
 	}
-
 	_, err = client.UpdateStage(ctx, &apigateway.UpdateStageInput{
 		RestApiId:       aws.String(state.ApiId),
 		StageName:       aws.String(state.StageName),
 		PatchOperations: patches,
 	})
 	if err != nil {
-		log.Error().Err(err).Msgf("Failed to restore throttle settings on API Gateway stage %s/%s", state.ApiId, state.StageName)
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to restore throttle settings on API Gateway stage %s/%s", state.ApiId, state.StageName), err)
+		return extension_kit.ToError(fmt.Sprintf("Failed to restore throttle settings on API Gateway stage %s/%s", state.ApiId, state.StageName), err)
 	}
-	msg := fmt.Sprintf("Restored throttle settings on API Gateway stage %s/%s (had-settings=%t).", state.ApiId, state.StageName, state.HadOriginalThrottleSettings)
-	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{Level: extutil.Ptr(action_kit_api.Info), Message: msg}}),
-	}, nil
+	return nil
+}
+
+func (a *stageThrottleAttack) stopHttp(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+	client, err := a.httpClientProvider(state.Account, state.Region, state.DiscoveredByRole)
+	if err != nil {
+		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway v2 client for AWS account %s", state.Account), err)
+	}
+	// Send the original DefaultRouteSettings verbatim. If there was no original, we send an empty
+	// RouteSettings{} — that clears the throttling fields we set without affecting other stage config
+	// (v2 UpdateStage only touches fields present in the request body).
+	settings := decodeRouteSettings(state.HttpOrigDefaultRouteSettings)
+	_, err = client.UpdateStage(ctx, &apigatewayv2.UpdateStageInput{
+		ApiId:                aws.String(state.ApiId),
+		StageName:            aws.String(state.StageName),
+		DefaultRouteSettings: &settings,
+	})
+	if err != nil {
+		return extension_kit.ToError(fmt.Sprintf("Failed to restore throttle settings on API Gateway v2 stage %s/%s", state.ApiId, state.StageName), err)
+	}
+	return nil
+}
+
+func decodeRouteSettings(encoded string) apigwv2types.RouteSettings {
+	if encoded == "" {
+		return apigwv2types.RouteSettings{}
+	}
+	var rs apigwv2types.RouteSettings
+	if err := json.Unmarshal([]byte(encoded), &rs); err != nil {
+		log.Warn().Err(err).Msg("Failed to decode DefaultRouteSettings snapshot; restoring with empty settings")
+		return apigwv2types.RouteSettings{}
+	}
+	return rs
 }

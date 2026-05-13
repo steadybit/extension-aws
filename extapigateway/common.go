@@ -16,18 +16,31 @@ const (
 	stageTargetType = "com.steadybit.extension_aws.apigateway.stage"
 )
 
-// ApiGatewayStageThrottleAttackState captures the throttle config of a REST stage so we can restore it on stop.
+// ApiGatewayStageThrottleAttackState captures the throttle config of an API Gateway stage so we can restore
+// it on stop. The same state struct serves both REST (v1) and HTTP (v2) stages — ProtocolType drives the
+// branching in Prepare/Start/Stop.
 type ApiGatewayStageThrottleAttackState struct {
-	ApiId                       string
-	StageName                   string
-	Account                     string
-	Region                      string
-	DiscoveredByRole            *string
+	ApiId            string
+	StageName        string
+	Account          string
+	Region           string
+	ProtocolType     string // "REST" or "HTTP"
+	DiscoveredByRole *string
+
+	// Target values (apply to both REST and HTTP).
+	TargetRateLimit  float64
+	TargetBurstLimit int32
+
+	// REST snapshot: pulled from Stage.MethodSettings["*/*"]. HadOriginalThrottleSettings=false means we
+	// remove the override on Stop so the stage falls back to account defaults.
 	OriginalRateLimit           float64
 	OriginalBurstLimit          int32
 	HadOriginalThrottleSettings bool
-	TargetRateLimit             float64
-	TargetBurstLimit            int32
+
+	// HTTP snapshot: full Stage.DefaultRouteSettings serialised as JSON so we can restore non-throttle
+	// fields (DataTraceEnabled, DetailedMetricsEnabled, LoggingLevel) verbatim. Empty string means
+	// DefaultRouteSettings was nil; on Stop we send an empty RouteSettings to clear what we set.
+	HttpOrigDefaultRouteSettings string
 }
 
 type RestApiGatewayApi interface {
@@ -40,6 +53,8 @@ type RestApiGatewayApi interface {
 type HttpApiGatewayApi interface {
 	GetApis(ctx context.Context, params *apigatewayv2.GetApisInput, optFns ...func(*apigatewayv2.Options)) (*apigatewayv2.GetApisOutput, error)
 	GetStages(ctx context.Context, params *apigatewayv2.GetStagesInput, optFns ...func(*apigatewayv2.Options)) (*apigatewayv2.GetStagesOutput, error)
+	GetStage(ctx context.Context, params *apigatewayv2.GetStageInput, optFns ...func(*apigatewayv2.Options)) (*apigatewayv2.GetStageOutput, error)
+	UpdateStage(ctx context.Context, params *apigatewayv2.UpdateStageInput, optFns ...func(*apigatewayv2.Options)) (*apigatewayv2.UpdateStageOutput, error)
 }
 
 func defaultRestClientProvider(account string, region string, role *string) (RestApiGatewayApi, error) {
