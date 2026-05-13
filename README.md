@@ -146,7 +146,7 @@ by tweaking the `Resource` clause.
 }
 ```
 
-> Note: API Gateway uses the `apigateway:GET`/`apigateway:PATCH` style of permissions instead of dedicated action verbs. `PATCH` is only required if you want to use the throttle attack on REST stages; otherwise, only `GET` is needed.
+> Note: API Gateway uses the `apigateway:GET`/`apigateway:PATCH` style of permissions instead of dedicated action verbs. `GET` covers discovery of both REST (v1) and HTTP (v2) APIs. `PATCH` is required if you want to use the throttle attack on either REST or HTTP stages (a single IAM action covers both API types). WebSocket stages are not supported by the throttle attack.
 
 </details>
 <details>

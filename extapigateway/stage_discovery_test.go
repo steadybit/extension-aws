@@ -74,6 +74,22 @@ func (m *httpApiMock) GetStages(ctx context.Context, params *apigatewayv2.GetSta
 	return args.Get(0).(*apigatewayv2.GetStagesOutput), args.Error(1)
 }
 
+func (m *httpApiMock) GetStage(ctx context.Context, params *apigatewayv2.GetStageInput, optFns ...func(*apigatewayv2.Options)) (*apigatewayv2.GetStageOutput, error) {
+	args := m.Called(ctx, params)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*apigatewayv2.GetStageOutput), args.Error(1)
+}
+
+func (m *httpApiMock) UpdateStage(ctx context.Context, params *apigatewayv2.UpdateStageInput, optFns ...func(*apigatewayv2.Options)) (*apigatewayv2.UpdateStageOutput, error) {
+	args := m.Called(ctx, params)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*apigatewayv2.UpdateStageOutput), args.Error(1)
+}
+
 func TestGetAllStagesRestAndHttp(t *testing.T) {
 	rest := new(restApiMock)
 	httpApi := new(httpApiMock)
