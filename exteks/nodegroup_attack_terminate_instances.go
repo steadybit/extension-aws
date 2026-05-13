@@ -58,7 +58,7 @@ func (a *eksNodegroupTerminateInstancesAttack) NewEmptyState() EksNodegroupTermi
 func (a *eksNodegroupTerminateInstancesAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    fmt.Sprintf("%s.terminate-instances", nodegroupTargetId),
-		Label: "Terminate EKS node group instances",
+		Label: "Trigger EKS Nodegroup Terminate Instance",
 		Description: "Terminates a percentage of EC2 instances backing an EKS managed node group. The underlying Auto Scaling group automatically replaces the terminated instances within minutes. " +
 			"Validates pod rescheduling, PDB enforcement, cluster-autoscaler scale-up timing, and stateful workload AZ failover. " +
 			"This is an instantaneous attack — there is no automatic rollback; AWS handles instance replacement.",
