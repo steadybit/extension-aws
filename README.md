@@ -261,7 +261,7 @@ by tweaking the `Resource` clause.
 
 </details>
 <details>
-    <summary>EBS volume-Discovery</summary>
+    <summary>EBS volume-Discovery & Actions</summary>
 
 ```yaml
 {
@@ -271,13 +271,19 @@ by tweaking the `Resource` clause.
       "Effect": "Allow",
       "Action": [
         "ec2:DescribeVolumes",
-        "ec2:DescribeSnapshots"
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeInstances",
+        "ssm:DescribeInstanceInformation",
+        "ssm:SendCommand",
+        "ssm:GetCommandInvocation"
       ],
       "Resource": "*"
     }
   ]
 }
 ```
+
+> Note: `ec2:DescribeInstances` + the three `ssm:*` actions are only required for the "Trigger AWS EBS Volume Pause IO" attack (runs `fsfreeze` on the attached EC2 instance via SSM SendCommand). Discovery-only deployments need just `ec2:DescribeVolumes` and `ec2:DescribeSnapshots`. The attack is Linux-only; Windows volumes are rejected at Prepare. The instance must have the SSM agent installed and registered as Online.
 
 </details>
 <details>

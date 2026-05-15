@@ -147,6 +147,7 @@ func registerHandlers(ctx context.Context) {
 
 	if !cfg.DiscoveryDisabledEbs {
 		discovery_kit_sdk.Register(extec2.NewEbsVolumeDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extec2.NewEbsPauseIoAttack())
 	}
 
 	if !cfg.DiscoveryDisabledSqs {

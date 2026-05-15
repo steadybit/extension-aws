@@ -13,6 +13,7 @@ const (
 	natGatewayTargetType     = "com.steadybit.extension_aws.nat-gateway"
 	natGatewayIcon           = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj48cGF0aCBkPSJNMTIgMmw0IDRoLTN2NGgtMlY2SDhsNC00em0wIDIwbC00LTRoM3YtNGgyVjE4aDNsLTQgNHpNMiAxMmw0LTR2M2g0djJINlYxNmwtNC00em0yMCAwbC00IDR2LTNoLTR2LTJoNFY4bDQgNHoiIGZpbGw9ImN1cnJlbnRDb2xvciIvPjwvc3ZnPg=="
 	ebsTargetType            = "com.steadybit.extension_aws.ebs-volume"
+	ebsPauseIoActionId       = "com.steadybit.extension_aws.ebs-volume.pause-io"
 	ebsIcon                  = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj48cGF0aCBkPSJNMTIgM2M0Ljk3IDAgOSAxLjM0IDkgM3YxMmMwIDEuNjYtNC4wMyAzLTkgM3MtOS0xLjM0LTktM1Y2YzAtMS42NiA0LjAzLTMgOS0zem0wIDJjLTMuOSAwLTcgLjg5LTcgMnMzLjEgMiA3IDIgNy0uODkgNy0yLTMuMS0yLTctMnptLTcgNXYyYzAgMS4xMSAzLjEgMiA3IDJzNy0uODkgNy0yVjEwYy0xLjY3IDEuMDgtNC42NCAxLjUtNyAxLjVzLTUuMzMtLjQyLTctMS41em0wIDR2MmMwIDEuMTEgMy4xIDIgNyAyczctLjg5IDctMnYtMmMtMS42NyAxLjA4LTQuNjQgMS41LTcgMS41cy01LjMzLS40Mi03LTEuNXoiIGZpbGw9ImN1cnJlbnRDb2xvciIvPjwvc3ZnPg=="
 	subnetBlackholeActionId  = "com.steadybit.extension_aws.ec2-subnet.blackhole"
 	subnetTargetType         = "com.steadybit.extension_aws.ec2-subnet"
