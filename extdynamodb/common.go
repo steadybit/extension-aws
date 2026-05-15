@@ -22,6 +22,24 @@ type DynamodbApi interface {
 	DescribeContinuousBackups(ctx context.Context, params *dynamodb.DescribeContinuousBackupsInput, optFns ...func(*dynamodb.Options)) (*dynamodb.DescribeContinuousBackupsOutput, error)
 	DescribeTimeToLive(ctx context.Context, params *dynamodb.DescribeTimeToLiveInput, optFns ...func(*dynamodb.Options)) (*dynamodb.DescribeTimeToLiveOutput, error)
 	ListTagsOfResource(ctx context.Context, params *dynamodb.ListTagsOfResourceInput, optFns ...func(*dynamodb.Options)) (*dynamodb.ListTagsOfResourceOutput, error)
+	UpdateTable(ctx context.Context, params *dynamodb.UpdateTableInput, optFns ...func(*dynamodb.Options)) (*dynamodb.UpdateTableOutput, error)
+}
+
+// TableThrottleAttackState captures the original provisioned capacity for a PROVISIONED-mode table
+// (and each of its GSIs) so we can restore on Stop.
+type TableThrottleAttackState struct {
+	TableName        string
+	Account          string
+	Region           string
+	DiscoveredByRole *string
+
+	OriginalReadCapacity  int64
+	OriginalWriteCapacity int64
+	// GSI name → [read, write]
+	OriginalGsiCapacity map[string][2]int64
+
+	TargetReadCapacity  int64
+	TargetWriteCapacity int64
 }
 
 type AppAutoScalingApi interface {

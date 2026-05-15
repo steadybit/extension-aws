@@ -151,6 +151,7 @@ func registerHandlers(ctx context.Context) {
 
 	if !cfg.DiscoveryDisabledSqs {
 		discovery_kit_sdk.Register(extsqs.NewQueueDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extsqs.NewQueueVisibilityTimeoutAttack())
 	}
 
 	if !cfg.DiscoveryDisabledEventbridge {
@@ -205,6 +206,7 @@ func registerHandlers(ctx context.Context) {
 
 	if !cfg.DiscoveryDisabledDynamodb {
 		discovery_kit_sdk.Register(extdynamodb.NewTableDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extdynamodb.NewTableThrottleAttack())
 	}
 
 	if !cfg.DiscoveryDisabledEks {

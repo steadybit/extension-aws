@@ -190,7 +190,7 @@ by tweaking the `Resource` clause.
 
 </details>
 <details>
-    <summary>DynamoDB-Discovery</summary>
+    <summary>DynamoDB-Discovery & Actions</summary>
 
 ```yaml
 {
@@ -204,6 +204,7 @@ by tweaking the `Resource` clause.
         "dynamodb:DescribeContinuousBackups",
         "dynamodb:DescribeTimeToLive",
         "dynamodb:ListTagsOfResource",
+        "dynamodb:UpdateTable",
         "application-autoscaling:DescribeScalableTargets"
       ],
       "Resource": "*"
@@ -211,6 +212,8 @@ by tweaking the `Resource` clause.
   ]
 }
 ```
+
+> Note: `dynamodb:UpdateTable` is only required for the "Trigger AWS DynamoDB Table Throttle" attack on PROVISIONED tables. Discovery-only deployments can omit it.
 
 </details>
 <details>
@@ -278,7 +281,7 @@ by tweaking the `Resource` clause.
 
 </details>
 <details>
-    <summary>SQS-Discovery</summary>
+    <summary>SQS-Discovery & Actions</summary>
 
 ```yaml
 {
@@ -289,13 +292,16 @@ by tweaking the `Resource` clause.
       "Action": [
         "sqs:ListQueues",
         "sqs:GetQueueAttributes",
-        "sqs:ListQueueTags"
+        "sqs:ListQueueTags",
+        "sqs:SetQueueAttributes"
       ],
       "Resource": "*"
     }
   ]
 }
 ```
+
+> Note: `sqs:SetQueueAttributes` is only required for the "Trigger AWS SQS Queue Visibility Timeout Change" attack. Discovery-only deployments can omit it.
 
 </details>
 <details>
