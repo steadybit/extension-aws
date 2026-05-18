@@ -90,7 +90,7 @@ func (d *eksClusterDiscovery) DescribeTarget() discovery_kit_api.TargetDescripti
 		Label:    discovery_kit_api.PluralLabel{One: "EKS cluster", Other: "EKS clusters"},
 		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     new(eksIcon),
+		Icon:     new(eksClusterIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},

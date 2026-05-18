@@ -63,7 +63,7 @@ func (a *eksNodegroupTerminateInstancesAttack) Describe() action_kit_api.ActionD
 			"Validates pod rescheduling, PDB enforcement, cluster-autoscaler scale-up timing, and stateful workload AZ failover. " +
 			"This is an instantaneous attack — there is no automatic rollback; AWS handles instance replacement.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    new(eksIcon),
+		Icon:    new(eksNodegroupIcon),
 		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: nodegroupTargetId,
 			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{

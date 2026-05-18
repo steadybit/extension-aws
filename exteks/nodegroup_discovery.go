@@ -55,7 +55,7 @@ func (d *eksNodegroupDiscovery) DescribeTarget() discovery_kit_api.TargetDescrip
 		Label:    discovery_kit_api.PluralLabel{One: "EKS node group", Other: "EKS node groups"},
 		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     new(eksIcon),
+		Icon:     new(eksNodegroupIcon),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
