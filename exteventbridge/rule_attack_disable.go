@@ -38,7 +38,7 @@ func (a *ruleDisableAttack) NewEmptyState() EventBridgeRuleAttackState {
 func (a *ruleDisableAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.disable", ruleTargetType),
-		Label:       "Disable EventBridge rule",
+		Label:       "Disable EventBridge Rule",
 		Description: "Disables an EventBridge rule for the duration of the experiment. The rule is re-enabled on stop. Lets you simulate dropped events without deleting any configuration.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        new(eventBridgeIcon),

@@ -33,7 +33,7 @@ func (a brokerRebootAttack) NewEmptyState() BrokerAttackState {
 func (a brokerRebootAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.reboot", brokerTargetId),
-		Label:       "Trigger AWS MQ Broker Reboot",
+		Label:       "Trigger MQ Broker Reboot",
 		Description: "Reboots an Amazon MQ broker. For SINGLE_INSTANCE brokers this causes downtime; for ACTIVE_STANDBY_MULTI_AZ or CLUSTER_MULTI_AZ deployments this validates failover.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        new(mqIcon),

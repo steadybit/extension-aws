@@ -37,7 +37,7 @@ func (a *asgSuspendProcessesAttack) NewEmptyState() AsgAttackState {
 func (a *asgSuspendProcessesAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:          fmt.Sprintf("%s.suspend-processes", asgTargetId),
-		Label:       "Suspend Auto Scaling processes",
+		Label:       "Suspend Auto Scaling Processes",
 		Description: "Suspends one or more Auto Scaling processes (Launch, HealthCheck, ReplaceUnhealthy, ...) for the duration of the experiment. Processes are resumed on stop.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        new(asgIcon),

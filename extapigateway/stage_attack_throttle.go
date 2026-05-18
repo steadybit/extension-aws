@@ -47,7 +47,7 @@ func (a *stageThrottleAttack) NewEmptyState() ApiGatewayStageThrottleAttackState
 func (a *stageThrottleAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    fmt.Sprintf("%s.throttle", stageTargetType),
-		Label: "Throttle API Gateway stage",
+		Label: "Throttle API Gateway Stage",
 		Description: "Lowers the stage-level throttle rate and burst limits for the duration of the experiment to simulate API throttling. " +
 			"Original limits are restored on stop. Supports REST APIs (v1) and HTTP APIs (v2); WebSocket APIs are not supported.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
