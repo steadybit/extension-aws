@@ -39,7 +39,7 @@ func (a *queueVisibilityTimeoutAttack) NewEmptyState() QueueVisibilityTimeoutAtt
 func (a *queueVisibilityTimeoutAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    fmt.Sprintf("%s.visibility-timeout", queueTargetType),
-		Label: "Trigger AWS SQS Queue Visibility Timeout Change",
+		Label: "Change Queue Visibility Timeout",
 		Description: "Temporarily changes the SQS queue's visibility timeout. Set it very low (0-5s) to force premature redelivery and stress consumer idempotency, " +
 			"or very high (close to the 12-hour max) to stall redelivery and reveal stuck-message handling. Original timeout is restored on stop.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
