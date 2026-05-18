@@ -47,7 +47,7 @@ func (a *tableThrottleAttack) NewEmptyState() TableThrottleAttackState {
 func (a *tableThrottleAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    fmt.Sprintf("%s.throttle", tableTargetId),
-		Label: "Trigger AWS DynamoDB Table Throttle",
+		Label: "Change Read/Write Table Capacity",
 		Description: "Temporarily lowers a PROVISIONED-mode DynamoDB table's read + write capacity (and the capacity of each GSI) to force ProvisionedThroughputExceededException. " +
 			"Validates client retry / backoff logic and circuit breakers. Original capacities are restored on stop. " +
 			"Tables in PAY_PER_REQUEST mode are not supported (no fixed capacity to lower). If the table has Application Auto Scaling, the autoscaler will eventually scale back up; " +
