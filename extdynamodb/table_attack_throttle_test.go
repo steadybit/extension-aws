@@ -70,6 +70,52 @@ func TestThrottlePrepareCapturesTableAndGsiCapacity(t *testing.T) {
 	assert.Equal(t, int64(1), state.TargetWriteCapacity)
 }
 
+func TestThrottlePrepareRejectsNoOpCapacityChange(t *testing.T) {
+	api := new(ddbApiMock)
+	api.On("DescribeTable", mock.Anything, mock.Anything).Return(&dynamodb.DescribeTableOutput{
+		Table: &ddbtypes.TableDescription{
+			TableName:          aws.String("my-table"),
+			BillingModeSummary: &ddbtypes.BillingModeSummary{BillingMode: ddbtypes.BillingModeProvisioned},
+			ProvisionedThroughput: &ddbtypes.ProvisionedThroughputDescription{
+				ReadCapacityUnits:  aws.Int64(1),
+				WriteCapacityUnits: aws.Int64(1),
+			},
+		},
+	}, nil)
+	a := newThrottleAttack(api)
+	state := a.NewEmptyState()
+	_, err := a.Prepare(context.Background(), &state, newThrottleRequest(1, 1))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "already equals current capacity")
+}
+
+func TestThrottlePrepareAllowsNoOpWhenGsiNeedsChange(t *testing.T) {
+	api := new(ddbApiMock)
+	api.On("DescribeTable", mock.Anything, mock.Anything).Return(&dynamodb.DescribeTableOutput{
+		Table: &ddbtypes.TableDescription{
+			TableName:          aws.String("my-table"),
+			BillingModeSummary: &ddbtypes.BillingModeSummary{BillingMode: ddbtypes.BillingModeProvisioned},
+			ProvisionedThroughput: &ddbtypes.ProvisionedThroughputDescription{
+				ReadCapacityUnits:  aws.Int64(1),
+				WriteCapacityUnits: aws.Int64(1),
+			},
+			GlobalSecondaryIndexes: []ddbtypes.GlobalSecondaryIndexDescription{
+				{
+					IndexName: aws.String("gsi-1"),
+					ProvisionedThroughput: &ddbtypes.ProvisionedThroughputDescription{
+						ReadCapacityUnits:  aws.Int64(10),
+						WriteCapacityUnits: aws.Int64(10),
+					},
+				},
+			},
+		},
+	}, nil)
+	a := newThrottleAttack(api)
+	state := a.NewEmptyState()
+	_, err := a.Prepare(context.Background(), &state, newThrottleRequest(1, 1))
+	require.NoError(t, err)
+}
+
 func TestThrottlePrepareRejectsPayPerRequest(t *testing.T) {
 	api := new(ddbApiMock)
 	api.On("DescribeTable", mock.Anything, mock.Anything).Return(&dynamodb.DescribeTableOutput{

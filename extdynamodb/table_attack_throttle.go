@@ -148,6 +148,23 @@ func (a *tableThrottleAttack) Prepare(ctx context.Context, state *TableThrottleA
 			aws.ToInt64(gsi.ProvisionedThroughput.WriteCapacityUnits),
 		}
 	}
+
+	// Reject up front if the requested capacity matches the current capacity for both the table and
+	// every GSI. AWS UpdateTable rejects no-op throughput changes with ValidationException; surfacing
+	// that as a Prepare error is clearer than letting it fail mid-experiment at Start.
+	if state.TargetReadCapacity == state.OriginalReadCapacity && state.TargetWriteCapacity == state.OriginalWriteCapacity {
+		needsGsiChange := false
+		for _, rw := range state.OriginalGsiCapacity {
+			if rw[0] != state.TargetReadCapacity || rw[1] != state.TargetWriteCapacity {
+				needsGsiChange = true
+				break
+			}
+		}
+		if !needsGsiChange {
+			return nil, extension_kit.ToError(fmt.Sprintf("Target capacity (RCU=%d, WCU=%d) already equals current capacity for table %s; pick different values to actually throttle.", state.TargetReadCapacity, state.TargetWriteCapacity, state.TableName), nil)
+		}
+	}
+
 	return &action_kit_api.PrepareResult{
 		Messages: extutil.Ptr([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
