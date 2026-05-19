@@ -44,7 +44,7 @@ type Specification struct {
 	DiscoveryIntervalElasticacheReplicationGroup int         `json:"discoveryIntervalElasticacheReplicationGroup" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalElbAlb                      int         `json:"discoveryIntervalElbAlb" split_words:"true" required:"false" default:"30"`
 	DiscoveryIntervalElbNlb                      int         `json:"discoveryIntervalElbNlb" split_words:"true" required:"false" default:"30"`
-	DiscoveryIntervalEbs                         int         `json:"discoveryIntervalEbs" split_words:"true" required:"false" default:"60"`
+	DiscoveryIntervalEbs                         int         `json:"discoveryIntervalEbs" split_words:"true" required:"false" default:"300"`
 	DiscoveryIntervalEventbridge                 int         `json:"discoveryIntervalEventbridge" split_words:"true" required:"false" default:"60"`
 	DiscoveryIntervalMq                          int         `json:"discoveryIntervalMq" split_words:"true" required:"false" default:"60"`
 	DiscoveryIntervalNatGateway                  int         `json:"discoveryIntervalNatGateway" split_words:"true" required:"false" default:"60"`
