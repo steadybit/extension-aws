@@ -180,29 +180,29 @@ func TestGetAllStagesRestAndHttp(t *testing.T) {
 	assert.NotNil(t, httpTgt, "expected HTTP target present")
 
 	rt := targets[restTgt.idx]
-	assert.Equal(t, stageTargetType, rt.TargetType)
+	assert.Equal(t, apigatewayTargetType, rt.TargetType)
 	assert.Equal(t, "payments/prod", rt.Label)
 	assert.Equal(t, []string{"REST"}, rt.Attributes["aws.apigateway.api.protocol-type"])
 	assert.Equal(t, []string{"REGIONAL"}, rt.Attributes["aws.apigateway.api.endpoint-type"])
-	assert.Equal(t, []string{"500"}, rt.Attributes["aws.apigateway.stage.throttle.rate-limit"])
-	assert.Equal(t, []string{"1000"}, rt.Attributes["aws.apigateway.stage.throttle.burst-limit"])
-	assert.Equal(t, []string{"true"}, rt.Attributes["aws.apigateway.stage.cache.enabled"])
-	assert.Equal(t, []string{"0.5"}, rt.Attributes["aws.apigateway.stage.cache.size"])
-	assert.Equal(t, []string{"true"}, rt.Attributes["aws.apigateway.stage.tracing-enabled"])
-	assert.Equal(t, []string{"INFO"}, rt.Attributes["aws.apigateway.stage.logging-level"])
-	assert.Equal(t, []string{"true"}, rt.Attributes["aws.apigateway.stage.access-log.configured"])
-	assert.Equal(t, []string{"arn:aws:wafv2:..."}, rt.Attributes["aws.apigateway.stage.waf-arn"])
+	assert.Equal(t, []string{"500"}, rt.Attributes["aws.apigateway.throttle.rate-limit"])
+	assert.Equal(t, []string{"1000"}, rt.Attributes["aws.apigateway.throttle.burst-limit"])
+	assert.Equal(t, []string{"true"}, rt.Attributes["aws.apigateway.cache.enabled"])
+	assert.Equal(t, []string{"0.5"}, rt.Attributes["aws.apigateway.cache.size"])
+	assert.Equal(t, []string{"true"}, rt.Attributes["aws.apigateway.tracing-enabled"])
+	assert.Equal(t, []string{"INFO"}, rt.Attributes["aws.apigateway.logging-level"])
+	assert.Equal(t, []string{"true"}, rt.Attributes["aws.apigateway.access-log.configured"])
+	assert.Equal(t, []string{"arn:aws:wafv2:..."}, rt.Attributes["aws.apigateway.waf-arn"])
 	assert.Equal(t, []string{"Demo"}, rt.Attributes["aws.apigateway.api.label.application"])
 	assert.Equal(t, []string{"arn:role"}, rt.Attributes["extension-aws.discovered-by-role"])
 
 	ht := targets[httpTgt.idx]
 	assert.Equal(t, "orders/$default", ht.Label)
 	assert.Equal(t, []string{"HTTP"}, ht.Attributes["aws.apigateway.api.protocol-type"])
-	assert.Equal(t, []string{"2000"}, ht.Attributes["aws.apigateway.stage.throttle.rate-limit"])
-	assert.Equal(t, []string{"5000"}, ht.Attributes["aws.apigateway.stage.throttle.burst-limit"])
-	assert.Equal(t, []string{"INFO"}, ht.Attributes["aws.apigateway.stage.logging-level"])
-	assert.Equal(t, []string{"true"}, ht.Attributes["aws.apigateway.stage.access-log.configured"])
-	assert.Equal(t, []string{"true"}, ht.Attributes["aws.apigateway.stage.auto-deploy"])
+	assert.Equal(t, []string{"2000"}, ht.Attributes["aws.apigateway.throttle.rate-limit"])
+	assert.Equal(t, []string{"5000"}, ht.Attributes["aws.apigateway.throttle.burst-limit"])
+	assert.Equal(t, []string{"INFO"}, ht.Attributes["aws.apigateway.logging-level"])
+	assert.Equal(t, []string{"true"}, ht.Attributes["aws.apigateway.access-log.configured"])
+	assert.Equal(t, []string{"true"}, ht.Attributes["aws.apigateway.auto-deploy"])
 }
 
 func TestPrivateRestApiSurfacesEndpointType(t *testing.T) {

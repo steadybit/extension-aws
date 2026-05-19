@@ -32,33 +32,33 @@ const (
 	protocolWEBSOCKET = "WEBSOCKET"
 )
 
-type stageDiscovery struct{}
+type apigatewayDiscovery struct{}
 
 var (
-	_ discovery_kit_sdk.TargetDescriber    = (*stageDiscovery)(nil)
-	_ discovery_kit_sdk.AttributeDescriber = (*stageDiscovery)(nil)
+	_ discovery_kit_sdk.TargetDescriber    = (*apigatewayDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber = (*apigatewayDiscovery)(nil)
 )
 
-func NewStageDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
-	return discovery_kit_sdk.NewCachedTargetDiscovery(&stageDiscovery{},
+func NewApigatewayDiscovery(ctx context.Context) discovery_kit_sdk.TargetDiscovery {
+	return discovery_kit_sdk.NewCachedTargetDiscovery(&apigatewayDiscovery{},
 		discovery_kit_sdk.WithRefreshTargetsNow(),
 		discovery_kit_sdk.WithRefreshTargetsInterval(ctx, time.Duration(config.Config.DiscoveryIntervalApigateway)*time.Second),
 	)
 }
 
-func (d *stageDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
+func (d *apigatewayDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id: stageTargetType,
+		Id: apigatewayTargetType,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			CallInterval: new(fmt.Sprintf("%ds", config.Config.DiscoveryIntervalApigateway)),
 		},
 	}
 }
 
-func (d *stageDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
+func (d *apigatewayDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
-		Id:       stageTargetType,
-		Label:    discovery_kit_api.PluralLabel{One: "API Gateway stage", Other: "API Gateway stages"},
+		Id:       apigatewayTargetType,
+		Label:    discovery_kit_api.PluralLabel{One: "API Gateway", Other: "API Gateways"},
 		Category: new("cloud"),
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     new(apiGatewayIcon),
@@ -66,8 +66,8 @@ func (d *stageDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
 				{Attribute: "aws.apigateway.api.protocol-type"},
-				{Attribute: "aws.apigateway.stage.throttle.rate-limit"},
-				{Attribute: "aws.apigateway.stage.tracing-enabled"},
+				{Attribute: "aws.apigateway.throttle.rate-limit"},
+				{Attribute: "aws.apigateway.tracing-enabled"},
 				{Attribute: "aws.account"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{{Attribute: "steadybit.label", Direction: "ASC"}},
@@ -75,32 +75,32 @@ func (d *stageDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	}
 }
 
-func (d *stageDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
+func (d *apigatewayDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
 	return []discovery_kit_api.AttributeDescription{
 		{Attribute: "aws.apigateway.api.id", Label: discovery_kit_api.PluralLabel{One: "API Gateway API ID", Other: "API Gateway API IDs"}},
 		{Attribute: "aws.apigateway.api.name", Label: discovery_kit_api.PluralLabel{One: "API Gateway API name", Other: "API Gateway API names"}},
 		{Attribute: "aws.apigateway.api.protocol-type", Label: discovery_kit_api.PluralLabel{One: "API Gateway protocol type", Other: "API Gateway protocol types"}},
 		{Attribute: "aws.apigateway.api.endpoint-type", Label: discovery_kit_api.PluralLabel{One: "API Gateway endpoint type", Other: "API Gateway endpoint types"}},
 		{Attribute: "aws.apigateway.api.disable-execute-api-endpoint", Label: discovery_kit_api.PluralLabel{One: "API Gateway disable execute-api endpoint", Other: "API Gateway disable execute-api endpoint"}},
-		{Attribute: "aws.apigateway.stage.name", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage name", Other: "API Gateway stage names"}},
-		{Attribute: "aws.apigateway.stage.throttle.rate-limit", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage throttle rate", Other: "API Gateway stage throttle rates"}},
-		{Attribute: "aws.apigateway.stage.throttle.burst-limit", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage throttle burst", Other: "API Gateway stage throttle bursts"}},
-		{Attribute: "aws.apigateway.stage.cache.enabled", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage cache", Other: "API Gateway stage cache"}},
-		{Attribute: "aws.apigateway.stage.cache.size", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage cache size", Other: "API Gateway stage cache sizes"}},
-		{Attribute: "aws.apigateway.stage.tracing-enabled", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage X-Ray tracing", Other: "API Gateway stage X-Ray tracing"}},
-		{Attribute: "aws.apigateway.stage.logging-level", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage logging level", Other: "API Gateway stage logging levels"}},
-		{Attribute: "aws.apigateway.stage.access-log.configured", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage access log", Other: "API Gateway stage access log"}},
-		{Attribute: "aws.apigateway.stage.waf-arn", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage WAF ARN", Other: "API Gateway stage WAF ARNs"}},
-		{Attribute: "aws.apigateway.stage.client-certificate-id", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage client certificate", Other: "API Gateway stage client certificates"}},
-		{Attribute: "aws.apigateway.stage.auto-deploy", Label: discovery_kit_api.PluralLabel{One: "API Gateway stage auto-deploy", Other: "API Gateway stage auto-deploy"}},
+		{Attribute: "aws.apigateway.name", Label: discovery_kit_api.PluralLabel{One: "API Gateway name", Other: "API Gateway names"}},
+		{Attribute: "aws.apigateway.throttle.rate-limit", Label: discovery_kit_api.PluralLabel{One: "API Gateway throttle rate", Other: "API Gateway throttle rates"}},
+		{Attribute: "aws.apigateway.throttle.burst-limit", Label: discovery_kit_api.PluralLabel{One: "API Gateway throttle burst", Other: "API Gateway throttle bursts"}},
+		{Attribute: "aws.apigateway.cache.enabled", Label: discovery_kit_api.PluralLabel{One: "API Gateway cache", Other: "API Gateway cache"}},
+		{Attribute: "aws.apigateway.cache.size", Label: discovery_kit_api.PluralLabel{One: "API Gateway cache size", Other: "API Gateway cache sizes"}},
+		{Attribute: "aws.apigateway.tracing-enabled", Label: discovery_kit_api.PluralLabel{One: "API Gateway X-Ray tracing", Other: "API Gateway X-Ray tracing"}},
+		{Attribute: "aws.apigateway.logging-level", Label: discovery_kit_api.PluralLabel{One: "API Gateway logging level", Other: "API Gateway logging levels"}},
+		{Attribute: "aws.apigateway.access-log.configured", Label: discovery_kit_api.PluralLabel{One: "API Gateway access log", Other: "API Gateway access log"}},
+		{Attribute: "aws.apigateway.waf-arn", Label: discovery_kit_api.PluralLabel{One: "API Gateway WAF ARN", Other: "API Gateway WAF ARNs"}},
+		{Attribute: "aws.apigateway.client-certificate-id", Label: discovery_kit_api.PluralLabel{One: "API Gateway client certificate", Other: "API Gateway client certificates"}},
+		{Attribute: "aws.apigateway.auto-deploy", Label: discovery_kit_api.PluralLabel{One: "API Gateway auto-deploy", Other: "API Gateway auto-deploy"}},
 	}
 }
 
-func (d *stageDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	return utils.ForEveryConfiguredAwsAccess(getStageTargets, ctx, "apigateway-stage")
+func (d *apigatewayDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
+	return utils.ForEveryConfiguredAwsAccess(getApigatewayTargets, ctx, "apigateway")
 }
 
-func getStageTargets(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
+func getApigatewayTargets(account *utils.AwsAccess, ctx context.Context) ([]discovery_kit_api.Target, error) {
 	rest := apigateway.NewFromConfig(account.AwsConfig)
 	httpApi := apigatewayv2.NewFromConfig(account.AwsConfig)
 	result, err := getAllStages(ctx, rest, httpApi, account)
@@ -229,7 +229,7 @@ func toRestStageTarget(api apigwtypes.RestApi, stage apigwtypes.Stage, account s
 	attributes["aws.apigateway.api.id"] = []string{apiId}
 	attributes["aws.apigateway.api.name"] = []string{apiName}
 	attributes["aws.apigateway.api.protocol-type"] = []string{protocolREST}
-	attributes["aws.apigateway.stage.name"] = []string{stageName}
+	attributes["aws.apigateway.name"] = []string{stageName}
 
 	endpointType := "REGIONAL"
 	if api.EndpointConfiguration != nil && len(api.EndpointConfiguration.Types) > 0 {
@@ -241,32 +241,32 @@ func toRestStageTarget(api apigwtypes.RestApi, stage apigwtypes.Stage, account s
 
 	rate, burst := readRestStageThrottle(stage)
 	if rate >= 0 {
-		attributes["aws.apigateway.stage.throttle.rate-limit"] = []string{strconv.FormatFloat(rate, 'f', -1, 64)}
+		attributes["aws.apigateway.throttle.rate-limit"] = []string{strconv.FormatFloat(rate, 'f', -1, 64)}
 	}
 	if burst >= 0 {
-		attributes["aws.apigateway.stage.throttle.burst-limit"] = []string{strconv.Itoa(int(burst))}
+		attributes["aws.apigateway.throttle.burst-limit"] = []string{strconv.Itoa(int(burst))}
 	}
 
-	attributes["aws.apigateway.stage.cache.enabled"] = []string{strconv.FormatBool(stage.CacheClusterEnabled)}
+	attributes["aws.apigateway.cache.enabled"] = []string{strconv.FormatBool(stage.CacheClusterEnabled)}
 	if stage.CacheClusterEnabled && stage.CacheClusterSize != "" {
-		attributes["aws.apigateway.stage.cache.size"] = []string{string(stage.CacheClusterSize)}
+		attributes["aws.apigateway.cache.size"] = []string{string(stage.CacheClusterSize)}
 	}
-	attributes["aws.apigateway.stage.tracing-enabled"] = []string{strconv.FormatBool(stage.TracingEnabled)}
+	attributes["aws.apigateway.tracing-enabled"] = []string{strconv.FormatBool(stage.TracingEnabled)}
 
 	if loggingLevel := readRestStageLoggingLevel(stage); loggingLevel != "" {
-		attributes["aws.apigateway.stage.logging-level"] = []string{loggingLevel}
+		attributes["aws.apigateway.logging-level"] = []string{loggingLevel}
 	}
-	attributes["aws.apigateway.stage.access-log.configured"] = []string{strconv.FormatBool(stage.AccessLogSettings != nil && stage.AccessLogSettings.DestinationArn != nil && *stage.AccessLogSettings.DestinationArn != "")}
+	attributes["aws.apigateway.access-log.configured"] = []string{strconv.FormatBool(stage.AccessLogSettings != nil && stage.AccessLogSettings.DestinationArn != nil && *stage.AccessLogSettings.DestinationArn != "")}
 
 	if stage.WebAclArn != nil && *stage.WebAclArn != "" {
-		attributes["aws.apigateway.stage.waf-arn"] = []string{*stage.WebAclArn}
+		attributes["aws.apigateway.waf-arn"] = []string{*stage.WebAclArn}
 	}
 	if stage.ClientCertificateId != nil && *stage.ClientCertificateId != "" {
-		attributes["aws.apigateway.stage.client-certificate-id"] = []string{*stage.ClientCertificateId}
+		attributes["aws.apigateway.client-certificate-id"] = []string{*stage.ClientCertificateId}
 	}
 
 	for k, v := range stage.Tags {
-		attributes[fmt.Sprintf("aws.apigateway.stage.label.%s", strings.ToLower(k))] = []string{v}
+		attributes[fmt.Sprintf("aws.apigateway.label.%s", strings.ToLower(k))] = []string{v}
 	}
 	for k, v := range api.Tags {
 		// API-level tags inherited (avoid clobbering stage tags by using a different prefix).
@@ -283,7 +283,7 @@ func toRestStageTarget(api apigwtypes.RestApi, stage apigwtypes.Stage, account s
 	return discovery_kit_api.Target{
 		Id:         id,
 		Label:      label,
-		TargetType: stageTargetType,
+		TargetType: apigatewayTargetType,
 		Attributes: attributes,
 	}
 }
@@ -321,7 +321,7 @@ func toHttpStageTarget(api apigwv2types.Api, stage apigwv2types.Stage, account s
 	attributes["aws.apigateway.api.id"] = []string{apiId}
 	attributes["aws.apigateway.api.name"] = []string{apiName}
 	attributes["aws.apigateway.api.protocol-type"] = []string{string(api.ProtocolType)}
-	attributes["aws.apigateway.stage.name"] = []string{stageName}
+	attributes["aws.apigateway.name"] = []string{stageName}
 
 	if api.DisableExecuteApiEndpoint != nil {
 		attributes["aws.apigateway.api.disable-execute-api-endpoint"] = []string{strconv.FormatBool(*api.DisableExecuteApiEndpoint)}
@@ -329,27 +329,27 @@ func toHttpStageTarget(api apigwv2types.Api, stage apigwv2types.Stage, account s
 
 	if stage.DefaultRouteSettings != nil {
 		if stage.DefaultRouteSettings.ThrottlingRateLimit != nil {
-			attributes["aws.apigateway.stage.throttle.rate-limit"] = []string{strconv.FormatFloat(*stage.DefaultRouteSettings.ThrottlingRateLimit, 'f', -1, 64)}
+			attributes["aws.apigateway.throttle.rate-limit"] = []string{strconv.FormatFloat(*stage.DefaultRouteSettings.ThrottlingRateLimit, 'f', -1, 64)}
 		}
 		if stage.DefaultRouteSettings.ThrottlingBurstLimit != nil {
-			attributes["aws.apigateway.stage.throttle.burst-limit"] = []string{strconv.Itoa(int(*stage.DefaultRouteSettings.ThrottlingBurstLimit))}
+			attributes["aws.apigateway.throttle.burst-limit"] = []string{strconv.Itoa(int(*stage.DefaultRouteSettings.ThrottlingBurstLimit))}
 		}
 		if stage.DefaultRouteSettings.LoggingLevel != "" {
-			attributes["aws.apigateway.stage.logging-level"] = []string{string(stage.DefaultRouteSettings.LoggingLevel)}
+			attributes["aws.apigateway.logging-level"] = []string{string(stage.DefaultRouteSettings.LoggingLevel)}
 		}
 	}
 
-	attributes["aws.apigateway.stage.access-log.configured"] = []string{strconv.FormatBool(stage.AccessLogSettings != nil && stage.AccessLogSettings.DestinationArn != nil && *stage.AccessLogSettings.DestinationArn != "")}
+	attributes["aws.apigateway.access-log.configured"] = []string{strconv.FormatBool(stage.AccessLogSettings != nil && stage.AccessLogSettings.DestinationArn != nil && *stage.AccessLogSettings.DestinationArn != "")}
 
 	if stage.AutoDeploy != nil {
-		attributes["aws.apigateway.stage.auto-deploy"] = []string{strconv.FormatBool(*stage.AutoDeploy)}
+		attributes["aws.apigateway.auto-deploy"] = []string{strconv.FormatBool(*stage.AutoDeploy)}
 	}
 	if stage.ClientCertificateId != nil && *stage.ClientCertificateId != "" {
-		attributes["aws.apigateway.stage.client-certificate-id"] = []string{*stage.ClientCertificateId}
+		attributes["aws.apigateway.client-certificate-id"] = []string{*stage.ClientCertificateId}
 	}
 
 	for k, v := range stage.Tags {
-		attributes[fmt.Sprintf("aws.apigateway.stage.label.%s", strings.ToLower(k))] = []string{v}
+		attributes[fmt.Sprintf("aws.apigateway.label.%s", strings.ToLower(k))] = []string{v}
 	}
 	for k, v := range api.Tags {
 		key := fmt.Sprintf("aws.apigateway.api.label.%s", strings.ToLower(k))
@@ -365,7 +365,7 @@ func toHttpStageTarget(api apigwv2types.Api, stage apigwv2types.Stage, account s
 	return discovery_kit_api.Target{
 		Id:         id,
 		Label:      label,
-		TargetType: stageTargetType,
+		TargetType: apigatewayTargetType,
 		Attributes: attributes,
 	}
 }

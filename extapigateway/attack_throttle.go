@@ -23,47 +23,47 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-type stageThrottleAttack struct {
+type apigatewayThrottleAttack struct {
 	restClientProvider func(account string, region string, role *string) (RestApiGatewayApi, error)
 	httpClientProvider func(account string, region string, role *string) (HttpApiGatewayApi, error)
 }
 
 var (
-	_ action_kit_sdk.Action[ApiGatewayStageThrottleAttackState]         = (*stageThrottleAttack)(nil)
-	_ action_kit_sdk.ActionWithStop[ApiGatewayStageThrottleAttackState] = (*stageThrottleAttack)(nil)
+	_ action_kit_sdk.Action[ApiGatewayThrottleAttackState]         = (*apigatewayThrottleAttack)(nil)
+	_ action_kit_sdk.ActionWithStop[ApiGatewayThrottleAttackState] = (*apigatewayThrottleAttack)(nil)
 )
 
-func NewStageThrottleAttack() action_kit_sdk.ActionWithStop[ApiGatewayStageThrottleAttackState] {
-	return &stageThrottleAttack{
+func NewApigatewayThrottleAttack() action_kit_sdk.ActionWithStop[ApiGatewayThrottleAttackState] {
+	return &apigatewayThrottleAttack{
 		restClientProvider: defaultRestClientProvider,
 		httpClientProvider: defaultHttpClientProvider,
 	}
 }
 
-func (a *stageThrottleAttack) NewEmptyState() ApiGatewayStageThrottleAttackState {
-	return ApiGatewayStageThrottleAttackState{}
+func (a *apigatewayThrottleAttack) NewEmptyState() ApiGatewayThrottleAttackState {
+	return ApiGatewayThrottleAttackState{}
 }
 
-func (a *stageThrottleAttack) Describe() action_kit_api.ActionDescription {
+func (a *apigatewayThrottleAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:    fmt.Sprintf("%s.throttle", stageTargetType),
-		Label: "Throttle API Gateway Stage",
+		Id:    fmt.Sprintf("%s.throttle", apigatewayTargetType),
+		Label: "Throttle API Gateway",
 		Description: "Lowers the stage-level throttle rate and burst limits for the duration of the experiment to simulate API throttling. " +
 			"Original limits are restored on stop. Supports REST APIs (v1) and HTTP APIs (v2); WebSocket APIs are not supported.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:    new(apiGatewayIcon),
 		TargetSelection: new(action_kit_api.TargetSelection{
-			TargetType: stageTargetType,
+			TargetType: apigatewayTargetType,
 			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "by API id and stage (REST)",
 					Description: new("Find REST API stage by API id and stage name"),
-					Query:       "aws.apigateway.api.protocol-type=\"REST\" and aws.apigateway.api.id=\"\" and aws.apigateway.stage.name=\"\"",
+					Query:       "aws.apigateway.api.protocol-type=\"REST\" and aws.apigateway.api.id=\"\" and aws.apigateway.name=\"\"",
 				},
 				{
 					Label:       "by API id and stage (HTTP)",
 					Description: new("Find HTTP API stage by API id and stage name"),
-					Query:       "aws.apigateway.api.protocol-type=\"HTTP\" and aws.apigateway.api.id=\"\" and aws.apigateway.stage.name=\"\"",
+					Query:       "aws.apigateway.api.protocol-type=\"HTTP\" and aws.apigateway.api.id=\"\" and aws.apigateway.name=\"\"",
 				},
 			}),
 		}),
@@ -104,11 +104,11 @@ func (a *stageThrottleAttack) Describe() action_kit_api.ActionDescription {
 	}
 }
 
-func (a *stageThrottleAttack) Prepare(ctx context.Context, state *ApiGatewayStageThrottleAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (a *apigatewayThrottleAttack) Prepare(ctx context.Context, state *ApiGatewayThrottleAttackState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	state.Account = extutil.MustHaveValue(request.Target.Attributes, "aws.account")[0]
 	state.Region = extutil.MustHaveValue(request.Target.Attributes, "aws.region")[0]
 	state.ApiId = extutil.MustHaveValue(request.Target.Attributes, "aws.apigateway.api.id")[0]
-	state.StageName = extutil.MustHaveValue(request.Target.Attributes, "aws.apigateway.stage.name")[0]
+	state.StageName = extutil.MustHaveValue(request.Target.Attributes, "aws.apigateway.name")[0]
 	state.DiscoveredByRole = utils.GetOptionalTargetAttribute(request.Target.Attributes, "extension-aws.discovered-by-role")
 
 	protocols := request.Target.Attributes["aws.apigateway.api.protocol-type"]
@@ -137,7 +137,7 @@ func (a *stageThrottleAttack) Prepare(ctx context.Context, state *ApiGatewayStag
 	return nil, nil
 }
 
-func (a *stageThrottleAttack) prepareRest(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+func (a *apigatewayThrottleAttack) prepareRest(ctx context.Context, state *ApiGatewayThrottleAttackState) error {
 	client, err := a.restClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
@@ -164,7 +164,7 @@ func (a *stageThrottleAttack) prepareRest(ctx context.Context, state *ApiGateway
 	return nil
 }
 
-func (a *stageThrottleAttack) prepareHttp(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+func (a *apigatewayThrottleAttack) prepareHttp(ctx context.Context, state *ApiGatewayThrottleAttackState) error {
 	client, err := a.httpClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway v2 client for AWS account %s", state.Account), err)
@@ -203,7 +203,7 @@ func (a *stageThrottleAttack) prepareHttp(ctx context.Context, state *ApiGateway
 	return nil
 }
 
-func (a *stageThrottleAttack) Start(ctx context.Context, state *ApiGatewayStageThrottleAttackState) (*action_kit_api.StartResult, error) {
+func (a *apigatewayThrottleAttack) Start(ctx context.Context, state *ApiGatewayThrottleAttackState) (*action_kit_api.StartResult, error) {
 	switch state.ProtocolType {
 	case protocolREST:
 		if err := a.startRest(ctx, state); err != nil {
@@ -221,7 +221,7 @@ func (a *stageThrottleAttack) Start(ctx context.Context, state *ApiGatewayStageT
 	}, nil
 }
 
-func (a *stageThrottleAttack) startRest(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+func (a *apigatewayThrottleAttack) startRest(ctx context.Context, state *ApiGatewayThrottleAttackState) error {
 	client, err := a.restClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
@@ -240,7 +240,7 @@ func (a *stageThrottleAttack) startRest(ctx context.Context, state *ApiGatewaySt
 	return nil
 }
 
-func (a *stageThrottleAttack) startHttp(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+func (a *apigatewayThrottleAttack) startHttp(ctx context.Context, state *ApiGatewayThrottleAttackState) error {
 	client, err := a.httpClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway v2 client for AWS account %s", state.Account), err)
@@ -263,7 +263,7 @@ func (a *stageThrottleAttack) startHttp(ctx context.Context, state *ApiGatewaySt
 	return nil
 }
 
-func (a *stageThrottleAttack) Stop(ctx context.Context, state *ApiGatewayStageThrottleAttackState) (*action_kit_api.StopResult, error) {
+func (a *apigatewayThrottleAttack) Stop(ctx context.Context, state *ApiGatewayThrottleAttackState) (*action_kit_api.StopResult, error) {
 	switch state.ProtocolType {
 	case protocolREST:
 		if err := a.stopRest(ctx, state); err != nil {
@@ -282,7 +282,7 @@ func (a *stageThrottleAttack) Stop(ctx context.Context, state *ApiGatewayStageTh
 	}, nil
 }
 
-func (a *stageThrottleAttack) stopRest(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+func (a *apigatewayThrottleAttack) stopRest(ctx context.Context, state *ApiGatewayThrottleAttackState) error {
 	client, err := a.restClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway client for AWS account %s", state.Account), err)
@@ -321,7 +321,7 @@ func (a *stageThrottleAttack) stopRest(ctx context.Context, state *ApiGatewaySta
 	return nil
 }
 
-func (a *stageThrottleAttack) stopHttp(ctx context.Context, state *ApiGatewayStageThrottleAttackState) error {
+func (a *apigatewayThrottleAttack) stopHttp(ctx context.Context, state *ApiGatewayThrottleAttackState) error {
 	client, err := a.httpClientProvider(state.Account, state.Region, state.DiscoveredByRole)
 	if err != nil {
 		return extension_kit.ToError(fmt.Sprintf("Failed to initialize API Gateway v2 client for AWS account %s", state.Account), err)

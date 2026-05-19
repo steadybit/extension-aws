@@ -108,8 +108,8 @@ func registerHandlers(ctx context.Context) {
 	discovery_kit_sdk.Register(utils.NewCommonAttributeDescriber())
 
 	if !cfg.DiscoveryDisabledApigateway {
-		discovery_kit_sdk.Register(extapigateway.NewStageDiscovery(ctx))
-		action_kit_sdk.RegisterAction(extapigateway.NewStageThrottleAttack())
+		discovery_kit_sdk.Register(extapigateway.NewApigatewayDiscovery(ctx))
+		action_kit_sdk.RegisterAction(extapigateway.NewApigatewayThrottleAttack())
 	}
 
 	if !cfg.DiscoveryDisabledAsg {

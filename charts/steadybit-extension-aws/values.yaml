@@ -33,7 +33,7 @@ aws:
   assumeRolesAdvanced: []
   discovery:
     disabled:
-      # aws.discovery.disabled.apigateway -- Disables API Gateway stage discovery and the related actions.
+      # aws.discovery.disabled.apigateway -- Disables API Gateway discovery and the related actions.
       apigateway: false
       # aws.discovery.disabled.asg -- Disables Auto Scaling group discovery and the related actions.
       asg: false

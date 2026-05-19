@@ -32,7 +32,7 @@ func newThrottleRequest(rate int, burst int, protocol string) action_kit_api.Pre
 				"aws.account":                      {"42"},
 				"aws.region":                       {"us-east-1"},
 				"aws.apigateway.api.id":            {apiId},
-				"aws.apigateway.stage.name":        {"prod"},
+				"aws.apigateway.name":              {"prod"},
 				"aws.apigateway.api.protocol-type": {protocol},
 				"extension-aws.discovered-by-role": {"arn:role"},
 			},
@@ -40,14 +40,14 @@ func newThrottleRequest(rate int, burst int, protocol string) action_kit_api.Pre
 	})
 }
 
-func newRestAttack(api *restApiMock) stageThrottleAttack {
-	return stageThrottleAttack{
+func newRestAttack(api *restApiMock) apigatewayThrottleAttack {
+	return apigatewayThrottleAttack{
 		restClientProvider: func(account string, region string, role *string) (RestApiGatewayApi, error) { return api, nil },
 	}
 }
 
-func newHttpAttack(api *httpApiMock) stageThrottleAttack {
-	return stageThrottleAttack{
+func newHttpAttack(api *httpApiMock) apigatewayThrottleAttack {
+	return apigatewayThrottleAttack{
 		httpClientProvider: func(account string, region string, role *string) (HttpApiGatewayApi, error) { return api, nil },
 	}
 }
@@ -126,7 +126,7 @@ func TestStartThrottlePatchesStage(t *testing.T) {
 		return true
 	})).Return(&apigateway.UpdateStageOutput{}, nil)
 	attack := newRestAttack(api)
-	state := ApiGatewayStageThrottleAttackState{
+	state := ApiGatewayThrottleAttackState{
 		ApiId: "rest-1", StageName: "prod", Account: "42", Region: "us-east-1", ProtocolType: "REST",
 		TargetRateLimit: 1, TargetBurstLimit: 1,
 	}
@@ -144,7 +144,7 @@ func TestStopRestoresOriginalSettings(t *testing.T) {
 		return true
 	})).Return(&apigateway.UpdateStageOutput{}, nil)
 	attack := newRestAttack(api)
-	state := ApiGatewayStageThrottleAttackState{
+	state := ApiGatewayThrottleAttackState{
 		ApiId: "rest-1", StageName: "prod", Account: "42", Region: "us-east-1", ProtocolType: "REST",
 		HadOriginalThrottleSettings: true, OriginalRateLimit: 500, OriginalBurstLimit: 1000,
 	}
@@ -164,7 +164,7 @@ func TestStopRemovesMethodSettingWhenItDidNotExist(t *testing.T) {
 		return true
 	})).Return(&apigateway.UpdateStageOutput{}, nil)
 	attack := newRestAttack(api)
-	state := ApiGatewayStageThrottleAttackState{
+	state := ApiGatewayThrottleAttackState{
 		ApiId: "rest-1", StageName: "prod", ProtocolType: "REST",
 		HadOriginalThrottleSettings: false,
 		RestStageHadMethodSetting:   false,
@@ -189,7 +189,7 @@ func TestStopResetsToAccountDefaultWhenMethodSettingExistedWithoutThrottle(t *te
 		return true
 	})).Return(&apigateway.UpdateStageOutput{}, nil)
 	attack := newRestAttack(api)
-	state := ApiGatewayStageThrottleAttackState{
+	state := ApiGatewayThrottleAttackState{
 		ApiId: "rest-1", StageName: "prod", ProtocolType: "REST",
 		HadOriginalThrottleSettings: false,
 		RestStageHadMethodSetting:   true,
@@ -203,7 +203,7 @@ func TestStartThrottleForwardsError(t *testing.T) {
 	api := new(restApiMock)
 	api.On("UpdateStage", mock.Anything, mock.Anything).Return(nil, errors.New("boom"))
 	attack := newRestAttack(api)
-	state := ApiGatewayStageThrottleAttackState{ApiId: "rest-1", StageName: "prod", ProtocolType: "REST"}
+	state := ApiGatewayThrottleAttackState{ApiId: "rest-1", StageName: "prod", ProtocolType: "REST"}
 	_, err := attack.Start(context.Background(), &state)
 	assert.Error(t, err)
 }
@@ -262,7 +262,7 @@ func TestStartThrottleHttpPreservesOtherDefaultRouteSettings(t *testing.T) {
 		return true
 	})).Return(&apigatewayv2.UpdateStageOutput{}, nil)
 	attack := newHttpAttack(api)
-	state := ApiGatewayStageThrottleAttackState{
+	state := ApiGatewayThrottleAttackState{
 		ApiId: "http-1", StageName: "prod", ProtocolType: "HTTP",
 		TargetRateLimit: 1, TargetBurstLimit: 1,
 		HttpOrigDefaultRouteSettings: `{"DataTraceEnabled":true,"ThrottlingRateLimit":500,"ThrottlingBurstLimit":1000}`,
@@ -283,7 +283,7 @@ func TestStopThrottleHttpRestoresSnapshot(t *testing.T) {
 		return true
 	})).Return(&apigatewayv2.UpdateStageOutput{}, nil)
 	attack := newHttpAttack(api)
-	state := ApiGatewayStageThrottleAttackState{
+	state := ApiGatewayThrottleAttackState{
 		ApiId: "http-1", StageName: "prod", ProtocolType: "HTTP",
 		HadOriginalThrottleSettings:  true,
 		OriginalRateLimit:            500,
@@ -310,7 +310,7 @@ func TestStopThrottleHttpResetsToAccountDefaultWhenNoOriginalSettings(t *testing
 		return true
 	})).Return(&apigatewayv2.UpdateStageOutput{}, nil)
 	attack := newHttpAttack(api)
-	state := ApiGatewayStageThrottleAttackState{
+	state := ApiGatewayThrottleAttackState{
 		ApiId: "http-1", StageName: "prod", ProtocolType: "HTTP",
 		HadOriginalThrottleSettings:  false,
 		HttpOrigDefaultRouteSettings: "", // stage originally had no DefaultRouteSettings
