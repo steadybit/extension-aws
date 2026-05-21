@@ -246,3 +246,7 @@ extraEnv: []
 #  - secretRef:
 #    name: env-secrets
 extraEnvFrom: []
+
+discovery:
+  # discovery.group -- Optional group identifier. When set, the extension adds steadybit.group=<value> to every discovered target. Used as an additional matcher in enrichment rules.
+  group: ""
