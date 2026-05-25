@@ -31,8 +31,8 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.23 h1:bpd8vxhlQi2r1hiueO
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.23/go.mod h1:15DfR2nw+CRHIk0tqNyifu3G1YdAOy68RftkhMDDwYk=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.24 h1:OQqn11BtaYv1WLUowvcA30MpzIu8Ti4pcLPIIyoKZrA=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.24/go.mod h1:X5ZJyfwVrWA96GzPmUCWFQaEARPR7gCrpq2E92PJwAE=
-github.com/aws/aws-sdk-go-v2/service/apigateway v1.39.3 h1:7MJlB7KGFd+KNKtnPgoFWYf52PGO1pd+1VHp10lNKhI=
-github.com/aws/aws-sdk-go-v2/service/apigateway v1.39.3/go.mod h1:MwilTAruv11x8EFjsk1R0VfjMdCxB6JHVtanCqsTR5o=
+github.com/aws/aws-sdk-go-v2/service/apigateway v1.40.0 h1:+s2yzvSERu63KCzhRQopwqfKcOYKMbP1LAw0RgR2PRM=
+github.com/aws/aws-sdk-go-v2/service/apigateway v1.40.0/go.mod h1:MwilTAruv11x8EFjsk1R0VfjMdCxB6JHVtanCqsTR5o=
 github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.34.3 h1:JqFmDekar5Ije9SKKBUAmvuqardAXgCoJV78dt2BQSI=
 github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.34.3/go.mod h1:+ONaMzn4bVIQwVsamP28xDWWZuYO+6cWupJpZOSlUNE=
 github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.41.16 h1:9ePxWacyZEGJQIBfYxumxYjDZvvpCcUAnFQUQy4GI2U=
