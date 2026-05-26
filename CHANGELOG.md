@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.4.15
+
+- Add discovery for 11 new AWS services: API Gateway, ASG, DynamoDB, EBS, EKS cluster + node group, EventBridge Rule, Amazon MQ Broker, NAT Gateway, NLB, SQS
+- Add attacks: Suspend ASG Processes, Trigger EKS Nodegroup Terminate Instance, Trigger MQ Broker Reboot, Disable EventBridge Rule, Throttle API Gateway (REST v1 + HTTP v2), Change Queue Visibility Timeout, Change Read/Write Table Capacity
+- Fix DynamoDB throttle attack to reject no-op capacity changes at Prepare
+- Fix API Gateway HTTP v2 throttle to restore account defaults on stop
+- Rename API Gateway Stage target to API Gateway
+- Update dependencies
+
 ## v2.4.14
 
 - Bump Go to 1.26.3
