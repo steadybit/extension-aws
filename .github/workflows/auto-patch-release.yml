@@ -1,0 +1,35 @@
+name: Auto Patch Release
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: If true, evaluate without committing or notifying Slack
+        type: boolean
+        default: true
+      force_release:
+        description: If true, release even when the commit range contains unsafe commits
+        type: boolean
+        default: false
+      release_type:
+        description: Which component of the version to bump
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+jobs:
+  auto-patch-release:
+    uses: steadybit/extension-kit/.github/workflows/reusable-auto-patch-release.yml@main # NOSONAR githubactions:S7637 - our own action
+    with:
+      VERSION_BUMPER_APPID: ${{ vars.GH_APP_STEADYBIT_APP_ID }}
+      dry_run: ${{ inputs.dry_run || false }}
+      force_release: ${{ inputs.force_release || false }}
+      release_type: ${{ inputs.release_type || 'patch' }}
+    secrets:
+      VERSION_BUMPER_SECRET: ${{ secrets.GH_APP_STEADYBIT_PRIVATE_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
