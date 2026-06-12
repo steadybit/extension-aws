@@ -1,5 +1,23 @@
 # Changelog
 
+## v2.4.16
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.41.7 to 1.41.9
+- chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.41.9 to 1.41.12
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/feature/ec2/imds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticache
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/eventbridge
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/kafka
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/lambda
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/mq
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sqs
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sts
+- chore: update to go 1.26.4
+- feat: add weekly auto patch-release workflow
+
 ## v2.4.15
 
 - Add discovery for 11 new AWS services: API Gateway, ASG, DynamoDB, EBS, EKS cluster + node group, EventBridge Rule, Amazon MQ Broker, NAT Gateway, NLB, SQS
