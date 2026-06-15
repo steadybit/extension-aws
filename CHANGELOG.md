@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.4.17
+
+- chore(deps): bump alpine from 3.23 to 3.24
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/credentials
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ec2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/fis
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/lambda
+
 ## v2.4.16
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.41.7 to 1.41.9
