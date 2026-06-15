@@ -24,7 +24,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.46.2
 	github.com/aws/aws-sdk-go-v2/service/fis v1.38.6
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.52.2
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.90.3
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.92.3
 	github.com/aws/aws-sdk-go-v2/service/mq v1.35.1
 	github.com/aws/aws-sdk-go-v2/service/rds v1.118.2
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.31.12
@@ -55,7 +55,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.11 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.13 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.29 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.29 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.30 // indirect
