@@ -6,15 +6,15 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: If true, evaluate without committing or notifying Slack
+        description: Dry run (no commit, tag, or Slack notification)
         type: boolean
         default: true
       force_release:
-        description: If true, release even when the commit range contains unsafe commits
+        description: Force release (override unsafe-commit check)
         type: boolean
         default: false
       release_type:
-        description: Which component of the version to bump
+        description: Version bump
         type: choice
         options:
           - patch
