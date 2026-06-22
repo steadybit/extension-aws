@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.4.18
+
+- build: rename workflow_dispatch input labels for the GH UI
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/dynamodb
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ec2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/eks
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/kafka
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/mq
+- chore(deps): bump github.com/steadybit/extension-kit
+- chore(deps): bump github.com/testcontainers/testcontainers-go/modules/localstack
+- chore(deps): bump golang.org/x/net to v0.55.0 (CVE-2026-39821) (#878)
+
 ## v2.4.17
 
 - chore(deps): bump alpine from 3.23 to 3.24
