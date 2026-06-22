@@ -45,8 +45,8 @@ require (
 	github.com/steadybit/discovery-kit/go/discovery_kit_test v1.2.1
 	github.com/steadybit/extension-kit v1.10.5
 	github.com/stretchr/testify v1.11.1
-	github.com/testcontainers/testcontainers-go v0.42.0
-	github.com/testcontainers/testcontainers-go/modules/localstack v0.42.0
+	github.com/testcontainers/testcontainers-go v0.43.0
+	github.com/testcontainers/testcontainers-go/modules/localstack v0.43.0
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a
 )
 
@@ -138,7 +138,7 @@ require (
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
-	github.com/shirou/gopsutil/v4 v4.26.4 // indirect
+	github.com/shirou/gopsutil/v4 v4.26.5 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
