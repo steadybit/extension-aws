@@ -2,7 +2,6 @@
 
 ## v2.4.18
 
-- build: rename workflow_dispatch input labels for the GH UI
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/dynamodb
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ec2
