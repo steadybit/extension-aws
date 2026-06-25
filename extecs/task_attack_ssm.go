@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -81,7 +82,10 @@ type ssmCommandInvocation struct {
 	stepNameToOutput          string
 }
 
-var heartbeats = make(map[uuid.UUID]func())
+var (
+	heartbeatsMutex sync.Mutex
+	heartbeats      = make(map[uuid.UUID]func())
+)
 
 func newEcsTaskSsmAction(makeDescription func() action_kit_api.ActionDescription, invocation ssmCommandInvocation) action_kit_sdk.ActionWithStop[TaskSsmActionState] {
 	description := makeDescription()
@@ -330,7 +334,9 @@ func (e *ecsTaskSsmAction) startHeartbeat(state *TaskSsmActionState) {
 	}
 
 	heartbeatCtx, heartbeatCancel := context.WithTimeout(context.Background(), e.heartbeat.Timeout)
+	heartbeatsMutex.Lock()
 	heartbeats[state.ExecutionId] = heartbeatCancel
+	heartbeatsMutex.Unlock()
 
 	go func(parameters map[string][]string, ctx context.Context, cancel func()) {
 		client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
@@ -372,8 +378,13 @@ func (e *ecsTaskSsmAction) startHeartbeat(state *TaskSsmActionState) {
 }
 
 func (e *ecsTaskSsmAction) stopHeartbeat(state *TaskSsmActionState) {
-	if cancel, ok := heartbeats[state.ExecutionId]; ok {
+	heartbeatsMutex.Lock()
+	cancel, ok := heartbeats[state.ExecutionId]
+	if ok {
 		delete(heartbeats, state.ExecutionId)
+	}
+	heartbeatsMutex.Unlock()
+	if ok {
 		cancel()
 	}
 }
