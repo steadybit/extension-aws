@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- fix: guard the ECS SSM heartbeat map with a mutex to prevent a `concurrent map writes` crash when multiple ECS task attacks run concurrently
+
 ## v2.4.18
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
