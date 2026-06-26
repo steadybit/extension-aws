@@ -6,4 +6,4 @@ on:
 jobs:
   claude-review:
     uses: steadybit/extension-kit/.github/workflows/reusable-claude-pr-review.yml@main
-    secrets: inherit
+    secrets: inherit # NOSONAR

@@ -11,4 +11,4 @@ on:
 jobs:
   claude:
     uses: steadybit/extension-kit/.github/workflows/reusable-claude-comments.yml@main
-    secrets: inherit
+    secrets: inherit # NOSONAR
