@@ -29,7 +29,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/rds v1.118.2
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.31.12
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.43.2
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.68.6
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.69.3
 	github.com/aws/aws-sdk-go-v2/service/sts v1.43.3
 	github.com/aws/smithy-go v1.27.3
 	github.com/google/uuid v1.6.0
