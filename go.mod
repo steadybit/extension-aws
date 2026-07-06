@@ -19,7 +19,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.308.0
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.81.2
 	github.com/aws/aws-sdk-go-v2/service/eks v1.87.0
-	github.com/aws/aws-sdk-go-v2/service/elasticache v1.54.3
+	github.com/aws/aws-sdk-go-v2/service/elasticache v1.54.5
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.55.4
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.46.2
 	github.com/aws/aws-sdk-go-v2/service/fis v1.38.6
