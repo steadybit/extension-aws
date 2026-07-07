@@ -1,8 +1,26 @@
 # Changelog
 
-## Unreleased
+## v2.4.19
 
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/config
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/feature/ec2/imds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/dynamodb
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ec2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/eks
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticache
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/kafka
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/mq
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ssm
+- chore(deps): bump github.com/aws/smithy-go from 1.27.1 to 1.27.3
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_sdk
+- chore(deps): bump goreleaser/goreleaser from v2.16.0 to v2.17.0
+- chore: add Claude Code workflows (#889)
+- chore: silence SonarQube finding on secrets: inherit in Claude workflows
 - fix: guard the ECS SSM heartbeat map with a mutex to prevent a `concurrent map writes` crash when multiple ECS task attacks run concurrently
+- fix: prevent concurrent map writes crash in ECS SSM heartbeat (#890)
 
 ## v2.4.18
 
