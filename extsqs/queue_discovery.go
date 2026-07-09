@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -144,11 +145,8 @@ func matchesSqsTagFilter(tags map[string]string, filters []config.TagFilter) boo
 	for _, filter := range filters {
 		matched := false
 		if v, ok := tags[filter.Key]; ok {
-			for _, want := range filter.Values {
-				if v == want {
-					matched = true
-					break
-				}
+			if slices.Contains(filter.Values, v) {
+				matched = true
 			}
 		}
 		if !matched {
@@ -234,8 +232,8 @@ func parseRedrivePolicy(raw string) (string, int) {
 		return "", 0
 	}
 	var p struct {
-		DeadLetterTargetArn string      `json:"deadLetterTargetArn"`
-		MaxReceiveCount     interface{} `json:"maxReceiveCount"`
+		DeadLetterTargetArn string `json:"deadLetterTargetArn"`
+		MaxReceiveCount     any    `json:"maxReceiveCount"`
 	}
 	if err := json.Unmarshal([]byte(raw), &p); err != nil {
 		return "", 0

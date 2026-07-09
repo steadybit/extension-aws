@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -132,11 +133,8 @@ func matchesBrokerTagFilter(tags map[string]string, filters []config.TagFilter) 
 	for _, filter := range filters {
 		matched := false
 		if value, ok := tags[filter.Key]; ok {
-			for _, v := range filter.Values {
-				if value == v {
-					matched = true
-					break
-				}
+			if slices.Contains(filter.Values, value) {
+				matched = true
 			}
 		}
 		if !matched {

@@ -18,10 +18,10 @@ import (
 
 func TestPrepareSuspendProcessesFiltersAlreadySuspended(t *testing.T) {
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
-			"processes": []interface{}{"Launch", "HealthCheck", "AZRebalance"},
+		Config: map[string]any{
+			"processes": []any{"Launch", "HealthCheck", "AZRebalance"},
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.asg.name":                     {"web-asg"},
 				"aws.asg.suspended-processes":      {"AZRebalance"},
@@ -47,10 +47,10 @@ func TestPrepareSuspendProcessesFiltersAlreadySuspended(t *testing.T) {
 
 func TestPrepareSuspendProcessesAllAlreadySuspended(t *testing.T) {
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
-			"processes": []interface{}{"Launch"},
+		Config: map[string]any{
+			"processes": []any{"Launch"},
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.asg.name":                {"web-asg"},
 				"aws.asg.suspended-processes": {"Launch"},
@@ -71,10 +71,10 @@ func TestPrepareSuspendProcessesAllAlreadySuspended(t *testing.T) {
 
 func TestPrepareSuspendProcessesNoneSelected(t *testing.T) {
 	requestBody := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{
-			"processes": []interface{}{},
+		Config: map[string]any{
+			"processes": []any{},
 		},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.asg.name": {"web-asg"},
 				"aws.account":  {"42"},

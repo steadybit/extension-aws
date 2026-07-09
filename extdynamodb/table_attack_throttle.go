@@ -166,7 +166,7 @@ func (a *tableThrottleAttack) Prepare(ctx context.Context, state *TableThrottleA
 	}
 
 	return &action_kit_api.PrepareResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Will throttle table %s to RCU=%d WCU=%d (was RCU=%d WCU=%d) and %d GSI(s) to the same values.", state.TableName, state.TargetReadCapacity, state.TargetWriteCapacity, state.OriginalReadCapacity, state.OriginalWriteCapacity, len(state.OriginalGsiCapacity)),
 		}}),
@@ -178,7 +178,7 @@ func (a *tableThrottleAttack) Start(ctx context.Context, state *TableThrottleAtt
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to throttle DynamoDB table %s", state.TableName), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Throttled table %s to RCU=%d WCU=%d", state.TableName, state.TargetReadCapacity, state.TargetWriteCapacity),
 		}}),
@@ -191,7 +191,7 @@ func (a *tableThrottleAttack) Stop(ctx context.Context, state *TableThrottleAtta
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to restore capacity on DynamoDB table %s", state.TableName), err)
 	}
 	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Restored table %s capacity to RCU=%d WCU=%d", state.TableName, state.OriginalReadCapacity, state.OriginalWriteCapacity),
 		}}),

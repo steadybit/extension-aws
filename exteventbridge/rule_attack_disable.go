@@ -93,7 +93,7 @@ func (a *ruleDisableAttack) Start(ctx context.Context, state *EventBridgeRuleAtt
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to disable EventBridge rule %s/%s", state.BusName, state.RuleName), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Disabled EventBridge rule %s/%s", state.BusName, state.RuleName),
 		}}),
@@ -114,7 +114,7 @@ func (a *ruleDisableAttack) Stop(ctx context.Context, state *EventBridgeRuleAtta
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to re-enable EventBridge rule %s/%s", state.BusName, state.RuleName), err)
 	}
 	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Re-enabled EventBridge rule %s/%s", state.BusName, state.RuleName),
 		}}),

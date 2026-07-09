@@ -217,7 +217,7 @@ func (a *apigatewayThrottleAttack) Start(ctx context.Context, state *ApiGatewayT
 	msg := fmt.Sprintf("Throttled API Gateway stage %s/%s (%s) to rate=%v, burst=%d. Original: rate=%v, burst=%d (had-settings=%t).",
 		state.ApiId, state.StageName, state.ProtocolType, state.TargetRateLimit, state.TargetBurstLimit, state.OriginalRateLimit, state.OriginalBurstLimit, state.HadOriginalThrottleSettings)
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{Level: extutil.Ptr(action_kit_api.Info), Message: msg}}),
+		Messages: new([]action_kit_api.Message{{Level: extutil.Ptr(action_kit_api.Info), Message: msg}}),
 	}, nil
 }
 
@@ -278,7 +278,7 @@ func (a *apigatewayThrottleAttack) Stop(ctx context.Context, state *ApiGatewayTh
 	}
 	msg := fmt.Sprintf("Restored throttle settings on API Gateway stage %s/%s (%s, had-settings=%t).", state.ApiId, state.StageName, state.ProtocolType, state.HadOriginalThrottleSettings)
 	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{Level: extutil.Ptr(action_kit_api.Info), Message: msg}}),
+		Messages: new([]action_kit_api.Message{{Level: extutil.Ptr(action_kit_api.Info), Message: msg}}),
 	}, nil
 }
 
