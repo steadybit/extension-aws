@@ -56,8 +56,8 @@ func (m *sqsApiMock) SetQueueAttributes(ctx context.Context, params *sqs.SetQueu
 
 func newVisibilityRequest(target int) action_kit_api.PrepareActionRequestBody {
 	return extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{"visibilityTimeoutSeconds": target},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Config: map[string]any{"visibilityTimeoutSeconds": target},
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.account":                      {"42"},
 				"aws.region":                       {"us-east-1"},

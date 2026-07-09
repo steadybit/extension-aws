@@ -87,8 +87,8 @@ func (a *eksNodegroupTerminateInstancesAttack) Describe() action_kit_api.ActionD
 				DefaultValue: new("33"),
 				Order:        new(1),
 				Required:     new(true),
-				MinValue:     extutil.Ptr(1),
-				MaxValue:     extutil.Ptr(100),
+				MinValue:     new(1),
+				MaxValue:     new(100),
 			},
 		},
 	}
@@ -163,10 +163,7 @@ func (a *eksNodegroupTerminateInstancesAttack) Prepare(ctx context.Context, stat
 		return nil, extension_kit.ToError(fmt.Sprintf("EKS node group %s/%s currently has no InService instances to terminate", state.ClusterName, state.NodegroupName), nil)
 	}
 
-	sampleSize := int(math.Ceil(float64(len(allInstances)) * float64(pct) / 100.0))
-	if sampleSize < 1 {
-		sampleSize = 1
-	}
+	sampleSize := max(int(math.Ceil(float64(len(allInstances))*float64(pct)/100.0)), 1)
 	if sampleSize > len(allInstances) {
 		sampleSize = len(allInstances)
 	}
@@ -179,7 +176,7 @@ func (a *eksNodegroupTerminateInstancesAttack) Prepare(ctx context.Context, stat
 	sort.Strings(state.InstanceIds)
 
 	return &action_kit_api.PrepareResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level: extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Selected %d of %d InService instance(s) (%d%%) in EKS node group %s/%s for termination: %v",
 				sampleSize, len(allInstances), pct, state.ClusterName, state.NodegroupName, state.InstanceIds),
@@ -200,7 +197,7 @@ func (a *eksNodegroupTerminateInstancesAttack) Start(ctx context.Context, state 
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to terminate EKS node group instances %v", state.InstanceIds), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level: extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Termination requested for %d instance(s) in EKS node group %s/%s: %v. The underlying Auto Scaling group will replace them.",
 				len(state.InstanceIds), state.ClusterName, state.NodegroupName, state.InstanceIds),

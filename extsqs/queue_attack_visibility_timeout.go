@@ -119,7 +119,7 @@ func (a *queueVisibilityTimeoutAttack) Prepare(ctx context.Context, state *Queue
 		state.OriginalVisibilityTimeout = 30
 	}
 	return &action_kit_api.PrepareResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Will change VisibilityTimeout on queue %s from %d to %d for the attack duration", state.QueueName, state.OriginalVisibilityTimeout, state.TargetVisibilityTimeout),
 		}}),
@@ -131,7 +131,7 @@ func (a *queueVisibilityTimeoutAttack) Start(ctx context.Context, state *QueueVi
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to change VisibilityTimeout on SQS queue %s", state.QueueName), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Set VisibilityTimeout on queue %s to %d (was %d)", state.QueueName, state.TargetVisibilityTimeout, state.OriginalVisibilityTimeout),
 		}}),
@@ -144,7 +144,7 @@ func (a *queueVisibilityTimeoutAttack) Stop(ctx context.Context, state *QueueVis
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to restore VisibilityTimeout on SQS queue %s", state.QueueName), err)
 	}
 	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Restored VisibilityTimeout on queue %s to %d", state.QueueName, state.OriginalVisibilityTimeout),
 		}}),

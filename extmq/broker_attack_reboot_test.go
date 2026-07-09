@@ -19,7 +19,7 @@ import (
 
 func TestPrepareReboot(t *testing.T) {
 	body := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"aws.account":        {"42"},
 				"aws.region":         {"us-east-1"},

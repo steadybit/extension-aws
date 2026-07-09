@@ -79,7 +79,7 @@ func (a brokerRebootAttack) Start(ctx context.Context, state *BrokerAttackState)
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to reboot Amazon MQ broker %s (%s)", state.BrokerName, state.BrokerID), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Reboot triggered for Amazon MQ broker %s (%s)", state.BrokerName, state.BrokerID),
 		}}),

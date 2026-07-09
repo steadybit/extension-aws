@@ -76,7 +76,7 @@ func (a *asgSuspendProcessesAttack) Describe() action_kit_api.ActionDescription 
 				DefaultValue: new(`["Launch","HealthCheck","ReplaceUnhealthy"]`),
 				Order:        new(2),
 				Required:     new(true),
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{Label: "Launch", Value: "Launch"},
 					action_kit_api.ExplicitParameterOption{Label: "Terminate", Value: "Terminate"},
 					action_kit_api.ExplicitParameterOption{Label: "HealthCheck", Value: "HealthCheck"},
@@ -120,7 +120,7 @@ func (a *asgSuspendProcessesAttack) Prepare(_ context.Context, state *AsgAttackS
 
 	if len(toSuspend) == 0 {
 		return &action_kit_api.PrepareResult{
-			Messages: extutil.Ptr([]action_kit_api.Message{{
+			Messages: new([]action_kit_api.Message{{
 				Level:   extutil.Ptr(action_kit_api.Warn),
 				Message: fmt.Sprintf("All requested processes were already suspended on Auto Scaling group %s. Stop will not resume them.", state.AutoScalingGroupName),
 			}}),
@@ -145,7 +145,7 @@ func (a *asgSuspendProcessesAttack) Start(ctx context.Context, state *AsgAttackS
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to suspend processes %v on Auto Scaling group %s", state.SuspendedProcesses, state.AutoScalingGroupName), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Suspended processes %v on Auto Scaling group %s", state.SuspendedProcesses, state.AutoScalingGroupName),
 		}}),
@@ -169,7 +169,7 @@ func (a *asgSuspendProcessesAttack) Stop(ctx context.Context, state *AsgAttackSt
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to resume processes %v on Auto Scaling group %s", state.SuspendedProcesses, state.AutoScalingGroupName), err)
 	}
 	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Resumed processes %v on Auto Scaling group %s", state.SuspendedProcesses, state.AutoScalingGroupName),
 		}}),

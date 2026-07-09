@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -207,11 +208,8 @@ func matchesEventbridgeTagFilter(tags map[string]string, filters []config.TagFil
 	for _, filter := range filters {
 		matched := false
 		if v, ok := tags[filter.Key]; ok {
-			for _, want := range filter.Values {
-				if v == want {
-					matched = true
-					break
-				}
+			if slices.Contains(filter.Values, v) {
+				matched = true
 			}
 		}
 		if !matched {
