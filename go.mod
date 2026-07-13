@@ -22,7 +22,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.54.5
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.55.6
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.46.2
-	github.com/aws/aws-sdk-go-v2/service/fis v1.38.6
+	github.com/aws/aws-sdk-go-v2/service/fis v1.39.0
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.54.2
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.92.3
 	github.com/aws/aws-sdk-go-v2/service/mq v1.36.2
