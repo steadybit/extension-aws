@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.4.20
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/applicationautoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ec2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/fis
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/lambda
+- chore(deps): bump go to 1.26.5 (#907)
+- chore(deps): bump golang.org/x/crypto from 0.51.0 to 0.52.0
+- refactor: register extension index via exthttp.RegisterRevisionedHandler (#909)
+
 ## v2.4.19
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/config
