@@ -6,6 +6,8 @@ on:
       - 'main'
     tags:
       - 'v*'
+    paths-ignore:
+      - '.trivyignore.yml'
   pull_request:
     branches:
       - 'main'
