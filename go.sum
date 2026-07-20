@@ -67,8 +67,8 @@ github.com/aws/aws-sdk-go-v2/service/lambda v1.97.0 h1:k/rVQdLBLbfoNfp1pdTO4+RGG
 github.com/aws/aws-sdk-go-v2/service/lambda v1.97.0/go.mod h1:gKWVtxlMTgoLU9m6FDw7z6FAEFh8u8CoaPJx0zWk5J8=
 github.com/aws/aws-sdk-go-v2/service/mq v1.36.2 h1:GwIrFZ2LLa3D+Au3Xg6GCDwmsceWjgEwG8SiQooL19Q=
 github.com/aws/aws-sdk-go-v2/service/mq v1.36.2/go.mod h1:1cvUTAP9z6aNZsc5MOQZa6TVlNelGykBfwpRQpOfC1w=
-github.com/aws/aws-sdk-go-v2/service/rds v1.118.2 h1:pkEeQneYFpTAnGhyqSbyp/DlCPPJTGt0GkWahlLYzMA=
-github.com/aws/aws-sdk-go-v2/service/rds v1.118.2/go.mod h1:7gS+cGrKF0mH253QHFlStmx79ws+DlNk+04ZRfmw3U0=
+github.com/aws/aws-sdk-go-v2/service/rds v1.122.0 h1:1L+fL3PdKGxYaaxADMHC3QbCjHlhb1ElHQAXjh1bI1I=
+github.com/aws/aws-sdk-go-v2/service/rds v1.122.0/go.mod h1:Ve7qHa8jBmStKNz/oaxs2yBuFnwyvN0k/8PpPZVxkEY=
 github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.31.12 h1:kOX5fCUb0BSMNHbRm7icw/dEyTjiYCLczIYglbYFJnI=
 github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.31.12/go.mod h1:n8ixkV2383DfuJhsCMVdfeSfYWqJhO2uadau9wrta9U=
 github.com/aws/aws-sdk-go-v2/service/signin v1.2.0 h1:3nXpRcFwRCW8n7HgO2QGy0Dc20eQNfBuUemGQhpF8m8=
