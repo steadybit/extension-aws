@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.4.21
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/autoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/dynamodb
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticache
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/kafka
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/lambda
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/rds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sts
+- ci: skip build on .trivyignore.yml-only changes [skip ci]
+
 ## v2.4.20
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
