@@ -24,7 +24,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.46.2
 	github.com/aws/aws-sdk-go-v2/service/fis v1.39.0
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.55.1
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.97.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.99.0
 	github.com/aws/aws-sdk-go-v2/service/mq v1.36.2
 	github.com/aws/aws-sdk-go-v2/service/rds v1.122.0
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.31.12
