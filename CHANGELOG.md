@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.4.22
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/feature/ec2/imds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/applicationautoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/dynamodb
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ec2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/eks
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/fis
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sqs
+- chore(deps): bump github.com/getkin/kin-openapi from 0.138.0 to 0.144.0
+- chore(deps): bump goreleaser/goreleaser from v2.17.0 to v2.17.1
+
 ## v2.4.21
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
