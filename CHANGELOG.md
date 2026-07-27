@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.4.23
+
+- chore(deps): update dependencies
+
 ## v2.4.22
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/feature/ec2/imds
