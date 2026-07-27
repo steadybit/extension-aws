@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.30
 	github.com/aws/aws-sdk-go-v2/service/apigateway v1.40.8
 	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.36.1
-	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.44.0
+	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.45.0
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.69.1
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.60.1
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.317.0
