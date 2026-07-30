@@ -250,3 +250,7 @@ extraEnvFrom: []
 discovery:
   # discovery.group -- Optional group identifier. When set, the extension adds steadybit.group=<value> to every discovered target. Used as an additional matcher in enrichment rules.
   group: ""
+  # discovery.excludeQuery -- Optional query in Steadybit's target query language; matching targets are not reported. Quote it in YAML (or use a |- block scalar) — see https://github.com/steadybit/discovery-kit/blob/main/docs/target-filtering.md
+  excludeQuery: ""
+  # discovery.includeQuery -- Optional query in Steadybit's target query language; when set, only matching targets are reported.
+  includeQuery: ""
