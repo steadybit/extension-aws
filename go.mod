@@ -16,7 +16,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.45.2
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.70.0
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.62.0
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.317.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.318.0
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.89.0
 	github.com/aws/aws-sdk-go-v2/service/eks v1.90.0
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.56.0
