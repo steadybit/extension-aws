@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.4.24
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/config
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/applicationautoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ec2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/lambda
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/rds
+- feat: support filtering targets out of discovery
+- fix: rename aws.zone label to "Zone" for consistency across cloud extensions
+
 ## v2.4.23
 
 - chore(deps): update dependencies
