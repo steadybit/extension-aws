@@ -32,8 +32,8 @@ func (c *commonAttributes) DescribeAttributes() []discovery_kit_api.AttributeDes
 		}, {
 			Attribute: "aws.zone",
 			Label: discovery_kit_api.PluralLabel{
-				One:   "AWS zone",
-				Other: "AWS zones",
+				One:   "Zone",
+				Other: "Zones",
 			},
 		}, {
 			Attribute: "aws.zone.id",
