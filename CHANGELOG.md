@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.4.25
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.43.2 to 1.43.4
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/config
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/dynamodb
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/fis
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/mq
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/rds
+
 ## v2.4.24
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/config
