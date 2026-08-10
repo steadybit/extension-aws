@@ -51,8 +51,8 @@ github.com/aws/aws-sdk-go-v2/service/eks v1.90.0 h1:kllLzp3kjvTIfOnG9PzTE8ta2A11
 github.com/aws/aws-sdk-go-v2/service/eks v1.90.0/go.mod h1:An9RTA4UKFFF18KYn9I8w6F7ejHsMUb2WKrWxFG7WQQ=
 github.com/aws/aws-sdk-go-v2/service/elasticache v1.56.0 h1:KwkgsVklj6heo6xV3Go+KNbGtJGv80+u7lnU7Mw3R64=
 github.com/aws/aws-sdk-go-v2/service/elasticache v1.56.0/go.mod h1:jNvxVh9nmK+pamcs+77YWzwFdDK/HuUNLqisJw++0Nk=
-github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.58.1 h1:4KFrMyyOVeXiP4wiDaeevlV73qemxrMY1qN/pmW6My8=
-github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.58.1/go.mod h1:8oLCSyyky75OpQ8Lo72GuoJXbeaEb1R8+dHgQOgWKaI=
+github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.58.5 h1:3Zphqh8L0blfkrdUv270L8RuNy0RvltPMaskEbs+Xo8=
+github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.58.5/go.mod h1:Mr4sgkXQN58SJTNJq64yKOrHzA9cqbS2MKExmDCtdcY=
 github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.0 h1:yELHfWewimb2tn3G1VzB9vV0m1gfIg6l7SUJegUwdOM=
 github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.0/go.mod h1:omTuHWtb4F9qY54sIyduQW899SSbvO6t7rgO6KiLn90=
 github.com/aws/aws-sdk-go-v2/service/fis v1.40.0 h1:KpshBxvwsSH4XgICKLXebBxRsc5zqtcysLOYKmdrhbI=
