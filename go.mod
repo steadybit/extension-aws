@@ -28,7 +28,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/mq v1.39.4
 	github.com/aws/aws-sdk-go-v2/service/rds v1.124.1
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.35.0
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.46.0
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.46.5
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.73.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.45.4
 	github.com/aws/smithy-go v1.27.7
