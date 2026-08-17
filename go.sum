@@ -31,8 +31,8 @@ github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.36 h1:5CrzwxDqf4w3x1Vs3
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.36/go.mod h1:A3gHdKZIvG/QXERzZwcxNS3RNDFcRCuhhTFBYp+V/nw=
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.36 h1:A4N2f4YPcST0v+dWtX+xrpPPCL9VTBhoIFFUWYqbacE=
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.36/go.mod h1:B/Qr859uxWUEfZeGotK5KAEoof4Q9YWgNtPSwV6jcyk=
-github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.36 h1:jbGY4CXLzZElOXgGsexlC3Hi+3YM0rSmk4opFXKqg/k=
-github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.36/go.mod h1:uBu/9aKsS/UQGc72RAt3y54kjgYQxmhut8ZD2dXCDNE=
+github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.37 h1:oyd3ke4V9AhKcRR7rRgxk1VyI+DjK2CBQtbxh3OkdaA=
+github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.37/go.mod h1:aA9D7SqfG9IC1b7FLD7Iyc8Q4JN0a8gHhNjN4zPlIaI=
 github.com/aws/aws-sdk-go-v2/service/apigateway v1.42.5 h1:Z+8vxfSQrlz2ixwsZPUgBmoWTlWCt39HxaGeDWJic58=
 github.com/aws/aws-sdk-go-v2/service/apigateway v1.42.5/go.mod h1:dGix9no22yIDTfvm4RAC/lCGua6fQp0flRXlxb4+sMs=
 github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.37.4 h1:XTTGr+U0wf8qeuTQ0PhHkfSdU2EoKzV+a/fdBhfNBcg=
@@ -53,8 +53,8 @@ github.com/aws/aws-sdk-go-v2/service/elasticache v1.56.0 h1:KwkgsVklj6heo6xV3Go+
 github.com/aws/aws-sdk-go-v2/service/elasticache v1.56.0/go.mod h1:jNvxVh9nmK+pamcs+77YWzwFdDK/HuUNLqisJw++0Nk=
 github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.58.6 h1:P2KzXoV/LpmGl606LpYoOic/sIJZ2rK3ISb0gq55fcI=
 github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.58.6/go.mod h1:g7QiYmqwcRBEzNv4wEF1A6iBPFqyo7CottPV9Cy4KuI=
-github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.0 h1:yELHfWewimb2tn3G1VzB9vV0m1gfIg6l7SUJegUwdOM=
-github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.0/go.mod h1:omTuHWtb4F9qY54sIyduQW899SSbvO6t7rgO6KiLn90=
+github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.5 h1:pr74r7rrAlxzbNZ3M62sZPkkfVaZv4y0zJAc+zJZdQo=
+github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.5/go.mod h1:KEHNsKgUKn1+HYQDwk/C/yMbu+pR6nyLDZedJJc3lSU=
 github.com/aws/aws-sdk-go-v2/service/fis v1.40.4 h1:DPXJ+vpMZonTIUj/uHpBf72Jz5JqG0E8ac4I0qkouuY=
 github.com/aws/aws-sdk-go-v2/service/fis v1.40.4/go.mod h1:OVJVlKWib4JqXGlZXgxrEOToa1CeyLLvTM1q0j3myBY=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.15 h1:JJLBQxwY+AFwuPAi5ivGc1ChnTdUt4cXMv7e76m2c/Y=

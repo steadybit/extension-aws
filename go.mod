@@ -21,7 +21,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/eks v1.90.0
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.58.6
-	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.0
+	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.5
 	github.com/aws/aws-sdk-go-v2/service/fis v1.40.4
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.101.0
@@ -59,7 +59,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.15 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.36 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.36 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.36 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.37 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.12 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.35 // indirect
