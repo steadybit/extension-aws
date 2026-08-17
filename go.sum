@@ -63,8 +63,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.12 h1:JiB
 github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.12/go.mod h1:2jd+Rjsg3BeToVNAJT2l2FQ4FQt8nd3488jydlmB82E=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.35 h1:BBEElKh4a+rKshvjrfpajTe9CbpZvrbb4Jkg2PB7RzA=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.35/go.mod h1:zaZk983w//8beSruBVec/mr4CmDwgZitW/qzGhAAX0g=
-github.com/aws/aws-sdk-go-v2/service/kafka v1.56.0 h1:QSvI/3ND6Pgx0DQB0i09gfypwzHotyNt94kzXcuXnvY=
-github.com/aws/aws-sdk-go-v2/service/kafka v1.56.0/go.mod h1:dTPUh1Cv2uHm3h4bwrpUuJo4OQdcHFozlRgw4N/t+E8=
+github.com/aws/aws-sdk-go-v2/service/kafka v1.58.1 h1:AmhVtAFQTu5pfN+4H1ZO6tUrh0D0y/3b3xJeyWC330U=
+github.com/aws/aws-sdk-go-v2/service/kafka v1.58.1/go.mod h1:qPhAa6y0ocXJ7gTO3Uj3kPAO0ijZuYJ1OJyOtKDZT58=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.101.0 h1:7Ajy3/Uk9NytijLJhGtYY8JCuogbIUFXlX3/yiVlEG4=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.101.0/go.mod h1:sARNHpfl6YWc1y4IBQRnYTM9DndQ8JgFTZc6eIM9T0s=
 github.com/aws/aws-sdk-go-v2/service/mq v1.39.4 h1:gGmE7K11lgcJBZMXCqe5z/hzlRGtCKlvSDxTPfhTERE=
