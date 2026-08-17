@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.4.26
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.43.4 to 1.43.5
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/feature/ec2/imds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/autoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/eventbridge
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/kafka
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sqs
+
 ## v2.4.25
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.43.2 to 1.43.4
