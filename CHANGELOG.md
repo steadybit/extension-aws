@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.4.27
+
+- chore(deps): bump steadybit kits and drop Go patch pin (#961)
+- chore(deps): pin goreleaser build toolchain to go1.26.6
+- chore(deps): use go-version-file, drop patch pin (go 1.26) (#960)
+
 ## v2.4.26
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.43.4 to 1.43.5
