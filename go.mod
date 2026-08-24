@@ -26,7 +26,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kafka v1.58.3
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.101.4
 	github.com/aws/aws-sdk-go-v2/service/mq v1.39.6
-	github.com/aws/aws-sdk-go-v2/service/rds v1.124.3
+	github.com/aws/aws-sdk-go-v2/service/rds v1.124.4
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.36.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.46.6
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.73.6
@@ -62,7 +62,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.38 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.14 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.37 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.38 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.5.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.33.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.38.6 // indirect
