@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.4.28
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.43.6 to 1.43.7
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/feature/ec2/imds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/kafka
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/rds
+- chore(deps): bump github.com/moby/go-archive from 0.2.0 to 0.3.0
+- chore(deps): bump github.com/steadybit/discovery-kit/go/discovery_kit_test
+- chore(deps): bump github.com/testcontainers/testcontainers-go
+
 ## v2.4.27
 
 - chore(deps): bump steadybit kits and drop Go patch pin (#961)
