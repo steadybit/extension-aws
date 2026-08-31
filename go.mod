@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.45.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.37
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.36
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.38
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.19.1
 	github.com/aws/aws-sdk-go-v2/service/apigateway v1.42.7
 	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.39.1
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.45.6
