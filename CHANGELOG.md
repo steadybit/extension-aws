@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.4.29
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/feature/ec2/imds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigatewayv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/lambda
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/mq
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sqs
+- chore(deps): bump github.com/aws/smithy-go from 1.27.8 to 1.28.1
+- chore(deps): bump github.com/stretchr/testify from 1.11.1 to 1.12.1
+- chore(deps): bump github.com/testcontainers/testcontainers-go/modules/localstack
+- chore(deps): bump goreleaser/goreleaser from v2.17.1 to v2.18.0
+
 ## v2.4.28
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.43.6 to 1.43.7
