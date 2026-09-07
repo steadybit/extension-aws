@@ -39,8 +39,8 @@ github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.39.1 h1:GF7ClYhbwyiwvqUd+5b
 github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.39.1/go.mod h1:J5dYsgqHwacnfrsLTkROs7TctL/AkkMdNQv/dtc/7kI=
 github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.45.6 h1:0nDzjwLdPYvhvFBSe3oaXkNve6tZCjhXxqeMohYDDuw=
 github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.45.6/go.mod h1:V6A+fimdxgLSVwFZavG8C1+H7z+cF5erpqD87oL78i0=
-github.com/aws/aws-sdk-go-v2/service/autoscaling v1.72.1 h1:dphKqIDUM4m9Lz6rPgTJFkgUFC8oUiABxPN4DohkrXM=
-github.com/aws/aws-sdk-go-v2/service/autoscaling v1.72.1/go.mod h1:GAUQKj/AD0M/V2yO652a6BOJiLhsLKZ+jQ7bFfbZDDk=
+github.com/aws/aws-sdk-go-v2/service/autoscaling v1.76.0 h1:iV8RGJWF/iHjYo/+vFHE6AUKFd2cFvy//QJ+vCfuoAY=
+github.com/aws/aws-sdk-go-v2/service/autoscaling v1.76.0/go.mod h1:wh20TPxjGHR8c/e3+NIZTNzMsrTlkSXODJnxIaaf5a0=
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.66.0 h1:Iz90Uc1I8Yx/EVZMVEdB3SuLRkOJYY1YUUU0hTV7AFo=
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.66.0/go.mod h1:1n7X9A0OjJ8CZjeac5PsFxEkIzBioOs223JPLDZ5bbQ=
 github.com/aws/aws-sdk-go-v2/service/ec2 v1.321.2 h1:jcHDG5dFHYfpGUfEKmBbG8XtJHcJinqLpiIsjz2c4Uw=
