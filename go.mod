@@ -15,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.39.1
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.45.6
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.72.1
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.63.3
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.66.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.321.2
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.90.3
 	github.com/aws/aws-sdk-go-v2/service/eks v1.91.1
@@ -60,8 +60,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.5.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.38 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.17 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.14 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.19 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.13.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.38 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.5.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.33.6 // indirect
