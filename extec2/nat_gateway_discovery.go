@@ -154,9 +154,19 @@ func listAllNatGateways(ctx context.Context, client natGatewayApi) ([]types.NatG
 	return result, nil
 }
 
+// buildSubnetAzMap resolves the availability zone of every subnet referenced by a
+// non-deleted NAT gateway. Deleted gateways stay visible in DescribeNatGateways for
+// about an hour and still carry their SubnetId; since such a subnet may already be
+// gone, they are skipped. The lookup uses the "subnet-id" filter instead of the
+// SubnetIds parameter because the latter fails the whole request with
+// InvalidSubnetID.NotFound as soon as a single ID no longer exists, whereas the filter
+// simply omits unknown subnets from the result.
 func buildSubnetAzMap(ctx context.Context, client natGatewayApi, gateways []types.NatGateway) (map[string]string, error) {
 	subnetSet := make(map[string]struct{})
 	for _, gw := range gateways {
+		if gw.State == types.NatGatewayStateDeleted || gw.State == types.NatGatewayStateDeleting {
+			continue
+		}
 		if gw.SubnetId != nil {
 			subnetSet[*gw.SubnetId] = struct{}{}
 		}
@@ -168,14 +178,21 @@ func buildSubnetAzMap(ctx context.Context, client natGatewayApi, gateways []type
 	for id := range subnetSet {
 		ids = append(ids, id)
 	}
-	out, err := client.DescribeSubnets(ctx, &ec2.DescribeSubnetsInput{SubnetIds: ids})
-	if err != nil {
-		return nil, err
-	}
-	m := make(map[string]string, len(out.Subnets))
-	for _, s := range out.Subnets {
-		if s.SubnetId != nil && s.AvailabilityZone != nil {
-			m[*s.SubnetId] = *s.AvailabilityZone
+	sort.Strings(ids)
+
+	m := make(map[string]string, len(ids))
+	paginator := ec2.NewDescribeSubnetsPaginator(client, &ec2.DescribeSubnetsInput{
+		Filters: []types.Filter{{Name: aws.String("subnet-id"), Values: ids}},
+	})
+	for paginator.HasMorePages() {
+		out, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, s := range out.Subnets {
+			if s.SubnetId != nil && s.AvailabilityZone != nil {
+				m[*s.SubnetId] = *s.AvailabilityZone
+			}
 		}
 	}
 	return m, nil
