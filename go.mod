@@ -14,7 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/apigateway v1.42.7
 	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.39.1
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.45.6
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.72.1
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.76.0
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.66.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.328.0
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.90.3
