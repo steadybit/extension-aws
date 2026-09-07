@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.4.30
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/autoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/dynamodb
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ec2
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/fis
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/rds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sts
+- chore(deps): bump goreleaser/goreleaser from v2.18.0 to v2.18.1
+
 ## v2.4.29
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/feature/ec2/imds
