@@ -214,8 +214,13 @@ func (e *albStaticResponseAction) Prepare(ctx context.Context, state *AlbStaticR
 	state.LoadbalancerArn = extutil.MustHaveValue(request.Target.Attributes, "aws-elb.alb.arn")[0]
 	state.TargetExecutionId = request.ExecutionId
 	if request.ExecutionContext != nil {
-		state.ExecutionId = *request.ExecutionContext.ExecutionId
-		state.ExperimentKey = *request.ExecutionContext.ExperimentKey
+		if request.ExecutionContext.ExecutionId != nil {
+			state.ExecutionId = *request.ExecutionContext.ExecutionId
+		}
+		// a standalone execution has no experiment behind it and therefore no key
+		if request.ExecutionContext.ExperimentKey != nil {
+			state.ExperimentKey = *request.ExecutionContext.ExperimentKey
+		}
 	}
 
 	client, err := e.clientProvider(state.Account, state.Region, state.DiscoveredByRole)
@@ -382,20 +387,7 @@ func (e *albStaticResponseAction) Start(ctx context.Context, state *AlbStaticRes
 				FixedResponseConfig: fixedResponseConfig,
 			},
 		},
-		Tags: []types.Tag{
-			{
-				Key:   new("steadybit-target-execution-id"),
-				Value: new(state.TargetExecutionId.String()),
-			},
-			{
-				Key:   new("steadybit-execution-id"),
-				Value: new(strconv.Itoa(state.ExecutionId)),
-			},
-			{
-				Key:   new("steadybit-experiment-key"),
-				Value: new(state.ExperimentKey),
-			},
-		},
+		Tags: ruleTags(state),
 	})
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to add rule to listener '%s'.", state.ListenerArn), err)
@@ -600,4 +592,26 @@ func defaultClientProviderService(account string, region string, role *string) (
 		return nil, err
 	}
 	return elasticloadbalancingv2.NewFromConfig(awsAccess.AwsConfig), nil
+}
+
+// ruleTags marks the created rule as ours. The experiment key is only known for a run with an experiment behind it;
+// a standalone execution gets no such tag rather than an empty one.
+func ruleTags(state *AlbStaticResponseState) []types.Tag {
+	tags := []types.Tag{
+		{
+			Key:   new("steadybit-target-execution-id"),
+			Value: new(state.TargetExecutionId.String()),
+		},
+		{
+			Key:   new("steadybit-execution-id"),
+			Value: new(strconv.Itoa(state.ExecutionId)),
+		},
+	}
+	if state.ExperimentKey != "" {
+		tags = append(tags, types.Tag{
+			Key:   new("steadybit-experiment-key"),
+			Value: new(state.ExperimentKey),
+		})
+	}
+	return tags
 }

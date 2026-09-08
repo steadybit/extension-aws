@@ -132,6 +132,37 @@ func TestAlbStaticResponseAction_Prepare(t *testing.T) {
 			},
 		},
 		{
+			name: "Should accept an execution without an experiment key",
+			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
+				Config: map[string]any{
+					"duration":           "180",
+					"listenerPort":       "443",
+					"responseStatusCode": "500",
+				},
+				Target: new(action_kit_api.Target{
+					Attributes: map[string][]string{
+						"aws-elb.alb.arn": {"my-loadbalancer-arn"},
+						"aws.account":     {"42"},
+						"aws.region":      {"us-west-1"},
+					},
+				}),
+				ExecutionContext: new(action_kit_api.ExecutionContext{
+					ExecutionId: new(5),
+				}),
+				ExecutionId: targetExecutionId,
+			}),
+
+			wantedState: &AlbStaticResponseState{
+				Account:            "42",
+				Region:             "us-west-1",
+				ListenerArn:        "my-listener-arn",
+				LoadbalancerArn:    "my-loadbalancer-arn",
+				ResponseStatusCode: 500,
+				ExecutionId:        5,
+				TargetExecutionId:  targetExecutionId,
+			},
+		},
+		{
 			name: "Should return error if too many host headers",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
 				Config: map[string]any{
@@ -565,4 +596,16 @@ func Test_getNewPriorityPairs(t *testing.T) {
 			assert.Equalf(t, tt.want, getNewPriorityPairs(tt.args.rules), "getNewPriorityPairs(%v)", tt.args.rules)
 		})
 	}
+}
+
+func Test_ruleTags(t *testing.T) {
+	targetExecutionId, _ := uuid.NewUUID()
+	withKey := ruleTags(&AlbStaticResponseState{TargetExecutionId: targetExecutionId, ExecutionId: 5, ExperimentKey: "ADM-1"})
+	assert.Len(t, withKey, 3)
+	assert.Equal(t, "steadybit-experiment-key", *withKey[2].Key)
+	assert.Equal(t, "ADM-1", *withKey[2].Value)
+
+	withoutKey := ruleTags(&AlbStaticResponseState{TargetExecutionId: targetExecutionId, ExecutionId: 5})
+	assert.Len(t, withoutKey, 2)
+	assert.Equal(t, "steadybit-execution-id", *withoutKey[1].Key)
 }
