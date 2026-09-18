@@ -38,12 +38,19 @@ import (
 	"github.com/steadybit/extension-kit/exthealth"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extlogging"
+	"github.com/steadybit/extension-kit/extotel"
 	"github.com/steadybit/extension-kit/extruntime"
 	"github.com/steadybit/extension-kit/extsignals"
 )
 
 func main() {
 	extlogging.InitZeroLog()
+
+	// Export OpenTelemetry traces when an OTLP endpoint is configured, so an
+	// operator debugging a slow or timing-out action can see what happened inside
+	// this extension. Off, and free, until OTEL_EXPORTER_OTLP_ENDPOINT is set —
+	// see the extension-kit README for the full set of variables.
+	extotel.InitOpenTelemetry()
 	extbuild.PrintBuildInformation()
 	extruntime.LogRuntimeInformation(zerolog.DebugLevel)
 	exthealth.StartProbes(8086)
