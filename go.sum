@@ -63,8 +63,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.3 h1:bON1rJf67
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.3/go.mod h1:c5BBpjJcQXpfeq9iASyVKA3T6vX6B6LEXY4mL/gklDY=
 github.com/aws/aws-sdk-go-v2/service/kafka v1.65.0 h1:JPjwM+bcIIDD5IqEWG//dDVgIszxAGq/0hyyB77RHV4=
 github.com/aws/aws-sdk-go-v2/service/kafka v1.65.0/go.mod h1:TwVlW7suMgnih6u0cdxv2BClpt95I1trqNP4p26ja48=
-github.com/aws/aws-sdk-go-v2/service/lambda v1.104.1 h1:5hDVbKi9kocpTnH0/xFJbT3rz7hRNv+fNjJIJDMQCSQ=
-github.com/aws/aws-sdk-go-v2/service/lambda v1.104.1/go.mod h1:xFO5LMHsvX9T3B9lLauhTYYyYSCoCn46gxiqpVfK+Sw=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.108.0 h1:iIjgs1MWp6quM8QyDUorxEjIZEpXV4UgqEp6wbFAz5U=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.108.0/go.mod h1:KYgalOoMYV+Dm9vz0ydRM+SQ3RtFcqGHR/rl36YD6oY=
 github.com/aws/aws-sdk-go-v2/service/mq v1.41.1 h1:bOwRei7deCGWWHFWrbYoLkGrhPOTKd3HbVzF/0VOW7w=
 github.com/aws/aws-sdk-go-v2/service/mq v1.41.1/go.mod h1:aHNcFiRZVLlEQGlrrwpJjIAikelP9Fjfi20gH/mrOVM=
 github.com/aws/aws-sdk-go-v2/service/rds v1.129.0 h1:rfqkLgq6+N4R2+03T8VS6B7yU4l1gx21zaK/v54Qaik=
