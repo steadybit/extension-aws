@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.4.31
+
+- Add OpenTelemetry tracing support
+- Tolerate a prepare request without an experiment key in the ALB static-response attack
+- Tolerate stale subnets when mapping NAT gateway AZs
+- Depend on extension-kit v1.12.1
+- Update dependencies
+
 ## v2.4.30
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/autoscaling
