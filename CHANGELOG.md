@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.4.33
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/eks
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticache
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/eventbridge
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/mq
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/rds
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sqs
+- chore(deps): bump github.com/aws/smithy-go from 1.28.1 to 1.28.2
+
 ## v2.4.32
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/config
