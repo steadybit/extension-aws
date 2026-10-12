@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.4.34
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/credentials
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/applicationautoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/kafka
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_test
+- chore(deps): bump goreleaser/goreleaser from v2.18.2 to v2.18.3
+
 ## v2.4.33
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs
