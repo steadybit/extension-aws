@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.4.35
+
+- chore(deps): bump golang.org/x/net to v0.61.0
+- chore(deps): update go toolchain to 1.27.2
+
 ## v2.4.34
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/credentials
