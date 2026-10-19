@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.4.36
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/autoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/lambda
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/mq
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sqs
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ssm
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sts
+
 ## v2.4.35
 
 - chore(deps): bump golang.org/x/net to v0.61.0
