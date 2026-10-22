@@ -3,7 +3,10 @@
 ##
 ## Build
 ##
-FROM --platform=$BUILDPLATFORM goreleaser/goreleaser:v2.18.3 AS build
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS build
+
+RUN apk add --no-cache git make
+COPY --from=goreleaser/goreleaser:v2.18.3 /usr/bin/goreleaser /usr/bin/goreleaser
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -16,7 +19,7 @@ ARG REVISION=unknown
 WORKDIR /app
 
 COPY . .
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH GOTOOLCHAIN=go1.27.2+auto goreleaser build --snapshot="${BUILD_SNAPSHOT}" --single-target -o extension
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH goreleaser build --snapshot="${BUILD_SNAPSHOT}" --single-target -o extension
 
 ##
 ## Runtime
