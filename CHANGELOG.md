@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.4.37
+
+- build(docker): build with golang:1.27-alpine to pick up Go patch releases
+- chore(deps): bump github.com/KimMachineGun/automemlimit
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/autoscaling
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/dynamodb
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/ssm
+- chore(deps): bump github.com/aws/smithy-go from 1.28.5 to 1.28.6
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_test
+
 ## v2.4.36
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/service/autoscaling
