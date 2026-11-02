@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.4.38
+
+- chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.47.4 to 1.47.5
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/apigateway
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/elasticache
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/kafka
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/lambda
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/sqs
+- chore(deps): bump github.com/aws/smithy-go from 1.28.6 to 1.28.7
+
 ## v2.4.37
 
 - build(docker): build with golang:1.27-alpine to pick up Go patch releases
