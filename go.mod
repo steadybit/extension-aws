@@ -27,7 +27,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.4
 	github.com/aws/aws-sdk-go-v2/service/mq v1.45.4
 	github.com/aws/aws-sdk-go-v2/service/rds v1.130.0
-	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.41.6
+	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.41.7
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.52.7
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.81.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.51.4
