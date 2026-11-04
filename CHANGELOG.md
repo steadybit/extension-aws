@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- feat: the ECS task network delay and loss attacks show their IP Address/CIDR filter in a "Traffic Filter" group on platforms that support parameter groups
+
 ## v2.4.38
 
 - chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.47.4 to 1.47.5
