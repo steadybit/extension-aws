@@ -25,9 +25,10 @@ func NewEcsTaskNetworkLossAction() action_kit_sdk.Action[TaskSsmActionState] {
 
 func getEcsTaskNetworkLossDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.network_loss", ecsTaskTargetId),
-		Label:       "Drop Outgoing Traffic",
-		Description: "Cause packet loss for outgoing network traffic (egress).",
+		Id:              fmt.Sprintf("%s.network_loss", ecsTaskTargetId),
+		Label:           "Drop Outgoing Traffic",
+		Description:     "Cause packet loss for outgoing network traffic (egress).",
+		ParameterGroups: new([]action_kit_api.ParameterGroup{trafficFilterGroup}),
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "duration",
@@ -54,6 +55,7 @@ func getEcsTaskNetworkLossDescription() action_kit_api.ActionDescription {
 				Type:         action_kit_api.ActionParameterTypeStringArray,
 				DefaultValue: new(""),
 				Advanced:     new(true),
+				Group:        new(groupTrafficFilter),
 				Order:        new(2),
 			},
 		},

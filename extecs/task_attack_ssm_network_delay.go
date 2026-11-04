@@ -25,9 +25,10 @@ func NewEcsTaskNetworkDelayAction() action_kit_sdk.Action[TaskSsmActionState] {
 
 func getEcsTaskNetworkDelayDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.network_delay", ecsTaskTargetId),
-		Label:       "Delay Outgoing Traffic",
-		Description: "Inject latency into egress network traffic.",
+		Id:              fmt.Sprintf("%s.network_delay", ecsTaskTargetId),
+		Label:           "Delay Outgoing Traffic",
+		Description:     "Inject latency into egress network traffic.",
+		ParameterGroups: new([]action_kit_api.ParameterGroup{trafficFilterGroup}),
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "duration",
@@ -63,6 +64,7 @@ func getEcsTaskNetworkDelayDescription() action_kit_api.ActionDescription {
 				Type:         action_kit_api.ActionParameterTypeStringArray,
 				DefaultValue: new(""),
 				Advanced:     new(true),
+				Group:        new(groupTrafficFilter),
 				Order:        new(3),
 			},
 		},
