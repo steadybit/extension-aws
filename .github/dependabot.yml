@@ -8,6 +8,13 @@ updates:
   directory: /
   schedule:
     interval: "weekly"
+  groups:
+    steadybit:
+      patterns:
+        - "github.com/steadybit/*"
+    aws-sdk:
+      patterns:
+        - "github.com/aws/*"
 - package-ecosystem: "docker"
   directory: "/"
   schedule:
