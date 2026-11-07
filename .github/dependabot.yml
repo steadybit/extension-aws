@@ -8,6 +8,10 @@ updates:
   directory: /
   schedule:
     interval: "weekly"
+  groups:
+    steadybit:
+      patterns:
+        - "github.com/steadybit/*"
 - package-ecosystem: "docker"
   directory: "/"
   schedule:
