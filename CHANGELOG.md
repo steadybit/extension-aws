@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- fix(chart): raise default memory to 48Mi request / 128Mi limit (was 16Mi / 32Mi), which got the extension OOM-killed during discovery
 - feat: the ECS task network delay and loss attacks show their IP Address/CIDR filter in a "Traffic Filter" group on platforms that support parameter groups
 
 ## v2.4.38
