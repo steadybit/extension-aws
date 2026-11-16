@@ -1,9 +1,17 @@
 # Changelog
 
-## Unreleased
+## v2.5.0
 
-- fix(chart): raise default memory to 48Mi request / 128Mi limit (was 16Mi / 32Mi), which got the extension OOM-killed during discovery
+- chore(deps): bump github.com/steadybit/extension-kit
+- chore(deps): bump github.com/testcontainers/testcontainers-go/modules/localstack
+- chore(deps): bump golang.org/x/net to v0.62.0
+- chore(deps): bump the aws-sdk group with 23 updates
+- chore(deps): bump the aws-sdk group with 24 updates
+- chore(deps): bump the steadybit group with 2 updates
+- feat: show the IP/CIDR filter of the ECS network attacks in a Traffic Filter group
 - feat: the ECS task network delay and loss attacks show their IP Address/CIDR filter in a "Traffic Filter" group on platforms that support parameter groups
+- fix(chart): raise default memory to 48Mi request / 128Mi limit (#1058)
+- fix(chart): raise default memory to 48Mi request / 128Mi limit (was 16Mi / 32Mi), which got the extension OOM-killed during discovery
 
 ## v2.4.38
 
