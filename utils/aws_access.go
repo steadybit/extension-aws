@@ -35,6 +35,7 @@ func InitializeAwsAccess(specification extConfig.Specification, awsConfigForRoot
 	awsConfigForRootAccount.APIOptions = append(awsConfigForRootAccount.APIOptions, func(stack *middleware.Stack) error {
 		return stack.Initialize.Add(customLoggerMiddleware, middleware.After)
 	})
+	awsConfigForRootAccount.APIOptions = append(awsConfigForRootAccount.APIOptions, addPartnerRevenueMeasurementUserAgent)
 
 	if specification.AwsEndpointOverride != "" {
 		log.Warn().Msgf("Overriding AWS base endpoint with '%s'", specification.AwsEndpointOverride)
