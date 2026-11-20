@@ -99,6 +99,10 @@ spec:
               value: |-
                {{ .Values.aws.assumeRolesAdvanced | toJson }}
             {{- end }}
+            {{- if not .Values.aws.partnerRevenueMeasurement.enabled }}
+            - name: STEADYBIT_EXTENSION_PARTNER_REVENUE_MEASUREMENT_DISABLED
+              value: "true"
+            {{- end }}
             {{- if .Values.aws.discovery.attributes.excludes.apigateway }}
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_APIGATEWAY
               value: {{ join "," .Values.aws.discovery.attributes.excludes.apigateway | quote }}

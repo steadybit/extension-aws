@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- feat: identify the extension's AWS API calls with the AWS Partner Revenue Measurement user agent of the Steadybit Marketplace product (opt out with `aws.partnerRevenueMeasurement.enabled=false` / `STEADYBIT_EXTENSION_PARTNER_REVENUE_MEASUREMENT_DISABLED=true`)
+
 ## v2.5.0
 
 - chore(deps): bump github.com/steadybit/extension-kit
