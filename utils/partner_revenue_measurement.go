@@ -16,13 +16,20 @@ import (
 // https://docs.aws.amazon.com/PRM/latest/aws-prm-onboarding-guide/user-agent-string.html
 const partnerRevenueMeasurementUserAgent = "APN_1.1/pc_egaiyzlc2fa84pb03ml3c4hnk$"
 
-// addPartnerRevenueMeasurementUserAgent appends the identifier to the User-Agent header of every request.
+const partnerRevenueMeasurementMiddlewareID = "SteadybitPartnerRevenueMeasurementUserAgent"
+
+// addPartnerRevenueMeasurementUserAgent appends the identifier to the User-Agent header of every request made by the
+// clients created from the extension's AWS config. Calls made by credential providers (e.g. web identity token
+// exchange) use their own clients and are not covered; AWS does not attribute those calls anyway.
 //
 // The SDK's application ID setting (aws.Config.AppID, AWS_SDK_UA_APP_ID) cannot be used for this: the SDK replaces
 // the "/" of the identifier with "-", which no longer matches the format AWS expects.
 func addPartnerRevenueMeasurementUserAgent(stack *middleware.Stack) error {
+	if _, ok := stack.Build.Get(partnerRevenueMeasurementMiddlewareID); ok {
+		return nil
+	}
 	// Added after the SDK's own user agent middleware, so the header it builds is already there to append to.
-	return stack.Build.Add(middleware.BuildMiddlewareFunc("SteadybitPartnerRevenueMeasurementUserAgent",
+	return stack.Build.Add(middleware.BuildMiddlewareFunc(partnerRevenueMeasurementMiddlewareID,
 		func(ctx context.Context, in middleware.BuildInput, next middleware.BuildHandler) (middleware.BuildOutput, middleware.Metadata, error) {
 			if request, ok := in.Request.(*smithyhttp.Request); ok {
 				const header = "User-Agent"

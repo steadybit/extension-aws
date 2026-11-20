@@ -6,6 +6,24 @@ tests:
   - it: manifest should match snapshot without TLS
     asserts:
       - matchSnapshot: {}
+  - it: should keep the partner revenue measurement user agent by default
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: STEADYBIT_EXTENSION_PARTNER_REVENUE_MEASUREMENT_DISABLED
+            value: "true"
+  - it: should disable the partner revenue measurement user agent when opted out
+    set:
+      aws:
+        partnerRevenueMeasurement:
+          enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: STEADYBIT_EXTENSION_PARTNER_REVENUE_MEASUREMENT_DISABLED
+            value: "true"
   - it: manifest should add aws env vars
     set:
       aws:

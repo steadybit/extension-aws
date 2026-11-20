@@ -17,6 +17,7 @@ our [Reliability Hub](https://hub.steadybit.com/extension/com.steadybit.extensio
 | `STEADYBIT_EXTENSION_TAG_FILTERS`                               | `aws.tagFilters`                                | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_ASSUME_ROLES_ADVANCED`                     | `aws.assumeRolesAdvanced`                       | See detailed description below                                                                                                                                | no       |                                                                                                                                               |
 | `STEADYBIT_EXTENSION_WORKER_THREADS`                            |                                                 | How many parallel workers should call aws apis (only used if `STEADYBIT_EXTENSION_ASSUME_ROLES` is used)                                                      | no       | 1                                                                                                                                             |
+| `STEADYBIT_EXTENSION_PARTNER_REVENUE_MEASUREMENT_DISABLED`      | `aws.partnerRevenueMeasurement.enabled` (inverted) | Stop adding the AWS Partner Revenue Measurement identifier to the User-Agent of AWS API calls, see [below](#aws-partner-revenue-measurement)             | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_APIGATEWAY`             | `aws.discovery.disabled.apigateway`             | Disable API Gateway discovery and all related definitions                                                                                               | no       | false                                                                                                                                         |
 | `STEADYBIT_EXTENSION_DISCOVERY_INTERVAL_APIGATEWAY`             |                                                 | Discovery-Interval in seconds                                                                                                                                 | no       | 60                                                                                                                                            |
 | `STEADYBIT_EXTENSION_DISCOVERY_DISABLED_ASG`                    | `aws.discovery.disabled.asg`                    | Disable Auto Scaling group discovery and all related definitions                                                                                              | no       | false                                                                                                                                         |
@@ -858,6 +859,15 @@ tries to get the account id from:
    more details. For example, if running in kubernetes and using a ServiceAccount, you can
    use `serviceAccount.eksRoleArn` of the agent helm chart to link
    your serviceAccount to a given role.
+
+### AWS Partner Revenue Measurement
+
+Steadybit is an AWS Partner. The extension adds `APN_1.1/pc_egaiyzlc2fa84pb03ml3c4hnk$` to the User-Agent of its AWS
+API calls, so AWS can attribute the usage to Steadybit
+([AWS Partner Revenue Measurement](https://docs.aws.amazon.com/PRM/latest/aws-prm-onboarding-guide/user-agent-string.html)).
+It changes nothing about what the extension does and costs you nothing; it is visible in CloudTrail as part of the
+`userAgent`. To opt out, set `aws.partnerRevenueMeasurement.enabled=false` in the Helm chart or
+`STEADYBIT_EXTENSION_PARTNER_REVENUE_MEASUREMENT_DISABLED=true`.
 
 ## Installation
 

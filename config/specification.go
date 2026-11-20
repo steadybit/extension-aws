@@ -14,6 +14,7 @@ type Specification struct {
 	AssumeRolesAdvanced                          AssumeRoles `json:"assumeRolesAdvanced" split_words:"true" required:"false"` // If you need a more fine-grained approach and want to specify Regions/TagFilters per role.
 	WorkerThreads                                int         `json:"workerThreads" split_words:"true" required:"false" default:"1"`
 	AwsEndpointOverride                          string      `json:"awsEndpointOverride" split_words:"true" required:"false"`
+	PartnerRevenueMeasurementDisabled            bool        `json:"partnerRevenueMeasurementDisabled" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledApigateway                  bool        `json:"discoveryDisabledApigateway" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledAsg                         bool        `json:"discoveryDisabledAsg" split_words:"true" required:"false" default:"false"`
 	DiscoveryDisabledEc2                         bool        `json:"discoveryDisabledEc2" split_words:"true" required:"false" default:"false"`

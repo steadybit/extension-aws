@@ -31,6 +31,9 @@ aws:
   #      - key: "application"
   #        values: ["Demo", "Shop"]
   assumeRolesAdvanced: []
+  partnerRevenueMeasurement:
+    # aws.partnerRevenueMeasurement.enabled -- Adds the AWS Partner Revenue Measurement identifier of Steadybit to the User-Agent of the extension's AWS API calls, so AWS can attribute the usage to Steadybit. Set to false to opt out. (https://github.com/steadybit/extension-aws?tab=readme-ov-file#aws-partner-revenue-measurement)
+    enabled: true
   discovery:
     disabled:
       # aws.discovery.disabled.apigateway -- Disables API Gateway discovery and the related actions.
