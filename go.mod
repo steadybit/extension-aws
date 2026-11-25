@@ -8,29 +8,29 @@ go 1.26.0
 require (
 	github.com/KimMachineGun/automemlimit v1.0.2
 	github.com/aws/aws-sdk-go-v2 v1.48.0
-	github.com/aws/aws-sdk-go-v2/config v1.33.18
-	github.com/aws/aws-sdk-go-v2/credentials v1.21.0
+	github.com/aws/aws-sdk-go-v2/config v1.33.21
+	github.com/aws/aws-sdk-go-v2/credentials v1.21.3
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.20.9
-	github.com/aws/aws-sdk-go-v2/service/apigateway v1.52.9
+	github.com/aws/aws-sdk-go-v2/service/apigateway v1.53.0
 	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.46.9
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.51.12
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.82.0
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.74.0
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.347.0
-	github.com/aws/aws-sdk-go-v2/service/ecs v1.105.1
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.74.1
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.350.0
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.106.0
 	github.com/aws/aws-sdk-go-v2/service/eks v1.105.6
-	github.com/aws/aws-sdk-go-v2/service/elasticache v1.65.0
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.64.0
+	github.com/aws/aws-sdk-go-v2/service/elasticache v1.66.0
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.65.0
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.55.11
 	github.com/aws/aws-sdk-go-v2/service/fis v1.46.12
-	github.com/aws/aws-sdk-go-v2/service/kafka v1.65.12
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.115.0
+	github.com/aws/aws-sdk-go-v2/service/kafka v1.66.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.118.0
 	github.com/aws/aws-sdk-go-v2/service/mq v1.45.12
-	github.com/aws/aws-sdk-go-v2/service/rds v1.133.0
+	github.com/aws/aws-sdk-go-v2/service/rds v1.134.0
 	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.42.0
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.53.0
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.83.0
-	github.com/aws/aws-sdk-go-v2/service/sts v1.52.0
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.84.0
+	github.com/aws/aws-sdk-go-v2/service/sts v1.53.0
 	github.com/aws/smithy-go v1.28.9
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -63,7 +63,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.25 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.13.12 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.12 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.13.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signin v1.14.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.39.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.44.5 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
